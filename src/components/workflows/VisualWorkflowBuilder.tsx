@@ -135,7 +135,7 @@ const VisualWorkflowBuilder: React.FC = () => {
 
             {/* Add Step Button */}
             <div className="flex justify-center pt-4">
-              <Button variant="dashed" className="border-dashed border-2 border-gray-300 bg-transparent">
+              <Button variant="outline" className="border-dashed border-2 border-gray-300 bg-transparent">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Step
               </Button>
