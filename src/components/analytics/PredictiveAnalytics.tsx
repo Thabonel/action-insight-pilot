@@ -1,9 +1,12 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Target, Calendar, Zap } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
+import PerformancePredictions from './predictive/PerformancePredictions';
+import RevenueForecastChart from './predictive/RevenueForecastChart';
+import CampaignSuccessPredictions from './predictive/CampaignSuccessPredictions';
+import LeadConversionPredictions from './predictive/LeadConversionPredictions';
+import BudgetOptimization from './predictive/BudgetOptimization';
 
 const PredictiveAnalytics: React.FC = () => {
   const [predictions] = useState({
@@ -68,18 +71,6 @@ const PredictiveAnalytics: React.FC = () => {
     { month: 'Month 6', actual: null, predicted: 61000 }
   ]);
 
-  const getProbabilityColor = (probability: number) => {
-    if (probability >= 80) return 'text-green-600 bg-green-50';
-    if (probability >= 60) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
-  };
-
-  const getRecommendationBadge = (rec: string) => {
-    if (rec.includes('planned')) return { variant: 'default' as const, label: 'Recommended' };
-    if (rec.includes('Increase')) return { variant: 'secondary' as const, label: 'Optimize' };
-    return { variant: 'outline' as const, label: 'Monitor' };
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -89,182 +80,18 @@ const PredictiveAnalytics: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Performance Predictions */}
-        <div>
-          <h4 className="font-medium text-gray-900 mb-3">Performance Predictions</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h5 className="font-medium text-blue-900 mb-2">Next Month Forecast</h5>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Revenue</span>
-                  <span className="font-bold text-blue-900">${predictions.nextMonth.revenue.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Leads</span>
-                  <span className="font-bold text-blue-900">{predictions.nextMonth.leads}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Campaigns</span>
-                  <span className="font-bold text-blue-900">{predictions.nextMonth.campaigns}</span>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-blue-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-blue-700">Confidence</span>
-                  <Badge variant="outline">{predictions.nextMonth.confidence}%</Badge>
-                </div>
-              </div>
-            </div>
+        <PerformancePredictions 
+          nextMonth={predictions.nextMonth}
+          quarterlyForecast={predictions.quarterlyForecast}
+        />
 
-            <div className="bg-green-50 rounded-lg p-4">
-              <h5 className="font-medium text-green-900 mb-2">Quarterly Outlook</h5>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-green-700">Projected Revenue</span>
-                  <span className="font-bold text-green-900">${predictions.quarterlyForecast.revenue.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-green-700">Growth Rate</span>
-                  <span className="font-bold text-green-900">{predictions.quarterlyForecast.growth}%</span>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-green-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-green-700">Confidence</span>
-                  <Badge variant="outline">{predictions.quarterlyForecast.confidence}%</Badge>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <RevenueForecastChart forecastData={forecastData} />
 
-        {/* Revenue Forecast Chart */}
-        <div>
-          <h4 className="font-medium text-gray-900 mb-3">6-Month Revenue Forecast</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={forecastData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" fontSize={12} />
-              <YAxis fontSize={12} />
-              <Tooltip />
-              <Line 
-                type="monotone" 
-                dataKey="actual" 
-                stroke="#3B82F6" 
-                strokeWidth={2} 
-                name="Actual"
-                connectNulls={false}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="predicted" 
-                stroke="#8B5CF6" 
-                strokeWidth={2} 
-                strokeDasharray="5 5"
-                name="Predicted"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <CampaignSuccessPredictions campaignPredictions={campaignPredictions} />
 
-        {/* Campaign Success Predictions */}
-        <div>
-          <h4 className="font-medium text-gray-900 mb-3">Campaign Success Probability</h4>
-          <div className="space-y-3">
-            {campaignPredictions.map((campaign, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h5 className="font-medium text-gray-900">{campaign.name}</h5>
-                  <div className="flex items-center space-x-2">
-                    <Badge {...getRecommendationBadge(campaign.recommendation)}>
-                      {getRecommendationBadge(campaign.recommendation).label}
-                    </Badge>
-                    <div className={`px-2 py-1 rounded text-sm font-medium ${getProbabilityColor(campaign.successProbability)}`}>
-                      {campaign.successProbability}%
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                  <div>
-                    <span className="text-sm text-gray-500">Success Probability</span>
-                    <Progress value={campaign.successProbability} className="h-2 mt-1" />
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">Predicted ROI</span>
-                    <div className="font-medium">{campaign.predictedROI}%</div>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-500">Recommendation</span>
-                    <div className="font-medium text-sm">{campaign.recommendation}</div>
-                  </div>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-500">Risk Factors:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {campaign.riskFactors.map((risk, riskIndex) => (
-                      <Badge key={riskIndex} variant="outline" className="text-xs">
-                        {risk}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <LeadConversionPredictions leadPredictions={leadPredictions} />
 
-        {/* Lead Conversion Predictions */}
-        <div>
-          <h4 className="font-medium text-gray-900 mb-3">Lead Conversion Likelihood</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {leadPredictions.map((lead, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-gray-900">{lead.type}</span>
-                  <Badge variant={lead.probability > 70 ? 'default' : 'secondary'}>
-                    {lead.probability}%
-                  </Badge>
-                </div>
-                <Progress value={lead.probability} className="h-2 mb-3" />
-                <div className="text-sm text-gray-600">
-                  Expected conversions: <span className="font-medium">{lead.expectedConversions}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Budget Optimization */}
-        <div>
-          <h4 className="font-medium text-gray-900 mb-3">Budget Optimization Opportunities</h4>
-          <div className="space-y-3">
-            {budgetOptimization.map((channel, index) => {
-              const budgetChange = channel.recommendedBudget - channel.currentBudget;
-              const isIncrease = budgetChange > 0;
-              
-              return (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <span className="font-medium text-gray-900">{channel.channel}</span>
-                    <div className="text-sm text-gray-600">
-                      Current: ${channel.currentBudget.toLocaleString()} → 
-                      Recommended: ${channel.recommendedBudget.toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className={`font-medium ${isIncrease ? 'text-blue-600' : 'text-green-600'}`}>
-                      {isIncrease ? '+' : ''}${budgetChange.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Expected: ${channel.expectedReturn.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <BudgetOptimization budgetOptimization={budgetOptimization} />
       </CardContent>
     </Card>
   );
