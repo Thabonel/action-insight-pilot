@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { apiClient } from '@/lib/api-client';
@@ -33,7 +32,7 @@ const Campaigns: React.FC = () => {
     try {
       const result = await apiClient.getCampaigns();
       if (result.success) {
-        setCampaigns(result.data || []);
+        setCampaigns((result.data as Campaign[]) || []);
         behaviorTracker.trackFeatureComplete('campaigns_load', actionId, true);
       } else {
         console.error('Failed to load campaigns:', result.error);
@@ -54,7 +53,7 @@ const Campaigns: React.FC = () => {
     try {
       const result = await apiClient.createCampaign(newCampaign);
       if (result.success) {
-        setCampaigns(prev => [result.data, ...prev]);
+        setCampaigns(prev => [result.data as Campaign, ...prev]);
         setNewCampaign({ name: '', type: 'email', status: 'draft', description: '' });
         setShowCreateForm(false);
         behaviorTracker.trackFeatureComplete('campaign_create', actionId, true);
