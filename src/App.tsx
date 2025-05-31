@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
+import ConversationalDashboard from "@/pages/ConversationalDashboard";
 import Campaigns from "@/pages/Campaigns";
 import Settings from "@/pages/Settings";
 import AuthPage from "@/pages/auth/AuthPage";
@@ -29,7 +30,8 @@ const App = () => (
                 <Layout />
               </ProtectedRoute>
             }>
-              <Route index element={<Dashboard />} />
+              <Route index element={<ConversationalDashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="leads" element={<div className="p-6">Leads page coming soon...</div>} />
               <Route path="content" element={<div className="p-6">Content page coming soon...</div>} />
