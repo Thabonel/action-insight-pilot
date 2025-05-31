@@ -34,6 +34,7 @@ const Layout: React.FC = () => {
     { name: 'Social', href: '/social', icon: MessageSquare, feature: 'social' },
     { name: 'Email', href: '/email', icon: MessageSquare, feature: 'email' },
     { name: 'Analytics', href: '/analytics', icon: Calendar, feature: 'analytics' },
+    { name: 'Workflows', href: '/workflows', icon: SettingsIcon, feature: 'workflows' },
   ];
 
   return (
