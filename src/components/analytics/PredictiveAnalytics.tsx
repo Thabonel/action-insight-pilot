@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Crystal, TrendingUp, Target, Calendar, Zap } from 'lucide-react';
+import { TrendingUp, Target, Calendar, Zap } from 'lucide-react';
 
 const PredictiveAnalytics: React.FC = () => {
   const [predictions] = useState({
@@ -85,7 +84,7 @@ const PredictiveAnalytics: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Crystal className="h-5 w-5 text-blue-600" />
+          <TrendingUp className="h-5 w-5 text-blue-600" />
           <span>Predictive Analytics</span>
         </CardTitle>
       </CardHeader>
