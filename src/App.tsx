@@ -13,6 +13,7 @@ import CampaignManagement from "@/pages/CampaignManagement";
 import Settings from "@/pages/Settings";
 import AuthPage from "@/pages/auth/AuthPage";
 import NotFound from "./pages/NotFound";
+import Leads from "@/pages/Leads";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +35,7 @@ const App = () => (
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="campaign-management" element={<CampaignManagement />} />
-              <Route path="leads" element={<div className="p-6">Leads page coming soon...</div>} />
+              <Route path="leads" element={<Leads />} />
               <Route path="content" element={<div className="p-6">Content page coming soon...</div>} />
               <Route path="social" element={<div className="p-6">Social page coming soon...</div>} />
               <Route path="email" element={<div className="p-6">Email page coming soon...</div>} />
