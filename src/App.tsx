@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import ConversationalDashboard from "@/pages/ConversationalDashboard";
 import Campaigns from "@/pages/Campaigns";
+import CampaignManagement from "@/pages/CampaignManagement";
 import Settings from "@/pages/Settings";
 import AuthPage from "@/pages/auth/AuthPage";
 import NotFound from "./pages/NotFound";
@@ -33,6 +33,7 @@ const App = () => (
               <Route index element={<ConversationalDashboard />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="campaigns" element={<Campaigns />} />
+              <Route path="campaign-management" element={<CampaignManagement />} />
               <Route path="leads" element={<div className="p-6">Leads page coming soon...</div>} />
               <Route path="content" element={<div className="p-6">Content page coming soon...</div>} />
               <Route path="social" element={<div className="p-6">Social page coming soon...</div>} />
