@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { AuthService } from '@/lib/supabase';
+import { AuthService, supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 
@@ -32,7 +32,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     AuthService.getCurrentUser().then(({ user }) => {
       setUser(user);
       if (user) {
-        apiClient.setToken(user.access_token);
+        // Get the session to access the token
+        const getSession = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.access_token) {
+            apiClient.setToken(session.access_token);
+          }
+        };
+        getSession();
         behaviorTracker.trackAction('execution', 'auth', { action: 'auto_login', userId: user.id });
       }
       setLoading(false);
@@ -42,7 +49,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = AuthService.onAuthStateChange((user) => {
       setUser(user);
       if (user) {
-        apiClient.setToken(user.access_token);
+        // Get the session to access the token
+        const getSession = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.access_token) {
+            apiClient.setToken(session.access_token);
+          }
+        };
+        getSession();
         behaviorTracker.trackAction('execution', 'auth', { action: 'login', userId: user.id });
       } else {
         apiClient.setToken('');
