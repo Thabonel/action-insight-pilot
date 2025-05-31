@@ -4,8 +4,16 @@ import { behaviorTracker } from '@/lib/behavior-tracker';
 import { apiClient } from '@/lib/api-client';
 import { Calendar, Settings as SettingsIcon } from 'lucide-react';
 
+interface Campaign {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  description?: string;
+}
+
 const Campaigns: React.FC = () => {
-  const [campaigns, setCampaigns] = useState([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newCampaign, setNewCampaign] = useState({
