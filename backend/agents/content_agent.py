@@ -123,7 +123,7 @@ class GeneratedContent:
     approval_notes: Optional[str] = None
     published_at: Optional[datetime] = None
 
-class ContentCreationAgent:
+class ContentAgent:
     def __init__(self, openai_api_key: str, supabase_client=None):
         self.openai_client = AsyncOpenAI(api_key=openai_api_key)
         self.supabase = supabase_client
