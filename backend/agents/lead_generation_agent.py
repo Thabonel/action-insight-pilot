@@ -1630,7 +1630,7 @@ class EmailValidator:
         
         if not self.api_key:
             # Basic email format validation
-            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
             return bool(re.match(email_pattern, email))
         
         # Real implementation would use email verification service
