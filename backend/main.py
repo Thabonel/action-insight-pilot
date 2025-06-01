@@ -5,9 +5,9 @@ from datetime import datetime
 import logging
 import uuid
 
-from .config import agent_manager, get_environment_config
-from .models import APIResponse
-from .routes import campaigns, leads, content
+from config import agent_manager, get_environment_config
+from models import APIResponse
+from routes import campaigns, leads, content
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
