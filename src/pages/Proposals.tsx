@@ -82,7 +82,7 @@ const Proposals: React.FC = () => {
     try {
       const response = await apiClient.getProposalTemplates();
       if (response.success) {
-        setTemplates(response.data);
+        setTemplates(response.data || {});
       }
     } catch (error) {
       console.error('Error loading templates:', error);
@@ -93,7 +93,7 @@ const Proposals: React.FC = () => {
     try {
       const response = await apiClient.getProposals();
       if (response.success) {
-        setProposals(response.data);
+        setProposals((response.data as Proposal[]) || []);
       }
     } catch (error) {
       console.error('Error loading proposals:', error);
@@ -142,13 +142,16 @@ const Proposals: React.FC = () => {
   const handleExportProposal = async (proposalId: string, format: string) => {
     try {
       const response = await apiClient.exportProposal(proposalId, format);
-      if (response.success) {
+      if (response.success && response.data) {
+        const exportData = response.data as { download_url?: string };
         toast({
           title: "Export Started",
           description: `Your proposal is being exported as ${format.toUpperCase()}`,
         });
         // In a real implementation, trigger download
-        window.open(response.data.download_url, '_blank');
+        if (exportData.download_url) {
+          window.open(exportData.download_url, '_blank');
+        }
       }
     } catch (error) {
       toast({
