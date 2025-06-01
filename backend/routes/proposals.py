@@ -73,12 +73,19 @@ async def get_proposal_templates(token: str = Depends(verify_token)):
                     "name": "Consulting Services Proposal",
                     "sections": ["executive_summary", "problem_analysis", "proposed_solution", "methodology", "timeline", "pricing", "terms"],
                     "default_services": ["Strategy Consulting", "Process Optimization", "Training & Development"]
+                },
+                "trade_services": {
+                    "name": "Trade Services Proposal",
+                    "sections": ["service_assessment", "project_scope", "materials_labor", "timeline", "pricing", "warranty_terms"],
+                    "default_services": ["Service Assessment", "Installation/Repair", "Quality Inspection", "Cleanup & Completion"]
                 }
             }
             return APIResponse(success=True, data=mock_templates)
     except Exception as e:
         logger.error(f"Error getting templates: {e}")
         return APIResponse(success=False, error=str(e))
+
+# ... keep existing code (get_proposals, save_proposal, export_proposal endpoints)
 
 @router.get("", response_model=APIResponse)
 async def get_proposals(status: str = None, client: str = None, token: str = Depends(verify_token)):

@@ -32,10 +32,10 @@ class ProposalGenerator:
                 "sections": ["executive_summary", "problem_analysis", "proposed_solution", "methodology", "timeline", "pricing", "terms"],
                 "default_services": ["Strategy Consulting", "Process Optimization", "Training & Development"]
             },
-            "roofing": {
-                "name": "Roofing Services Proposal",
-                "sections": ["property_assessment", "proposed_work", "materials", "timeline", "pricing", "warranty_terms"],
-                "default_services": ["Roof Inspection", "Repair Services", "Full Replacement", "Maintenance"]
+            "trade_services": {
+                "name": "Trade Services Proposal",
+                "sections": ["service_assessment", "project_scope", "materials_labor", "timeline", "pricing", "warranty_terms"],
+                "default_services": ["Service Assessment", "Installation/Repair", "Quality Inspection", "Cleanup & Completion"]
             },
             "custom": {
                 "name": "Custom Service Proposal",
@@ -67,8 +67,8 @@ class ProposalGenerator:
                 "template_type": template_type,
                 "client_info": client_info,
                 "content": proposal_content,
-                "pricing": await self._generate_pricing_table(budget_range, project_details),
-                "timeline": await self._generate_timeline(project_details),
+                "pricing": await self._generate_pricing_table(budget_range, project_details, template_type),
+                "timeline": await self._generate_timeline(project_details, template_type),
                 "terms": await self._generate_terms_conditions(template_type),
                 "created_at": datetime.now().isoformat(),
                 "status": "draft"
@@ -94,7 +94,7 @@ class ProposalGenerator:
         solution that addresses your specific needs and objectives.
         
         Our proposed approach will deliver measurable results while staying within your budget parameters 
-        of {budget_range.get('min', 'TBD')} - {budget_range.get('max', 'TBD')}.
+        of ${budget_range.get('min', 'TBD')} - ${budget_range.get('max', 'TBD')}.
         """
         
         # Client Overview
@@ -124,71 +124,139 @@ class ProposalGenerator:
             Technology Stack: {project_details.get('technology', 'Modern web technologies')}
             """
         
+        # Service Assessment (for trade services)
+        if template.get('name') == 'Trade Services Proposal':
+            content["service_assessment"] = f"""
+            Site Assessment: Comprehensive evaluation of project requirements and conditions
+            Scope of Work: {project_details.get('scope', 'Complete trade service solution')}
+            Service Type: {project_details.get('description', 'Professional trade services')}
+            Special Considerations: Property access, permits, and safety requirements
+            """
+        
         return content
 
-    async def _generate_pricing_table(self, budget_range: Dict, project_details: Dict) -> List[Dict]:
-        """Generate pricing breakdown"""
+    async def _generate_pricing_table(self, budget_range: Dict, project_details: Dict, template_type: str) -> List[Dict]:
+        """Generate pricing breakdown based on template type"""
         
         min_budget = budget_range.get('min', 5000)
         max_budget = budget_range.get('max', 10000)
         
-        # Basic pricing structure
-        pricing_items = [
-            {
-                "item": "Initial Setup & Strategy",
-                "description": "Project planning, strategy development, and initial setup",
-                "price": min_budget * 0.2,
-                "quantity": 1
-            },
-            {
-                "item": "Core Implementation",
-                "description": "Main project deliverables and implementation",
-                "price": min_budget * 0.6,
-                "quantity": 1
-            },
-            {
-                "item": "Testing & Optimization",
-                "description": "Quality assurance, testing, and performance optimization",
-                "price": min_budget * 0.15,
-                "quantity": 1
-            },
-            {
-                "item": "Training & Support",
-                "description": "Team training and initial support period",
-                "price": min_budget * 0.05,
-                "quantity": 1
-            }
-        ]
+        if template_type == "trade_services":
+            # Trade services pricing with flexible hourly/project rates
+            pricing_items = [
+                {
+                    "item": "Service Assessment & Planning",
+                    "description": "Site evaluation, measurements, and project planning",
+                    "price": min_budget * 0.1,
+                    "quantity": 1
+                },
+                {
+                    "item": "Materials & Supplies",
+                    "description": "All required materials and supplies for the project",
+                    "price": min_budget * 0.4,
+                    "quantity": 1
+                },
+                {
+                    "item": "Labor & Installation",
+                    "description": "Professional installation and completion of work",
+                    "price": min_budget * 0.4,
+                    "quantity": 1
+                },
+                {
+                    "item": "Permits & Inspections",
+                    "description": "Required permits and final inspections",
+                    "price": min_budget * 0.05,
+                    "quantity": 1
+                },
+                {
+                    "item": "Cleanup & Final Walkthrough",
+                    "description": "Site cleanup and project completion verification",
+                    "price": min_budget * 0.05,
+                    "quantity": 1
+                }
+            ]
+        else:
+            # Standard pricing structure for other templates
+            pricing_items = [
+                {
+                    "item": "Initial Setup & Strategy",
+                    "description": "Project planning, strategy development, and initial setup",
+                    "price": min_budget * 0.2,
+                    "quantity": 1
+                },
+                {
+                    "item": "Core Implementation",
+                    "description": "Main project deliverables and implementation",
+                    "price": min_budget * 0.6,
+                    "quantity": 1
+                },
+                {
+                    "item": "Testing & Optimization",
+                    "description": "Quality assurance, testing, and performance optimization",
+                    "price": min_budget * 0.15,
+                    "quantity": 1
+                },
+                {
+                    "item": "Training & Support",
+                    "description": "Team training and initial support period",
+                    "price": min_budget * 0.05,
+                    "quantity": 1
+                }
+            ]
         
         return pricing_items
 
-    async def _generate_timeline(self, project_details: Dict) -> List[Dict]:
-        """Generate project timeline"""
+    async def _generate_timeline(self, project_details: Dict, template_type: str) -> List[Dict]:
+        """Generate project timeline based on template type"""
         
         duration = project_details.get('duration', 8)  # weeks
         
-        timeline = [
-            {
-                "phase": "Discovery & Planning",
-                "duration": "1 week",
-                "deliverables": ["Project plan", "Requirements document", "Timeline confirmation"]
-            },
-            {
-                "phase": "Design & Development",
-                "duration": f"{duration - 3} weeks",
-                "deliverables": ["Initial designs", "Core functionality", "Regular progress updates"]
-            },
-            {
-                "phase": "Testing & Refinement",
-                "duration": "1 week",
-                "deliverables": ["Quality assurance", "Bug fixes", "Performance optimization"]
-            },
-            {
-                "phase": "Launch & Support",
-                "duration": "1 week",
-                "deliverables": ["Final delivery", "Training sessions", "Support documentation"]
-            }
-        ]
+        if template_type == "trade_services":
+            timeline = [
+                {
+                    "phase": "Site Assessment & Preparation",
+                    "duration": "1-2 days",
+                    "deliverables": ["Site evaluation", "Material list", "Permits obtained"]
+                },
+                {
+                    "phase": "Material Procurement",
+                    "duration": "2-3 days",
+                    "deliverables": ["Materials ordered", "Delivery scheduled", "Site prepared"]
+                },
+                {
+                    "phase": "Installation & Work Completion",
+                    "duration": f"{duration} days",
+                    "deliverables": ["Professional installation", "Quality checks", "Progress updates"]
+                },
+                {
+                    "phase": "Final Inspection & Completion",
+                    "duration": "1 day",
+                    "deliverables": ["Final inspection", "Quality verification", "Cleanup completed"]
+                }
+            ]
+        else:
+            timeline = [
+                {
+                    "phase": "Discovery & Planning",
+                    "duration": "1 week",
+                    "deliverables": ["Project plan", "Requirements document", "Timeline confirmation"]
+                },
+                {
+                    "phase": "Design & Development",
+                    "duration": f"{duration - 3} weeks",
+                    "deliverables": ["Initial designs", "Core functionality", "Regular progress updates"]
+                },
+                {
+                    "phase": "Testing & Refinement",
+                    "duration": "1 week",
+                    "deliverables": ["Quality assurance", "Bug fixes", "Performance optimization"]
+                },
+                {
+                    "phase": "Launch & Support",
+                    "duration": "1 week",
+                    "deliverables": ["Final delivery", "Training sessions", "Support documentation"]
+                }
+            ]
         
         return timeline
 
@@ -203,11 +271,13 @@ class ProposalGenerator:
             "warranty": "90-day warranty on all work completed"
         }
         
-        if template_type == "roofing":
+        if template_type == "trade_services":
             base_terms.update({
-                "warranty": "10-year warranty on materials, 5-year warranty on workmanship",
+                "warranty": "1-year warranty on workmanship, manufacturer warranty on materials",
                 "weather_policy": "Work may be delayed due to weather conditions",
-                "permits": "All necessary permits will be obtained by contractor"
+                "permits": "All necessary permits and inspections included",
+                "liability": "Fully licensed, bonded, and insured contractor",
+                "changes": "Any changes to scope require written approval and may affect pricing"
             })
         elif template_type == "web_development":
             base_terms.update({
@@ -217,6 +287,8 @@ class ProposalGenerator:
             })
         
         return base_terms
+
+    # ... keep existing code (get_proposal_templates, save_proposal, get_proposals, export_proposal methods)
 
     async def get_proposal_templates(self) -> Dict[str, Any]:
         """Get available proposal templates"""

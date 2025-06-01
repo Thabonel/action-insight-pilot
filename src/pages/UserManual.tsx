@@ -130,8 +130,65 @@ const UserManual: React.FC = () => {
         <div className="lg:col-span-3">
           <Card>
             <CardContent className="p-8">
-              {/* ... keep existing code (getting-started through social sections) */}
+              {/* Getting Started through Social sections */}
+              {activeSection === 'getting-started' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Getting Started</h2>
+                  <p className="text-gray-700 mt-4">
+                    Welcome to the Agentic AI Marketing Platform! This guide will help you navigate and utilize all features effectively.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'dashboard' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Dashboard Navigation</h2>
+                  <p className="text-gray-700 mt-4">
+                    The dashboard provides an overview of your marketing performance, recent activities, and quick access to key features.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'campaigns' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Campaign Management</h2>
+                  <p className="text-gray-700 mt-4">
+                    Create, monitor, and optimize your marketing campaigns with AI assistance.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'content' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Content Creation</h2>
+                  <p className="text-gray-700 mt-4">
+                    Use AI tools to generate engaging marketing content tailored to your audience.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'leads' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Lead Management</h2>
+                  <p className="text-gray-700 mt-4">
+                    Track and nurture leads through the sales funnel with AI-powered scoring and automation.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'email' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Email Automation</h2>
+                  <p className="text-gray-700 mt-4">
+                    Automate your email campaigns with personalized sequences and performance tracking.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'social' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Social Media</h2>
+                  <p className="text-gray-700 mt-4">
+                    Manage your social media posts, schedules, and analytics across multiple platforms.
+                  </p>
+                </div>
+              )}
 
+              {/* Proposal Generator Section */}
               {activeSection === 'proposals' && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold text-gray-900">Proposal Generator</h2>
@@ -156,7 +213,7 @@ const UserManual: React.FC = () => {
                         "• Marketing Services (for digital marketing proposals)",
                         "• Web Development (for website/app projects)", 
                         "• Consulting Services (for advisory/strategy work)",
-                        "• Roofing Services (for construction/roofing projects)",
+                        "• Trade Services (for contractors, plumbers, electricians, HVAC, landscaping)",
                         "• Custom (for other service types)",
                         "Add project details and requirements",
                         "Paste any call transcripts or notes from client meetings",
@@ -192,14 +249,25 @@ const UserManual: React.FC = () => {
                         </div>
 
                         <div className="bg-orange-50 p-4 rounded-lg">
-                          <h5 className="font-semibold text-orange-700">Roofing Services Template</h5>
-                          <p className="text-sm text-orange-600">Best for: Roof repairs, replacements, inspections, maintenance</p>
-                          <p className="text-sm text-orange-600">Includes: Property assessment, materials list, warranty terms, permits</p>
+                          <h5 className="font-semibold text-orange-700">Trade Services Template</h5>
+                          <p className="text-sm text-orange-600">Best for: Plumbing, electrical, HVAC, landscaping, handyman services, general contractors</p>
+                          <p className="text-sm text-orange-600">Includes: Site assessment, materials & labor breakdown, warranty terms, permits & licensing</p>
+                          
+                          <div className="mt-3 space-y-2">
+                            <p className="text-sm font-medium text-orange-700">Trade-Specific Examples:</p>
+                            <ul className="text-xs text-orange-600 space-y-1 ml-4">
+                              <li><strong>Plumber:</strong> Bathroom renovation, pipe repair, fixture installation</li>
+                              <li><strong>Electrician:</strong> Panel upgrades, outlet installation, lighting projects</li>
+                              <li><strong>HVAC:</strong> System installation, maintenance, repairs</li>
+                              <li><strong>Landscaper:</strong> Garden design, lawn care, hardscaping</li>
+                              <li><strong>General Contractor:</strong> Home renovations, repairs, additions</li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
 
                       <Warning>
-                        Choose the template that best matches your service type. You can always customize the content, but starting with the right template saves significant time.
+                        Choose the template that best matches your service type. The Trade Services Template can be customized for any type of contractor or service business with flexible pricing for hourly rates or project-based work.
                       </Warning>
                     </div>
 
@@ -227,12 +295,13 @@ const UserManual: React.FC = () => {
                         <li><strong>Line Items:</strong> Add/remove services with descriptions</li>
                         <li><strong>Quantities:</strong> Specify hours, deliverables, or units</li>
                         <li><strong>Rates:</strong> Set hourly rates or fixed project costs</li>
+                        <li><strong>Trade Services:</strong> Separate materials and labor costs automatically</li>
                         <li><strong>Subtotals:</strong> Automatic calculation of totals and taxes</li>
                         <li><strong>Payment Terms:</strong> Define payment schedule and methods</li>
                       </ul>
 
                       <Success>
-                        Well-structured pricing tables with clear descriptions increase proposal acceptance rates by up to 35%.
+                        Well-structured pricing tables with clear descriptions increase proposal acceptance rates by up to 35%. For trade services, separating materials and labor helps clients understand value better.
                       </Success>
                     </div>
 
@@ -314,6 +383,7 @@ const UserManual: React.FC = () => {
                         <li><strong>Dynamic Pricing:</strong> Pricing recommendations based on project scope and market rates</li>
                         <li><strong>Competitive Analysis:</strong> Insights on industry-standard pricing and terms</li>
                         <li><strong>Success Predictions:</strong> AI estimates proposal acceptance probability</li>
+                        <li><strong>Trade-Specific Intelligence:</strong> Automatic permit requirements and material suggestions for contractors</li>
                       </ul>
 
                       <h4 className="font-semibold mb-2 mt-6">Best Practices for Higher Acceptance Rates:</h4>
@@ -325,6 +395,7 @@ const UserManual: React.FC = () => {
                         "Set clear expectations for timeline, deliverables, and communication",
                         "Include testimonials or references from satisfied clients",
                         "Use professional formatting with your company branding",
+                        "For trade services: Include licensing info, insurance details, and warranty terms",
                         "Follow up within 3-5 business days if no response"
                       ]} />
 
@@ -333,14 +404,38 @@ const UserManual: React.FC = () => {
                       </Warning>
 
                       <Success>
-                        Proposals that include specific ROI projections and clear next steps have 60% higher acceptance rates than generic proposals.
+                        Proposals that include specific ROI projections and clear next steps have 60% higher acceptance rates than generic proposals. Trade service proposals with detailed material breakdowns and permit information show 45% better conversion rates.
                       </Success>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ... keep existing code (analytics through troubleshooting sections) */}
+              {/* Analytics through Troubleshooting sections */}
+              {activeSection === 'analytics' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Analytics & Reports</h2>
+                  <p className="text-gray-700 mt-4">
+                    Access detailed reports and insights to measure campaign performance and ROI.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'settings' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Settings & Admin</h2>
+                  <p className="text-gray-700 mt-4">
+                    Manage your account settings, integrations, and user permissions.
+                  </p>
+                </div>
+              )}
+              {activeSection === 'troubleshooting' && (
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Troubleshooting</h2>
+                  <p className="text-gray-700 mt-4">
+                    Find solutions to common issues and get support for platform problems.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
