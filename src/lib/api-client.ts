@@ -192,6 +192,29 @@ export class ApiClient {
       method: 'POST',
     });
   }
+
+  // Proposal endpoints
+  async getProposalTemplates() {
+    return this.request('/api/proposals/templates');
+  }
+
+  async generateProposal(proposalData: any) {
+    return this.request('/api/proposals/generate', {
+      method: 'POST',
+      body: JSON.stringify(proposalData),
+    });
+  }
+
+  async getProposals() {
+    return this.request('/api/proposals');
+  }
+
+  async exportProposal(proposalId: string, format: string) {
+    return this.request(`/api/proposals/${proposalId}/export`, {
+      method: 'POST',
+      body: JSON.stringify({ format }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
