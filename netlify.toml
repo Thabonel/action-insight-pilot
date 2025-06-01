@@ -1,5 +1,6 @@
 
 
+
 [build]
   # Install all dependencies including dev dependencies, then build
   command = "npm ci && npm run build"
@@ -25,4 +26,5 @@
 
 [context.deploy-preview.environment]
   NODE_ENV = "production"
+
 
