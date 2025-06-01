@@ -27,10 +27,12 @@ try:
     from agents.content_agent import ContentAgent
     from agents.email_automation_agent import EmailAutomationAgent
     from agents.analytics_agent import AnalyticsAgent
+    from agents.mcp_agent import MCPAgent
     
     # Initialize agents with proper error handling
     openai_api_key = os.getenv("OPENAI_API_KEY", "")
     integrations = {}
+    mcp_agent = MCPAgent()
     
     # Create agent instances
     campaign_agent = CampaignAgent(openai_api_key, integrations)
@@ -636,6 +638,26 @@ async def send_email(email_data: Dict[str, Any], token: str = Depends(verify_tok
             return APIResponse(success=True, data=sent_email)
     except Exception as e:
         logger.error(f"Error sending email: {e}")
+        return APIResponse(success=False, error=str(e))
+
+# ================== MCP ENDPOINTS ==================
+
+@app.get("/api/tools", response_model=APIResponse)
+async def list_mcp_tools(token: str = Depends(verify_token)):
+    """List all available MCP tools"""
+    try:
+        tools = await mcp_agent.list_available_tools()
+        return APIResponse(success=True, data={"tools": tools, "count": len(tools)})
+    except Exception as e:
+        return APIResponse(success=False, error=str(e))
+
+@app.post("/api/workflows/execute", response_model=APIResponse)
+async def execute_mcp_workflow(workflow_data: Dict[str, Any], token: str = Depends(verify_token)):
+    """Execute MCP workflow"""
+    try:
+        result = await mcp_agent.execute_marketing_workflow(workflow_data)
+        return APIResponse(success=True, data=result)
+    except Exception as e:
         return APIResponse(success=False, error=str(e))
 
 # ================== ANALYTICS ENDPOINTS ==================
