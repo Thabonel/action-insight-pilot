@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -18,7 +17,11 @@ app = FastAPI(title="Agentic AI Marketing Platform", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "*",
+        "https://aiboostcampaign.com",
+        "https://www.aiboostcampaign.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
