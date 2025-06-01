@@ -1,0 +1,24 @@
+
+[build]
+  # Use npm instead of bun for more reliable Netlify builds
+  command = "npm install && npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Set Node.js version for compatibility
+  NODE_VERSION = "18"
+  # Ensure npm is used instead of bun
+  NPM_FLAGS = "--prefer-offline --no-audit --progress=false"
+
+# Redirect all routes to index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variables (you'll need to set these in Netlify dashboard)
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
