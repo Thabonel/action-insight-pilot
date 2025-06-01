@@ -19,19 +19,41 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Import all agents
+# Import all agents - FIXED VERSION
 try:
-    from agents.campaign_agent import Campaign_agent
-    from agents.lead_generation_agent import lead_generation_agent
-    from agents.content_agent import content_agent
-    from agents.social_media_agent import social_media_agent, SocialPlatform, PostStatus
-    from agents.email_automation_agent import email_automation_agent
-    from agents.analytics_agent import analytics_agent
+    from agents.campaign_agent import CampaignAgent
+    from agents.social_media_agent import SocialMediaAgent, SocialPlatform, PostStatus  
+    from agents.lead_generation_agent import LeadGenerationAgent
+    from agents.content_agent import ContentAgent
+    from agents.email_automation_agent import EmailAutomationAgent
+    from agents.analytics_agent import AnalyticsAgent
+    
+    # Initialize agents with proper error handling
+    openai_api_key = os.getenv("OPENAI_API_KEY", "")
+    integrations = {}
+    
+    # Create agent instances
+    campaign_agent = CampaignAgent(openai_api_key, integrations)
+    social_media_agent = SocialMediaAgent(openai_api_key, integrations)
+    lead_generation_agent = LeadGenerationAgent(openai_api_key, integrations)
+    content_agent = ContentAgent(openai_api_key, integrations)
+    email_automation_agent = EmailAutomationAgent(openai_api_key, integrations)
+    analytics_agent = AnalyticsAgent(openai_api_key, integrations)
+    
     AGENTS_AVAILABLE = True
-    logger.info("All AI agents loaded successfully")
+    logger.info("✅ All AI agents loaded successfully!")
+    
 except ImportError as e:
-    logger.warning(f"Could not import agents: {e}. Using mock data.")
+    logger.warning(f"⚠️ Could not import agents: {e}. Using mock data.")
     AGENTS_AVAILABLE = False
+    
+    # Create mock agent objects for fallback
+    campaign_agent = None
+    social_media_agent = None
+    lead_generation_agent = None
+    content_agent = None
+    email_automation_agent = None
+    analytics_agent = None
 
 app = FastAPI(title="Agentic AI Marketing Platform", version="1.0.0")
 
