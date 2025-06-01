@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,9 +80,7 @@ const Proposals: React.FC = () => {
 
   const loadTemplates = async () => {
     try {
-      const response = await apiClient('/api/proposals/templates', {
-        method: 'GET'
-      });
+      const response = await apiClient.getProposalTemplates();
       if (response.success) {
         setTemplates(response.data);
       }
@@ -94,9 +91,7 @@ const Proposals: React.FC = () => {
 
   const loadProposals = async () => {
     try {
-      const response = await apiClient('/api/proposals', {
-        method: 'GET'
-      });
+      const response = await apiClient.getProposals();
       if (response.success) {
         setProposals(response.data);
       }
@@ -118,10 +113,7 @@ const Proposals: React.FC = () => {
   const handleGenerateProposal = async () => {
     setLoading(true);
     try {
-      const response = await apiClient('/api/proposals/generate', {
-        method: 'POST',
-        body: JSON.stringify(formData)
-      });
+      const response = await apiClient.generateProposal(formData);
       if (response.success) {
         setGeneratedProposal(response.data);
         setActiveTab('preview');
@@ -149,10 +141,7 @@ const Proposals: React.FC = () => {
 
   const handleExportProposal = async (proposalId: string, format: string) => {
     try {
-      const response = await apiClient(`/api/proposals/${proposalId}/export`, {
-        method: 'POST',
-        body: JSON.stringify({ format })
-      });
+      const response = await apiClient.exportProposal(proposalId, format);
       if (response.success) {
         toast({
           title: "Export Started",
