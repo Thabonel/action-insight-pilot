@@ -1,18 +1,12 @@
 
-
-
 [build]
   # Install all dependencies including dev dependencies, then build
-  command = "npm ci && npm run build"
+  command = "npm install --include=dev && npm run build"
   publish = "dist"
 
 [build.environment]
   # Set Node.js version for compatibility
   NODE_VERSION = "18"
-  # Force npm to install dev dependencies
-  NODE_ENV = "development"
-  # Ensure npm is used instead of bun
-  NPM_FLAGS = "--include=dev"
 
 # Redirect all routes to index.html for SPA routing
 [[redirects]]
@@ -26,5 +20,3 @@
 
 [context.deploy-preview.environment]
   NODE_ENV = "production"
-
-
