@@ -81,7 +81,9 @@ const Proposals: React.FC = () => {
 
   const loadTemplates = async () => {
     try {
-      const response = await apiClient.get('/api/proposals/templates');
+      const response = await apiClient('/api/proposals/templates', {
+        method: 'GET'
+      });
       if (response.success) {
         setTemplates(response.data);
       }
@@ -92,7 +94,9 @@ const Proposals: React.FC = () => {
 
   const loadProposals = async () => {
     try {
-      const response = await apiClient.get('/api/proposals');
+      const response = await apiClient('/api/proposals', {
+        method: 'GET'
+      });
       if (response.success) {
         setProposals(response.data);
       }
@@ -105,7 +109,7 @@ const Proposals: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       [section]: {
-        ...prev[section as keyof ProposalFormData],
+        ...(prev[section as keyof ProposalFormData] as object),
         [field]: value
       }
     }));
@@ -114,7 +118,10 @@ const Proposals: React.FC = () => {
   const handleGenerateProposal = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.post('/api/proposals/generate', formData);
+      const response = await apiClient('/api/proposals/generate', {
+        method: 'POST',
+        body: JSON.stringify(formData)
+      });
       if (response.success) {
         setGeneratedProposal(response.data);
         setActiveTab('preview');
@@ -142,7 +149,10 @@ const Proposals: React.FC = () => {
 
   const handleExportProposal = async (proposalId: string, format: string) => {
     try {
-      const response = await apiClient.post(`/api/proposals/${proposalId}/export`, { format });
+      const response = await apiClient(`/api/proposals/${proposalId}/export`, {
+        method: 'POST',
+        body: JSON.stringify({ format })
+      });
       if (response.success) {
         toast({
           title: "Export Started",
