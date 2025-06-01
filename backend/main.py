@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -6,7 +7,7 @@ import uuid
 
 from config import agent_manager, get_environment_config
 from models import APIResponse
-from routes import campaigns, leads, content
+from routes import campaigns, leads, content, proposals
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +36,7 @@ app.add_middleware(
 app.include_router(campaigns.router)
 app.include_router(leads.router)
 app.include_router(content.router)
+app.include_router(proposals.router)
 
 # ================== HEALTH CHECK & INFO ENDPOINTS ==================
 
@@ -69,7 +71,8 @@ async def api_status():
             "content_agent": "loaded",
             "social_media_agent": "loaded",
             "email_automation_agent": "loaded",
-            "analytics_agent": "loaded"
+            "analytics_agent": "loaded",
+            "proposal_generator": "loaded"
         }
     else:
         agents = {
@@ -78,7 +81,8 @@ async def api_status():
             "content_agent": "mock_data", 
             "social_media_agent": "mock_data",
             "email_automation_agent": "mock_data",
-            "analytics_agent": "mock_data"
+            "analytics_agent": "mock_data",
+            "proposal_generator": "mock_data"
         }
     
     return {
@@ -89,8 +93,9 @@ async def api_status():
             "campaigns": 6,
             "leads": 4, 
             "content": 2,
+            "proposals": 5,
         },
-        "total_endpoints": 12,
+        "total_endpoints": 17,
         "timestamp": datetime.now().isoformat()
     }
 

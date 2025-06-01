@@ -24,6 +24,7 @@ class AgentManager:
         self.content_agent = None
         self.email_automation_agent = None
         self.analytics_agent = None
+        self.proposal_generator = None
         self.mcp_agent = None
         
         self._initialize_agents()
@@ -37,6 +38,7 @@ class AgentManager:
             from agents.content_agent import ContentAgent
             from agents.email_automation_agent import EmailAutomationAgent
             from agents.analytics_agent import AnalyticsAgent
+            from agents.proposal_generator import ProposalGenerator
             from agents.mcp_agent import MCPAgent
             
             # Initialize MCP agent first
@@ -49,6 +51,7 @@ class AgentManager:
             self.content_agent = ContentAgent(self.openai_api_key, self.integrations)
             self.email_automation_agent = EmailAutomationAgent(self.openai_api_key, self.integrations)
             self.analytics_agent = AnalyticsAgent(self.openai_api_key, self.integrations)
+            self.proposal_generator = ProposalGenerator(self.openai_api_key, self.integrations)
             
             self.agents_available = True
             logger.info("✅ All AI agents loaded successfully!")
