@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Import all agents
 try:
-    from agents.campaign_agent import campaign_agent
+    from agents.campaign_agent import Campaign_agent
     from agents.lead_generation_agent import lead_generation_agent
     from agents.content_agent import content_agent
     from agents.social_media_agent import social_media_agent, SocialPlatform, PostStatus
