@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +14,8 @@ import {
   LogOut,
   BookOpen,
   Menu,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -41,6 +41,7 @@ const Layout: React.FC = () => {
     { name: 'Email', href: '/email', icon: Mail, description: 'Email automation' },
     { name: 'Analytics', href: '/analytics', icon: TrendingUp, description: 'Performance insights' },
     { name: 'Workflows', href: '/workflows', icon: GitBranch, description: 'Automation workflows' },
+    { name: 'Proposals', href: '/proposals', icon: FileText, description: 'AI proposal generator' },
   ];
 
   const bottomNavigation = [

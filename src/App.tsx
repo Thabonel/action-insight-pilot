@@ -21,6 +21,7 @@ import Email from "@/pages/Email";
 import Analytics from "@/pages/Analytics";
 import Workflows from "@/pages/Workflows";
 import UserManual from "@/pages/UserManual";
+import Proposals from "@/pages/Proposals";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="email" element={<Email />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="workflows" element={<Workflows />} />
+              <Route path="proposals" element={<Proposals />} />
               <Route path="settings" element={<Settings />} />
               <Route path="user-manual" element={<UserManual />} />
             </Route>
