@@ -929,7 +929,8 @@ async def startup_event():
                 logger.info("Supabase configuration found")
             else:
                 logger.warning("No Supabase configuration found - using in-memory storage")
-             logger.info("All agents initialized successfully")
+            
+            logger.info("All agents initialized successfully")
             await mcp_agent.connect_all_servers()
             logger.info("MCP universal tool connector initialized")
         except Exception as e:
