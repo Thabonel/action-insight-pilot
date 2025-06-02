@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Agentic AI Marketing Platform", version="1.0.0")
 
-# Add CORS middleware
+# Enhanced CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -23,7 +22,8 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173",
+        "*"  # Temporary for debugging - remove in production
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -31,14 +31,20 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
-# Import and include routers
+# Add manual OPTIONS handler for all routes
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    return {"message": "OK"}
+
+# Import and include routers with /api prefix
 try:
     from routes import campaigns, leads, content, proposals
-    app.include_router(campaigns.router)
-    app.include_router(leads.router)
-    app.include_router(content.router)
-    app.include_router(proposals.router)
-    logger.info("All routers loaded successfully")
+    # ADD /api PREFIX HERE - this is the key fix!
+    app.include_router(campaigns.router, prefix="/api")
+    app.include_router(leads.router, prefix="/api")
+    app.include_router(content.router, prefix="/api")
+    app.include_router(proposals.router, prefix="/api")
+    logger.info("All routers loaded successfully with /api prefix")
 except Exception as e:
     logger.error(f"Error loading routers: {e}")
 
