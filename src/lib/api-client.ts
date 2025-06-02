@@ -8,10 +8,11 @@ export interface ApiResponse<T = any> {
 export class ApiClient {
   private baseUrl = 'https://srv-d0sjalqli9vc73d20vqg.onrender.com';
   private token: string | null = null;
-  private timeout = 15000; // Increased to 15 seconds for better backend response
+  private timeout = 30000; // 30 seconds timeout
 
   setToken(token: string) {
     this.token = token;
+    console.log('API Client token set:', token ? 'Token provided' : 'No token');
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
@@ -24,6 +25,7 @@ export class ApiClient {
       };
 
       console.log(`API Request: ${options.method || 'GET'} ${url}`);
+      console.log('Request headers:', headers);
 
       // Add timeout to fetch
       const controller = new AbortController();

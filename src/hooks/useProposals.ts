@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { ProposalFormData, Proposal, GeneratedProposal } from '@/types/proposals';
 
 interface Template {
@@ -27,11 +28,14 @@ export const useProposals = () => {
   const [templatesLoading, setTemplatesLoading] = useState(true);
   const [backendAvailable, setBackendAvailable] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const loadTemplates = async (retryCount = 0) => {
     setTemplatesLoading(true);
     try {
       console.log(`Loading proposal templates from backend... (attempt ${retryCount + 1})`);
+      console.log('Current user:', user?.id);
+      
       const response: ApiResponse = await apiClient.getProposalTemplates();
       console.log('Templates API response:', response);
       
@@ -58,7 +62,6 @@ export const useProposals = () => {
         return;
       }
       
-      // Clear templates and show error - no fallback
       setTemplates({});
       toast({
         title: "Backend Connection Failed",
@@ -151,9 +154,12 @@ export const useProposals = () => {
   };
 
   useEffect(() => {
-    loadTemplates();
-    loadProposals();
-  }, []);
+    // Only load templates if user is authenticated
+    if (user) {
+      loadTemplates();
+      loadProposals();
+    }
+  }, [user]);
 
   return {
     templates,
