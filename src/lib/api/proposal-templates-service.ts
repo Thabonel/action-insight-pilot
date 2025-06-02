@@ -30,7 +30,10 @@ export class ProposalTemplatesService {
       throw new Error(`Failed to fetch templates: ${error.message}`);
     }
 
-    return data || [];
+    return (data || []).map(template => ({
+      ...template,
+      template_content: template.template_content as ProposalTemplate['template_content']
+    }));
   }
 
   async getTemplatesByCategory(category: string): Promise<ProposalTemplate[]> {
@@ -44,7 +47,10 @@ export class ProposalTemplatesService {
       throw new Error(`Failed to fetch templates for category ${category}: ${error.message}`);
     }
 
-    return data || [];
+    return (data || []).map(template => ({
+      ...template,
+      template_content: template.template_content as ProposalTemplate['template_content']
+    }));
   }
 
   async getTemplate(id: string): Promise<ProposalTemplate | null> {
@@ -61,7 +67,10 @@ export class ProposalTemplatesService {
       throw new Error(`Failed to fetch template: ${error.message}`);
     }
 
-    return data;
+    return {
+      ...data,
+      template_content: data.template_content as ProposalTemplate['template_content']
+    };
   }
 }
 
