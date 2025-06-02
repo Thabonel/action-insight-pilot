@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { useNavigate } from 'react-router-dom';
 import { 
   Share2, 
   TrendingUp, 
@@ -17,7 +18,9 @@ import {
   Heart,
   MessageCircle,
   Repeat2,
-  Eye
+  Eye,
+  Settings,
+  Plus
 } from 'lucide-react';
 import SocialAIAssistant from '@/components/social/SocialAIAssistant';
 import IntelligentPostScheduler from '@/components/social/IntelligentPostScheduler';
@@ -28,6 +31,8 @@ import PlatformOptimization from '@/components/social/PlatformOptimization';
 
 const Social: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [connectedPlatforms, setConnectedPlatforms] = useState(2); // This would come from your API
+  const navigate = useNavigate();
 
   useEffect(() => {
     const trackingId = behaviorTracker.trackFeatureStart('social_page');
@@ -54,6 +59,14 @@ const Social: React.FC = () => {
         </div>
         
         <div className="flex space-x-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/connect-platforms')}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Manage Platforms
+          </Button>
           <Button variant="outline" size="sm">
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Posts
@@ -65,6 +78,27 @@ const Social: React.FC = () => {
         </div>
       </div>
 
+      {/* Platform Connection Status */}
+      {connectedPlatforms === 0 && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4">
+              <div className="text-4xl">🔗</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-900 mb-2">Connect Your Social Media Tools</h3>
+                <p className="text-blue-800 mb-4">
+                  Connect Buffer, Hootsuite, Later, or Sprout Social to push AI-generated content directly to your existing workflow.
+                </p>
+                <Button onClick={() => navigate('/connect-platforms')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Connect Platform
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -72,11 +106,10 @@ const Social: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Share2 className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm text-gray-600">Total Posts</p>
-                <p className="text-2xl font-bold">1,247</p>
-                <p className="text-xs text-green-600 flex items-center">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  +23% this month
+                <p className="text-sm text-gray-600">Connected Platforms</p>
+                <p className="text-2xl font-bold">{connectedPlatforms}</p>
+                <p className="text-xs text-blue-600">
+                  {connectedPlatforms > 0 ? 'Active integrations' : 'Ready to connect'}
                 </p>
               </div>
             </div>
@@ -101,7 +134,7 @@ const Social: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Users className="h-5 w-5 text-purple-600" />
               <div>
-                <p className="text-sm text-gray-600">Followers</p>
+                <p className="text-sm text-gray-600">Total Followers</p>
                 <p className="text-2xl font-bold">45.2K</p>
                 <p className="text-xs text-purple-600">Growth: +12% month</p>
               </div>
@@ -114,9 +147,9 @@ const Social: React.FC = () => {
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-gray-600">Best Platform</p>
-                <p className="text-2xl font-bold">LinkedIn</p>
-                <p className="text-xs text-green-600">12.3% engagement</p>
+                <p className="text-sm text-gray-600">AI Posts This Week</p>
+                <p className="text-2xl font-bold">24</p>
+                <p className="text-xs text-green-600">+18% vs last week</p>
               </div>
             </div>
           </CardContent>
