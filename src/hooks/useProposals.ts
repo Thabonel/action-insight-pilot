@@ -9,16 +9,36 @@ export const useProposals = () => {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [generatedProposal, setGeneratedProposal] = useState<GeneratedProposal | null>(null);
   const [loading, setLoading] = useState(false);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   const { toast } = useToast();
 
   const loadTemplates = async () => {
+    setTemplatesLoading(true);
     try {
+      console.log('Loading proposal templates...');
       const response = await apiClient.getProposalTemplates();
-      if (response.success) {
-        setTemplates(response.data || {});
+      console.log('Templates response:', response);
+      
+      if (response.success && response.data) {
+        setTemplates(response.data);
+        console.log('Templates loaded successfully:', response.data);
+      } else {
+        console.error('Failed to load templates:', response.error);
+        toast({
+          title: "Template Loading Error",
+          description: "Failed to load proposal templates. Please refresh the page.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Error loading templates:', error);
+      toast({
+        title: "Template Loading Error",
+        description: "Failed to load proposal templates. Please check your connection.",
+        variant: "destructive",
+      });
+    } finally {
+      setTemplatesLoading(false);
     }
   };
 
@@ -36,7 +56,9 @@ export const useProposals = () => {
   const generateProposal = async (formData: ProposalFormData) => {
     setLoading(true);
     try {
+      console.log('Generating proposal with data:', formData);
       const response = await apiClient.generateProposal(formData);
+      
       if (response.success) {
         setGeneratedProposal(response.data as GeneratedProposal);
         toast({
@@ -45,6 +67,7 @@ export const useProposals = () => {
         });
         return true;
       } else {
+        console.error('Proposal generation failed:', response.error);
         toast({
           title: "Error",
           description: response.error || "Failed to generate proposal",
@@ -53,6 +76,7 @@ export const useProposals = () => {
         return false;
       }
     } catch (error) {
+      console.error('Error generating proposal:', error);
       toast({
         title: "Error",
         description: "Failed to generate proposal. Please try again.",
@@ -96,8 +120,10 @@ export const useProposals = () => {
     proposals,
     generatedProposal,
     loading,
+    templatesLoading,
     generateProposal,
     exportProposal,
-    loadProposals
+    loadProposals,
+    refreshTemplates: loadTemplates
   };
 };

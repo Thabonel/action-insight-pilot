@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends
 from typing import Dict, Any
 import uuid
@@ -59,33 +58,46 @@ async def get_proposal_templates(token: str = Depends(verify_token)):
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
             mock_templates = {
-                "marketing_services": {
-                    "name": "Marketing Services Proposal",
+                "trade_services": {
+                    "name": "Trade Services Template",
+                    "description": "Professional template for trade services like plumbing, electrical, HVAC, construction, etc.",
+                    "sections": ["service_assessment", "project_scope", "materials_labor", "timeline", "pricing", "warranty_terms"],
+                    "default_services": ["Service Assessment", "Installation/Repair", "Quality Inspection", "Cleanup & Completion"],
+                    "category": "trade"
+                },
+                "digital_marketing": {
+                    "name": "Digital Marketing Template",
+                    "description": "Comprehensive template for digital marketing services and campaigns",
                     "sections": ["executive_summary", "client_overview", "proposed_services", "timeline", "pricing", "terms"],
-                    "default_services": ["SEO", "Content Marketing", "Social Media Management", "PPC Advertising"]
+                    "default_services": ["SEO", "Content Marketing", "Social Media Management", "PPC Advertising"],
+                    "category": "marketing"
                 },
                 "web_development": {
-                    "name": "Web Development Proposal",
+                    "name": "Web Development Template",
+                    "description": "Complete template for website and web application development projects",
                     "sections": ["project_overview", "technical_requirements", "development_phases", "timeline", "pricing", "terms"],
-                    "default_services": ["UI/UX Design", "Frontend Development", "Backend Development", "Testing & QA"]
+                    "default_services": ["UI/UX Design", "Frontend Development", "Backend Development", "Testing & QA"],
+                    "category": "development"
                 },
                 "consulting": {
-                    "name": "Consulting Services Proposal",
+                    "name": "Consulting Services Template",
+                    "description": "Professional template for business and strategy consulting services",
                     "sections": ["executive_summary", "problem_analysis", "proposed_solution", "methodology", "timeline", "pricing", "terms"],
-                    "default_services": ["Strategy Consulting", "Process Optimization", "Training & Development"]
+                    "default_services": ["Strategy Consulting", "Process Optimization", "Training & Development"],
+                    "category": "consulting"
                 },
-                "trade_services": {
-                    "name": "Trade Services Proposal",
-                    "sections": ["service_assessment", "project_scope", "materials_labor", "timeline", "pricing", "warranty_terms"],
-                    "default_services": ["Service Assessment", "Installation/Repair", "Quality Inspection", "Cleanup & Completion"]
+                "general_business": {
+                    "name": "General Business Template",
+                    "description": "Flexible template suitable for various business services and projects",
+                    "sections": ["overview", "services", "timeline", "pricing", "terms"],
+                    "default_services": ["Business Analysis", "Solution Implementation", "Support & Training"],
+                    "category": "general"
                 }
             }
             return APIResponse(success=True, data=mock_templates)
     except Exception as e:
         logger.error(f"Error getting templates: {e}")
         return APIResponse(success=False, error=str(e))
-
-# ... keep existing code (get_proposals, save_proposal, export_proposal endpoints)
 
 @router.get("", response_model=APIResponse)
 async def get_proposals(status: str = None, client: str = None, token: str = Depends(verify_token)):

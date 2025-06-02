@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText } from 'lucide-react';
+import { FileText, AlertCircle } from 'lucide-react';
 import { ProposalFormData } from '@/types/proposals';
 
 interface ProposalFormProps {
@@ -26,6 +26,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
   onFormDataChange,
   onSubmit
 }) => {
+  const hasTemplates = templates && Object.keys(templates).length > 0;
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -38,18 +40,33 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="template">Proposal Template</Label>
-              <Select onValueChange={(value) => onFormDataChange({ template_type: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(templates).map(([key, template]) => (
-                    <SelectItem key={key} value={key}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {!hasTemplates ? (
+                <div className="flex items-center space-x-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+                  <span className="text-sm text-yellow-700">Loading templates...</span>
+                </div>
+              ) : (
+                <Select 
+                  value={formData.template_type} 
+                  onValueChange={(value) => onFormDataChange({ template_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(templates).map(([key, template]) => (
+                      <SelectItem key={key} value={key}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{template.name}</span>
+                          {template.description && (
+                            <span className="text-xs text-gray-500">{template.description}</span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -203,7 +220,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
       <div className="flex justify-end">
         <Button 
           onClick={onSubmit} 
-          disabled={!formData.template_type || !formData.client_info.company_name || loading}
+          disabled={!formData.template_type || !formData.client_info.company_name || loading || !hasTemplates}
           className="flex items-center gap-2"
         >
           <FileText className="h-4 w-4" />
