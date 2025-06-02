@@ -4,8 +4,23 @@ import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { ProposalFormData, Proposal, GeneratedProposal } from '@/types/proposals';
 
+interface Template {
+  id: string;
+  name: string;
+  description: string;
+  sections: string[];
+  default_services?: string[];
+  category?: string;
+}
+
+interface ApiResponse<T = any> {
+  data?: T;
+  success: boolean;
+  error?: string;
+}
+
 export const useProposals = () => {
-  const [templates, setTemplates] = useState<Record<string, any>>({});
+  const [templates, setTemplates] = useState<Record<string, Template>>({});
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [generatedProposal, setGeneratedProposal] = useState<GeneratedProposal | null>(null);
   const [loading, setLoading] = useState(false);
@@ -16,14 +31,14 @@ export const useProposals = () => {
     setTemplatesLoading(true);
     try {
       console.log('Loading proposal templates...');
-      const response = await apiClient.getProposalTemplates();
+      const response: ApiResponse = await apiClient.getProposalTemplates();
       console.log('Templates API response:', response);
       
       if (response.success && response.data) {
         console.log('Templates data received:', response.data);
-        // Check if response.data has a data property (nested structure)
-        const templatesData = response.data.data || response.data;
-        setTemplates(templatesData);
+        // Handle both nested and direct data structures
+        const templatesData = (response.data as any).data || response.data;
+        setTemplates(templatesData as Record<string, Template>);
         console.log('Templates set successfully:', templatesData);
         toast({
           title: "Templates Loaded",
@@ -51,7 +66,7 @@ export const useProposals = () => {
 
   const loadProposals = async () => {
     try {
-      const response = await apiClient.getProposals();
+      const response: ApiResponse = await apiClient.getProposals();
       if (response.success) {
         setProposals((response.data as Proposal[]) || []);
       }
@@ -64,7 +79,7 @@ export const useProposals = () => {
     setLoading(true);
     try {
       console.log('Generating proposal with data:', formData);
-      const response = await apiClient.generateProposal(formData);
+      const response: ApiResponse = await apiClient.generateProposal(formData);
       
       if (response.success) {
         setGeneratedProposal(response.data as GeneratedProposal);
@@ -97,7 +112,7 @@ export const useProposals = () => {
 
   const exportProposal = async (proposalId: string, format: string) => {
     try {
-      const response = await apiClient.exportProposal(proposalId, format);
+      const response: ApiResponse = await apiClient.exportProposal(proposalId, format);
       if (response.success && response.data) {
         const exportData = response.data as { download_url?: string };
         toast({
