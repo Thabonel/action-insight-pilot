@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,7 @@ import Analytics from "@/pages/Analytics";
 import Workflows from "@/pages/Workflows";
 import UserManual from "@/pages/UserManual";
 import Proposals from "@/pages/Proposals";
+import ConnectPlatforms from "@/pages/ConnectPlatforms";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +50,7 @@ const App = () => (
               <Route path="analytics" element={<Analytics />} />
               <Route path="workflows" element={<Workflows />} />
               <Route path="proposals" element={<Proposals />} />
+              <Route path="connect-platforms" element={<ConnectPlatforms />} />
               <Route path="settings" element={<Settings />} />
               <Route path="user-manual" element={<UserManual />} />
             </Route>
