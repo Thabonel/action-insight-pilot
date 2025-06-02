@@ -1,4 +1,14 @@
 
+import { HttpClient } from './http-client';
+import { CampaignsService } from './api/campaigns-service';
+import { LeadsService } from './api/leads-service';
+import { ContentService } from './api/content-service';
+import { SocialService } from './api/social-service';
+import { EmailService } from './api/email-service';
+import { AnalyticsService } from './api/analytics-service';
+import { WorkflowService } from './api/workflow-service';
+import { ProposalsService } from './api/proposals-service';
+
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -6,244 +16,158 @@ export interface ApiResponse<T = any> {
 }
 
 export class ApiClient {
-  private baseUrl = 'https://srv-d0sjalqli9vc73d20vqg.onrender.com';
-  private token: string | null = null;
-  private timeout = 30000; // 30 seconds timeout
+  private httpClient: HttpClient;
+  private campaigns: CampaignsService;
+  private leads: LeadsService;
+  private content: ContentService;
+  private social: SocialService;
+  private email: EmailService;
+  private analytics: AnalyticsService;
+  private workflow: WorkflowService;
+  private proposals: ProposalsService;
 
-  setToken(token: string) {
-    this.token = token;
-    console.log('API Client token set:', token ? 'Token provided' : 'No token');
+  constructor() {
+    this.httpClient = new HttpClient();
+    this.campaigns = new CampaignsService(this.httpClient);
+    this.leads = new LeadsService(this.httpClient);
+    this.content = new ContentService(this.httpClient);
+    this.social = new SocialService(this.httpClient);
+    this.email = new EmailService(this.httpClient);
+    this.analytics = new AnalyticsService(this.httpClient);
+    this.workflow = new WorkflowService(this.httpClient);
+    this.proposals = new ProposalsService(this.httpClient);
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-    try {
-      const url = `${this.baseUrl}${endpoint}`;
-      const headers = {
-        'Content-Type': 'application/json',
-        ...(this.token && { Authorization: `Bearer ${this.token}` }),
-        ...options.headers,
-      };
-
-      console.log(`API Request: ${options.method || 'GET'} ${url}`);
-      console.log('Request headers:', headers);
-
-      // Add timeout to fetch
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      console.log(`API Response: ${response.status} ${response.statusText}`);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`API Error: ${response.status}`, errorText);
-        return {
-          success: false,
-          error: `HTTP ${response.status}: ${response.statusText}`,
-        };
-      }
-
-      const data = await response.json();
-      return {
-        success: true,
-        data,
-      };
-    } catch (error) {
-      console.error('API Request failed:', error);
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          return {
-            success: false,
-            error: 'Request timeout - backend server may be down',
-          };
-        }
-        return {
-          success: false,
-          error: `Network error: ${error.message}`,
-        };
-      }
-      
-      return {
-        success: false,
-        error: 'Unknown network error occurred',
-      };
-    }
+  setToken(token: string) {
+    this.httpClient.setToken(token);
   }
 
   // Campaign endpoints
   async getCampaigns() {
-    return this.request('/api/campaigns');
+    return this.campaigns.getCampaigns();
   }
 
   async createCampaign(campaignData: any) {
-    return this.request('/api/campaigns', {
-      method: 'POST',
-      body: JSON.stringify(campaignData),
-    });
+    return this.campaigns.createCampaign(campaignData);
   }
 
   async bulkCreateCampaigns(campaigns: any[]) {
-    return this.request('/api/campaigns/bulk/create', {
-      method: 'POST',
-      body: JSON.stringify({ campaigns }),
-    });
+    return this.campaigns.bulkCreateCampaigns(campaigns);
   }
 
   async getCampaignById(id: string) {
-    return this.request(`/api/campaigns/${id}`);
+    return this.campaigns.getCampaignById(id);
   }
 
   async updateCampaign(id: string, updates: any) {
-    return this.request(`/api/campaigns/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(updates),
-    });
+    return this.campaigns.updateCampaign(id, updates);
   }
 
   async deleteCampaign(id: string) {
-    return this.request(`/api/campaigns/${id}`, {
-      method: 'DELETE',
-    });
+    return this.campaigns.deleteCampaign(id);
   }
 
   // Lead endpoints
   async getLeads() {
-    return this.request('/api/leads');
+    return this.leads.getLeads();
   }
 
   async searchLeads(query: string) {
-    return this.request(`/api/leads/search?q=${encodeURIComponent(query)}`);
+    return this.leads.searchLeads(query);
   }
 
   async getLeadAnalytics() {
-    return this.request('/api/leads/analytics/overview');
+    return this.leads.getLeadAnalytics();
   }
 
   async createLead(leadData: any) {
-    return this.request('/api/leads', {
-      method: 'POST',
-      body: JSON.stringify(leadData),
-    });
+    return this.leads.createLead(leadData);
   }
 
   // Content endpoints
   async createContent(contentData: any) {
-    return this.request('/api/content/create', {
-      method: 'POST',
-      body: JSON.stringify(contentData),
-    });
+    return this.content.createContent(contentData);
   }
 
   async getContentLibrary() {
-    return this.request('/api/content/library');
+    return this.content.getContentLibrary();
   }
 
   // Social media endpoints
   async getSocialMediaPosts() {
-    return this.request('/api/social/posts');
+    return this.social.getSocialMediaPosts();
   }
 
   async createSocialPost(postData: any) {
-    return this.request('/api/social/posts', {
-      method: 'POST',
-      body: JSON.stringify(postData),
-    });
+    return this.social.createSocialPost(postData);
   }
 
   async getSocialAnalytics() {
-    return this.request('/api/social/analytics');
+    return this.social.getSocialAnalytics();
   }
 
   async scheduleSocialPost(postData: any) {
-    return this.request('/api/social/schedule', {
-      method: 'POST',
-      body: JSON.stringify(postData),
-    });
+    return this.social.scheduleSocialPost(postData);
   }
 
   // Email endpoints
   async getEmailCampaigns() {
-    return this.request('/api/email/campaigns');
+    return this.email.getEmailCampaigns();
   }
 
   async createEmailCampaign(campaignData: any) {
-    return this.request('/api/email/campaigns', {
-      method: 'POST',
-      body: JSON.stringify(campaignData),
-    });
+    return this.email.createEmailCampaign(campaignData);
   }
 
   async getEmailAnalytics() {
-    return this.request('/api/email/analytics');
+    return this.email.getEmailAnalytics();
   }
 
   async sendEmail(emailData: any) {
-    return this.request('/api/email/send', {
-      method: 'POST',
-      body: JSON.stringify(emailData),
-    });
+    return this.email.sendEmail(emailData);
   }
 
   // Analytics endpoints
   async getAnalyticsOverview() {
-    return this.request('/api/analytics/overview');
+    return this.analytics.getAnalyticsOverview();
   }
 
   async getSystemStats() {
-    return this.request('/api/system/stats');
+    return this.analytics.getSystemStats();
   }
 
   async getPerformanceMetrics() {
-    return this.request('/api/analytics/performance');
+    return this.analytics.getPerformanceMetrics();
   }
 
   // Workflow endpoints
   async getWorkflows() {
-    return this.request('/api/workflow/list');
+    return this.workflow.getWorkflows();
   }
 
   async createWorkflow(workflowData: any) {
-    return this.request('/api/workflow/create', {
-      method: 'POST',
-      body: JSON.stringify(workflowData),
-    });
+    return this.workflow.createWorkflow(workflowData);
   }
 
   async executeWorkflow(id: string) {
-    return this.request(`/api/workflow/${id}/execute`, {
-      method: 'POST',
-    });
+    return this.workflow.executeWorkflow(id);
   }
 
   // Proposal endpoints
   async getProposalTemplates() {
-    return this.request('/api/proposals/templates');
+    return this.proposals.getProposalTemplates();
   }
 
   async generateProposal(proposalData: any) {
-    return this.request('/api/proposals/generate', {
-      method: 'POST',
-      body: JSON.stringify(proposalData),
-    });
+    return this.proposals.generateProposal(proposalData);
   }
 
   async getProposals() {
-    return this.request('/api/proposals');
+    return this.proposals.getProposals();
   }
 
   async exportProposal(proposalId: string, format: string) {
-    return this.request(`/api/proposals/${proposalId}/export`, {
-      method: 'POST',
-      body: JSON.stringify({ format }),
-    });
+    return this.proposals.exportProposal(proposalId, format);
   }
 }
 
