@@ -53,37 +53,41 @@ async def generate_proposal(proposal_data: Dict[str, Any], token: str = Depends(
 async def get_proposal_templates(token: str = Depends(verify_token)):
     """Get available proposal templates"""
     try:
+        logger.info("Getting proposal templates...")
+        
         if agent_manager.agents_available:
             result = await agent_manager.proposal_generator.get_proposal_templates()
+            logger.info(f"Agent templates result: {result}")
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
+            # Comprehensive mock templates with proper structure
             mock_templates = {
                 "trade_services": {
                     "name": "Trade Services Template",
-                    "description": "Professional template for trade services like plumbing, electrical, HVAC, construction, etc.",
+                    "description": "Professional template for trade services like plumbing, electrical, HVAC, construction, landscaping, etc.",
                     "sections": ["service_assessment", "project_scope", "materials_labor", "timeline", "pricing", "warranty_terms"],
                     "default_services": ["Service Assessment", "Installation/Repair", "Quality Inspection", "Cleanup & Completion"],
                     "category": "trade"
                 },
                 "digital_marketing": {
                     "name": "Digital Marketing Template",
-                    "description": "Comprehensive template for digital marketing services and campaigns",
-                    "sections": ["executive_summary", "client_overview", "proposed_services", "timeline", "pricing", "terms"],
-                    "default_services": ["SEO", "Content Marketing", "Social Media Management", "PPC Advertising"],
+                    "description": "Comprehensive template for digital marketing services, SEO, social media campaigns, and advertising",
+                    "sections": ["executive_summary", "marketing_strategy", "proposed_services", "timeline", "investment", "kpis"],
+                    "default_services": ["SEO Optimization", "Content Marketing", "Social Media Management", "PPC Advertising", "Analytics & Reporting"],
                     "category": "marketing"
                 },
                 "web_development": {
                     "name": "Web Development Template",
                     "description": "Complete template for website and web application development projects",
                     "sections": ["project_overview", "technical_requirements", "development_phases", "timeline", "pricing", "terms"],
-                    "default_services": ["UI/UX Design", "Frontend Development", "Backend Development", "Testing & QA"],
+                    "default_services": ["UI/UX Design", "Frontend Development", "Backend Development", "Testing & QA", "Deployment"],
                     "category": "development"
                 },
                 "consulting": {
-                    "name": "Consulting Services Template",
-                    "description": "Professional template for business and strategy consulting services",
-                    "sections": ["executive_summary", "problem_analysis", "proposed_solution", "methodology", "timeline", "pricing", "terms"],
-                    "default_services": ["Strategy Consulting", "Process Optimization", "Training & Development"],
+                    "name": "Business Consulting Template",
+                    "description": "Professional template for business strategy, operations, and management consulting services",
+                    "sections": ["executive_summary", "situation_analysis", "recommendations", "implementation", "timeline", "fees"],
+                    "default_services": ["Strategy Consulting", "Process Optimization", "Change Management", "Training & Development"],
                     "category": "consulting"
                 },
                 "general_business": {
@@ -94,7 +98,10 @@ async def get_proposal_templates(token: str = Depends(verify_token)):
                     "category": "general"
                 }
             }
+            
+            logger.info(f"Returning mock templates: {list(mock_templates.keys())}")
             return APIResponse(success=True, data=mock_templates)
+            
     except Exception as e:
         logger.error(f"Error getting templates: {e}")
         return APIResponse(success=False, error=str(e))
