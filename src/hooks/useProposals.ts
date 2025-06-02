@@ -17,16 +17,23 @@ export const useProposals = () => {
     try {
       console.log('Loading proposal templates...');
       const response = await apiClient.getProposalTemplates();
-      console.log('Templates response:', response);
+      console.log('Templates API response:', response);
       
       if (response.success && response.data) {
-        setTemplates(response.data);
-        console.log('Templates loaded successfully:', response.data);
+        console.log('Templates data received:', response.data);
+        // Check if response.data has a data property (nested structure)
+        const templatesData = response.data.data || response.data;
+        setTemplates(templatesData);
+        console.log('Templates set successfully:', templatesData);
+        toast({
+          title: "Templates Loaded",
+          description: `${Object.keys(templatesData).length} templates loaded successfully`,
+        });
       } else {
         console.error('Failed to load templates:', response.error);
         toast({
           title: "Template Loading Error",
-          description: "Failed to load proposal templates. Please refresh the page.",
+          description: response.error || "Failed to load proposal templates. Please refresh the page.",
           variant: "destructive",
         });
       }

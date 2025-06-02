@@ -40,6 +40,7 @@ const Proposals: React.FC = () => {
     proposals,
     generatedProposal,
     loading,
+    templatesLoading,
     generateProposal,
     exportProposal
   } = useProposals();
@@ -90,6 +91,7 @@ const Proposals: React.FC = () => {
             formData={formData}
             templates={templates}
             loading={loading}
+            templatesLoading={templatesLoading}
             onInputChange={handleInputChange}
             onFormDataChange={handleFormDataChange}
             onSubmit={handleGenerateProposal}

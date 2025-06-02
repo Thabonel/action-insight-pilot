@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, AlertCircle } from 'lucide-react';
+import { FileText, AlertCircle, Loader2 } from 'lucide-react';
 import { ProposalFormData } from '@/types/proposals';
 
 interface ProposalFormProps {
   formData: ProposalFormData;
   templates: Record<string, any>;
   loading: boolean;
+  templatesLoading: boolean;
   onInputChange: (section: string, field: string, value: any) => void;
   onFormDataChange: (data: Partial<ProposalFormData>) => void;
   onSubmit: () => void;
@@ -22,11 +23,20 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
   formData,
   templates,
   loading,
+  templatesLoading,
   onInputChange,
   onFormDataChange,
   onSubmit
 }) => {
   const hasTemplates = templates && Object.keys(templates).length > 0;
+  const templateCount = Object.keys(templates || {}).length;
+
+  console.log('ProposalForm render:', { 
+    templatesLoading, 
+    hasTemplates, 
+    templateCount, 
+    templatesKeys: Object.keys(templates || {}) 
+  });
 
   return (
     <div className="space-y-6">
@@ -40,32 +50,42 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="template">Proposal Template</Label>
-              {!hasTemplates ? (
-                <div className="flex items-center space-x-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm text-yellow-700">Loading templates...</span>
+              {templatesLoading ? (
+                <div className="flex items-center space-x-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+                  <span className="text-sm text-blue-700">Loading templates...</span>
+                </div>
+              ) : !hasTemplates ? (
+                <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm text-red-700">No templates available. Please refresh the page.</span>
                 </div>
               ) : (
-                <Select 
-                  value={formData.template_type} 
-                  onValueChange={(value) => onFormDataChange({ template_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(templates).map(([key, template]) => (
-                      <SelectItem key={key} value={key}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{template.name}</span>
-                          {template.description && (
-                            <span className="text-xs text-gray-500">{template.description}</span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Select 
+                    value={formData.template_type} 
+                    onValueChange={(value) => onFormDataChange({ template_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(templates).map(([key, template]) => (
+                        <SelectItem key={key} value={key}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{template.name}</span>
+                            {template.description && (
+                              <span className="text-xs text-gray-500">{template.description}</span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="text-xs text-gray-500">
+                    {templateCount} templates available
+                  </div>
+                </div>
               )}
             </div>
           </CardContent>
