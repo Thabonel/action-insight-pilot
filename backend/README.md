@@ -1,5 +1,5 @@
 
-# Marketing Automation Backend
+# Marketing_Automation_Backend
 
 A FastAPI backend for the marketing automation platform with AI agents, campaign management, lead tracking, and analytics.
 
