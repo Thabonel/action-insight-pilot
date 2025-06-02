@@ -1,11 +1,10 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Loader2, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface TemplateSelectionProps {
   selectedTemplate: string;
@@ -21,11 +20,26 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
   templates,
   loading,
   backendAvailable = true,
-  onTemplateChange,
-  onRetryConnection
+  onTemplateChange
 }) => {
   const hasTemplates = templates && Object.keys(templates).length > 0;
   const templateCount = Object.keys(templates || {}).length;
+
+  // Group templates by category
+  const templatesByCategory = Object.entries(templates).reduce((acc, [key, template]) => {
+    const category = template.category || 'other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push({ key, ...template });
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  const formatCategoryName = (category: string) => {
+    return category.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
 
   return (
     <Card>
@@ -39,22 +53,14 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
           {loading ? (
             <div className="flex items-center space-x-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
               <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
-              <span className="text-sm text-blue-700">Loading templates from backend...</span>
+              <span className="text-sm text-blue-700">Loading templates from Supabase...</span>
             </div>
           ) : !hasTemplates ? (
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <span className="text-sm text-red-700">
-                  {backendAvailable ? 'No templates found on server' : 'Cannot connect to backend server'}
-                </span>
-              </div>
-              {onRetryConnection && (
-                <Button variant="outline" size="sm" onClick={onRetryConnection} className="w-full">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry Loading Templates
-                </Button>
-              )}
+            <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <span className="text-sm text-red-700">
+                No templates found. Please check your connection.
+              </span>
             </div>
           ) : (
             <div className="space-y-2">
@@ -63,21 +69,28 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
                   <SelectValue placeholder="Select a template" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(templates).map(([key, template]) => (
-                    <SelectItem key={key} value={key}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{template.name}</span>
-                        {template.description && (
-                          <span className="text-xs text-gray-500">{template.description}</span>
-                        )}
+                  {Object.entries(templatesByCategory).map(([category, categoryTemplates]) => (
+                    <div key={category}>
+                      <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {formatCategoryName(category)}
                       </div>
-                    </SelectItem>
+                      {categoryTemplates.map((template) => (
+                        <SelectItem key={template.key} value={template.key}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{template.name}</span>
+                            {template.description && (
+                              <span className="text-xs text-gray-500">{template.description}</span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </div>
                   ))}
                 </SelectContent>
               </Select>
               <div className="text-xs text-gray-500 flex items-center gap-2">
-                <Wifi className="h-3 w-3 text-green-600" />
-                {templateCount} templates loaded from backend
+                <CheckCircle className="h-3 w-3 text-green-600" />
+                {templateCount} templates loaded from Supabase
               </div>
             </div>
           )}

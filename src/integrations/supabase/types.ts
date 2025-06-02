@@ -1221,6 +1221,36 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          template_content: Json
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          name: string
+          template_content: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          template_content?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       scraped_data: {
         Row: {
           agent_id: number | null
