@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import {
   Settings, 
   BarChart3, 
   Calendar,
-  Refresh,
+  RefreshCw,
   Unlink,
   CheckCircle,
   AlertTriangle,
@@ -238,7 +237,7 @@ const ConnectedAccountsDashboard: React.FC<ConnectedAccountsDashboardProps> = ({
               <span>View Analytics</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col" onClick={onRefresh}>
-              <Refresh className="h-6 w-6 mb-2" />
+              <RefreshCw className="h-6 w-6 mb-2" />
               <span>Sync All Platforms</span>
             </Button>
           </div>
