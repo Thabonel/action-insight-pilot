@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,11 +46,11 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
   return (
     <div className="space-y-6">
       {/* Backend Status Alert */}
-      {!backendAvailable && hasTemplates && (
-        <Alert>
+      {!backendAvailable && (
+        <Alert variant="destructive">
           <WifiOff className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
-            <span>Backend unavailable - using offline templates</span>
+            <span>Backend server is not responding - templates cannot be loaded</span>
             {onRetryConnection && (
               <Button variant="outline" size="sm" onClick={onRetryConnection} className="ml-4">
                 <RefreshCw className="h-4 w-4 mr-2" />
@@ -66,7 +65,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
         <Alert>
           <Wifi className="h-4 w-4" />
           <AlertDescription>
-            Connected to server - {templateCount} templates available
+            Connected to backend server - {templateCount} templates loaded
           </AlertDescription>
         </Alert>
       )}
@@ -84,13 +83,15 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
               {templatesLoading ? (
                 <div className="flex items-center space-x-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
                   <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
-                  <span className="text-sm text-blue-700">Loading templates...</span>
+                  <span className="text-sm text-blue-700">Loading templates from backend...</span>
                 </div>
               ) : !hasTemplates ? (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
                     <AlertCircle className="h-4 w-4 text-red-600" />
-                    <span className="text-sm text-red-700">No templates available</span>
+                    <span className="text-sm text-red-700">
+                      {backendAvailable ? 'No templates found on server' : 'Cannot connect to backend server'}
+                    </span>
                   </div>
                   {onRetryConnection && (
                     <Button variant="outline" size="sm" onClick={onRetryConnection} className="w-full">
@@ -122,12 +123,8 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
                     </SelectContent>
                   </Select>
                   <div className="text-xs text-gray-500 flex items-center gap-2">
-                    {backendAvailable ? (
-                      <Wifi className="h-3 w-3 text-green-600" />
-                    ) : (
-                      <WifiOff className="h-3 w-3 text-orange-600" />
-                    )}
-                    {templateCount} templates available {!backendAvailable && '(offline)'}
+                    <Wifi className="h-3 w-3 text-green-600" />
+                    {templateCount} templates loaded from backend
                   </div>
                 </div>
               )}
@@ -284,7 +281,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
       <div className="flex justify-end">
         <Button 
           onClick={onSubmit} 
-          disabled={!formData.template_type || !formData.client_info.company_name || loading || !hasTemplates}
+          disabled={!formData.template_type || !formData.client_info.company_name || loading || !hasTemplates || !backendAvailable}
           className="flex items-center gap-2"
         >
           <FileText className="h-4 w-4" />

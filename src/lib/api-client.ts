@@ -8,7 +8,7 @@ export interface ApiResponse<T = any> {
 export class ApiClient {
   private baseUrl = 'https://srv-d0sjalqli9vc73d20vqg.onrender.com';
   private token: string | null = null;
-  private timeout = 10000; // 10 seconds
+  private timeout = 15000; // Increased to 15 seconds for better backend response
 
   setToken(token: string) {
     this.token = token;
@@ -39,16 +39,16 @@ export class ApiClient {
 
       console.log(`API Response: ${response.status} ${response.statusText}`);
 
-      const data = await response.json();
-
       if (!response.ok) {
-        console.error(`API Error: ${response.status}`, data);
+        const errorText = await response.text();
+        console.error(`API Error: ${response.status}`, errorText);
         return {
           success: false,
-          error: data.message || data.error || `HTTP error! status: ${response.status}`,
+          error: `HTTP ${response.status}: ${response.statusText}`,
         };
       }
 
+      const data = await response.json();
       return {
         success: true,
         data,
@@ -60,18 +60,18 @@ export class ApiClient {
         if (error.name === 'AbortError') {
           return {
             success: false,
-            error: 'Request timeout - server may be unavailable',
+            error: 'Request timeout - backend server may be down',
           };
         }
         return {
           success: false,
-          error: error.message,
+          error: `Network error: ${error.message}`,
         };
       }
       
       return {
         success: false,
-        error: 'Network error - please check your connection',
+        error: 'Unknown network error occurred',
       };
     }
   }
