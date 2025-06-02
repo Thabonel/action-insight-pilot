@@ -18,7 +18,6 @@ interface ProposalFormProps {
   onInputChange: (section: string, field: string, value: any) => void;
   onFormDataChange: (data: Partial<ProposalFormData>) => void;
   onSubmit: () => void;
-  onRetryConnection?: () => void;
 }
 
 const ProposalForm: React.FC<ProposalFormProps> = ({
@@ -29,8 +28,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
   backendAvailable = true,
   onInputChange,
   onFormDataChange,
-  onSubmit,
-  onRetryConnection
+  onSubmit
 }) => {
   const hasTemplates = templates && Object.keys(templates).length > 0;
   const templateCount = Object.keys(templates || {}).length;
@@ -61,7 +59,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
         backendAvailable={backendAvailable}
         hasTemplates={hasTemplates}
         templateCount={templateCount}
-        onRetryConnection={onRetryConnection}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -71,7 +68,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
           loading={templatesLoading}
           backendAvailable={backendAvailable}
           onTemplateChange={handleTemplateChange}
-          onRetryConnection={onRetryConnection}
         />
 
         <ClientInformation
@@ -95,7 +91,7 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
       <div className="flex justify-end">
         <Button 
           onClick={onSubmit} 
-          disabled={!formData.template_type || !formData.client_info.company_name || loading || !hasTemplates || !backendAvailable}
+          disabled={!formData.template_type || !formData.client_info.company_name || loading || !hasTemplates}
           className="flex items-center gap-2"
         >
           <FileText className="h-4 w-4" />

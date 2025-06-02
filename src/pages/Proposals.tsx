@@ -43,8 +43,7 @@ const Proposals: React.FC = () => {
     templatesLoading,
     backendAvailable,
     generateProposal,
-    exportProposal,
-    retryConnection
+    exportProposal
   } = useProposals();
 
   const handleInputChange = (section: string, field: string, value: any) => {
@@ -98,7 +97,6 @@ const Proposals: React.FC = () => {
             onInputChange={handleInputChange}
             onFormDataChange={handleFormDataChange}
             onSubmit={handleGenerateProposal}
-            onRetryConnection={retryConnection}
           />
         </TabsContent>
 
