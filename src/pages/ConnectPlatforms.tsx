@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import {
   Users,
   BarChart3,
   Calendar,
-  Refresh
+  RefreshCw
 } from 'lucide-react';
 import { SocialPlatform, PlatformConnection, PlatformConfig } from '@/types/socialConnectors';
 import { useToast } from '@/hooks/use-toast';
@@ -150,7 +149,7 @@ const ConnectPlatforms: React.FC = () => {
         
         <div className="flex space-x-3">
           <Button variant="outline" onClick={loadConnections}>
-            <Refresh className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
           <Button onClick={() => setActiveTab('select')}>
