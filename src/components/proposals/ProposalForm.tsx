@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, AlertCircle, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FileText, AlertCircle, Loader2, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { ProposalFormData } from '@/types/proposals';
 
 interface ProposalFormProps {
@@ -14,9 +15,11 @@ interface ProposalFormProps {
   templates: Record<string, any>;
   loading: boolean;
   templatesLoading: boolean;
+  backendAvailable?: boolean;
   onInputChange: (section: string, field: string, value: any) => void;
   onFormDataChange: (data: Partial<ProposalFormData>) => void;
   onSubmit: () => void;
+  onRetryConnection?: () => void;
 }
 
 const ProposalForm: React.FC<ProposalFormProps> = ({
@@ -24,9 +27,11 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
   templates,
   loading,
   templatesLoading,
+  backendAvailable = true,
   onInputChange,
   onFormDataChange,
-  onSubmit
+  onSubmit,
+  onRetryConnection
 }) => {
   const hasTemplates = templates && Object.keys(templates).length > 0;
   const templateCount = Object.keys(templates || {}).length;
@@ -35,11 +40,37 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
     templatesLoading, 
     hasTemplates, 
     templateCount, 
-    templatesKeys: Object.keys(templates || {}) 
+    templatesKeys: Object.keys(templates || {}),
+    backendAvailable
   });
 
   return (
     <div className="space-y-6">
+      {/* Backend Status Alert */}
+      {!backendAvailable && hasTemplates && (
+        <Alert>
+          <WifiOff className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Backend unavailable - using offline templates</span>
+            {onRetryConnection && (
+              <Button variant="outline" size="sm" onClick={onRetryConnection} className="ml-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry Connection
+              </Button>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {backendAvailable && hasTemplates && (
+        <Alert>
+          <Wifi className="h-4 w-4" />
+          <AlertDescription>
+            Connected to server - {templateCount} templates available
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Template Selection */}
         <Card>
@@ -56,9 +87,17 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
                   <span className="text-sm text-blue-700">Loading templates...</span>
                 </div>
               ) : !hasTemplates ? (
-                <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <span className="text-sm text-red-700">No templates available. Please refresh the page.</span>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-sm text-red-700">No templates available</span>
+                  </div>
+                  {onRetryConnection && (
+                    <Button variant="outline" size="sm" onClick={onRetryConnection} className="w-full">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Retry Loading Templates
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -82,8 +121,13 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="text-xs text-gray-500">
-                    {templateCount} templates available
+                  <div className="text-xs text-gray-500 flex items-center gap-2">
+                    {backendAvailable ? (
+                      <Wifi className="h-3 w-3 text-green-600" />
+                    ) : (
+                      <WifiOff className="h-3 w-3 text-orange-600" />
+                    )}
+                    {templateCount} templates available {!backendAvailable && '(offline)'}
                   </div>
                 </div>
               )}
