@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
-from typing import Dict, Any
+
+from fastapi import APIRouter, Depends, HTTPException
+from typing import Dict, Any, Optional
 import uuid
 from datetime import datetime
 import logging
@@ -16,6 +17,8 @@ router = APIRouter(prefix="/api/proposals", tags=["proposals"])
 async def generate_proposal(proposal_data: Dict[str, Any], token: str = Depends(verify_token)):
     """Generate a new proposal"""
     try:
+        logger.info(f"Generating proposal with data: {proposal_data}")
+        
         if agent_manager.agents_available:
             result = await agent_manager.proposal_generator.generate_proposal(proposal_data)
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
@@ -50,7 +53,7 @@ async def generate_proposal(proposal_data: Dict[str, Any], token: str = Depends(
         return APIResponse(success=False, error=str(e))
 
 @router.get("/templates", response_model=APIResponse)
-async def get_proposal_templates(token: str = Depends(verify_token)):
+async def get_proposal_templates(token: Optional[str] = Depends(verify_token)):
     """Get available proposal templates"""
     try:
         logger.info("Getting proposal templates...")
@@ -107,7 +110,7 @@ async def get_proposal_templates(token: str = Depends(verify_token)):
         return APIResponse(success=False, error=str(e))
 
 @router.get("", response_model=APIResponse)
-async def get_proposals(status: str = None, client: str = None, token: str = Depends(verify_token)):
+async def get_proposals(status: Optional[str] = None, client: Optional[str] = None, token: str = Depends(verify_token)):
     """Get saved proposals with optional filters"""
     try:
         filters = {}

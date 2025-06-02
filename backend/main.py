@@ -7,7 +7,6 @@ import uuid
 
 from config import agent_manager, get_environment_config
 from models import APIResponse
-from routes import campaigns, leads, content, proposals
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,11 +31,16 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
-# Include routers
-app.include_router(campaigns.router)
-app.include_router(leads.router)
-app.include_router(content.router)
-app.include_router(proposals.router)
+# Import and include routers
+try:
+    from routes import campaigns, leads, content, proposals
+    app.include_router(campaigns.router)
+    app.include_router(leads.router)
+    app.include_router(content.router)
+    app.include_router(proposals.router)
+    logger.info("All routers loaded successfully")
+except Exception as e:
+    logger.error(f"Error loading routers: {e}")
 
 # ================== HEALTH CHECK & INFO ENDPOINTS ==================
 
