@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Agentic AI Marketing Platform", version="1.0.0")
 
-# Enhanced CORS middleware with the exact domain
+# Enhanced CORS middleware with specific allowed origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[

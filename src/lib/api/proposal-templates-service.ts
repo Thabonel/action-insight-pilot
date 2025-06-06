@@ -1,5 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ProposalTemplate {
   id: string;
@@ -20,57 +20,75 @@ export interface ProposalTemplate {
 
 export class ProposalTemplatesService {
   async getTemplates(): Promise<ProposalTemplate[]> {
-    const { data, error } = await supabase
-      .from('proposal_templates')
-      .select('*')
-      .order('category', { ascending: true })
-      .order('name', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('proposal_templates')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('name', { ascending: true });
 
-    if (error) {
-      throw new Error(`Failed to fetch templates: ${error.message}`);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(`Failed to fetch templates: ${error.message}`);
+      }
+
+      return (data || []).map(template => ({
+        ...template,
+        template_content: template.template_content as ProposalTemplate['template_content']
+      }));
+    } catch (error) {
+      console.error('Error in getTemplates:', error);
+      throw error;
     }
-
-    return (data || []).map(template => ({
-      ...template,
-      template_content: template.template_content as ProposalTemplate['template_content']
-    }));
   }
 
   async getTemplatesByCategory(category: string): Promise<ProposalTemplate[]> {
-    const { data, error } = await supabase
-      .from('proposal_templates')
-      .select('*')
-      .eq('category', category)
-      .order('name', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('proposal_templates')
+        .select('*')
+        .eq('category', category)
+        .order('name', { ascending: true });
 
-    if (error) {
-      throw new Error(`Failed to fetch templates for category ${category}: ${error.message}`);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(`Failed to fetch templates for category ${category}: ${error.message}`);
+      }
+
+      return (data || []).map(template => ({
+        ...template,
+        template_content: template.template_content as ProposalTemplate['template_content']
+      }));
+    } catch (error) {
+      console.error('Error in getTemplatesByCategory:', error);
+      throw error;
     }
-
-    return (data || []).map(template => ({
-      ...template,
-      template_content: template.template_content as ProposalTemplate['template_content']
-    }));
   }
 
   async getTemplate(id: string): Promise<ProposalTemplate | null> {
-    const { data, error } = await supabase
-      .from('proposal_templates')
-      .select('*')
-      .eq('id', id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('proposal_templates')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // No data found
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null; // No data found
+        }
+        console.error('Supabase error:', error);
+        throw new Error(`Failed to fetch template: ${error.message}`);
       }
-      throw new Error(`Failed to fetch template: ${error.message}`);
-    }
 
-    return {
-      ...data,
-      template_content: data.template_content as ProposalTemplate['template_content']
-    };
+      return {
+        ...data,
+        template_content: data.template_content as ProposalTemplate['template_content']
+      };
+    } catch (error) {
+      console.error('Error in getTemplate:', error);
+      throw error;
+    }
   }
 }
 
