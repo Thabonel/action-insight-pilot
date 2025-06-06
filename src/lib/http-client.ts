@@ -25,7 +25,6 @@ export class HttpClient {
       };
 
       console.log(`API Request: ${options.method || 'GET'} ${url}`);
-      console.log('Request headers:', headers);
 
       // Add timeout to fetch
       const controller = new AbortController();
@@ -42,11 +41,32 @@ export class HttpClient {
       console.log(`API Response: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`API Error: ${response.status}`, errorText);
+        // Handle specific HTTP errors
+        if (response.status === 0 || response.status >= 500) {
+          return {
+            success: false,
+            error: 'Backend server is unavailable. Please try again later.',
+          };
+        }
+        
+        if (response.status === 404) {
+          return {
+            success: false,
+            error: 'API endpoint not found.',
+          };
+        }
+
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.detail || errorMessage;
+        } catch {
+          // Use default error message if JSON parsing fails
+        }
+
         return {
           success: false,
-          error: `HTTP ${response.status}: ${response.statusText}`,
+          error: errorMessage,
         };
       }
 
@@ -65,6 +85,14 @@ export class HttpClient {
             error: 'Request timeout - backend server may be down',
           };
         }
+        
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          return {
+            success: false,
+            error: 'Unable to connect to backend server. Please check your internet connection.',
+          };
+        }
+        
         return {
           success: false,
           error: `Network error: ${error.message}`,
