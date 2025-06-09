@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -115,6 +116,14 @@ const IntegrationSettings: React.FC = () => {
       icon: '🌱',
       status: 'disconnected',
       description: 'Enterprise social media management',
+      profiles: 0
+    },
+    {
+      id: 'ai_video_publisher',
+      name: 'AI Video Publisher',
+      icon: '🎬',
+      status: 'disconnected',
+      description: 'Create and publish videos with AI',
       profiles: 0
     }
   ];
