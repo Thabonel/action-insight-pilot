@@ -1223,31 +1223,37 @@ export type Database = {
       }
       proposal_templates: {
         Row: {
-          category: string
-          created_at: string
+          category: string | null
+          created_at: string | null
           description: string
           id: string
+          is_active: boolean | null
           name: string
-          template_content: Json
-          updated_at: string
+          sections: Json | null
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
-          category: string
-          created_at?: string
+          category?: string | null
+          created_at?: string | null
           description: string
           id?: string
+          is_active?: boolean | null
           name: string
-          template_content: Json
-          updated_at?: string
+          sections?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
-          category?: string
-          created_at?: string
+          category?: string | null
+          created_at?: string | null
           description?: string
           id?: string
+          is_active?: boolean | null
           name?: string
-          template_content?: Json
-          updated_at?: string
+          sections?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

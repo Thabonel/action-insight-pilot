@@ -22,7 +22,8 @@ export enum SocialPlatform {
   BUFFER = 'buffer',
   HOOTSUITE = 'hootsuite',
   LATER = 'later',
-  SPROUT_SOCIAL = 'sprout_social'
+  SPROUT_SOCIAL = 'sprout_social',
+  AI_VIDEO_PUBLISHER = 'ai_video_publisher'
 }
 
 export interface PlatformConfig {

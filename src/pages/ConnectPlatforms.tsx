@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,16 @@ const ConnectPlatforms: React.FC = () => {
       features: ['Advanced Analytics', 'Social CRM', 'Team Workflows', 'Social Listening'],
       supportedNetworks: ['Twitter', 'Facebook', 'LinkedIn', 'Instagram', 'Pinterest'],
       pricingInfo: '30-day free trial'
+    },
+    {
+      id: SocialPlatform.AI_VIDEO_PUBLISHER,
+      name: 'AI Video Publisher',
+      description: 'Create and publish videos with AI',
+      icon: '🎬',
+      color: 'purple',
+      features: ['Auto Video Creation', 'Multiplatform Publishing', 'AI Optimization'],
+      supportedNetworks: ['YouTube', 'TikTok', 'Instagram'],
+      pricingInfo: 'Free during beta'
     }
   ];
 
