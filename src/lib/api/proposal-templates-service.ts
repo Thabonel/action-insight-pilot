@@ -34,7 +34,11 @@ export class ProposalTemplatesService {
 
       return (data || []).map(template => ({
         ...template,
-        template_content: template.template_content as ProposalTemplate['template_content']
+        template_content: {
+          sections: template.sections as ProposalTemplate['template_content']['sections'] || [],
+          default_services: [],
+          pricing_structure: 'fixed'
+        }
       }));
     } catch (error) {
       console.error('Error in getTemplates:', error);
@@ -57,7 +61,11 @@ export class ProposalTemplatesService {
 
       return (data || []).map(template => ({
         ...template,
-        template_content: template.template_content as ProposalTemplate['template_content']
+        template_content: {
+          sections: template.sections as ProposalTemplate['template_content']['sections'] || [],
+          default_services: [],
+          pricing_structure: 'fixed'
+        }
       }));
     } catch (error) {
       console.error('Error in getTemplatesByCategory:', error);
@@ -83,7 +91,11 @@ export class ProposalTemplatesService {
 
       return {
         ...data,
-        template_content: data.template_content as ProposalTemplate['template_content']
+        template_content: {
+          sections: data.sections as ProposalTemplate['template_content']['sections'] || [],
+          default_services: [],
+          pricing_structure: 'fixed'
+        }
       };
     } catch (error) {
       console.error('Error in getTemplate:', error);
