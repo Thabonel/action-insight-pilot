@@ -25,7 +25,8 @@ class AgentManager:
         self.analytics_agent = None
         self.proposal_generator = None
         self.mcp_agent = None
-        
+        self.internal_publisher_agent = None  # ✅ NEW AGENT
+
         self._initialize_agents()
     
     def _initialize_agents(self):
@@ -39,11 +40,9 @@ class AgentManager:
             from agents.analytics_agent import AnalyticsAgent
             from agents.proposal_generator import ProposalGenerator
             from agents.mcp_agent import MCPAgent
+            from agents.internal_publishing_agent import InternalPublisherAgent  # ✅ IMPORT NEW AGENT
             
-            # Initialize MCP agent first
             self.mcp_agent = MCPAgent()
-            
-            # Create agent instances
             self.campaign_agent = CampaignAgent(self.openai_api_key, self.integrations)
             self.social_media_agent = SocialMediaAgent(self.openai_api_key, self.integrations)
             self.lead_generation_agent = LeadGenerationAgent(self.openai_api_key, self.integrations)
@@ -51,10 +50,11 @@ class AgentManager:
             self.email_automation_agent = EmailAutomationAgent(self.openai_api_key, self.integrations)
             self.analytics_agent = AnalyticsAgent(self.openai_api_key, self.integrations)
             self.proposal_generator = ProposalGenerator(self.openai_api_key, self.integrations)
+            self.internal_publisher_agent = InternalPublisherAgent()  # ✅ INITIALIZE NEW AGENT
             
             self.agents_available = True
             logger.info("✅ All AI agents loaded successfully!")
-            
+        
         except ImportError as e:
             logger.warning(f"⚠️ Could not import agents: {e}. Using mock data.")
             self.agents_available = False
@@ -68,7 +68,6 @@ class AgentManager:
 # Global agent manager instance
 agent_manager = AgentManager()
 
-# Environment configuration
 def get_environment_config():
     return {
         "openai_key": os.getenv("OPENAI_API_KEY"),
