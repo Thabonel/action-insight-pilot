@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,7 @@ import {
   Share2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import UserApiKeysSettings from './UserApiKeysSettings';
 
 const IntegrationSettings: React.FC = () => {
   const [newWebhook, setNewWebhook] = useState('');
@@ -84,7 +84,6 @@ const IntegrationSettings: React.FC = () => {
     }
   ];
 
-  // Social Media Platform Integrations
   const socialPlatforms = [
     {
       id: 'buffer',
@@ -257,6 +256,9 @@ const IntegrationSettings: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* User API Keys Section */}
+      <UserApiKeysSettings />
 
       {/* Third-Party Integrations */}
       <Card>
