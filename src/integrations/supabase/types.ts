@@ -1161,6 +1161,7 @@ export type Database = {
       performance_analytics: {
         Row: {
           created_at: string | null
+          created_by: string | null
           date_recorded: string
           dimensions: Json | null
           id: string
@@ -1171,6 +1172,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           date_recorded: string
           dimensions?: Json | null
           id?: string
@@ -1181,6 +1183,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           date_recorded?: string
           dimensions?: Json | null
           id?: string
@@ -1297,6 +1300,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      secret_audit_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          ip_address: unknown | null
+          operation: string
+          service_name: string
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          operation: string
+          service_name: string
+          success: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          operation?: string
+          service_name?: string
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       security_logs: {
         Row: {
@@ -1505,6 +1544,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_secrets: {
+        Row: {
+          created_at: string | null
+          encrypted_value: string
+          id: string
+          initialization_vector: string
+          is_active: boolean | null
+          last_used_at: string | null
+          metadata: Json | null
+          service_name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          encrypted_value: string
+          id?: string
+          initialization_vector: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          metadata?: Json | null
+          service_name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          encrypted_value?: string
+          id?: string
+          initialization_vector?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          metadata?: Json | null
+          service_name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
