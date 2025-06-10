@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +49,15 @@ const UserApiKeysSettings: React.FC = () => {
       icon: '🧠',
       required: true,
       validation: (value) => value.startsWith('sk-') && value.length > 20
+    },
+    {
+      id: 'anthropic_api_key',
+      name: 'Anthropic Claude API Key',
+      description: 'Alternative to OpenAI for advanced reasoning and analytics',
+      placeholder: 'sk-ant-...',
+      icon: '🤖',
+      required: false,
+      validation: (value) => value.startsWith('sk-ant-') && value.length > 20
     },
     {
       id: 'json2video_api_key',
@@ -376,7 +384,7 @@ const UserApiKeysSettings: React.FC = () => {
                   <h4 className="font-semibold text-blue-900">🧠 AI & Video Creation Tools</h4>
                   <p className="text-sm text-blue-800 mt-1">
                     These API keys enable AI-powered content generation and video creation features.
-                    OpenAI and json2video keys are required for full functionality.
+                    OpenAI key is required for full functionality, Claude can be used as an alternative for analytics.
                   </p>
                 </div>
               </div>
