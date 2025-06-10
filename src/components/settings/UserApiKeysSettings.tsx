@@ -17,16 +17,11 @@ import {
   Share2,
   Shield,
   Brain,
-  Globe
+  Globe,
+  Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface ApiKey {
-  service: string;
-  value: string;
-  isValid: boolean;
-  lastUpdated?: string;
-}
+import { SecretsService, SecretMetadata } from '@/lib/services/secrets-service';
 
 interface ApiKeyConfig {
   id: string;
@@ -39,15 +34,16 @@ interface ApiKeyConfig {
 }
 
 const UserApiKeysSettings: React.FC = () => {
-  const [apiKeys, setApiKeys] = useState<Record<string, ApiKey>>({});
+  const [secrets, setSecrets] = useState<SecretMetadata[]>([]);
   const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const aiServices: ApiKeyConfig[] = [
     {
-      id: 'openai',
+      id: 'openai_api_key',
       name: 'OpenAI API Key',
       description: 'Required for AI content generation and video script creation',
       placeholder: 'sk-...',
@@ -56,7 +52,7 @@ const UserApiKeysSettings: React.FC = () => {
       validation: (value) => value.startsWith('sk-') && value.length > 20
     },
     {
-      id: 'json2video',
+      id: 'json2video_api_key',
       name: 'json2video API Key',
       description: 'For automated video creation and rendering',
       placeholder: 'j2v_...',
@@ -65,7 +61,7 @@ const UserApiKeysSettings: React.FC = () => {
       validation: (value) => value.length > 10
     },
     {
-      id: 'blotato',
+      id: 'blotato_api_key',
       name: 'Blotato API Key',
       description: 'For video enhancement and processing',
       placeholder: 'blt_...',
@@ -77,7 +73,7 @@ const UserApiKeysSettings: React.FC = () => {
 
   const socialPlatforms: ApiKeyConfig[] = [
     {
-      id: 'twitter',
+      id: 'twitter_bearer_token',
       name: 'Twitter (X) Bearer Token',
       description: 'For posting and managing Twitter content',
       placeholder: 'AAA...',
@@ -86,7 +82,7 @@ const UserApiKeysSettings: React.FC = () => {
       validation: (value) => value.length > 50
     },
     {
-      id: 'facebook',
+      id: 'facebook_access_token',
       name: 'Facebook Access Token',
       description: 'For Facebook page management and posting',
       placeholder: 'EAA...',
@@ -95,7 +91,7 @@ const UserApiKeysSettings: React.FC = () => {
       validation: (value) => value.startsWith('EAA') && value.length > 50
     },
     {
-      id: 'instagram',
+      id: 'instagram_access_token',
       name: 'Instagram Access Token',
       description: 'For Instagram content publishing',
       placeholder: 'IGQ...',
@@ -104,7 +100,7 @@ const UserApiKeysSettings: React.FC = () => {
       validation: (value) => value.length > 30
     },
     {
-      id: 'linkedin',
+      id: 'linkedin_access_token',
       name: 'LinkedIn Access Token',
       description: 'For LinkedIn company page posting',
       placeholder: 'AQX...',
@@ -113,7 +109,7 @@ const UserApiKeysSettings: React.FC = () => {
       validation: (value) => value.length > 30
     },
     {
-      id: 'youtube',
+      id: 'youtube_api_key',
       name: 'YouTube API Key',
       description: 'For YouTube channel management and uploads',
       placeholder: 'AIza...',
@@ -122,99 +118,77 @@ const UserApiKeysSettings: React.FC = () => {
       validation: (value) => value.startsWith('AIza') && value.length > 30
     },
     {
-      id: 'tiktok',
+      id: 'tiktok_access_token',
       name: 'TikTok Access Token',
       description: 'For TikTok content publishing and management',
       placeholder: 'ttk_...',
       icon: '🎵',
       required: false,
       validation: (value) => value.length > 20
-    },
-    {
-      id: 'snapchat',
-      name: 'Snapchat OAuth Token',
-      description: 'For Snapchat story and content management',
-      placeholder: 'snap_...',
-      icon: '👻',
-      required: false,
-      validation: (value) => value.length > 20
-    },
-    {
-      id: 'pinterest',
-      name: 'Pinterest OAuth Token',
-      description: 'For Pinterest board and pin management',
-      placeholder: 'pin_...',
-      icon: '📌',
-      required: false,
-      validation: (value) => value.length > 20
-    },
-    {
-      id: 'reddit',
-      name: 'Reddit OAuth Token',
-      description: 'For Reddit post and community management',
-      placeholder: 'red_...',
-      icon: '🔴',
-      required: false,
-      validation: (value) => value.length > 20
     }
   ];
 
   useEffect(() => {
-    fetchApiKeys();
+    fetchSecrets();
   }, []);
 
-  const fetchApiKeys = async () => {
+  const fetchSecrets = async () => {
     try {
-      const response = await fetch('/api/user/api-keys');
-      if (response.ok) {
-        const data = await response.json();
-        setApiKeys(data);
-      }
+      setLoading(true);
+      const secretsList = await SecretsService.listSecrets();
+      setSecrets(secretsList);
     } catch (error) {
-      console.error('Failed to fetch API keys:', error);
+      console.error('Failed to fetch secrets:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load API keys. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const saveApiKey = async (service: string, value: string) => {
-    setSaving(prev => ({ ...prev, [service]: true }));
+  const saveApiKey = async (serviceId: string, value: string) => {
+    setSaving(prev => ({ ...prev, [serviceId]: true }));
     
     try {
-      const response = await fetch('/api/user/api-keys', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ service, api_key: value }),
+      await SecretsService.saveSecret(serviceId, value);
+      await fetchSecrets(); // Refresh the list
+      setInputValues(prev => ({ ...prev, [serviceId]: '' }));
+      
+      toast({
+        title: "API Key Saved",
+        description: `Successfully saved ${serviceId} API key`,
       });
-
-      if (response.ok) {
-        setApiKeys(prev => ({
-          ...prev,
-          [service]: {
-            service,
-            value,
-            isValid: true,
-            lastUpdated: new Date().toISOString()
-          }
-        }));
-        
-        toast({
-          title: "API Key Saved",
-          description: `Successfully saved ${service} API key`,
-        });
-      } else {
-        throw new Error('Failed to save API key');
-      }
     } catch (error) {
+      console.error('Failed to save API key:', error);
       toast({
         title: "Error",
         description: "Failed to save API key. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setSaving(prev => ({ ...prev, [service]: false }));
+      setSaving(prev => ({ ...prev, [serviceId]: false }));
+    }
+  };
+
+  const deleteApiKey = async (serviceId: string) => {
+    try {
+      await SecretsService.deleteSecret(serviceId);
+      await fetchSecrets(); // Refresh the list
+      
+      toast({
+        title: "API Key Deleted",
+        description: `Successfully deleted ${serviceId} API key`,
+      });
+    } catch (error) {
+      console.error('Failed to delete API key:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete API key. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -237,17 +211,22 @@ const UserApiKeysSettings: React.FC = () => {
     return true;
   };
 
+  const hasSecret = (serviceId: string) => {
+    return secrets.some(secret => secret.service_name === serviceId);
+  };
+
+  const getSecretMetadata = (serviceId: string) => {
+    return secrets.find(secret => secret.service_name === serviceId);
+  };
+
   const renderApiKeyRow = (config: ApiKeyConfig) => {
-    const currentKey = apiKeys[config.id];
     const isVisible = visibleKeys[config.id];
     const isSaving = saving[config.id];
-    const [inputValue, setInputValue] = useState(currentKey?.value || '');
+    const inputValue = inputValues[config.id] || '';
     const isValid = validateApiKey(config, inputValue);
-    const hasChanges = inputValue !== (currentKey?.value || '');
-
-    useEffect(() => {
-      setInputValue(currentKey?.value || '');
-    }, [currentKey]);
+    const hasChanges = inputValue.length > 0;
+    const secretExists = hasSecret(config.id);
+    const secretMeta = getSecretMetadata(config.id);
 
     return (
       <div key={config.id} className="border rounded-lg p-4 space-y-3">
@@ -261,7 +240,7 @@ const UserApiKeysSettings: React.FC = () => {
               {config.required && (
                 <Badge variant="outline" className="text-xs">Required</Badge>
               )}
-              {currentKey?.isValid && (
+              {secretExists && (
                 <Check className="h-4 w-4 text-green-600" />
               )}
             </div>
@@ -274,9 +253,9 @@ const UserApiKeysSettings: React.FC = () => {
             <Input
               id={config.id}
               type={isVisible ? "text" : "password"}
-              placeholder={config.placeholder}
-              value={isVisible ? inputValue : (inputValue ? maskApiKey(inputValue) : '')}
-              onChange={(e) => setInputValue(e.target.value)}
+              placeholder={secretExists ? "Key is saved securely" : config.placeholder}
+              value={inputValue}
+              onChange={(e) => setInputValues(prev => ({ ...prev, [config.id]: e.target.value }))}
               className={!isValid && inputValue ? "border-red-300" : ""}
             />
             {!isValid && inputValue && (
@@ -307,12 +286,26 @@ const UserApiKeysSettings: React.FC = () => {
               <Save className="h-4 w-4" />
             )}
           </Button>
+
+          {secretExists && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => deleteApiKey(config.id)}
+              className="text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
-        {currentKey?.lastUpdated && (
-          <p className="text-xs text-gray-500">
-            Last updated: {new Date(currentKey.lastUpdated).toLocaleDateString()}
-          </p>
+        {secretMeta && (
+          <div className="text-xs text-gray-500 space-y-1">
+            <p>Last updated: {new Date(secretMeta.updated_at).toLocaleDateString()}</p>
+            {secretMeta.last_used_at && (
+              <p>Last used: {new Date(secretMeta.last_used_at).toLocaleDateString()}</p>
+            )}
+          </div>
         )}
       </div>
     );
@@ -357,7 +350,7 @@ const UserApiKeysSettings: React.FC = () => {
             <div>
               <h4 className="font-semibold text-green-900">🔒 Secure & Encrypted</h4>
               <p className="text-sm text-green-800">
-                Your API keys are encrypted and only accessible to you. We never store them in plain text.
+                Your API keys are encrypted with AES-GCM and only accessible to you. We never store them in plain text.
               </p>
             </div>
           </div>
