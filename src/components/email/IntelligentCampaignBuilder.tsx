@@ -6,7 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Mail, Sparkles, Target, Clock, Users } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
+import { useAIOperation } from '@/hooks/useAIOperation';
+import { Mail, Sparkles, Target, Clock, Users, Loader2 } from 'lucide-react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const IntelligentCampaignBuilder: React.FC = () => {
   const [campaign, setCampaign] = useState({
@@ -14,7 +17,9 @@ const IntelligentCampaignBuilder: React.FC = () => {
     subject: '',
     content: '',
     template: 'newsletter',
-    sendTime: 'optimal'
+    sendTime: 'optimal',
+    targetAudience: '',
+    campaignType: 'product_launch'
   });
 
   const [predictions] = useState({
@@ -25,7 +30,7 @@ const IntelligentCampaignBuilder: React.FC = () => {
     confidence: 92
   });
 
-  const [subjectSuggestions] = useState([
+  const [subjectSuggestions, setSubjectSuggestions] = useState([
     { text: "5 Ways to Boost Your ROI This Quarter", score: 94 },
     { text: "Your Weekly Marketing Insights", score: 87 },
     { text: "Breaking: New Strategy Drives 40% Growth", score: 91 }
@@ -55,10 +60,68 @@ const IntelligentCampaignBuilder: React.FC = () => {
     }
   ]);
 
+  const contentGeneration = useAIOperation({
+    successMessage: "Email content generated successfully!",
+    onSuccess: (data) => {
+      if (data.content) {
+        setCampaign(prev => ({ ...prev, content: data.content }));
+      }
+      if (data.subject_lines) {
+        setSubjectSuggestions(data.subject_lines);
+      }
+    }
+  });
+
+  const abTestGeneration = useAIOperation({
+    successMessage: "A/B test variants generated successfully!"
+  });
+
+  const sendTimeOptimization = useAIOperation({
+    successMessage: "Optimal send time calculated!"
+  });
+
+  const handleGenerateContent = async () => {
+    if (!campaign.name || !campaign.targetAudience) {
+      return;
+    }
+
+    behaviorTracker.trackAction('feature_use', 'ai_content_generation', {
+      campaignType: campaign.campaignType,
+      template: campaign.template
+    });
+
+    await contentGeneration.execute(() => 
+      apiClient.generateEmailContent(campaign.campaignType, {
+        template: campaign.template,
+        audience: campaign.targetAudience,
+        campaign_name: campaign.name
+      })
+    );
+  };
+
+  const handleGenerateABVariants = async () => {
+    if (!campaign.subject) return;
+
+    await abTestGeneration.execute(() => 
+      apiClient.generateABVariants(campaign.subject)
+    );
+  };
+
+  const handleOptimizeSendTime = async () => {
+    await sendTimeOptimization.execute(() => 
+      apiClient.suggestSendTime({
+        audience: campaign.targetAudience,
+        campaign_type: campaign.campaignType,
+        template: campaign.template
+      })
+    );
+  };
+
   const handleCreateCampaign = () => {
     behaviorTracker.trackAction('feature_use', 'email_campaign_create', {
       template: campaign.template,
-      predictedOpenRate: predictions.openRate
+      predictedOpenRate: predictions.openRate,
+      hasAIContent: !!contentGeneration.data
     });
   };
 
@@ -115,6 +178,30 @@ const IntelligentCampaignBuilder: React.FC = () => {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Target Audience</label>
+            <Input
+              value={campaign.targetAudience}
+              onChange={(e) => setCampaign(prev => ({ ...prev, targetAudience: e.target.value }))}
+              placeholder="e.g., SaaS professionals, 25-45 years"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Type</label>
+            <select 
+              value={campaign.campaignType}
+              onChange={(e) => setCampaign(prev => ({ ...prev, campaignType: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="product_launch">Product Launch</option>
+              <option value="newsletter">Newsletter</option>
+              <option value="educational">Educational</option>
+              <option value="promotional">Promotional</option>
+              <option value="welcome_series">Welcome Series</option>
+            </select>
+          </div>
+
           {/* Template Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Template</label>
@@ -144,9 +231,51 @@ const IntelligentCampaignBuilder: React.FC = () => {
             </div>
           </div>
 
+          {/* AI Content Generation */}
+          <div className="border rounded-lg p-4 bg-blue-50">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-medium text-blue-900">AI Content Generation</h4>
+              {contentGeneration.loading && <LoadingSpinner size="sm" />}
+            </div>
+            <Button
+              onClick={handleGenerateContent}
+              disabled={!campaign.name || !campaign.targetAudience || contentGeneration.loading}
+              className="w-full mb-3"
+            >
+              {contentGeneration.loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Content...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate AI Content
+                </>
+              )}
+            </Button>
+            {contentGeneration.error && (
+              <p className="text-sm text-red-600">{contentGeneration.error}</p>
+            )}
+          </div>
+
           {/* Subject Line */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Subject Line</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">Subject Line</label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateABVariants}
+                disabled={!campaign.subject || abTestGeneration.loading}
+              >
+                {abTestGeneration.loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Generate A/B Variants"
+                )}
+              </Button>
+            </div>
             <Input
               value={campaign.subject}
               onChange={(e) => setCampaign(prev => ({ ...prev, subject: e.target.value }))}
@@ -177,8 +306,9 @@ const IntelligentCampaignBuilder: React.FC = () => {
             <Textarea
               value={campaign.content}
               onChange={(e) => setCampaign(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Enter email content..."
+              placeholder={contentGeneration.loading ? "Generating content..." : "Enter email content..."}
               rows={6}
+              disabled={contentGeneration.loading}
             />
           </div>
         </div>
@@ -189,15 +319,48 @@ const IntelligentCampaignBuilder: React.FC = () => {
             <Mail className="h-4 w-4 mr-2" />
             Create Campaign
           </Button>
+          <Button variant="outline" onClick={handleOptimizeSendTime}>
+            {sendTimeOptimization.loading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Clock className="h-4 w-4 mr-2" />
+            )}
+            Optimize Time
+          </Button>
           <Button variant="outline">
             <Target className="h-4 w-4 mr-2" />
             A/B Test
           </Button>
-          <Button variant="outline">
-            <Clock className="h-4 w-4 mr-2" />
-            Schedule
-          </Button>
         </div>
+
+        {/* AI Results Display */}
+        {abTestGeneration.data && (
+          <div className="border rounded-lg p-4 bg-green-50">
+            <h4 className="font-medium text-green-900 mb-2">A/B Test Variants</h4>
+            <div className="space-y-2">
+              {abTestGeneration.data.variants?.map((variant: any, index: number) => (
+                <div key={index} className="p-2 bg-white rounded border">
+                  <span className="text-sm">{variant.text}</span>
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    {variant.score}% predicted
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {sendTimeOptimization.data && (
+          <div className="border rounded-lg p-4 bg-green-50">
+            <h4 className="font-medium text-green-900 mb-2">Optimal Send Time</h4>
+            <p className="text-sm text-green-700">
+              Best time: <strong>{sendTimeOptimization.data.optimal_time}</strong>
+            </p>
+            <p className="text-xs text-green-600 mt-1">
+              Expected {sendTimeOptimization.data.improvement}% improvement in open rates
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
