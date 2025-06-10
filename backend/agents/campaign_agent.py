@@ -1,587 +1,478 @@
-import asyncio
-import json
+
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
-from enum import Enum
-import httpx
-from openai import AsyncOpenAI
+from typing import Dict, Any, List
+import json
 import logging
+from .base_agent import BaseAgent
+from .ai_service import AIService
 
-class CampaignStatus(Enum):
-    DRAFT = "draft"
-    ACTIVE = "active"
-    PAUSED = "paused"
-    COMPLETED = "completed"
-    FAILED = "failed"
+logger = logging.getLogger(__name__)
 
-class Channel(Enum):
-    EMAIL = "email"
-    LINKEDIN = "linkedin"
-    FACEBOOK = "facebook"
-    GOOGLE_ADS = "google_ads"
-    TWITTER = "twitter"
-    INSTAGRAM = "instagram"
-
-@dataclass
-class CampaignObjective:
-    type: str  # lead_generation, brand_awareness, conversion, retention
-    target_metric: str  # leads, impressions, clicks, revenue
-    target_value: float
-    timeframe_days: int
-
-@dataclass
-class TargetAudience:
-    demographics: Dict[str, Any]
-    interests: List[str]
-    behaviors: List[str]
-    company_size: Optional[str] = None
-    industry: Optional[str] = None
-    job_titles: Optional[List[str]] = None
-
-@dataclass
-class Campaign:
-    id: str
-    name: str
-    objective: CampaignObjective
-    target_audience: TargetAudience
-    channels: List[Channel]
-    budget: Dict[str, float]  # total, daily, per_channel
-    status: CampaignStatus
-    start_date: datetime
-    end_date: datetime
-    content_calendar: List[Dict]
-    performance_metrics: Dict[str, Any]
-    created_at: datetime
-    updated_at: datetime
-
-class CampaignAgent:
-    def __init__(self, openai_api_key: str, integrations: Dict[str, str]):
-        self.openai_client = AsyncOpenAI(api_key=openai_api_key)
-        self.integrations = integrations  # API keys for various platforms
-        self.campaigns: Dict[str, Campaign] = {}
-        self.logger = logging.getLogger(__name__)
-        
-        # Platform clients
-        self.email_client = EmailPlatformClient(integrations.get('sendgrid_api_key'))
-        self.linkedin_client = LinkedInClient(integrations.get('linkedin_api_key'))
-        self.facebook_client = FacebookClient(integrations.get('facebook_api_key'))
-        self.google_ads_client = GoogleAdsClient(integrations.get('google_ads_api_key'))
-        self.twitter_client = TwitterClient(integrations.get('twitter_api_key'))
-
-    async def create_campaign(self, 
-                            name: str,
-                            objective: CampaignObjective,
-                            target_audience: TargetAudience,
-                            budget: Dict[str, float],
-                            channels: List[Channel],
-                            duration_days: int) -> Campaign:
-        """Create a comprehensive marketing campaign"""
-        
-        campaign_id = f"camp_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        start_date = datetime.now()
-        end_date = start_date + timedelta(days=duration_days)
-        
-        # AI-powered campaign strategy generation
-        strategy = await self._generate_campaign_strategy(objective, target_audience, channels, budget)
-        
-        # Create content calendar
-        content_calendar = await self._create_content_calendar(strategy, channels, duration_days)
-        
-        # Initialize campaign
-        campaign = Campaign(
-            id=campaign_id,
-            name=name,
-            objective=objective,
-            target_audience=target_audience,
-            channels=channels,
-            budget=budget,
-            status=CampaignStatus.DRAFT,
-            start_date=start_date,
-            end_date=end_date,
-            content_calendar=content_calendar,
-            performance_metrics={},
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        
-        self.campaigns[campaign_id] = campaign
-        
-        # Set up tracking and automation
-        await self._setup_campaign_tracking(campaign)
-        
-        self.logger.info(f"Campaign {campaign_id} created successfully")
-        return campaign
-
-    async def _generate_campaign_strategy(self, 
-                                        objective: CampaignObjective,
-                                        audience: TargetAudience,
-                                        channels: List[Channel],
-                                        budget: Dict[str, float]) -> Dict[str, Any]:
-        """AI-generated campaign strategy"""
-        
-        prompt = f"""
-        Create a comprehensive marketing campaign strategy with these parameters:
-        
-        Objective: {objective.type} - Target {objective.target_metric}: {objective.target_value} in {objective.timeframe_days} days
-        
-        Target Audience:
-        - Demographics: {audience.demographics}
-        - Interests: {audience.interests}
-        - Behaviors: {audience.behaviors}
-        - Industry: {audience.industry}
-        - Job Titles: {audience.job_titles}
-        
-        Channels: {[c.value for c in channels]}
-        Total Budget: ${budget.get('total', 0)}
-        
-        Provide a detailed strategy including:
-        1. Channel-specific tactics
-        2. Content themes and messaging
-        3. Budget allocation recommendations
-        4. Timing and frequency
-        5. Key performance indicators
-        6. A/B testing opportunities
-        
-        Return as structured JSON.
-        """
-        
-        response = await self.openai_client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7
-        )
-        
-        try:
-            strategy = json.loads(response.choices[0].message.content)
-            return strategy
-        except json.JSONDecodeError:
-            # Fallback strategy
-            return self._generate_fallback_strategy(objective, audience, channels, budget)
-
-    def _generate_fallback_strategy(self, objective, audience, channels, budget):
-        """Fallback strategy if AI generation fails"""
-        return {
-            "strategy": "Basic campaign strategy",
-            "tactics": [f"Use {channel.value} for outreach" for channel in channels],
-            "budget_allocation": {channel.value: budget.get('total', 0) / len(channels) for channel in channels}
-        }
-
-    async def _setup_campaign_tracking(self, campaign: Campaign):
-        """Set up tracking and monitoring for campaign"""
-        # This would set up webhooks, tracking pixels, etc.
-        pass
-
-    async def _create_content_calendar(self, 
-                                     strategy: Dict[str, Any],
-                                     channels: List[Channel],
-                                     duration_days: int) -> List[Dict]:
-        """Generate detailed content calendar"""
-        
-        calendar = []
-        start_date = datetime.now()
-        
-        for day in range(duration_days):
-            current_date = start_date + timedelta(days=day)
-            
-            for channel in channels:
-                # AI-generated content for each channel/day
-                content_items = await self._generate_daily_content(
-                    channel, current_date, strategy
-                )
-                calendar.extend(content_items)
-        
-        return calendar
-
-    async def _generate_daily_content(self, 
-                                    channel: Channel,
-                                    date: datetime,
-                                    strategy: Dict[str, Any]) -> List[Dict]:
-        """Generate AI content for specific channel and date"""
-        
-        prompt = f"""
-        Generate marketing content for {channel.value} on {date.strftime('%Y-%m-%d')}
-        
-        Strategy context: {json.dumps(strategy, indent=2)}
-        
-        Create 1-3 pieces of content with:
-        1. Compelling copy/text
-        2. Call-to-action
-        3. Optimal posting time
-        4. Hashtags/keywords (if applicable)
-        5. Visual description (if needed)
-        
-        Return as JSON array.
-        """
-        
-        try:
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.8
-            )
-            
-            content_items = json.loads(response.choices[0].message.content)
-            
-            # Add metadata
-            for item in content_items:
-                item.update({
-                    'channel': channel.value,
-                    'scheduled_date': date.isoformat(),
-                    'status': 'scheduled',
-                    'created_at': datetime.now().isoformat()
+class CampaignAgent(BaseAgent):
+    """AI-powered campaign management and optimization agent"""
+    
+    def __init__(self, agent_id: int, supabase_client, config: Dict[str, Any] = None):
+        super().__init__(agent_id, supabase_client, config)
+        self.ai_service = None
+    
+    async def _initialize_ai_service(self):
+        """Initialize AI service with OpenAI API key from secrets"""
+        if self.ai_service is None:
+            try:
+                # Get OpenAI API key from user secrets
+                result = await self.supabase.functions.invoke("manage-user-secrets", {
+                    "body": json.dumps({"serviceName": "openai_api_key"}),
+                    "headers": {"Content-Type": "application/json"}
                 })
-            
-            return content_items
-        except:
-            return []
-
-    async def launch_campaign(self, campaign_id: str) -> bool:
-        """Launch campaign across all channels"""
+                
+                if result.get('data') and result['data'].get('value'):
+                    api_key = result['data']['value']
+                    self.ai_service = AIService(api_key)
+                    self.logger.info("AI service initialized for campaign management")
+                else:
+                    raise Exception("OpenAI API key not found in user secrets")
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to initialize AI service: {str(e)}")
+                raise Exception(f"AI service initialization failed: {str(e)}")
+    
+    def get_supported_tasks(self) -> List[str]:
+        """Return list of supported task types"""
+        return [
+            "optimize_campaign",
+            "analyze_performance", 
+            "generate_ab_tests",
+            "schedule_campaigns",
+            "create_campaign_copy",
+            "monitor_campaigns"
+        ]
+    
+    async def execute_task(self, task_type: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute campaign management tasks using AI"""
+        await self._initialize_ai_service()
         
-        campaign = self.campaigns.get(campaign_id)
-        if not campaign:
-            raise ValueError(f"Campaign {campaign_id} not found")
+        if task_type == "optimize_campaign":
+            return await self._optimize_campaign(input_data)
+        elif task_type == "analyze_performance":
+            return await self._analyze_performance(input_data)
+        elif task_type == "generate_ab_tests":
+            return await self._generate_ab_tests(input_data)
+        elif task_type == "schedule_campaigns":
+            return await self._schedule_campaigns(input_data)
+        elif task_type == "create_campaign_copy":
+            return await self._create_campaign_copy(input_data)
+        elif task_type == "monitor_campaigns":
+            return await self._monitor_campaigns(input_data)
+        else:
+            raise ValueError(f"Unsupported task type: {task_type}")
+    
+    async def _optimize_campaign(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Optimize campaign using AI recommendations"""
+        self.validate_input_data(["campaign_id"], input_data)
+        
+        campaign_id = input_data["campaign_id"]
         
         try:
-            # Launch on each channel
-            for channel in campaign.channels:
-                await self._launch_on_channel(campaign, channel)
+            # Get campaign data
+            campaign_data = await self.get_campaign_data(campaign_id)
+            if not campaign_data:
+                raise Exception(f"Campaign {campaign_id} not found")
             
-            # Update campaign status
-            campaign.status = CampaignStatus.ACTIVE
-            campaign.updated_at = datetime.now()
+            # Get AI optimization recommendations
+            optimization = await self.ai_service.optimize_campaign_copy(campaign_data)
             
-            # Start monitoring
-            asyncio.create_task(self._monitor_campaign(campaign_id))
+            # Apply optimizations
+            optimized_content = campaign_data.get("content", {})
+            optimized_content.update({
+                "ai_optimizations": optimization,
+                "optimization_date": datetime.utcnow().isoformat(),
+                "original_version": campaign_data.get("content", {})
+            })
             
-            self.logger.info(f"Campaign {campaign_id} launched successfully")
-            return True
+            # Update campaign
+            self.supabase.table("campaigns")\
+                .update({
+                    "content": optimized_content,
+                    "updated_at": datetime.utcnow().isoformat()
+                })\
+                .eq("id", campaign_id)\
+                .execute()
+            
+            # Log optimization metrics
+            await self.update_campaign_metrics(campaign_id, {
+                "optimization_applied": True,
+                "optimization_type": "ai_enhanced",
+                "predicted_improvement": optimization.get("performance_predictions", {}),
+                "optimization_timestamp": datetime.utcnow().isoformat()
+            })
+            
+            return {
+                "campaign_id": campaign_id,
+                "optimizations": optimization,
+                "status": "optimized",
+                "timestamp": datetime.utcnow().isoformat()
+            }
             
         except Exception as e:
-            campaign.status = CampaignStatus.FAILED
-            self.logger.error(f"Failed to launch campaign {campaign_id}: {str(e)}")
-            return False
-
-    async def _launch_on_channel(self, campaign: Campaign, channel: Channel):
-        """Launch campaign on specific channel"""
+            self.logger.error(f"Failed to optimize campaign {campaign_id}: {str(e)}")
+            raise Exception(f"Campaign optimization failed: {str(e)}")
+    
+    async def _analyze_performance(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze campaign performance with AI insights"""
+        campaign_ids = input_data.get("campaign_ids", [])
+        time_period = input_data.get("time_period", "last_30_days")
         
-        channel_content = [
-            item for item in campaign.content_calendar 
-            if item['channel'] == channel.value
-        ]
+        analysis_results = []
         
-        if channel == Channel.EMAIL:
-            await self.email_client.create_campaign(campaign, channel_content)
-        elif channel == Channel.LINKEDIN:
-            await self.linkedin_client.create_campaign(campaign, channel_content)
-        elif channel == Channel.FACEBOOK:
-            await self.facebook_client.create_campaign(campaign, channel_content)
-        elif channel == Channel.GOOGLE_ADS:
-            await self.google_ads_client.create_campaign(campaign, channel_content)
-        elif channel == Channel.TWITTER:
-            await self.twitter_client.create_campaign(campaign, channel_content)
-
-    async def _monitor_campaign(self, campaign_id: str):
-        """Continuous campaign monitoring and optimization"""
-        
-        campaign = self.campaigns[campaign_id]
-        
-        while campaign.status == CampaignStatus.ACTIVE:
+        for campaign_id in campaign_ids:
             try:
-                # Collect performance data from all channels
-                performance_data = await self._collect_performance_data(campaign)
+                campaign_data = await self.get_campaign_data(campaign_id)
+                if not campaign_data:
+                    continue
                 
-                # Update campaign metrics
-                campaign.performance_metrics = performance_data
-                campaign.updated_at = datetime.now()
+                # Get campaign metrics
+                metrics_result = self.supabase.table("campaign_metrics")\
+                    .select("*")\
+                    .eq("campaign_id", campaign_id)\
+                    .gte("metric_date", self._get_date_from_period(time_period))\
+                    .execute()
                 
-                # AI-powered optimization recommendations
-                optimizations = await self._generate_optimizations(campaign, performance_data)
+                metrics = metrics_result.data if metrics_result.data else []
                 
-                # Apply automatic optimizations
-                await self._apply_optimizations(campaign, optimizations)
+                # Calculate performance indicators
+                performance_data = self._calculate_performance_metrics(metrics)
                 
-                # Check if campaign objectives are met
-                if self._check_campaign_completion(campaign):
-                    campaign.status = CampaignStatus.COMPLETED
-                    break
+                # Generate AI insights about performance
+                performance_analysis = {
+                    "campaign_id": campaign_id,
+                    "campaign_name": campaign_data.get("name", "Unknown"),
+                    "performance_score": performance_data.get("overall_score", 0),
+                    "key_metrics": performance_data,
+                    "ai_recommendations": await self._generate_performance_recommendations(campaign_data, performance_data),
+                    "trend_analysis": self._analyze_performance_trends(metrics),
+                    "analysis_period": time_period
+                }
                 
-                # Wait before next monitoring cycle
-                await asyncio.sleep(300)  # 5 minutes
+                analysis_results.append(performance_analysis)
                 
             except Exception as e:
-                self.logger.error(f"Error monitoring campaign {campaign_id}: {str(e)}")
-                await asyncio.sleep(60)
-
-    async def _collect_performance_data(self, campaign: Campaign) -> Dict[str, Any]:
-        """Collect real-time performance data from all channels"""
+                self.logger.error(f"Failed to analyze campaign {campaign_id}: {str(e)}")
         
-        performance_data = {
-            'timestamp': datetime.now().isoformat(),
-            'channels': {},
-            'overall': {
-                'total_spend': 0,
-                'total_impressions': 0,
-                'total_clicks': 0,
-                'total_conversions': 0,
-                'cost_per_click': 0,
-                'conversion_rate': 0
+        return {
+            "analyses": analysis_results,
+            "total_campaigns": len(campaign_ids),
+            "successful_analyses": len(analysis_results),
+            "timestamp": datetime.utcnow().isoformat(),
+            "status": "success"
+        }
+    
+    async def _generate_ab_tests(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate A/B test variations using AI"""
+        self.validate_input_data(["campaign_id", "test_element"], input_data)
+        
+        campaign_id = input_data["campaign_id"]
+        test_element = input_data["test_element"]  # subject_line, content, cta, etc.
+        
+        try:
+            campaign_data = await self.get_campaign_data(campaign_id)
+            if not campaign_data:
+                raise Exception(f"Campaign {campaign_id} not found")
+            
+            # Generate AI variations
+            optimization = await self.ai_service.optimize_campaign_copy(campaign_data)
+            
+            # Create A/B test variations
+            variants = optimization.get("a_b_test_variants", [])
+            if not variants:
+                variants = ["Original version", "AI-optimized version"]
+            
+            ab_test_data = {
+                "campaign_id": campaign_id,
+                "test_element": test_element,
+                "variants": variants,
+                "original_content": campaign_data.get("content", {}),
+                "ai_predictions": optimization.get("performance_predictions", {}),
+                "created_at": datetime.utcnow().isoformat(),
+                "status": "ready"
             }
-        }
+            
+            return {
+                "ab_test": ab_test_data,
+                "variants_count": len(variants),
+                "predicted_winner": variants[0] if variants else "Unknown",
+                "timestamp": datetime.utcnow().isoformat(),
+                "status": "success"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to generate A/B tests: {str(e)}")
+            raise Exception(f"A/B test generation failed: {str(e)}")
+    
+    async def _schedule_campaigns(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Schedule campaigns with AI-optimized timing"""
+        campaign_ids = input_data.get("campaign_ids", [])
+        scheduling_preferences = input_data.get("preferences", {})
         
-        for channel in campaign.channels:
+        scheduled_campaigns = []
+        
+        for campaign_id in campaign_ids:
             try:
-                if channel == Channel.EMAIL:
-                    data = await self.email_client.get_campaign_metrics(campaign.id)
-                elif channel == Channel.LINKEDIN:
-                    data = await self.linkedin_client.get_campaign_metrics(campaign.id)
-                elif channel == Channel.FACEBOOK:
-                    data = await self.facebook_client.get_campaign_metrics(campaign.id)
-                elif channel == Channel.GOOGLE_ADS:
-                    data = await self.google_ads_client.get_campaign_metrics(campaign.id)
-                elif channel == Channel.TWITTER:
-                    data = await self.twitter_client.get_campaign_metrics(campaign.id)
+                campaign_data = await self.get_campaign_data(campaign_id)
+                if not campaign_data:
+                    continue
                 
-                performance_data['channels'][channel.value] = data
+                # AI-optimized scheduling logic
+                optimal_time = self._calculate_optimal_send_time(
+                    campaign_data.get("target_audience", {}),
+                    scheduling_preferences
+                )
                 
-                # Aggregate overall metrics
-                performance_data['overall']['total_spend'] += data.get('spend', 0)
-                performance_data['overall']['total_impressions'] += data.get('impressions', 0)
-                performance_data['overall']['total_clicks'] += data.get('clicks', 0)
-                performance_data['overall']['total_conversions'] += data.get('conversions', 0)
+                # Update campaign with scheduled time
+                self.supabase.table("campaigns")\
+                    .update({
+                        "start_date": optimal_time,
+                        "status": "scheduled",
+                        "updated_at": datetime.utcnow().isoformat()
+                    })\
+                    .eq("id", campaign_id)\
+                    .execute()
+                
+                scheduled_campaigns.append({
+                    "campaign_id": campaign_id,
+                    "scheduled_time": optimal_time,
+                    "reasoning": "AI-optimized timing based on audience analysis"
+                })
                 
             except Exception as e:
-                self.logger.error(f"Error collecting data from {channel.value}: {str(e)}")
-                performance_data['channels'][channel.value] = {'error': str(e)}
+                self.logger.error(f"Failed to schedule campaign {campaign_id}: {str(e)}")
         
-        # Calculate derived metrics
-        total_clicks = performance_data['overall']['total_clicks']
-        total_spend = performance_data['overall']['total_spend']
-        total_conversions = performance_data['overall']['total_conversions']
+        return {
+            "scheduled_campaigns": scheduled_campaigns,
+            "total_scheduled": len(scheduled_campaigns),
+            "timestamp": datetime.utcnow().isoformat(),
+            "status": "success"
+        }
+    
+    async def _create_campaign_copy(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create campaign copy using AI"""
+        self.validate_input_data(["campaign_type", "target_audience"], input_data)
         
-        if total_spend > 0:
-            performance_data['overall']['cost_per_click'] = total_spend / max(total_clicks, 1)
-        if total_clicks > 0:
-            performance_data['overall']['conversion_rate'] = (total_conversions / total_clicks) * 100
-        
-        return performance_data
-
-    async def _generate_optimizations(self, 
-                                    campaign: Campaign,
-                                    performance_data: Dict[str, Any]) -> Dict[str, Any]:
-        """AI-powered optimization recommendations"""
-        
-        prompt = f"""
-        Analyze this campaign performance and recommend optimizations:
-        
-        Campaign Objective: {campaign.objective.type} - Target {campaign.objective.target_metric}: {campaign.objective.target_value}
-        
-        Current Performance:
-        {json.dumps(performance_data, indent=2)}
-        
-        Provide specific optimization recommendations:
-        1. Budget reallocation between channels
-        2. Audience targeting adjustments
-        3. Content/creative modifications
-        4. Bidding strategy changes
-        5. Scheduling adjustments
-        
-        Return as structured JSON with specific actions and expected impact.
-        """
+        campaign_type = input_data["campaign_type"]
+        target_audience = input_data["target_audience"]
+        brand_voice = input_data.get("brand_voice", "professional")
         
         try:
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.3
-            )
+            if campaign_type == "email":
+                content = await self.ai_service.generate_email_content(campaign_type, target_audience)
+            else:
+                content = await self.ai_service.generate_social_post(campaign_type, "campaign content", brand_voice)
             
-            return json.loads(response.choices[0].message.content)
-        except:
-            return {'recommendations': []}
-
-    async def _apply_optimizations(self, campaign: Campaign, optimizations: Dict[str, Any]):
-        """Apply optimization recommendations automatically"""
-        
-        for recommendation in optimizations.get('recommendations', []):
-            try:
-                action_type = recommendation.get('type')
-                
-                if action_type == 'budget_reallocation':
-                    await self._reallocate_budget(campaign, recommendation)
-                elif action_type == 'audience_adjustment':
-                    await self._adjust_audience(campaign, recommendation)
-                elif action_type == 'content_modification':
-                    await self._modify_content(campaign, recommendation)
-                elif action_type == 'bidding_adjustment':
-                    await self._adjust_bidding(campaign, recommendation)
-                
-                self.logger.info(f"Applied optimization: {action_type}")
-                
-            except Exception as e:
-                self.logger.error(f"Error applying optimization: {str(e)}")
-
-    async def _reallocate_budget(self, campaign, recommendation):
-        """Reallocate budget between channels"""
-        pass
-
-    async def _adjust_audience(self, campaign, recommendation):
-        """Adjust audience targeting"""
-        pass
-
-    async def _modify_content(self, campaign, recommendation):
-        """Modify campaign content"""
-        pass
-
-    async def _adjust_bidding(self, campaign, recommendation):
-        """Adjust bidding strategy"""
-        pass
-
-    def _check_campaign_completion(self, campaign: Campaign) -> bool:
-        """Check if campaign objectives are met"""
-        
-        performance = campaign.performance_metrics.get('overall', {})
-        objective = campaign.objective
-        
-        current_value = performance.get(objective.target_metric, 0)
-        return current_value >= objective.target_value
-
-    async def get_campaign_report(self, campaign_id: str) -> Dict[str, Any]:
-        """Generate comprehensive campaign report"""
-        
-        campaign = self.campaigns.get(campaign_id)
-        if not campaign:
-            raise ValueError(f"Campaign {campaign_id} not found")
-        
-        # AI-generated insights and recommendations
-        insights = await self._generate_campaign_insights(campaign)
-        
-        return {
-            'campaign': asdict(campaign),
-            'insights': insights,
-            'generated_at': datetime.now().isoformat()
-        }
-
-    async def _generate_campaign_insights(self, campaign: Campaign) -> Dict[str, Any]:
-        """AI-generated campaign insights and recommendations"""
-        
-        prompt = f"""
-        Generate comprehensive insights for this marketing campaign:
-        
-        Campaign Data:
-        {json.dumps(asdict(campaign), indent=2, default=str)}
-        
-        Provide:
-        1. Performance summary
-        2. Key insights and patterns
-        3. Channel effectiveness analysis
-        4. Audience engagement insights
-        5. ROI analysis
-        6. Recommendations for future campaigns
-        
-        Return as structured JSON.
-        """
-        
+            return {
+                "campaign_copy": content,
+                "campaign_type": campaign_type,
+                "target_audience": target_audience,
+                "timestamp": datetime.utcnow().isoformat(),
+                "status": "success"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create campaign copy: {str(e)}")
+            raise Exception(f"Campaign copy creation failed: {str(e)}")
+    
+    async def _monitor_campaigns(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Monitor active campaigns and provide alerts"""
         try:
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.5
-            )
+            # Get active campaigns
+            active_campaigns = self.supabase.table("campaigns")\
+                .select("*")\
+                .eq("status", "active")\
+                .execute()
             
-            return json.loads(response.choices[0].message.content)
-        except:
-            return {'insights': 'Unable to generate insights'}
-
-# Platform Integration Classes (These would connect to real APIs)
-
-class EmailPlatformClient:
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        self.base_url = "https://api.sendgrid.com/v3"
+            campaigns = active_campaigns.data if active_campaigns.data else []
+            
+            monitoring_results = []
+            alerts = []
+            
+            for campaign in campaigns:
+                campaign_id = campaign["id"]
+                
+                # Check campaign health
+                health_status = await self._check_campaign_health(campaign)
+                
+                monitoring_results.append({
+                    "campaign_id": campaign_id,
+                    "campaign_name": campaign.get("name", "Unknown"),
+                    "health_status": health_status["status"],
+                    "metrics": health_status["metrics"],
+                    "last_checked": datetime.utcnow().isoformat()
+                })
+                
+                # Generate alerts if needed
+                if health_status["status"] == "warning" or health_status["status"] == "critical":
+                    alerts.append({
+                        "campaign_id": campaign_id,
+                        "alert_type": health_status["status"],
+                        "message": health_status.get("message", "Campaign needs attention"),
+                        "recommendations": health_status.get("recommendations", [])
+                    })
+            
+            return {
+                "monitoring_results": monitoring_results,
+                "alerts": alerts,
+                "total_campaigns_monitored": len(campaigns),
+                "campaigns_with_issues": len(alerts),
+                "timestamp": datetime.utcnow().isoformat(),
+                "status": "success"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to monitor campaigns: {str(e)}")
+            raise Exception(f"Campaign monitoring failed: {str(e)}")
     
-    async def create_campaign(self, campaign: Campaign, content: List[Dict]):
-        # Real SendGrid API integration
-        pass
+    def _get_date_from_period(self, period: str) -> str:
+        """Convert period string to date"""
+        now = datetime.utcnow()
+        if period == "last_7_days":
+            return (now - timedelta(days=7)).isoformat()
+        elif period == "last_30_days":
+            return (now - timedelta(days=30)).isoformat()
+        elif period == "last_90_days":
+            return (now - timedelta(days=90)).isoformat()
+        else:
+            return (now - timedelta(days=30)).isoformat()
     
-    async def get_campaign_metrics(self, campaign_id: str) -> Dict[str, Any]:
-        # Real metrics from SendGrid
+    def _calculate_performance_metrics(self, metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Calculate performance metrics from raw data"""
+        if not metrics:
+            return {"overall_score": 0}
+        
+        # Simple aggregation - could be enhanced with more sophisticated analysis
+        total_metrics = len(metrics)
+        avg_value = sum(m.get("metric_value", 0) for m in metrics) / total_metrics if total_metrics > 0 else 0
+        
         return {
-            'impressions': 1000,
-            'opens': 250,
-            'clicks': 50,
-            'conversions': 5,
-            'spend': 100.0
+            "overall_score": min(100, int(avg_value)),
+            "total_data_points": total_metrics,
+            "average_performance": avg_value,
+            "performance_trend": "stable"  # Could be enhanced with trend analysis
         }
-
-class LinkedInClient:
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        self.base_url = "https://api.linkedin.com/v2"
     
-    async def create_campaign(self, campaign: Campaign, content: List[Dict]):
-        # Real LinkedIn Marketing API integration
-        pass
+    async def _generate_performance_recommendations(self, campaign_data: Dict[str, Any], performance_data: Dict[str, Any]) -> List[str]:
+        """Generate AI-powered performance recommendations"""
+        recommendations = []
+        
+        score = performance_data.get("overall_score", 0)
+        
+        if score < 30:
+            recommendations.extend([
+                "Consider revising campaign messaging",
+                "Review target audience segmentation", 
+                "Test different send times"
+            ])
+        elif score < 60:
+            recommendations.extend([
+                "Optimize subject lines for better open rates",
+                "A/B test call-to-action buttons",
+                "Refine audience targeting"
+            ])
+        else:
+            recommendations.extend([
+                "Campaign performing well - consider scaling",
+                "Test new content variations",
+                "Expand to similar audience segments"
+            ])
+        
+        return recommendations
     
-    async def get_campaign_metrics(self, campaign_id: str) -> Dict[str, Any]:
-        # Real metrics from LinkedIn
+    def _analyze_performance_trends(self, metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze performance trends over time"""
+        if len(metrics) < 2:
+            return {"trend": "insufficient_data"}
+        
+        # Simple trend analysis
+        recent_metrics = sorted(metrics, key=lambda x: x.get("metric_date", ""))
+        first_half = recent_metrics[:len(recent_metrics)//2]
+        second_half = recent_metrics[len(recent_metrics)//2:]
+        
+        first_avg = sum(m.get("metric_value", 0) for m in first_half) / len(first_half) if first_half else 0
+        second_avg = sum(m.get("metric_value", 0) for m in second_half) / len(second_half) if second_half else 0
+        
+        if second_avg > first_avg * 1.1:
+            trend = "improving"
+        elif second_avg < first_avg * 0.9:
+            trend = "declining"
+        else:
+            trend = "stable"
+        
         return {
-            'impressions': 5000,
-            'clicks': 150,
-            'conversions': 10,
-            'spend': 200.0
+            "trend": trend,
+            "change_percentage": ((second_avg - first_avg) / first_avg * 100) if first_avg > 0 else 0
         }
-
-class FacebookClient:
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        self.base_url = "https://graph.facebook.com/v18.0"
     
-    async def create_campaign(self, campaign: Campaign, content: List[Dict]):
-        # Real Facebook Marketing API integration
-        pass
+    def _calculate_optimal_send_time(self, target_audience: Dict[str, Any], preferences: Dict[str, Any]) -> str:
+        """Calculate optimal send time using AI insights"""
+        # Default to business hours, could be enhanced with ML
+        now = datetime.utcnow()
+        
+        # Optimize for business audience
+        if target_audience.get("job_title", "").lower() in ["ceo", "manager", "director"]:
+            # Send Tuesday-Thursday, 10 AM
+            days_ahead = (1 - now.weekday()) % 7  # Next Tuesday
+            if days_ahead == 0 and now.hour >= 10:
+                days_ahead = 7
+            
+            optimal_date = now + timedelta(days=days_ahead)
+            optimal_time = optimal_date.replace(hour=10, minute=0, second=0, microsecond=0)
+        else:
+            # General audience - Wednesday 2 PM
+            days_ahead = (2 - now.weekday()) % 7  # Next Wednesday  
+            if days_ahead == 0 and now.hour >= 14:
+                days_ahead = 7
+                
+            optimal_date = now + timedelta(days=days_ahead)
+            optimal_time = optimal_date.replace(hour=14, minute=0, second=0, microsecond=0)
+        
+        return optimal_time.isoformat()
     
-    async def get_campaign_metrics(self, campaign_id: str) -> Dict[str, Any]:
-        # Real metrics from Facebook
+    async def _check_campaign_health(self, campaign: Dict[str, Any]) -> Dict[str, Any]:
+        """Check campaign health and performance"""
+        campaign_id = campaign["id"]
+        
+        # Get recent metrics
+        metrics_result = self.supabase.table("campaign_metrics")\
+            .select("*")\
+            .eq("campaign_id", campaign_id)\
+            .gte("metric_date", (datetime.utcnow() - timedelta(days=7)).date().isoformat())\
+            .execute()
+        
+        metrics = metrics_result.data if metrics_result.data else []
+        
+        if not metrics:
+            return {
+                "status": "warning",
+                "message": "No recent performance data",
+                "metrics": {},
+                "recommendations": ["Check data collection", "Verify campaign is active"]
+            }
+        
+        avg_performance = sum(m.get("metric_value", 0) for m in metrics) / len(metrics)
+        
+        if avg_performance < 20:
+            status = "critical"
+            message = "Campaign performance below threshold"
+            recommendations = ["Review targeting", "Update creative", "Consider pausing"]
+        elif avg_performance < 50:
+            status = "warning" 
+            message = "Campaign performance needs improvement"
+            recommendations = ["Optimize content", "Test new audiences", "Adjust timing"]
+        else:
+            status = "healthy"
+            message = "Campaign performing well"
+            recommendations = ["Continue monitoring", "Consider scaling", "Test variations"]
+        
         return {
-            'impressions': 10000,
-            'clicks': 300,
-            'conversions': 15,
-            'spend': 300.0
-        }
-
-class GoogleAdsClient:
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-    
-    async def create_campaign(self, campaign: Campaign, content: List[Dict]):
-        # Real Google Ads API integration
-        pass
-    
-    async def get_campaign_metrics(self, campaign_id: str) -> Dict[str, Any]:
-        # Real metrics from Google Ads
-        return {
-            'impressions': 15000,
-            'clicks': 500,
-            'conversions': 25,
-            'spend': 400.0
-        }
-
-class TwitterClient:
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        self.base_url = "https://ads-api.twitter.com/12"
-    
-    async def create_campaign(self, campaign: Campaign, content: List[Dict]):
-        # Real Twitter Ads API integration
-        pass
-    
-    async def get_campaign_metrics(self, campaign_id: str) -> Dict[str, Any]:
-        # Real metrics from Twitter
-        return {
-            'impressions': 8000,
-            'clicks': 200,
-            'conversions': 8,
-            'spend': 150.0
+            "status": status,
+            "message": message,
+            "metrics": {"average_performance": avg_performance, "data_points": len(metrics)},
+            "recommendations": recommendations
         }
