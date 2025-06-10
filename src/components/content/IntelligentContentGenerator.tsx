@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { apiClient } from '@/lib/api-client';
+import { useAIOperation } from '@/hooks/useAIOperation';
 import { 
   Wand2, 
   Target, 
@@ -14,14 +16,18 @@ import {
   FileText,
   BarChart3,
   Lightbulb,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const IntelligentContentGenerator: React.FC = () => {
   const [contentTopic, setContentTopic] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('');
   const [generatedContent, setGeneratedContent] = useState('');
   const [predictionScore, setPredictionScore] = useState(0);
+  const [platform, setPlatform] = useState('blog');
+  const [brandVoice, setBrandVoice] = useState('professional');
 
   const [suggestedFormats] = useState([
     { name: 'How-to Guide', score: 94, reason: 'Your top performer' },
@@ -37,6 +43,15 @@ const IntelligentContentGenerator: React.FC = () => {
     'Social Media ROI Measurement',
     'Content Marketing Analytics'
   ]);
+
+  const contentGeneration = useAIOperation({
+    successMessage: "Content generated successfully!",
+    onSuccess: (data) => {
+      if (data.content) {
+        setGeneratedContent(data.content);
+      }
+    }
+  });
 
   const handleTopicChange = (topic: string) => {
     setContentTopic(topic);
@@ -58,30 +73,20 @@ const IntelligentContentGenerator: React.FC = () => {
     });
   };
 
-  const generateContent = () => {
+  const generateContent = async () => {
     if (!contentTopic || !selectedFormat) return;
     
-    // Simulate content generation
-    const sampleContent = `# ${contentTopic}
-
-## Introduction
-Based on your successful content patterns, this ${selectedFormat.toLowerCase()} follows the structure that performs best for your audience.
-
-## Key Points
-- Point 1: Leveraging your proven engagement strategies
-- Point 2: Using your optimal content length (800-1200 words)
-- Point 3: Including actionable takeaways (your audience's favorite)
-
-## Conclusion
-This content is optimized for your audience based on ${predictionScore}% prediction accuracy.`;
-
-    setGeneratedContent(sampleContent);
-    
-    behaviorTracker.trackAction('feature_use', 'content_generation', {
+    behaviorTracker.trackAction('feature_use', 'ai_content_generation', {
       topic: contentTopic,
       format: selectedFormat,
+      platform,
+      brandVoice,
       predictedScore: predictionScore
     });
+
+    await contentGeneration.execute(() => 
+      apiClient.generateSocialContent(platform, contentTopic, brandVoice)
+    );
   };
 
   return (
@@ -94,6 +99,41 @@ This content is optimized for your audience based on ${predictionScore}% predict
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Platform Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Content Platform
+            </label>
+            <select 
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="blog">Blog Post</option>
+              <option value="social">Social Media</option>
+              <option value="email">Email Content</option>
+              <option value="website">Website Copy</option>
+            </select>
+          </div>
+
+          {/* Brand Voice Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Brand Voice
+            </label>
+            <select 
+              value={brandVoice}
+              onChange={(e) => setBrandVoice(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="professional">Professional</option>
+              <option value="casual">Casual</option>
+              <option value="authoritative">Authoritative</option>
+              <option value="friendly">Friendly</option>
+              <option value="technical">Technical</option>
+            </select>
+          </div>
+
           {/* Topic Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -165,20 +205,38 @@ This content is optimized for your audience based on ${predictionScore}% predict
           </div>
 
           {/* Generate Button */}
-          <Button
-            onClick={generateContent}
-            disabled={!contentTopic || !selectedFormat}
-            className="w-full"
-            size="lg"
-          >
-            <Zap className="h-4 w-4 mr-2" />
-            Generate Optimized Content
-          </Button>
+          <div className="border rounded-lg p-4 bg-green-50">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-medium text-green-900">AI Content Generation</h4>
+              {contentGeneration.loading && <LoadingSpinner size="sm" />}
+            </div>
+            <Button
+              onClick={generateContent}
+              disabled={!contentTopic || !selectedFormat || contentGeneration.loading}
+              className="w-full"
+              size="lg"
+            >
+              {contentGeneration.loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Content...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Generate Optimized Content
+                </>
+              )}
+            </Button>
+            {contentGeneration.error && (
+              <p className="text-sm text-red-600 mt-2">{contentGeneration.error}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Generated Content */}
-      {generatedContent && (
+      {(generatedContent || contentGeneration.data) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -191,7 +249,7 @@ This content is optimized for your audience based on ${predictionScore}% predict
           </CardHeader>
           <CardContent>
             <Textarea
-              value={generatedContent}
+              value={generatedContent || contentGeneration.data?.content || ''}
               onChange={(e) => setGeneratedContent(e.target.value)}
               className="min-h-[300px] font-mono text-sm"
             />

@@ -4,9 +4,9 @@ project_id = "kciuuxoqxfsogjuqflou"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "graphql_public"]
+schemas = ["public", "storage", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
-[functions.manage-user-secrets]
+[functions.agent-executor]
 verify_jwt = true

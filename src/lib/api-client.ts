@@ -1,4 +1,3 @@
-
 import { HttpClient } from './http-client';
 import { CampaignsService } from './api/campaigns-service';
 import { LeadsService } from './api/leads-service';
@@ -8,6 +7,7 @@ import { EmailService } from './api/email-service';
 import { AnalyticsService } from './api/analytics-service';
 import { WorkflowService } from './api/workflow-service';
 import { ProposalsService } from './api/proposals-service';
+import { AgentsService } from './api/agents-service';
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -25,6 +25,7 @@ export class ApiClient {
   private analytics: AnalyticsService;
   private workflow: WorkflowService;
   private proposals: ProposalsService;
+  private agents: AgentsService;
 
   constructor() {
     this.httpClient = new HttpClient();
@@ -36,6 +37,7 @@ export class ApiClient {
     this.analytics = new AnalyticsService(this.httpClient);
     this.workflow = new WorkflowService(this.httpClient);
     this.proposals = new ProposalsService(this.httpClient);
+    this.agents = new AgentsService(this.httpClient);
   }
 
   setToken(token: string) {
@@ -168,6 +170,43 @@ export class ApiClient {
 
   async exportProposal(proposalId: string, format: string) {
     return this.proposals.exportProposal(proposalId, format);
+  }
+
+  // Agent endpoints
+  async executeAgentTask(agentType: string, taskType: string, inputData: any) {
+    return this.agents.executeTask({
+      agent_type: agentType,
+      task_type: taskType,
+      input_data: inputData
+    });
+  }
+
+  async generateEmailContent(campaignType: string, audience: any) {
+    return this.agents.generateEmailContent(campaignType, audience);
+  }
+
+  async generateABVariants(baseMessage: string) {
+    return this.agents.generateABVariants(baseMessage);
+  }
+
+  async suggestSendTime(audienceProfile: any) {
+    return this.agents.suggestSendTime(audienceProfile);
+  }
+
+  async scoreLeads(leads?: any[]) {
+    return this.agents.scoreLeads(leads);
+  }
+
+  async enrichLeads(leadData: any) {
+    return this.agents.enrichLeads(leadData);
+  }
+
+  async optimizeCampaign(campaignData: any) {
+    return this.agents.optimizeCampaign(campaignData);
+  }
+
+  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string) {
+    return this.agents.generateSocialContent(platform, contentTheme, brandVoice);
   }
 }
 
