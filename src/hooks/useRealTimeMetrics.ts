@@ -2,113 +2,99 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import type { RealTimeMetric } from '@/lib/api/real-time-metrics-service';
 
-interface RealTimeMetrics {
-  total_sent: number;
-  total_delivered: number;
-  total_opened: number;
-  total_clicked: number;
-  total_bounced: number;
-  total_unsubscribed: number;
-  delivery_rate: number;
-  open_rate: number;
-  click_rate: number;
-  bounce_rate: number;
-  unsubscribe_rate: number;
-  engagement_score: number;
-  trends: Array<{
-    timestamp: string;
-    opens: number;
-    clicks: number;
-  }>;
-  insights: Array<{
-    type: string;
-    metric: string;
-    message: string;
-    recommendation: string;
-  }>;
-  last_updated: string;
-}
-
-export function useRealTimeMetrics(campaignId: string, timeRange: string = '24h') {
-  const [metrics, setMetrics] = useState<RealTimeMetrics | null>(null);
-  const [loading, setLoading] = useState(false);
+export function useRealTimeMetrics(entityType?: string, entityId?: string) {
+  const [metrics, setMetrics] = useState<RealTimeMetric[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  const fetchMetrics = async () => {
-    if (!campaignId) return;
+  useEffect(() => {
+    if (entityType && entityId) {
+      loadMetrics();
+      startPolling();
+    } else {
+      loadDashboardMetrics();
+      startPolling();
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [entityType, entityId]);
+
+  const loadMetrics = async () => {
+    if (!entityType || !entityId) return;
     
     try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await apiClient.httpClient.request(
-        `/api/email/campaigns/${campaignId}/metrics?time_range=${timeRange}`
-      );
-
+      setIsLoading(true);
+      const response = await apiClient.realTimeMetrics.getEntityMetrics(entityType, entityId);
       if (response.success && response.data) {
-        // Type assertion with proper validation
-        const metricsData = response.data as RealTimeMetrics;
-        setMetrics(metricsData);
-      } else {
-        const errorMessage = response.error || 'Failed to fetch metrics';
-        setError(errorMessage);
+        setMetrics(response.data);
       }
+      setError(null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      setError(errorMessage);
-      console.error('Error fetching real-time metrics:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load metrics');
+      console.error('Error loading metrics:', err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const startRealTimeUpdates = (intervalMs: number = 30000) => {
-    // Clear existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
-    // Initial fetch
-    fetchMetrics();
-    
-    // Set up polling
-    intervalRef.current = setInterval(fetchMetrics, intervalMs);
-  };
-
-  const stopRealTimeUpdates = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+  const loadDashboardMetrics = async () => {
+    try {
+      setIsLoading(true);
+      const response = await apiClient.realTimeMetrics.getDashboardMetrics();
+      if (response.success && response.data) {
+        // Flatten all metrics from different entities
+        const allMetrics = Object.values(response.data).flat();
+        setMetrics(allMetrics);
+      }
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard metrics');
+      console.error('Error loading dashboard metrics:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const refreshMetrics = () => {
-    fetchMetrics();
-    toast({
-      title: "Metrics Refreshed",
-      description: "Real-time metrics have been updated",
-    });
+  const startPolling = () => {
+    // Poll for updates every 30 seconds
+    intervalRef.current = setInterval(() => {
+      if (entityType && entityId) {
+        loadMetrics();
+      } else {
+        loadDashboardMetrics();
+      }
+    }, 30000);
   };
 
-  useEffect(() => {
-    if (campaignId) {
-      startRealTimeUpdates();
-    }
-    
-    return () => {
-      stopRealTimeUpdates();
-    };
-  }, [campaignId, timeRange]);
+  const getMetricByType = (metricType: string): RealTimeMetric | undefined => {
+    return metrics.find(metric => metric.metric_type === metricType);
+  };
+
+  const getMetricValue = (metricType: string): number => {
+    const metric = getMetricByType(metricType);
+    return metric?.current_value || 0;
+  };
+
+  const getMetricChange = (metricType: string): number => {
+    const metric = getMetricByType(metricType);
+    return metric?.change_percentage || 0;
+  };
 
   return {
     metrics,
-    loading,
+    isLoading,
     error,
-    refreshMetrics,
-    startRealTimeUpdates,
-    stopRealTimeUpdates
+    getMetricByType,
+    getMetricValue,
+    getMetricChange,
+    reload: entityType && entityId ? loadMetrics : loadDashboardMetrics
   };
 }
