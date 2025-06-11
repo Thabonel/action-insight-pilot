@@ -45,12 +45,26 @@ export function useContentGeneration() {
       });
 
       if (response.success && response.data) {
-        setContent(response.data);
+        // Ensure the response data matches our GeneratedContent interface
+        const generatedContent: GeneratedContent = {
+          id: response.data.id || '',
+          title: response.data.title || '',
+          content: response.data.content || '',
+          html_content: response.data.html_content || '',
+          cta: response.data.cta || '',
+          seo_score: response.data.seo_score || 0,
+          readability_score: response.data.readability_score || 0,
+          engagement_prediction: response.data.engagement_prediction || 0,
+          tags: response.data.tags || [],
+          status: response.data.status || 'generated'
+        };
+        
+        setContent(generatedContent);
         toast({
           title: "Content Generated",
           description: "AI-powered content has been successfully generated!",
         });
-        return response.data;
+        return generatedContent;
       } else {
         const errorMessage = response.error || 'Failed to generate content';
         setError(errorMessage);
