@@ -49,7 +49,9 @@ export function useRealTimeMetrics(campaignId: string, timeRange: string = '24h'
       );
 
       if (response.success && response.data) {
-        setMetrics(response.data);
+        // Type assertion with proper validation
+        const metricsData = response.data as RealTimeMetrics;
+        setMetrics(metricsData);
       } else {
         const errorMessage = response.error || 'Failed to fetch metrics';
         setError(errorMessage);
