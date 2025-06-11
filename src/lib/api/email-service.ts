@@ -1,43 +1,6 @@
 
 import { HttpClient } from '../http-client';
 
-export interface EmailTemplateVersion {
-  id: string;
-  template_id: string;
-  version: number;
-  subject_line: string;
-  performance_score: number;
-  created_at: string;
-  status: string;
-}
-
-export interface RealTimeMetrics {
-  total_sent: number;
-  total_delivered: number;
-  total_opened: number;
-  total_clicked: number;
-  total_bounced: number;
-  total_unsubscribed: number;
-  delivery_rate: number;
-  open_rate: number;
-  click_rate: number;
-  bounce_rate: number;
-  unsubscribe_rate: number;
-  engagement_score: number;
-  trends: Array<{
-    timestamp: string;
-    opens: number;
-    clicks: number;
-  }>;
-  insights: Array<{
-    type: string;
-    metric: string;
-    message: string;
-    recommendation: string;
-  }>;
-  last_updated: string;
-}
-
 export class EmailService {
   constructor(private httpClient: HttpClient) {}
 
@@ -63,7 +26,38 @@ export class EmailService {
     });
   }
 
-  // New enhanced methods
+  async getRealTimeMetrics(campaignId: string, timeRange: string = '24h') {
+    return this.httpClient.request(`/api/email/campaigns/${campaignId}/metrics?time_range=${timeRange}`);
+  }
+
+  async generateEmailContent(campaignType: string, audience: any, options?: any) {
+    return this.httpClient.request('/api/email/content/generate', {
+      method: 'POST',
+      body: JSON.stringify({
+        campaign_type: campaignType,
+        audience,
+        ...options
+      }),
+    });
+  }
+
+  async generateABVariants(baseContent: string) {
+    return this.httpClient.request('/api/email/ab-variants', {
+      method: 'POST',
+      body: JSON.stringify({
+        base_content: baseContent
+      }),
+    });
+  }
+
+  async optimizeSendTime(audienceData: any) {
+    return this.httpClient.request('/api/email/send-time/optimize', {
+      method: 'POST',
+      body: JSON.stringify(audienceData),
+    });
+  }
+
+  // Legacy methods for compatibility
   async createTemplateVersion(templateId: string, versionData: any) {
     return this.httpClient.request(`/api/email/templates/${templateId}/versions`, {
       method: 'POST',
@@ -76,14 +70,10 @@ export class EmailService {
   }
 
   async sendPersonalizedEmail(emailData: any) {
-    return this.httpClient.request('/api/email/send-personalized', {
+    return this.httpClient.request('/api/email/send/personalized', {
       method: 'POST',
       body: JSON.stringify(emailData),
     });
-  }
-
-  async getRealTimeMetrics(campaignId: string, timeRange: string = '24h') {
-    return this.httpClient.request(`/api/email/campaigns/${campaignId}/metrics?time_range=${timeRange}`);
   }
 
   async registerWebhook(webhookData: any) {
@@ -94,9 +84,13 @@ export class EmailService {
   }
 
   async trackEmailEvent(emailId: string, eventType: string, metadata?: any) {
-    return this.httpClient.request(`/api/email/track/${emailId}/${eventType}`, {
+    return this.httpClient.request('/api/email/events/track', {
       method: 'POST',
-      body: JSON.stringify(metadata || {}),
+      body: JSON.stringify({
+        email_id: emailId,
+        event_type: eventType,
+        metadata
+      }),
     });
   }
 }
