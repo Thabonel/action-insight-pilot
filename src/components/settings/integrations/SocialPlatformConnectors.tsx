@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Share2, Settings, ExternalLink, Loader2 } from 'lucide-react';
 import { useIntegrations } from '@/hooks/useIntegrations';
 import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
 
 interface SocialPlatform {
   id: string;
@@ -23,7 +24,7 @@ const SocialPlatformConnectors: React.FC = () => {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
   const [connecting, setConnecting] = useState<Set<string>>(new Set());
   const { toast } = useToast();
-  const { integrations } = useIntegrations();
+  const { connectService } = useIntegrations();
 
   const platforms: SocialPlatform[] = [
     {
@@ -32,7 +33,7 @@ const SocialPlatformConnectors: React.FC = () => {
       description: 'Schedule and publish content across social platforms',
       status: 'disconnected',
       icon: '📊',
-      connectMethod: integrations.connectBuffer.bind(integrations)
+      connectMethod: (apiKey: string) => apiClient.integrations.connectBuffer(apiKey)
     },
     {
       id: 'hootsuite',
@@ -40,7 +41,7 @@ const SocialPlatformConnectors: React.FC = () => {
       description: 'Enterprise social media management',
       status: 'disconnected',
       icon: '🦉',
-      connectMethod: integrations.connectHootsuite.bind(integrations)
+      connectMethod: (apiKey: string) => apiClient.integrations.connectHootsuite(apiKey)
     },
     {
       id: 'later',
@@ -48,7 +49,7 @@ const SocialPlatformConnectors: React.FC = () => {
       description: 'Visual content calendar and publishing',
       status: 'disconnected',
       icon: '📅',
-      connectMethod: integrations.connectLater.bind(integrations)
+      connectMethod: (apiKey: string) => apiClient.integrations.connectLater(apiKey)
     },
     {
       id: 'sprout_social',
@@ -56,7 +57,7 @@ const SocialPlatformConnectors: React.FC = () => {
       description: 'Complete social media management platform',
       status: 'disconnected',
       icon: '🌱',
-      connectMethod: integrations.connectSproutSocial.bind(integrations)
+      connectMethod: (apiKey: string) => apiClient.integrations.connectSproutSocial(apiKey)
     },
     {
       id: 'video_publisher',
@@ -64,7 +65,7 @@ const SocialPlatformConnectors: React.FC = () => {
       description: 'AI-powered video content generation and publishing',
       status: 'disconnected',
       icon: '🎥',
-      connectMethod: integrations.connectVideoPublisher.bind(integrations)
+      connectMethod: (apiKey: string) => apiClient.integrations.connectVideoPublisher(apiKey)
     }
   ];
 

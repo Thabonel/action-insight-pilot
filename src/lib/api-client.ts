@@ -169,7 +169,7 @@ export class ApiClient {
   }
 
   async registerEmailWebhook(webhookData: any) {
-    return this.email.registerEmailWebhook(webhookData);
+    return this.email.registerWebhook(webhookData);
   }
 
   async trackEmailEvent(emailId: string, eventType: string, metadata?: any) {
