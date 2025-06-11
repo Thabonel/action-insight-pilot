@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 # Import route modules
-from routes import campaigns, leads, content, proposals, internal_publishing, email
+from routes import campaigns, leads, content, proposals, internal_publishing, email, integrations
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +35,7 @@ app.include_router(content.router)
 app.include_router(proposals.router)
 app.include_router(internal_publishing.router)
 app.include_router(email.router)
+app.include_router(integrations.router)
 
 @app.get("/")
 async def root():

@@ -13,6 +13,7 @@ import { UserPreferencesService } from './api/user-preferences-service';
 import { SocialPlatformsService } from './api/social-platforms-service';
 import { EnhancedCampaignsService } from './api/enhanced-campaigns-service';
 import { RealTimeMetricsService } from './api/real-time-metrics-service';
+import { IntegrationsService } from './api/integrations-service';
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -36,6 +37,7 @@ export class ApiClient {
   public socialPlatforms: SocialPlatformsService;
   public enhancedCampaigns: EnhancedCampaignsService;
   public realTimeMetrics: RealTimeMetricsService;
+  public integrations: IntegrationsService;
 
   constructor() {
     this.httpClient = new HttpClient();
@@ -53,6 +55,7 @@ export class ApiClient {
     this.socialPlatforms = new SocialPlatformsService(this.httpClient);
     this.enhancedCampaigns = new EnhancedCampaignsService(this.httpClient);
     this.realTimeMetrics = new RealTimeMetricsService(this.httpClient);
+    this.integrations = new IntegrationsService(this.httpClient);
   }
 
   setToken(token: string) {
@@ -166,7 +169,7 @@ export class ApiClient {
   }
 
   async registerEmailWebhook(webhookData: any) {
-    return this.email.registerWebhook(webhookData);
+    return this.email.registerEmailWebhook(webhookData);
   }
 
   async trackEmailEvent(emailId: string, eventType: string, metadata?: any) {
