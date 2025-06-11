@@ -57,7 +57,7 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
       setLoading(true);
       const response = await apiClient.getEmailRealTimeMetrics(campaignId, timeRange);
       if (response.success && response.data) {
-        setMetrics(response.data);
+        setMetrics(response.data as EmailMetricsData);
       } else {
         // Mock data for development
         setMetrics({
