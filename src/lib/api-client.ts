@@ -154,7 +154,7 @@ export class ApiClient {
   }
 
   async getEmailTemplateVersions(templateId: string) {
-    return this.email.getEmailTemplateVersions(templateId);
+    return this.email.getTemplateVersions(templateId);
   }
 
   async sendPersonalizedEmail(emailData: any) {
