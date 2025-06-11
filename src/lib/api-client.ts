@@ -1,3 +1,4 @@
+
 import { HttpClient } from './http-client';
 import { CampaignsService } from './api/campaigns-service';
 import { LeadsService } from './api/leads-service';
@@ -16,7 +17,7 @@ export interface ApiResponse<T = any> {
 }
 
 export class ApiClient {
-  private httpClient: HttpClient;
+  public httpClient: HttpClient;
   private campaigns: CampaignsService;
   private leads: LeadsService;
   private content: ContentService;
@@ -87,6 +88,10 @@ export class ApiClient {
   }
 
   // Content endpoints
+  async generateContent(brief: any) {
+    return this.content.generateContent(brief);
+  }
+
   async createContent(contentData: any) {
     return this.content.createContent(contentData);
   }

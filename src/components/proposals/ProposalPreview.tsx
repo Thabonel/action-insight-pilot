@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Download, Send, FileText } from 'lucide-react';
 import { GeneratedProposal } from '@/types/proposals';
+import { generateProposalPDF } from '@/utils/pdfGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProposalPreviewProps {
   proposal: GeneratedProposal | null;
@@ -11,6 +13,27 @@ interface ProposalPreviewProps {
 }
 
 const ProposalPreview: React.FC<ProposalPreviewProps> = ({ proposal, onExport }) => {
+  const { toast } = useToast();
+
+  const handlePDFDownload = async () => {
+    if (!proposal) return;
+    
+    try {
+      await generateProposalPDF(proposal);
+      toast({
+        title: "PDF Generated",
+        description: "Proposal PDF has been downloaded successfully!",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!proposal) {
     return (
       <Card>
@@ -32,7 +55,7 @@ const ProposalPreview: React.FC<ProposalPreviewProps> = ({ proposal, onExport })
         <div className="flex gap-2">
           <Button 
             variant="outline" 
-            onClick={() => onExport(proposal.id, 'pdf')}
+            onClick={handlePDFDownload}
             className="flex items-center gap-2"
           >
             <Download className="h-4 w-4" />
