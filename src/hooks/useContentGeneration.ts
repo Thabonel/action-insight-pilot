@@ -45,18 +45,21 @@ export function useContentGeneration() {
       });
 
       if (response.success && response.data) {
+        // Type assertion to properly access the response data properties
+        const responseData = response.data as any;
+        
         // Ensure the response data matches our GeneratedContent interface
         const generatedContent: GeneratedContent = {
-          id: response.data.id || '',
-          title: response.data.title || '',
-          content: response.data.content || '',
-          html_content: response.data.html_content || '',
-          cta: response.data.cta || '',
-          seo_score: response.data.seo_score || 0,
-          readability_score: response.data.readability_score || 0,
-          engagement_prediction: response.data.engagement_prediction || 0,
-          tags: response.data.tags || [],
-          status: response.data.status || 'generated'
+          id: responseData.id || '',
+          title: responseData.title || '',
+          content: responseData.content || '',
+          html_content: responseData.html_content || '',
+          cta: responseData.cta || '',
+          seo_score: responseData.seo_score || 0,
+          readability_score: responseData.readability_score || 0,
+          engagement_prediction: responseData.engagement_prediction || 0,
+          tags: responseData.tags || [],
+          status: responseData.status || 'generated'
         };
         
         setContent(generatedContent);
