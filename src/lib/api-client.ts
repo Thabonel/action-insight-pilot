@@ -1,4 +1,3 @@
-
 import { HttpClient } from './http-client';
 import { CampaignsService } from './api/campaigns-service';
 import { LeadsService } from './api/leads-service';
@@ -132,6 +131,31 @@ export class ApiClient {
 
   async sendEmail(emailData: any) {
     return this.email.sendEmail(emailData);
+  }
+
+  // New enhanced email methods
+  async createEmailTemplateVersion(templateId: string, versionData: any) {
+    return this.email.createTemplateVersion(templateId, versionData);
+  }
+
+  async getEmailTemplateVersions(templateId: string) {
+    return this.email.getTemplateVersions(templateId);
+  }
+
+  async sendPersonalizedEmail(emailData: any) {
+    return this.email.sendPersonalizedEmail(emailData);
+  }
+
+  async getEmailRealTimeMetrics(campaignId: string, timeRange: string = '24h') {
+    return this.email.getRealTimeMetrics(campaignId, timeRange);
+  }
+
+  async registerEmailWebhook(webhookData: any) {
+    return this.email.registerWebhook(webhookData);
+  }
+
+  async trackEmailEvent(emailId: string, eventType: string, metadata?: any) {
+    return this.email.trackEmailEvent(emailId, eventType, metadata);
   }
 
   // Analytics endpoints
