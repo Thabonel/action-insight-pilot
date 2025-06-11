@@ -28,10 +28,12 @@ serve(async (req) => {
 
     console.log(`Executing ${task_type} for agent ${agent_type}`, input_data);
 
-    // Get OpenAI API key from secrets
+    // Get AI API keys from secrets
     const openaiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openaiKey) {
-      throw new Error('OpenAI API key not configured');
+    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+
+    if (!openaiKey && !anthropicKey) {
+      throw new Error('No AI API key configured. Please add either OpenAI or Anthropic API key.');
     }
 
     let result;
@@ -39,16 +41,16 @@ serve(async (req) => {
     // Route to appropriate agent logic based on agent_type and task_type
     switch (agent_type) {
       case 'content_creator':
-        result = await handleContentCreatorTasks(task_type, input_data, openaiKey);
+        result = await handleContentCreatorTasks(task_type, input_data, openaiKey, anthropicKey);
         break;
       case 'campaign_manager':
-        result = await handleCampaignManagerTasks(task_type, input_data, openaiKey);
+        result = await handleCampaignManagerTasks(task_type, input_data, openaiKey, anthropicKey);
         break;
       case 'lead_generator':
-        result = await handleLeadGeneratorTasks(task_type, input_data, openaiKey);
+        result = await handleLeadGeneratorTasks(task_type, input_data, openaiKey, anthropicKey);
         break;
       case 'social_media_manager':
-        result = await handleSocialMediaTasks(task_type, input_data, openaiKey);
+        result = await handleSocialMediaTasks(task_type, input_data, openaiKey, anthropicKey);
         break;
       default:
         throw new Error(`Unknown agent type: ${agent_type}`);
@@ -67,6 +69,17 @@ serve(async (req) => {
     );
   }
 });
+
+async function callAI(messages: any[], openaiKey?: string, anthropicKey?: string) {
+  // Prefer OpenAI if available, fallback to Claude
+  if (openaiKey) {
+    return await callOpenAI(messages, openaiKey);
+  } else if (anthropicKey) {
+    return await callClaude(messages, anthropicKey);
+  } else {
+    throw new Error('No AI API key available');
+  }
+}
 
 async function callOpenAI(messages: any[], openaiKey: string) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -90,7 +103,38 @@ async function callOpenAI(messages: any[], openaiKey: string) {
   return data.choices[0].message.content;
 }
 
-async function handleContentCreatorTasks(task_type: string, input_data: any, openaiKey: string) {
+async function callClaude(messages: any[], anthropicKey: string) {
+  // Convert OpenAI format to Claude format
+  const systemMessage = messages.find(m => m.role === 'system')?.content || '';
+  const userMessages = messages.filter(m => m.role !== 'system');
+  
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${anthropicKey}`,
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1000,
+      system: systemMessage,
+      messages: userMessages.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      })),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Anthropic API error: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.content[0].text;
+}
+
+async function handleContentCreatorTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
   switch (task_type) {
     case 'create_email_content':
       const emailPrompt = `Create an engaging email for a ${input_data.campaign_type} campaign targeting ${input_data.target_audience}. 
@@ -99,10 +143,10 @@ async function handleContentCreatorTasks(task_type: string, input_data: any, ope
       
       Return JSON with: { "content": "email body", "subject_lines": [{"text": "subject", "score": 85}] }`;
 
-      const emailContent = await callOpenAI([
+      const emailContent = await callAI([
         { role: 'system', content: 'You are an expert email marketing specialist. Always return valid JSON.' },
         { role: 'user', content: emailPrompt }
-      ], openaiKey);
+      ], openaiKey, anthropicKey);
 
       try {
         return JSON.parse(emailContent);
@@ -115,17 +159,17 @@ async function handleContentCreatorTasks(task_type: string, input_data: any, ope
   }
 }
 
-async function handleCampaignManagerTasks(task_type: string, input_data: any, openaiKey: string) {
+async function handleCampaignManagerTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
   switch (task_type) {
     case 'generate_ab_variants':
       const abPrompt = `Generate 3 A/B test variants for this subject line: "${input_data.base_message}"
       
       Return JSON with: { "variants": [{"text": "variant", "score": 85}] }`;
 
-      const abContent = await callOpenAI([
+      const abContent = await callAI([
         { role: 'system', content: 'You are an expert A/B testing specialist. Always return valid JSON.' },
         { role: 'user', content: abPrompt }
-      ], openaiKey);
+      ], openaiKey, anthropicKey);
 
       try {
         return JSON.parse(abContent);
@@ -150,7 +194,7 @@ async function handleCampaignManagerTasks(task_type: string, input_data: any, op
   }
 }
 
-async function handleLeadGeneratorTasks(task_type: string, input_data: any, openaiKey: string) {
+async function handleLeadGeneratorTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
   switch (task_type) {
     case 'score_leads':
       // Simulate AI lead scoring
@@ -177,7 +221,7 @@ async function handleLeadGeneratorTasks(task_type: string, input_data: any, open
   }
 }
 
-async function handleSocialMediaTasks(task_type: string, input_data: any, openaiKey: string) {
+async function handleSocialMediaTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
   switch (task_type) {
     case 'create_social_post':
       const socialPrompt = `Create engaging ${input_data.platform} content about "${input_data.content_theme}" 
@@ -185,10 +229,10 @@ async function handleSocialMediaTasks(task_type: string, input_data: any, openai
       
       Return JSON with: { "content": "post content", "hashtags": ["tag1", "tag2"], "optimal_time": "time" }`;
 
-      const socialContent = await callOpenAI([
+      const socialContent = await callAI([
         { role: 'system', content: 'You are a social media expert. Always return valid JSON.' },
         { role: 'user', content: socialPrompt }
-      ], openaiKey);
+      ], openaiKey, anthropicKey);
 
       try {
         return JSON.parse(socialContent);
