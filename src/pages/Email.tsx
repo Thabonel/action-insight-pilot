@@ -2,16 +2,19 @@
 import React from 'react';
 import EmailAIAssistant from '@/components/email/EmailAIAssistant';
 import IntelligentCampaignBuilder from '@/components/email/IntelligentCampaignBuilder';
-import EmailPerformanceDashboard from '@/components/email/EmailPerformanceDashboard';
+import RealTimeMetricsDashboard from '@/components/email/RealTimeMetricsDashboard';
 import BehavioralAutomation from '@/components/email/BehavioralAutomation';
 import EmailWorkflowFeatures from '@/components/email/EmailWorkflowFeatures';
 
 const Email: React.FC = () => {
+  // Mock campaign ID - replace with actual campaign selection
+  const activeCampaignId = "campaign_123";
+
   return (
     <div className="p-6 space-y-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Email Automation</h1>
-        <p className="text-gray-600 mt-2">AI-powered email campaigns that learn from behavioral triggers</p>
+        <p className="text-gray-600 mt-2">AI-powered email campaigns with real-time analytics and behavioral triggers</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -26,16 +29,16 @@ const Email: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Performance Dashboard */}
-        <EmailPerformanceDashboard />
+      {/* Real-Time Metrics Dashboard */}
+      <RealTimeMetricsDashboard campaignId={activeCampaignId} />
 
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Behavioral Automation */}
         <BehavioralAutomation />
-      </div>
 
-      {/* Workflow Features */}
-      <EmailWorkflowFeatures />
+        {/* Workflow Features */}
+        <EmailWorkflowFeatures />
+      </div>
     </div>
   );
 };
