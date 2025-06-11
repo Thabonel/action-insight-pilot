@@ -1308,6 +1308,114 @@ export type Database = {
         }
         Relationships: []
       }
+      pam_analytics_logs: {
+        Row: {
+          api_calls_count: number | null
+          confidence: number | null
+          confidence_level: string | null
+          created_at: string | null
+          day_of_week: number | null
+          error_message: string | null
+          error_type: string | null
+          has_error: boolean | null
+          hour_of_day: number | null
+          intent: string | null
+          is_weekend: boolean | null
+          log_id: string
+          log_level: string | null
+          message: string | null
+          message_preview: string | null
+          raw_context: Json | null
+          response_time_ms: number | null
+          session_id: string | null
+          timestamp: string | null
+          trace_id: string | null
+          user_id: string | null
+          validation_passed: boolean | null
+          voice_enabled: boolean | null
+          workflow_name: string | null
+        }
+        Insert: {
+          api_calls_count?: number | null
+          confidence?: number | null
+          confidence_level?: string | null
+          created_at?: string | null
+          day_of_week?: number | null
+          error_message?: string | null
+          error_type?: string | null
+          has_error?: boolean | null
+          hour_of_day?: number | null
+          intent?: string | null
+          is_weekend?: boolean | null
+          log_id: string
+          log_level?: string | null
+          message?: string | null
+          message_preview?: string | null
+          raw_context?: Json | null
+          response_time_ms?: number | null
+          session_id?: string | null
+          timestamp?: string | null
+          trace_id?: string | null
+          user_id?: string | null
+          validation_passed?: boolean | null
+          voice_enabled?: boolean | null
+          workflow_name?: string | null
+        }
+        Update: {
+          api_calls_count?: number | null
+          confidence?: number | null
+          confidence_level?: string | null
+          created_at?: string | null
+          day_of_week?: number | null
+          error_message?: string | null
+          error_type?: string | null
+          has_error?: boolean | null
+          hour_of_day?: number | null
+          intent?: string | null
+          is_weekend?: boolean | null
+          log_id?: string
+          log_level?: string | null
+          message?: string | null
+          message_preview?: string | null
+          raw_context?: Json | null
+          response_time_ms?: number | null
+          session_id?: string | null
+          timestamp?: string | null
+          trace_id?: string | null
+          user_id?: string | null
+          validation_passed?: boolean | null
+          voice_enabled?: boolean | null
+          workflow_name?: string | null
+        }
+        Relationships: []
+      }
+      pam_memory: {
+        Row: {
+          context: Json | null
+          created_at: string | null
+          id: string
+          message: string | null
+          response: string | null
+          user_id: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          response?: string | null
+          user_id: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          response?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       performance_analytics: {
         Row: {
           created_at: string | null
@@ -1442,6 +1550,47 @@ export type Database = {
           recorded_at?: string | null
         }
         Relationships: []
+      }
+      route_data: {
+        Row: {
+          end_date: string | null
+          end_location: string
+          id: string
+          last_checked: string | null
+          start_date: string | null
+          start_location: string
+          user_id: string | null
+          waypoints: Json | null
+        }
+        Insert: {
+          end_date?: string | null
+          end_location: string
+          id?: string
+          last_checked?: string | null
+          start_date?: string | null
+          start_location: string
+          user_id?: string | null
+          waypoints?: Json | null
+        }
+        Update: {
+          end_date?: string | null
+          end_location?: string
+          id?: string
+          last_checked?: string | null
+          start_date?: string | null
+          start_location?: string
+          user_id?: string | null
+          waypoints?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scraped_data: {
         Row: {
@@ -1696,6 +1845,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_tickets: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          message: string
+          priority: string | null
+          session_id: string | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          priority?: string | null
+          session_id?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          priority?: string | null
+          session_id?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       team_invitations: {
         Row: {

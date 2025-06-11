@@ -1,4 +1,3 @@
-
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -6,7 +5,7 @@ export interface ApiResponse<T = any> {
 }
 
 export class HttpClient {
-  private baseUrl = 'https://srv-d0sjalqli9vc73d20vqg.onrender.com';
+  private baseUrl = 'https://wheels-wins-orchestrator.onrender.com';
   private token: string | null = null;
   private timeout = 30000; // 30 seconds timeout
 
