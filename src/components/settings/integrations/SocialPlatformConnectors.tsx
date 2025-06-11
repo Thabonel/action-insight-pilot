@@ -1,179 +1,201 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Share2, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { useSocialPlatforms } from '@/hooks/useSocialPlatforms';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Share2, Settings, ExternalLink, Loader2 } from 'lucide-react';
+import { useIntegrations } from '@/hooks/useIntegrations';
+import { useToast } from '@/hooks/use-toast';
 
 interface SocialPlatform {
   id: string;
   name: string;
-  icon: string;
   description: string;
+  status: 'connected' | 'disconnected';
+  icon: string;
+  connectMethod: (apiKey: string) => Promise<any>;
 }
 
 const SocialPlatformConnectors: React.FC = () => {
-  const { 
-    connections, 
-    isLoading, 
-    connectPlatform, 
-    disconnectPlatform, 
-    testConnection, 
-    getPlatformStatus 
-  } = useSocialPlatforms();
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+  const [connecting, setConnecting] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+  const { integrations } = useIntegrations();
 
-  const socialPlatforms: SocialPlatform[] = [
+  const platforms: SocialPlatform[] = [
     {
       id: 'buffer',
       name: 'Buffer',
+      description: 'Schedule and publish content across social platforms',
+      status: 'disconnected',
       icon: '📊',
-      description: 'Simple social media scheduling and analytics'
+      connectMethod: integrations.connectBuffer.bind(integrations)
     },
     {
       id: 'hootsuite',
       name: 'Hootsuite',
+      description: 'Enterprise social media management',
+      status: 'disconnected',
       icon: '🦉',
-      description: 'Comprehensive social media management'
+      connectMethod: integrations.connectHootsuite.bind(integrations)
     },
     {
       id: 'later',
       name: 'Later',
+      description: 'Visual content calendar and publishing',
+      status: 'disconnected',
       icon: '📅',
-      description: 'Visual content calendar and scheduler'
+      connectMethod: integrations.connectLater.bind(integrations)
     },
     {
-      id: 'sprout-social',
+      id: 'sprout_social',
       name: 'Sprout Social',
+      description: 'Complete social media management platform',
+      status: 'disconnected',
       icon: '🌱',
-      description: 'Enterprise social media management'
+      connectMethod: integrations.connectSproutSocial.bind(integrations)
     },
     {
-      id: 'ai_video_publisher',
+      id: 'video_publisher',
       name: 'AI Video Publisher',
-      icon: '🎬',
-      description: 'Create and publish videos with AI'
+      description: 'AI-powered video content generation and publishing',
+      status: 'disconnected',
+      icon: '🎥',
+      connectMethod: integrations.connectVideoPublisher.bind(integrations)
     }
   ];
+
+  const handleConnect = async (platform: SocialPlatform) => {
+    const apiKey = apiKeys[platform.id];
+    if (!apiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please enter your API key to connect",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setConnecting(prev => new Set(prev).add(platform.id));
+    try {
+      await platform.connectMethod(apiKey);
+      setApiKeys(prev => ({ ...prev, [platform.id]: '' }));
+    } catch (error) {
+      console.error(`Failed to connect to ${platform.name}:`, error);
+    } finally {
+      setConnecting(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(platform.id);
+        return newSet;
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'connected': return 'green';
-      case 'error': return 'red';
       case 'disconnected': return 'gray';
       default: return 'gray';
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'connected': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'error': return <AlertCircle className="h-4 w-4 text-red-600" />;
-      default: return null;
-    }
-  };
-
-  const getConnectedProfilesCount = (platformId: string): number => {
-    const connection = connections.find(conn => conn.platform_name === platformId);
-    return connection?.connection_metadata?.profiles_count || 0;
-  };
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span className="ml-2">Loading platform connections...</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
-            <Share2 className="h-5 w-5" />
-            <span>Social Media Platform Connectors</span>
-          </CardTitle>
-        </div>
+        <CardTitle className="flex items-center space-x-2">
+          <Share2 className="h-5 w-5" />
+          <span>Social Media Platform Connectors</span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {socialPlatforms.map(platform => {
-            const status = getPlatformStatus(platform.id);
-            const profilesCount = getConnectedProfilesCount(platform.id);
-            
-            return (
-              <div key={platform.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl">{platform.icon}</div>
-                    <div>
-                      <h3 className="font-medium">{platform.name}</h3>
-                      <p className="text-sm text-gray-600">{platform.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(status)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {platforms.map(platform => (
+            <div key={platform.id} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">{platform.icon}</span>
+                  <div>
+                    <h3 className="font-medium">{platform.name}</h3>
                     <Badge 
                       variant="outline" 
-                      className={`text-${getStatusColor(status)}-600 border-${getStatusColor(status)}-300`}
+                      className={`text-${getStatusColor(platform.status)}-600 border-${getStatusColor(platform.status)}-300`}
                     >
-                      {status}
+                      {platform.status}
                     </Badge>
                   </div>
                 </div>
-                
-                {status === 'connected' && (
-                  <div className="text-sm text-green-600 mb-2">
-                    ✅ {profilesCount} social profile(s) connected
-                  </div>
-                )}
-                
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => {
-                      if (status === 'connected') {
-                        disconnectPlatform(platform.id);
-                      } else {
-                        connectPlatform(platform.id);
-                      }
-                    }}
-                  >
-                    {status === 'connected' ? 'Disconnect' : 'Connect'}
-                  </Button>
-                  
-                  {status === 'connected' && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => testConnection(platform.id)}
-                    >
-                      Test
-                    </Button>
-                  )}
-                </div>
               </div>
-            );
-          })}
-        </div>
-        
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start space-x-3">
-            <div className="text-2xl">💡</div>
-            <div>
-              <h4 className="font-semibold text-blue-900 mb-1">AI-Enhanced Social Media Workflow</h4>
-              <p className="text-sm text-blue-800">
-                Connect your existing social media tools (Buffer, Hootsuite, Later, Sprout Social) to push AI-generated content directly to your familiar interface. Your team can continue using their preferred tools while benefiting from our AI content generation.
-              </p>
+              
+              <p className="text-sm text-gray-600 mb-4">{platform.description}</p>
+              
+              {platform.status === 'disconnected' ? (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full">Connect</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Connect to {platform.name}</DialogTitle>
+                      <DialogDescription>
+                        Enter your {platform.name} API key to connect and start publishing content.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor={`${platform.id}-api-key`}>API Key</Label>
+                        <Input
+                          id={`${platform.id}-api-key`}
+                          type="password"
+                          placeholder="Enter your API key"
+                          value={apiKeys[platform.id] || ''}
+                          onChange={(e) => setApiKeys(prev => ({ 
+                            ...prev, 
+                            [platform.id]: e.target.value 
+                          }))}
+                        />
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => handleConnect(platform)}
+                          disabled={connecting.has(platform.id) || !apiKeys[platform.id]}
+                          className="flex-1"
+                        >
+                          {connecting.has(platform.id) ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Connecting...
+                            </>
+                          ) : (
+                            'Connect'
+                          )}
+                        </Button>
+                        <Button variant="outline" asChild>
+                          <a 
+                            href={`https://${platform.name.toLowerCase()}.com/developers`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                <div className="flex space-x-2">
+                  <Button variant="outline" className="flex-1">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                  <Button variant="outline">Disconnect</Button>
+                </div>
+              )}
             </div>
-          </div>
+          ))}
         </div>
       </CardContent>
     </Card>

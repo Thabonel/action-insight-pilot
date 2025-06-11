@@ -1064,6 +1064,45 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_connections: {
+        Row: {
+          configuration: Json | null
+          connection_status: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          last_sync_at: string | null
+          service_name: string
+          sync_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          configuration?: Json | null
+          connection_status?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_sync_at?: string | null
+          service_name: string
+          sync_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          configuration?: Json | null
+          connection_status?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_sync_at?: string | null
+          service_name?: string
+          sync_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lead_activities: {
         Row: {
           activity_data: Json | null
@@ -1796,6 +1835,51 @@ export type Database = {
           metadata?: Json | null
           service_name?: string
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      webhooks: {
+        Row: {
+          created_at: string
+          events: string[]
+          id: string
+          is_active: boolean | null
+          last_response_code: number | null
+          last_triggered_at: string | null
+          name: string
+          retry_count: number | null
+          secret_token: string | null
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean | null
+          last_response_code?: number | null
+          last_triggered_at?: string | null
+          name: string
+          retry_count?: number | null
+          secret_token?: string | null
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          is_active?: boolean | null
+          last_response_code?: number | null
+          last_triggered_at?: string | null
+          name?: string
+          retry_count?: number | null
+          secret_token?: string | null
+          updated_at?: string
+          url?: string
           user_id?: string
         }
         Relationships: []

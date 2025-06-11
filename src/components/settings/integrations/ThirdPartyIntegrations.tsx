@@ -1,91 +1,151 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Zap,
-  BarChart3,
-  Mail,
-  MessageSquare,
-  ShoppingCart,
-  DollarSign,
-  Database
-} from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { ExternalLink, Zap, RefreshCw, Settings, Loader2 } from 'lucide-react';
+import { useIntegrations } from '@/hooks/useIntegrations';
+import { useToast } from '@/hooks/use-toast';
 
-interface Integration {
+interface ThirdPartyService {
   id: string;
   name: string;
-  category: string;
-  icon: any;
-  status: string;
   description: string;
-  lastSync: string;
+  status: 'connected' | 'disconnected' | 'error';
+  lastSync?: string;
+  icon: string;
+  docsUrl: string;
 }
 
 const ThirdPartyIntegrations: React.FC = () => {
-  const integrations: Integration[] = [
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+  const [connecting, setConnecting] = useState<Set<string>>(new Set());
+  const [syncing, setSyncing] = useState<Set<string>>(new Set());
+  const { connectService, syncService, disconnectService, connections } = useIntegrations();
+  const { toast } = useToast();
+
+  const services: ThirdPartyService[] = [
     {
-      id: 'google-analytics',
+      id: 'google_analytics',
       name: 'Google Analytics',
-      category: 'Analytics',
-      icon: BarChart3,
+      description: 'Website traffic and user behavior analytics',
       status: 'connected',
-      description: 'Track website performance and user behavior',
-      lastSync: '2 minutes ago'
+      lastSync: '2 hours ago',
+      icon: '📊',
+      docsUrl: 'https://developers.google.com/analytics'
     },
     {
       id: 'mailchimp',
       name: 'Mailchimp',
-      category: 'Email',
-      icon: Mail,
+      description: 'Email marketing and automation platform',
       status: 'connected',
-      description: 'Sync email lists and campaign data',
-      lastSync: '1 hour ago'
+      lastSync: '1 hour ago',
+      icon: '📧',
+      docsUrl: 'https://mailchimp.com/developer/'
     },
     {
       id: 'slack',
       name: 'Slack',
-      category: 'Communication',
-      icon: MessageSquare,
-      status: 'pending',
-      description: 'Get notifications and updates in Slack',
-      lastSync: 'Never'
+      description: 'Team communication and notifications',
+      status: 'disconnected',
+      icon: '💬',
+      docsUrl: 'https://api.slack.com/'
     },
     {
       id: 'shopify',
       name: 'Shopify',
-      category: 'E-commerce',
-      icon: ShoppingCart,
-      status: 'disconnected',
-      description: 'Sync product data and sales information',
-      lastSync: 'Never'
+      description: 'E-commerce platform integration',
+      status: 'connected',
+      lastSync: '30 minutes ago',
+      icon: '🛒',
+      docsUrl: 'https://shopify.dev/'
     },
     {
       id: 'stripe',
       name: 'Stripe',
-      category: 'Payments',
-      icon: DollarSign,
+      description: 'Payment processing and revenue tracking',
       status: 'connected',
-      description: 'Track revenue and payment analytics',
-      lastSync: '5 minutes ago'
+      lastSync: '15 minutes ago',
+      icon: '💳',
+      docsUrl: 'https://stripe.com/docs'
     },
     {
       id: 'hubspot',
       name: 'HubSpot',
-      category: 'CRM',
-      icon: Database,
+      description: 'CRM and marketing automation',
       status: 'disconnected',
-      description: 'Sync contacts and lead information',
-      lastSync: 'Never'
+      icon: '🔄',
+      docsUrl: 'https://developers.hubspot.com/'
     }
   ];
+
+  const getServiceStatus = (serviceId: string) => {
+    const connection = connections.find(conn => conn.service_name === serviceId);
+    return connection?.connection_status || 'disconnected';
+  };
+
+  const getLastSync = (serviceId: string) => {
+    const connection = connections.find(conn => conn.service_name === serviceId);
+    return connection?.last_sync_at ? new Date(connection.last_sync_at).toLocaleString() : null;
+  };
+
+  const handleConnect = async (service: ThirdPartyService) => {
+    const apiKey = apiKeys[service.id];
+    if (!apiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please enter your API key to connect",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setConnecting(prev => new Set(prev).add(service.id));
+    try {
+      await connectService(service.id, apiKey);
+      setApiKeys(prev => ({ ...prev, [service.id]: '' }));
+    } catch (error) {
+      console.error(`Failed to connect to ${service.name}:`, error);
+    } finally {
+      setConnecting(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(service.id);
+        return newSet;
+      });
+    }
+  };
+
+  const handleSync = async (serviceId: string) => {
+    setSyncing(prev => new Set(prev).add(serviceId));
+    try {
+      await syncService(serviceId);
+    } catch (error) {
+      console.error(`Failed to sync ${serviceId}:`, error);
+    } finally {
+      setSyncing(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(serviceId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleDisconnect = async (serviceId: string) => {
+    try {
+      await disconnectService(serviceId);
+    } catch (error) {
+      console.error(`Failed to disconnect ${serviceId}:`, error);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'connected': return 'green';
-      case 'pending': return 'yellow';
       case 'disconnected': return 'gray';
+      case 'error': return 'red';
       default: return 'gray';
     }
   };
@@ -99,32 +159,112 @@ const ThirdPartyIntegrations: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {integrations.map(integration => {
-            const Icon = integration.icon;
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {services.map(service => {
+            const actualStatus = getServiceStatus(service.id);
+            const lastSync = getLastSync(service.id);
+            
             return (
-              <div key={integration.id} className="border rounded-lg p-4">
+              <div key={service.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                      <Icon className="h-5 w-5" />
-                    </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl">{service.icon}</span>
                     <div>
-                      <h3 className="font-medium">{integration.name}</h3>
-                      <p className="text-sm text-gray-600">{integration.category}</p>
+                      <h3 className="font-medium">{service.name}</h3>
+                      <Badge 
+                        variant="outline" 
+                        className={`text-${getStatusColor(actualStatus)}-600 border-${getStatusColor(actualStatus)}-300`}
+                      >
+                        {actualStatus}
+                      </Badge>
                     </div>
                   </div>
-                  <Badge variant="outline" className={`text-${getStatusColor(integration.status)}-600 border-${getStatusColor(integration.status)}-300`}>
-                    {integration.status}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-600 mb-3">{integration.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Last sync: {integration.lastSync}</span>
-                  <Button variant="outline" size="sm">
-                    {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={service.docsUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   </Button>
                 </div>
+                
+                <p className="text-sm text-gray-600 mb-3">{service.description}</p>
+                
+                {lastSync && (
+                  <p className="text-xs text-gray-500 mb-3">
+                    Last synced: {lastSync}
+                  </p>
+                )}
+                
+                {actualStatus === 'disconnected' ? (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="w-full">Connect</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Connect to {service.name}</DialogTitle>
+                        <DialogDescription>
+                          Enter your {service.name} API key to connect and start syncing data.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor={`${service.id}-api-key`}>API Key</Label>
+                          <Input
+                            id={`${service.id}-api-key`}
+                            type="password"
+                            placeholder="Enter your API key"
+                            value={apiKeys[service.id] || ''}
+                            onChange={(e) => setApiKeys(prev => ({ 
+                              ...prev, 
+                              [service.id]: e.target.value 
+                            }))}
+                          />
+                        </div>
+                        <Button 
+                          onClick={() => handleConnect(service)}
+                          disabled={connecting.has(service.id) || !apiKeys[service.id]}
+                          className="w-full"
+                        >
+                          {connecting.has(service.id) ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Connecting...
+                            </>
+                          ) : (
+                            'Connect'
+                          )}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleSync(service.id)}
+                      disabled={syncing.has(service.id)}
+                    >
+                      {syncing.has(service.id) ? (
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      ) : (
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                      )}
+                      Sync
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Settings className="h-3 w-3 mr-1" />
+                      Settings
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDisconnect(service.id)}
+                    >
+                      Disconnect
+                    </Button>
+                  </div>
+                )}
               </div>
             );
           })}
