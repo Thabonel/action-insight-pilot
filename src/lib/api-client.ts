@@ -1,4 +1,3 @@
-
 import { HttpClient } from './http-client';
 import { CampaignsService } from './api/campaigns-service';
 import { LeadsService } from './api/leads-service';
@@ -149,13 +148,13 @@ export class ApiClient {
     return this.email.sendEmail(emailData);
   }
 
-  // New enhanced email methods
+  // New enhanced email methods with correct naming
   async createEmailTemplateVersion(templateId: string, versionData: any) {
     return this.email.createTemplateVersion(templateId, versionData);
   }
 
   async getEmailTemplateVersions(templateId: string) {
-    return this.email.getTemplateVersions(templateId);
+    return this.email.getEmailTemplateVersions(templateId);
   }
 
   async sendPersonalizedEmail(emailData: any) {
@@ -174,30 +173,25 @@ export class ApiClient {
     return this.email.trackEmailEvent(emailId, eventType, metadata);
   }
 
-  // Analytics endpoints
-  async getAnalyticsOverview() {
-    return this.analytics.getAnalyticsOverview();
+  // Agent endpoints - fixed method names
+  async executeAgentTask(agentType: string, taskType: string, inputData: any) {
+    return this.agents.executeTask({
+      agent_type: agentType,
+      task_type: taskType,
+      input_data: inputData
+    });
   }
 
-  async getSystemStats() {
-    return this.analytics.getSystemStats();
+  async generateEmailContent(campaignType: string, audience: any, options?: any) {
+    return this.email.generateEmailContent(campaignType, audience, options);
   }
 
-  async getPerformanceMetrics() {
-    return this.analytics.getPerformanceMetrics();
+  async generateABVariants(baseMessage: string) {
+    return this.email.generateABVariants(baseMessage);
   }
 
-  // Workflow endpoints
-  async getWorkflows() {
-    return this.workflow.getWorkflows();
-  }
-
-  async createWorkflow(workflowData: any) {
-    return this.workflow.createWorkflow(workflowData);
-  }
-
-  async executeWorkflow(id: string) {
-    return this.workflow.executeWorkflow(id);
+  async suggestSendTime(audienceProfile: any) {
+    return this.email.optimizeSendTime(audienceProfile);
   }
 
   // Proposal endpoints
@@ -215,27 +209,6 @@ export class ApiClient {
 
   async exportProposal(proposalId: string, format: string) {
     return this.proposals.exportProposal(proposalId, format);
-  }
-
-  // Agent endpoints
-  async executeAgentTask(agentType: string, taskType: string, inputData: any) {
-    return this.agents.executeTask({
-      agent_type: agentType,
-      task_type: taskType,
-      input_data: inputData
-    });
-  }
-
-  async generateEmailContent(campaignType: string, audience: any) {
-    return this.agents.generateEmailContent(campaignType, audience);
-  }
-
-  async generateABVariants(baseMessage: string) {
-    return this.agents.generateABVariants(baseMessage);
-  }
-
-  async suggestSendTime(audienceProfile: any) {
-    return this.agents.suggestSendTime(audienceProfile);
   }
 
   async scoreLeads(leads?: any[]) {

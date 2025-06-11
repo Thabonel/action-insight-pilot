@@ -56,10 +56,13 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
     try {
       setLoading(true);
       const response = await apiClient.getEmailRealTimeMetrics(campaignId, timeRange);
+      
       if (response.success && response.data) {
         setMetrics(response.data as EmailMetricsData);
+        setError(null);
       } else {
-        // Mock data for development
+        // Use fallback mock data if API fails
+        console.warn('API failed, using mock data:', response.error);
         setMetrics({
           total_sent: 1250,
           total_delivered: 1200,
@@ -94,11 +97,38 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
           ],
           last_updated: new Date().toISOString()
         });
+        setError(response.error || null);
       }
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load email metrics');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load email metrics';
+      setError(errorMessage);
       console.error('Error loading email metrics:', err);
+      
+      // Still provide mock data on error for development
+      setMetrics({
+        total_sent: 0,
+        total_delivered: 0,
+        total_opened: 0,
+        total_clicked: 0,
+        total_bounced: 0,
+        total_unsubscribed: 0,
+        delivery_rate: 0,
+        open_rate: 0,
+        click_rate: 0,
+        bounce_rate: 0,
+        unsubscribe_rate: 0,
+        engagement_score: 0,
+        trends: [],
+        insights: [
+          {
+            type: 'error',
+            metric: 'connection',
+            message: 'Unable to load metrics',
+            recommendation: 'Check your internet connection and try again'
+          }
+        ],
+        last_updated: new Date().toISOString()
+      });
     } finally {
       setLoading(false);
     }
