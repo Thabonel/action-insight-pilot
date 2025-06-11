@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useRealTimeMetrics } from '@/hooks/useRealTimeMetrics';
+import { useEmailMetrics } from '@/hooks/useEmailMetrics';
 import { RefreshCw, TrendingUp, Mail, MousePointer, AlertCircle, Users } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -14,7 +14,7 @@ interface RealTimeMetricsDashboardProps {
 
 const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ campaignId }) => {
   const [timeRange, setTimeRange] = useState('24h');
-  const { metrics, loading, error, refreshMetrics } = useRealTimeMetrics(campaignId, timeRange);
+  const { metrics, loading, error, refreshMetrics } = useEmailMetrics(campaignId, timeRange);
 
   if (error) {
     return (
