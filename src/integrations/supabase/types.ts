@@ -343,6 +343,48 @@ export type Database = {
           },
         ]
       }
+      campaign_performance_metrics: {
+        Row: {
+          campaign_id: string | null
+          created_at: string | null
+          id: string
+          metric_name: string
+          metric_value: number
+          recorded_at: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          metric_name: string
+          metric_value: number
+          recorded_at?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          metric_name?: string
+          metric_value?: number
+          recorded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_performance_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "active_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_performance_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           budget_allocated: number | null
@@ -774,6 +816,45 @@ export type Database = {
           },
         ]
       }
+      email_automation_rules: {
+        Row: {
+          action_config: Json
+          action_type: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          rule_name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_config?: Json
+          action_type: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_name: string
+          trigger_conditions?: Json
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_config?: Json
+          action_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_name?: string
+          trigger_conditions?: Json
+          trigger_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_campaigns: {
         Row: {
           campaign_id: string | null
@@ -1021,6 +1102,36 @@ export type Database = {
           },
         ]
       }
+      lead_scoring_rules: {
+        Row: {
+          conditions: Json
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          rule_name: string
+          score_weight: number
+          updated_at: string | null
+        }
+        Insert: {
+          conditions: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_name: string
+          score_weight?: number
+          updated_at?: string | null
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          rule_name?: string
+          score_weight?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           annual_revenue: number | null
@@ -1260,6 +1371,39 @@ export type Database = {
         }
         Relationships: []
       }
+      real_time_metrics: {
+        Row: {
+          change_percentage: number | null
+          current_value: number
+          entity_id: string
+          entity_type: string
+          id: string
+          metric_type: string
+          previous_value: number | null
+          recorded_at: string | null
+        }
+        Insert: {
+          change_percentage?: number | null
+          current_value: number
+          entity_id: string
+          entity_type: string
+          id?: string
+          metric_type: string
+          previous_value?: number | null
+          recorded_at?: string | null
+        }
+        Update: {
+          change_percentage?: number | null
+          current_value?: number
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metric_type?: string
+          previous_value?: number | null
+          recorded_at?: string | null
+        }
+        Relationships: []
+      }
       scraped_data: {
         Row: {
           agent_id: number | null
@@ -1409,6 +1553,51 @@ export type Database = {
         }
         Relationships: []
       }
+      social_platform_connections: {
+        Row: {
+          access_token_encrypted: string | null
+          connection_metadata: Json | null
+          connection_status: string | null
+          created_at: string | null
+          id: string
+          platform_name: string
+          platform_user_id: string | null
+          platform_username: string | null
+          refresh_token_encrypted: string | null
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token_encrypted?: string | null
+          connection_metadata?: Json | null
+          connection_status?: string | null
+          created_at?: string | null
+          id?: string
+          platform_name: string
+          platform_user_id?: string | null
+          platform_username?: string | null
+          refresh_token_encrypted?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token_encrypted?: string | null
+          connection_metadata?: Json | null
+          connection_status?: string | null
+          created_at?: string | null
+          id?: string
+          platform_name?: string
+          platform_user_id?: string | null
+          platform_username?: string | null
+          refresh_token_encrypted?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       social_posts: {
         Row: {
           campaign_id: string | null
@@ -1513,6 +1702,33 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          preference_category: string
+          preference_data: Json
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          preference_category: string
+          preference_data?: Json
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          preference_category?: string
+          preference_data?: Json
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           company_id: string
@@ -1581,6 +1797,42 @@ export type Database = {
           service_name?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      workflow_executions: {
+        Row: {
+          completed_at: string | null
+          created_by: string | null
+          error_message: string | null
+          id: string
+          input_data: Json | null
+          output_data: Json | null
+          started_at: string | null
+          status: string | null
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          input_data?: Json | null
+          output_data?: Json | null
+          started_at?: string | null
+          status?: string | null
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          input_data?: Json | null
+          output_data?: Json | null
+          started_at?: string | null
+          status?: string | null
+          workflow_id?: string
         }
         Relationships: []
       }

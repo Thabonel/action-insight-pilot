@@ -1,3 +1,4 @@
+
 import { HttpClient } from './http-client';
 import { CampaignsService } from './api/campaigns-service';
 import { LeadsService } from './api/leads-service';
@@ -8,6 +9,11 @@ import { AnalyticsService } from './api/analytics-service';
 import { WorkflowService } from './api/workflow-service';
 import { ProposalsService } from './api/proposals-service';
 import { AgentsService } from './api/agents-service';
+import { EnhancedSocialService } from './api/enhanced-social-service';
+import { UserPreferencesService } from './api/user-preferences-service';
+import { SocialPlatformsService } from './api/social-platforms-service';
+import { EnhancedCampaignsService } from './api/enhanced-campaigns-service';
+import { RealTimeMetricsService } from './api/real-time-metrics-service';
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -26,6 +32,11 @@ export class ApiClient {
   private workflow: WorkflowService;
   private proposals: ProposalsService;
   private agents: AgentsService;
+  private enhancedSocial: EnhancedSocialService;
+  public userPreferences: UserPreferencesService;
+  public socialPlatforms: SocialPlatformsService;
+  public enhancedCampaigns: EnhancedCampaignsService;
+  public realTimeMetrics: RealTimeMetricsService;
 
   constructor() {
     this.httpClient = new HttpClient();
@@ -38,6 +49,11 @@ export class ApiClient {
     this.workflow = new WorkflowService(this.httpClient);
     this.proposals = new ProposalsService(this.httpClient);
     this.agents = new AgentsService(this.httpClient);
+    this.enhancedSocial = new EnhancedSocialService(this.httpClient);
+    this.userPreferences = new UserPreferencesService(this.httpClient);
+    this.socialPlatforms = new SocialPlatformsService(this.httpClient);
+    this.enhancedCampaigns = new EnhancedCampaignsService(this.httpClient);
+    this.realTimeMetrics = new RealTimeMetricsService(this.httpClient);
   }
 
   setToken(token: string) {

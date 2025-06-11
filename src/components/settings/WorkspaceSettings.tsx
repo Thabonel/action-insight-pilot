@@ -15,44 +15,84 @@ import {
   Crown,
   Upload
 } from 'lucide-react';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+
+interface WorkspaceData {
+  name: string;
+  domain: string;
+  industry: string;
+  teamSize: string;
+  branding: {
+    primaryColor: string;
+    logo: File | null;
+    favicon: File | null;
+    whiteLabel: boolean;
+  };
+  features: {
+    multiTenant: boolean;
+    customDomain: boolean;
+    advancedAnalytics: boolean;
+    prioritySupport: boolean;
+  };
+}
+
+const defaultWorkspaceData: WorkspaceData = {
+  name: 'MarketingAI Pro',
+  domain: 'marketingai.company.com',
+  industry: 'Software & Technology',
+  teamSize: '25-50',
+  branding: {
+    primaryColor: '#3B82F6',
+    logo: null,
+    favicon: null,
+    whiteLabel: true
+  },
+  features: {
+    multiTenant: true,
+    customDomain: true,
+    advancedAnalytics: true,
+    prioritySupport: true
+  }
+};
 
 const WorkspaceSettings: React.FC = () => {
-  const [workspaceData, setWorkspaceData] = useState({
-    name: 'MarketingAI Pro',
-    domain: 'marketingai.company.com',
-    industry: 'Software & Technology',
-    teamSize: '25-50',
-    branding: {
-      primaryColor: '#3B82F6',
-      logo: null,
-      favicon: null,
-      whiteLabel: true
-    },
-    features: {
-      multiTenant: true,
-      customDomain: true,
-      advancedAnalytics: true,
-      prioritySupport: true
-    }
-  });
+  const { 
+    preferences: workspaceData, 
+    updatePreferences, 
+    isLoading 
+  } = useUserPreferences<WorkspaceData>('workspace', defaultWorkspaceData);
 
-  const handleSave = () => {
-    console.log('Saving workspace settings:', workspaceData);
-    // Implementation would save to backend
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await updatePreferences(workspaceData);
+    setIsSaving(false);
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    updatePreferences({ [field]: value });
+  };
+
+  const handleBrandingChange = (field: string, value: any) => {
+    updatePreferences({
+      branding: {
+        ...workspaceData.branding,
+        [field]: value
+      }
+    });
   };
 
   const handleFileUpload = (type: 'logo' | 'favicon') => (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setWorkspaceData(prev => ({
-        ...prev,
-        branding: {
-          ...prev.branding,
-          [type]: file
-        }
-      }));
+      handleBrandingChange(type, file);
     }
   };
+
+  if (isLoading) {
+    return <div>Loading workspace settings...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -72,7 +112,7 @@ const WorkspaceSettings: React.FC = () => {
               <Input
                 id="workspace-name"
                 value={workspaceData.name}
-                onChange={(e) => setWorkspaceData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -81,7 +121,7 @@ const WorkspaceSettings: React.FC = () => {
               <Input
                 id="custom-domain"
                 value={workspaceData.domain}
-                onChange={(e) => setWorkspaceData(prev => ({ ...prev, domain: e.target.value }))}
+                onChange={(e) => handleInputChange('domain', e.target.value)}
                 className="mt-1"
                 placeholder="your-company.com"
               />
@@ -91,7 +131,7 @@ const WorkspaceSettings: React.FC = () => {
               <Input
                 id="industry"
                 value={workspaceData.industry}
-                onChange={(e) => setWorkspaceData(prev => ({ ...prev, industry: e.target.value }))}
+                onChange={(e) => handleInputChange('industry', e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -100,7 +140,7 @@ const WorkspaceSettings: React.FC = () => {
               <Input
                 id="team-size"
                 value={workspaceData.teamSize}
-                onChange={(e) => setWorkspaceData(prev => ({ ...prev, teamSize: e.target.value }))}
+                onChange={(e) => handleInputChange('teamSize', e.target.value)}
                 className="mt-1"
               />
             </div>
@@ -125,10 +165,7 @@ const WorkspaceSettings: React.FC = () => {
             </div>
             <Switch
               checked={workspaceData.branding.whiteLabel}
-              onCheckedChange={(checked) => setWorkspaceData(prev => ({
-                ...prev,
-                branding: { ...prev.branding, whiteLabel: checked }
-              }))}
+              onCheckedChange={(checked) => handleBrandingChange('whiteLabel', checked)}
             />
           </div>
 
@@ -171,10 +208,7 @@ const WorkspaceSettings: React.FC = () => {
                 <Input
                   type="color"
                   value={workspaceData.branding.primaryColor}
-                  onChange={(e) => setWorkspaceData(prev => ({
-                    ...prev,
-                    branding: { ...prev.branding, primaryColor: e.target.value }
-                  }))}
+                  onChange={(e) => handleBrandingChange('primaryColor', e.target.value)}
                   className="w-20 h-10"
                 />
               </div>
@@ -245,9 +279,13 @@ const WorkspaceSettings: React.FC = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="flex items-center space-x-2">
+        <Button 
+          onClick={handleSave} 
+          disabled={isSaving}
+          className="flex items-center space-x-2"
+        >
           <Save className="h-4 w-4" />
-          <span>Save Changes</span>
+          <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
         </Button>
       </div>
     </div>

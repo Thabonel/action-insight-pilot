@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -14,31 +13,62 @@ import {
   MessageSquare,
   Calendar
 } from 'lucide-react';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+
+interface SystemPreferencesData {
+  notifications: {
+    email: boolean;
+    push: boolean;
+    desktop: boolean;
+    slack: boolean;
+  };
+  appearance: {
+    darkMode: boolean;
+    compactView: boolean;
+    animations: boolean;
+  };
+  privacy: {
+    analytics: boolean;
+    marketing: boolean;
+    thirdParty: boolean;
+  };
+  accessibility: {
+    highContrast: boolean;
+    largeText: boolean;
+    screenReader: boolean;
+  };
+}
+
+const defaultPreferences: SystemPreferencesData = {
+  notifications: {
+    email: true,
+    push: false,
+    desktop: true,
+    slack: false
+  },
+  appearance: {
+    darkMode: false,
+    compactView: false,
+    animations: true
+  },
+  privacy: {
+    analytics: true,
+    marketing: false,
+    thirdParty: false
+  },
+  accessibility: {
+    highContrast: false,
+    largeText: false,
+    screenReader: false
+  }
+};
 
 const SystemPreferences: React.FC = () => {
-  const [preferences, setPreferences] = useState({
-    notifications: {
-      email: true,
-      push: false,
-      desktop: true,
-      slack: false
-    },
-    appearance: {
-      darkMode: false,
-      compactView: false,
-      animations: true
-    },
-    privacy: {
-      analytics: true,
-      marketing: false,
-      thirdParty: false
-    },
-    accessibility: {
-      highContrast: false,
-      largeText: false,
-      screenReader: false
-    }
-  });
+  const { 
+    preferences, 
+    updatePreferences, 
+    resetPreferences 
+  } = useUserPreferences<SystemPreferencesData>('system', defaultPreferences);
 
   const notificationTypes = [
     { key: 'email', label: 'Email Notifications', icon: Mail, description: 'Receive updates via email' },
@@ -65,14 +95,13 @@ const SystemPreferences: React.FC = () => {
     { key: 'screenReader', label: 'Screen Reader Support', icon: Bell, description: 'Optimize for screen reader software' }
   ];
 
-  const updatePreference = (category: string, key: string, value: boolean) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updatePreference = (category: keyof SystemPreferencesData, key: string, value: boolean) => {
+    updatePreferences({
       [category]: {
-        ...prev[category as keyof typeof prev],
+        ...preferences[category],
         [key]: value
       }
-    }));
+    });
   };
 
   return (
@@ -203,7 +232,7 @@ const SystemPreferences: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="mt-6 flex flex-wrap gap-2">
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={resetPreferences}>
           Reset to Defaults
         </Button>
         <Button variant="outline" size="sm">
