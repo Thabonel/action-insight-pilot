@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -16,6 +15,7 @@ app = FastAPI(title="Agentic AI Marketing Platform API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://main--agentic-ai-marketing.netlify.app",  # Add your frontend URL
         "https://srv-d0sjalqli9vc73d20vqg.onrender.com",
         "http://localhost:3000",
         "http://localhost:5173",
