@@ -25,8 +25,7 @@ class AgentManager:
         self.analytics_agent = None
         self.proposal_generator = None
         self.mcp_agent = None
-        self.internal_publisher_agent = None  # ✅ NEW AGENT
-
+        self.internal_publisher_agent = None  # ✅ Keep as None for now
         self._initialize_agents()
     
     def _initialize_agents(self):
@@ -40,7 +39,7 @@ class AgentManager:
             from agents.analytics_agent import AnalyticsAgent
             from agents.proposal_generator import ProposalGenerator
             from agents.mcp_agent import MCPAgent
-            from agents.internal_publishing_agent import InternalPublisherAgent  # ✅ IMPORT NEW AGENT
+            # from agents.internal_publishing_agent import InternalPublisherAgent  # ✅ COMMENTED OUT - FIX LATER
             
             self.mcp_agent = MCPAgent()
             self.campaign_agent = CampaignAgent(self.openai_api_key, self.integrations)
@@ -50,7 +49,7 @@ class AgentManager:
             self.email_automation_agent = EmailAutomationAgent(self.openai_api_key, self.integrations)
             self.analytics_agent = AnalyticsAgent(self.openai_api_key, self.integrations)
             self.proposal_generator = ProposalGenerator(self.openai_api_key, self.integrations)
-            self.internal_publisher_agent = InternalPublisherAgent()  # ✅ INITIALIZE NEW AGENT
+            # self.internal_publisher_agent = InternalPublisherAgent()  # ✅ COMMENTED OUT - FIX LATER
             
             self.agents_available = True
             logger.info("✅ All AI agents loaded successfully!")
