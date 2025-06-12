@@ -43,12 +43,14 @@ const Campaigns: React.FC = () => {
       console.log('Loading campaigns...');
       const result = await apiClient.getCampaigns();
       
-      if (result.success) {
-        setCampaigns((result.data as Campaign[]) || []);
+      if (result.success && result.data) {
+        // Extract the campaigns array from result.data
+        const campaignsData = Array.isArray(result.data) ? result.data : [];
+        setCampaigns(campaignsData);
         behaviorTracker.trackFeatureComplete('campaigns_load', actionId, true);
         toast({
           title: "Campaigns loaded",
-          description: `Found ${(result.data as Campaign[])?.length || 0} campaigns`,
+          description: `Found ${campaignsData.length} campaigns`,
         });
       } else {
         console.error('Failed to load campaigns:', result.error);
@@ -93,15 +95,17 @@ const Campaigns: React.FC = () => {
       console.log('Creating campaign:', newCampaign);
       const result = await apiClient.createCampaign(newCampaign);
       
-      if (result.success) {
-        setCampaigns(prev => [result.data as Campaign, ...prev]);
+      if (result.success && result.data) {
+        // Extract the created campaign from result.data
+        const createdCampaign = result.data as Campaign;
+        setCampaigns(prev => [createdCampaign, ...prev]);
         setNewCampaign({ name: '', type: 'email', status: 'draft', description: '' });
         setShowCreateForm(false);
         setConnectionError(false);
         behaviorTracker.trackFeatureComplete('campaign_create', actionId, true);
         toast({
           title: "Success!",
-          description: `Campaign "${(result.data as Campaign).name}" created successfully`,
+          description: `Campaign "${createdCampaign.name}" created successfully`,
         });
       } else {
         console.error('Failed to create campaign:', result.error);
