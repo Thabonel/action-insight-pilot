@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { MessageSquare, Send, Zap, TrendingUp, Users, Mail, BarChart3, Clock } from 'lucide-react';
@@ -20,6 +19,7 @@ const ConversationalDashboard: React.FC = () => {
   }>>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [insights, setInsights] = useState(behaviorTracker.getInsights());
+  const [conversationContext, setConversationContext] = useState<any[]>([]);
 
   useEffect(() => {
     behaviorTracker.trackAction('navigation', 'conversational_dashboard', { section: 'main' });
@@ -32,11 +32,12 @@ const ConversationalDashboard: React.FC = () => {
   }, []);
 
   const quickSuggestions = [
+    "What should I focus on today?",
     "Show me my best performing campaigns",
     "What content should I create next?",
     "How are my leads converting?",
-    "Schedule posts for next week",
-    "Why is my budget running out so fast?"
+    "Why is my budget running out so fast?",
+    "Schedule posts for next week"
   ];
 
   const handleQuerySubmit = async (e: React.FormEvent) => {
@@ -46,9 +47,9 @@ const ConversationalDashboard: React.FC = () => {
     const actionId = behaviorTracker.trackFeatureStart('conversational_query');
     setIsProcessing(true);
 
-    // Simulate AI processing
-    setTimeout(() => {
-      const response = processQuery(query);
+    try {
+      // Call real AI agent instead of fake processing
+      const response = await processQueryWithAI(query, conversationContext);
       
       const newChat = {
         id: Date.now().toString(),
@@ -58,68 +59,217 @@ const ConversationalDashboard: React.FC = () => {
       };
 
       setChatHistory(prev => [newChat, ...prev]);
+      
+      // Update conversation context for better continuity
+      setConversationContext(prev => [...prev, 
+        { role: 'user', content: query },
+        { role: 'assistant', content: response }
+      ].slice(-10)); // Keep last 10 exchanges
+      
       setQuery('');
-      setIsProcessing(false);
       behaviorTracker.trackFeatureComplete('conversational_query', actionId, true);
-    }, 2000);
+    } catch (error) {
+      console.error('Query processing failed:', error);
+      behaviorTracker.trackFeatureComplete('conversational_query', actionId, false);
+      
+      // Show error response
+      const errorResponse = {
+        type: 'error',
+        title: 'AI Assistant Temporarily Unavailable',
+        explanation: 'I\'m having trouble processing your request right now. Please try again in a moment.',
+        businessImpact: 'Your marketing data is safe and campaigns are still running.',
+        nextActions: ['Try rephrasing your question', 'Check back in a few minutes', 'Contact support if issue persists']
+      };
+      
+      const newChat = {
+        id: Date.now().toString(),
+        query,
+        response: errorResponse,
+        timestamp: new Date(),
+      };
+      
+      setChatHistory(prev => [newChat, ...prev]);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const processQuery = (userQuery: string) => {
-    const lowerQuery = userQuery.toLowerCase();
+  const processQueryWithAI = async (userQuery: string, context: any[]) => {
+    try {
+      // Step 1: Get real campaign data
+      const campaignsResponse = await fetch('/api/campaigns');
+      const campaignData = await campaignsResponse.json();
+      
+      // Step 2: Determine the type of request and route to appropriate agent
+      const queryType = determineQueryType(userQuery);
+      
+      // Step 3: Call the appropriate AI agent with real data
+      let agentResponse;
+      
+      switch (queryType) {
+        case 'daily_focus':
+          agentResponse = await callDailyFocusAgent(userQuery, campaignData, context);
+          break;
+        case 'campaign_performance':
+          agentResponse = await callCampaignAgent('analyze_performance', { 
+            campaign_ids: campaignData.map((c: any) => c.id),
+            query: userQuery,
+            context: context
+          });
+          break;
+        case 'content_suggestions':
+          agentResponse = await callContentAgent(userQuery, campaignData, context);
+          break;
+        case 'lead_analysis':
+          agentResponse = await callLeadAgent(userQuery, context);
+          break;
+        default:
+          agentResponse = await callGeneralAgent(userQuery, campaignData, context);
+      }
+      
+      // Step 4: Format response for the ChatResponse component
+      return formatAgentResponse(agentResponse, queryType, campaignData);
+      
+    } catch (error) {
+      console.error('AI processing error:', error);
+      throw error;
+    }
+  };
+
+  const determineQueryType = (query: string): string => {
+    const lowerQuery = query.toLowerCase();
     
-    if (lowerQuery.includes('campaign') && lowerQuery.includes('performing')) {
+    if (lowerQuery.includes('focus') && (lowerQuery.includes('today') || lowerQuery.includes('should'))) {
+      return 'daily_focus';
+    }
+    if (lowerQuery.includes('campaign') && (lowerQuery.includes('perform') || lowerQuery.includes('best'))) {
+      return 'campaign_performance';
+    }
+    if (lowerQuery.includes('content') && (lowerQuery.includes('create') || lowerQuery.includes('next'))) {
+      return 'content_suggestions';
+    }
+    if (lowerQuery.includes('lead') && (lowerQuery.includes('convert') || lowerQuery.includes('quality'))) {
+      return 'lead_analysis';
+    }
+    
+    return 'general';
+  };
+
+  const callDailyFocusAgent = async (query: string, campaigns: any[], context: any[]) => {
+    // This is the key improvement - analyze TODAY'S priorities based on real data
+    const focusResponse = await fetch('/api/agents/daily-focus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        campaigns,
+        context,
+        date: new Date().toISOString().split('T')[0] // Today's date
+      })
+    });
+    
+    return await focusResponse.json();
+  };
+
+  const callCampaignAgent = async (task: string, data: any) => {
+    const response = await fetch('/api/agents/campaign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        task_type: task,
+        input_data: data
+      })
+    });
+    
+    return await response.json();
+  };
+
+  const callContentAgent = async (query: string, campaigns: any[], context: any[]) => {
+    const response = await fetch('/api/agents/content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        campaigns,
+        context
+      })
+    });
+    
+    return await response.json();
+  };
+
+  const callLeadAgent = async (query: string, context: any[]) => {
+    const response = await fetch('/api/agents/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        context
+      })
+    });
+    
+    return await response.json();
+  };
+
+  const callGeneralAgent = async (query: string, campaigns: any[], context: any[]) => {
+    // Use campaign agent as general agent for marketing questions
+    const response = await fetch('/api/agents/campaign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        task_type: 'general_query',
+        input_data: {
+          query,
+          campaigns,
+          context
+        }
+      })
+    });
+    
+    return await response.json();
+  };
+
+  const formatAgentResponse = (agentResponse: any, queryType: string, campaignData: any[]) => {
+    // Convert AI agent responses to the format expected by ChatResponse component
+    
+    if (queryType === 'daily_focus') {
+      return {
+        type: 'daily_focus',
+        title: 'Your Marketing Focus for Today',
+        explanation: agentResponse.focus_summary || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.',
+        businessImpact: agentResponse.business_impact || 'Focusing on these priorities could improve your marketing ROI significantly.',
+        nextActions: agentResponse.recommended_actions || [
+          'Review underperforming campaigns',
+          'Optimize high-potential content',
+          'Follow up on hot leads'
+        ],
+        data: agentResponse.priority_items || []
+      };
+    }
+    
+    if (queryType === 'campaign_performance' && agentResponse.analyses) {
       return {
         type: 'campaigns_performance',
-        title: 'Your Best Performing Campaigns',
-        data: [
-          { name: 'Email Series A', performance: 85, leads: 142, conversion: '12.4%' },
-          { name: 'Social Campaign B', performance: 78, leads: 89, conversion: '8.9%' },
-          { name: 'Content Push C', performance: 72, leads: 156, conversion: '7.2%' }
-        ],
-        explanation: "Your Email Series A is crushing it with 85% performance score and 12.4% conversion rate.",
-        businessImpact: "This campaign is generating $15,400 in monthly recurring revenue.",
-        nextActions: ["Scale Email Series A budget by 50%", "Create similar email sequences", "A/B test subject lines"]
+        title: 'Campaign Performance Analysis',
+        data: agentResponse.analyses.map((analysis: any) => ({
+          name: analysis.campaign_name,
+          performance: analysis.performance_score,
+          leads: analysis.key_metrics?.total_data_points || 0,
+          conversion: `${analysis.key_metrics?.average_performance || 0}%`
+        })),
+        explanation: agentResponse.analyses[0]?.ai_recommendations?.join(' ') || 'Your campaigns are performing well overall.',
+        businessImpact: `Based on current performance, these campaigns are generating significant value.`,
+        nextActions: agentResponse.analyses[0]?.ai_recommendations || ['Continue monitoring', 'Optimize underperformers']
       };
     }
     
-    if (lowerQuery.includes('content') && lowerQuery.includes('create')) {
-      return {
-        type: 'content_suggestions',
-        title: 'AI Content Recommendations',
-        suggestions: [
-          { type: 'Blog Post', topic: '5 Marketing Automation Trends', confidence: 94 },
-          { type: 'Video', topic: 'Customer Success Story', confidence: 87 },
-          { type: 'Infographic', topic: 'Lead Generation Stats', confidence: 82 }
-        ],
-        explanation: "Based on your audience engagement, blog posts about automation trends perform 40% better.",
-        businessImpact: "Content like this typically generates 200+ qualified leads per month.",
-        nextActions: ["Start with the blog post", "Interview successful customers", "Design infographic template"]
-      };
-    }
-
-    if (lowerQuery.includes('leads') && lowerQuery.includes('convert')) {
-      return {
-        type: 'lead_conversion',
-        title: 'Lead Conversion Analysis',
-        data: [
-          { source: 'Organic Search', leads: 245, converted: 31, rate: 12.7 },
-          { source: 'Social Media', leads: 189, converted: 18, rate: 9.5 },
-          { source: 'Email Campaign', leads: 156, converted: 22, rate: 14.1 },
-          { source: 'Paid Ads', leads: 98, converted: 8, rate: 8.2 }
-        ],
-        explanation: "Email campaigns have your highest conversion rate at 14.1%, while paid ads need optimization.",
-        businessImpact: "Improving paid ad conversion by 3% could add $8,200 monthly revenue.",
-        nextActions: ["Optimize paid ad landing pages", "Increase email campaign frequency", "Create retargeting campaigns"]
-      };
-    }
-
-    // Default response
+    // Default formatting for other response types
     return {
       type: 'general',
-      title: 'AI Assistant Response',
-      explanation: "I understand you're asking about your marketing performance. Let me analyze your data and provide insights.",
-      businessImpact: "Continuous optimization of your marketing stack can improve ROI by 25-40%.",
-      nextActions: ["Review campaign performance", "Analyze lead quality", "Optimize conversion funnels"]
+      title: agentResponse.title || 'AI Marketing Insights',
+      explanation: agentResponse.explanation || agentResponse.summary || 'Here are insights based on your marketing data.',
+      businessImpact: agentResponse.business_impact || agentResponse.impact || 'These insights can help improve your marketing effectiveness.',
+      nextActions: agentResponse.next_actions || agentResponse.recommendations || ['Review the analysis', 'Take action on priority items']
     };
   };
 
@@ -193,11 +343,10 @@ const ConversationalDashboard: React.FC = () => {
                             <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                             <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                           </div>
-                          <span className="text-sm text-slate-600">Analyzing your data...</span>
+                          <span className="text-sm text-slate-600">Analyzing your real campaign data...</span>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                   
                   {chatHistory.map((chat) => (
                     <div key={chat.id} className="space-y-4">
