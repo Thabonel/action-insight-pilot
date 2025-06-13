@@ -1,16 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-
 # Import route modules
-from routes import campaigns, leads, content, proposals, internal_publishing, email, integrations
-
+from routes import campaigns, leads, content, proposals, internal_publishing, email, integrations, agents
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 app = FastAPI(title="Agentic AI Marketing Platform API", version="1.0.0")
-
 # Configure CORS with more permissive settings
 app.add_middleware(
     CORSMiddleware,
@@ -48,13 +44,11 @@ app.add_middleware(
     ],
     expose_headers=["*"],
 )
-
 # Add explicit OPTIONS handler for troubleshooting
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):
     """Handle OPTIONS requests explicitly"""
     return {"message": "OK"}
-
 # Include routers
 app.include_router(campaigns.router)
 app.include_router(leads.router)
@@ -63,20 +57,17 @@ app.include_router(proposals.router)
 app.include_router(internal_publishing.router)
 app.include_router(email.router)
 app.include_router(integrations.router)
-
+app.include_router(agents.router)
 @app.get("/")
 async def root():
     return {"message": "Agentic AI Marketing Platform API", "status": "running"}
-
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "marketing-platform-api"}
-
 # Add a test endpoint for CORS debugging
 @app.get("/api/test")
 async def test_cors():
     return {"message": "CORS test successful", "timestamp": "2025-06-13"}
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
