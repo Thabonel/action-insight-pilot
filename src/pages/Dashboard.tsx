@@ -1,9 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { apiClient } from '@/lib/api-client';
+import { useAuth } from '@/contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { MessageSquare, Calendar, Settings as SettingsIcon, ChevronDown } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Dashboard: React.FC = () => {
   const [insights, setInsights] = useState(behaviorTracker.getInsights());
@@ -15,6 +16,8 @@ const Dashboard: React.FC = () => {
     timestamp: Date;
   }>>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   // Mock data for charts
   const performanceData = [
@@ -50,34 +53,148 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     if (!chatMessage.trim()) return;
 
+    // Check authentication
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to use the AI assistant.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const actionId = behaviorTracker.trackFeatureStart('chat');
     setIsTyping(true);
 
-    // Simulate AI response
-    const responses = [
-      "I can help you create a new campaign. What's your target audience?",
-      "Based on your recent activity, I'd recommend focusing on email automation.",
-      "Your productivity score is excellent! Let's optimize your lead generation.",
-      "I notice you're active during peak hours. Perfect time for social media posting!",
-      "Would you like me to analyze your campaign performance and suggest improvements?"
-    ];
-
-    const response = responses[Math.floor(Math.random() * responses.length)];
-
-    // Simulate typing delay
-    setTimeout(() => {
+    try {
+      // Get real campaign data
+      const campaignsResponse = await apiClient.getCampaigns();
+      
+      if (!campaignsResponse.success) {
+        throw new Error('Failed to fetch campaign data');
+      }
+      
+      const campaignData = Array.isArray(campaignsResponse.data) ? campaignsResponse.data : [];
+      
+      // Determine query type and call appropriate AI agent
+      const queryType = determineQueryType(chatMessage);
+      let agentResponse;
+      
+      if (queryType === 'daily_focus') {
+        agentResponse = await callDailyFocusAgent(chatMessage, campaignData);
+      } else {
+        agentResponse = await callGeneralCampaignAgent(chatMessage, campaignData);
+      }
+      
+      // Format the AI response for display
+      const formattedResponse = formatAgentResponse(agentResponse, queryType);
+      
       const newChat = {
         id: Date.now().toString(),
         message: chatMessage,
-        response,
+        response: formattedResponse,
         timestamp: new Date(),
       };
 
       setChatHistory(prev => [newChat, ...prev]);
       setChatMessage('');
-      setIsTyping(false);
       behaviorTracker.trackFeatureComplete('chat', actionId, true);
-    }, 1500);
+      
+      toast({
+        title: "AI Response Generated",
+        description: "Your marketing assistant has analyzed your request.",
+      });
+    } catch (error) {
+      console.error('Chat processing failed:', error);
+      behaviorTracker.trackFeatureComplete('chat', actionId, false);
+      
+      // Show error response
+      const errorResponse = error instanceof Error ? error.message : 'I\'m having trouble processing your request right now. Please try again in a moment.';
+      
+      const newChat = {
+        id: Date.now().toString(),
+        message: chatMessage,
+        response: errorResponse,
+        timestamp: new Date(),
+      };
+      
+      setChatHistory(prev => [newChat, ...prev]);
+      setChatMessage('');
+      
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to AI assistant. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const determineQueryType = (query: string): string => {
+    const lowerQuery = query.toLowerCase();
+    
+    if (lowerQuery.includes('focus') && (lowerQuery.includes('today') || lowerQuery.includes('should'))) {
+      return 'daily_focus';
+    }
+    
+    return 'general';
+  };
+
+  const callDailyFocusAgent = async (query: string, campaigns: any[]) => {
+    const requestData = {
+      query,
+      campaigns,
+      context: [],
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    const response = await apiClient.httpClient.request('/api/agents/daily-focus', {
+      method: 'POST',
+      body: JSON.stringify(requestData)
+    });
+    
+    if (!response.success) {
+      throw new Error(`Daily focus agent failed: ${response.error}`);
+    }
+    
+    return response.data;
+  };
+
+  const callGeneralCampaignAgent = async (query: string, campaigns: any[]) => {
+    const requestData = {
+      task_type: 'general_query',
+      input_data: {
+        query,
+        campaigns,
+        context: []
+      }
+    };
+
+    const response = await apiClient.httpClient.request('/api/agents/campaign', {
+      method: 'POST',
+      body: JSON.stringify(requestData)
+    });
+    
+    if (!response.success) {
+      throw new Error(`Campaign agent failed: ${response.error}`);
+    }
+    
+    return response.data;
+  };
+
+  const formatAgentResponse = (agentResponse: any, queryType: string) => {
+    if (!agentResponse.success) {
+      throw new Error(agentResponse.error || 'AI agent returned an error');
+    }
+    
+    const responseData = agentResponse.data;
+    
+    if (queryType === 'daily_focus') {
+      return responseData.focus_summary || responseData.explanation || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.';
+    }
+    
+    return responseData.explanation || responseData.focus_summary || 'Here are insights based on your marketing data.';
   };
 
   const formatDuration = (ms: number) => {
@@ -190,7 +307,18 @@ const Dashboard: React.FC = () => {
             
             <div className="p-6">
               <div className="h-80 overflow-y-auto mb-4 space-y-4">
-                {chatHistory.length === 0 && (
+                {/* Authentication Message */}
+                {!user && (
+                  <div className="text-center py-8 mb-6 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="w-16 h-16 bg-amber-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <MessageSquare className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-medium text-amber-800 mb-2">Authentication Required</h3>
+                    <p className="text-amber-700">Please log in to start chatting with your AI marketing assistant</p>
+                  </div>
+                )}
+
+                {chatHistory.length === 0 && !isTyping && user && (
                   <div className="text-center text-slate-500 py-8">
                     <MessageSquare className="h-12 w-12 mx-auto mb-4 text-slate-300" />
                     <p>Start a conversation with your AI assistant</p>
@@ -237,12 +365,13 @@ const Dashboard: React.FC = () => {
                   type="text"
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
-                  placeholder="Ask your AI assistant..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder={user ? "Ask your AI assistant..." : "Please log in to chat..."}
+                  disabled={!user}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                 />
                 <button
                   type="submit"
-                  disabled={!chatMessage.trim() || isTyping}
+                  disabled={!chatMessage.trim() || isTyping || !user}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   Send
