@@ -1,11 +1,12 @@
+
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { MessageSquare, Send, Zap, TrendingUp, Users, Mail, BarChart3, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import ChatResponse from '@/components/dashboard/ChatResponse';
 import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
@@ -122,8 +123,29 @@ const ConversationalDashboard: React.FC = () => {
 
   const processQueryWithRealAI = async (userQuery: string, context: any[]) => {
     try {
-      // Step 1: Get real campaign data using authenticated apiClient
-      const campaignsResponse = await apiClient.getCampaigns();
+      // Step 1: Get real campaign data using direct fetch
+      console.log('Fetching campaign data...');
+      
+      // Get the current session to access the token
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+      
+      if (!authToken) {
+        throw new Error('Authentication token not available');
+      }
+
+      const directResponse = await fetch('https://wheels-wins-orchestrator.onrender.com/api/campaigns', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!directResponse.ok) {
+        throw new Error(`Campaign fetch failed: ${directResponse.status} ${directResponse.statusText}`);
+      }
+      
+      const campaignsResponse = await directResponse.json();
       
       if (!campaignsResponse.success) {
         throw new Error('Failed to fetch campaign data');
@@ -135,13 +157,13 @@ const ConversationalDashboard: React.FC = () => {
       // Step 2: Determine query type and route to appropriate endpoint
       const queryType = determineQueryType(userQuery);
       
-      // Step 3: Call the appropriate AI agent with real data using authenticated apiClient
+      // Step 3: Call the appropriate AI agent with real data using direct fetch
       let agentResponse;
       
       if (queryType === 'daily_focus') {
-        agentResponse = await callDailyFocusAgent(userQuery, campaignData, context);
+        agentResponse = await callDailyFocusAgent(userQuery, campaignData, context, authToken);
       } else {
-        agentResponse = await callGeneralCampaignAgent(userQuery, campaignData, context);
+        agentResponse = await callGeneralCampaignAgent(userQuery, campaignData, context, authToken);
       }
       
       // Step 4: Format response for the ChatResponse component
@@ -163,7 +185,7 @@ const ConversationalDashboard: React.FC = () => {
     return 'general';
   };
 
-  const callDailyFocusAgent = async (query: string, campaigns: any[], context: any[]) => {
+  const callDailyFocusAgent = async (query: string, campaigns: any[], context: any[], authToken: string) => {
     const requestData = {
       query,
       campaigns,
@@ -171,19 +193,29 @@ const ConversationalDashboard: React.FC = () => {
       date: new Date().toISOString().split('T')[0] // Today's date
     };
 
-    const response = await apiClient.httpClient.request('/api/agents/daily-focus', {
+    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/daily-focus', {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(requestData)
     });
     
-    if (!response.success) {
-      throw new Error(`Daily focus agent failed: ${response.error}`);
+    if (!response.ok) {
+      throw new Error(`Daily focus agent failed: ${response.status} ${response.statusText}`);
     }
     
-    return response.data;
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(`Daily focus agent failed: ${data.error}`);
+    }
+    
+    return data.data;
   };
 
-  const callGeneralCampaignAgent = async (query: string, campaigns: any[], context: any[]) => {
+  const callGeneralCampaignAgent = async (query: string, campaigns: any[], context: any[], authToken: string) => {
     const requestData = {
       task_type: 'general_query',
       input_data: {
@@ -193,48 +225,56 @@ const ConversationalDashboard: React.FC = () => {
       }
     };
 
-    const response = await apiClient.httpClient.request('/api/agents/campaign', {
+    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/campaign', {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(requestData)
     });
     
-    if (!response.success) {
-      throw new Error(`Campaign agent failed: ${response.error}`);
+    if (!response.ok) {
+      throw new Error(`Campaign agent failed: ${response.status} ${response.statusText}`);
     }
     
-    return response.data;
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(`Campaign agent failed: ${data.error}`);
+    }
+    
+    return data.data;
   };
 
   const formatAgentResponse = (agentResponse: any, queryType: string, campaignData: any[]) => {
     // Handle the response based on your backend format
-    if (!agentResponse.success) {
-      throw new Error(agentResponse.error || 'AI agent returned an error');
+    if (!agentResponse) {
+      throw new Error('AI agent returned no data');
     }
-    
-    const responseData = agentResponse.data;
     
     if (queryType === 'daily_focus') {
       return {
         type: 'daily_focus',
-        title: responseData.title || 'Your Marketing Focus for Today',
-        explanation: responseData.focus_summary || responseData.explanation || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.',
-        businessImpact: responseData.business_impact || 'Focusing on these priorities could improve your marketing ROI significantly.',
-        nextActions: responseData.recommended_actions || [
+        title: agentResponse.title || 'Your Marketing Focus for Today',
+        explanation: agentResponse.focus_summary || agentResponse.explanation || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.',
+        businessImpact: agentResponse.business_impact || 'Focusing on these priorities could improve your marketing ROI significantly.',
+        nextActions: agentResponse.recommended_actions || [
           'Review underperforming campaigns',
           'Optimize high-potential content',
           'Follow up on hot leads'
         ],
-        data: responseData.priority_items || []
+        data: agentResponse.priority_items || []
       };
     }
     
     // Default formatting for general queries
     return {
       type: 'general',
-      title: responseData.title || 'AI Marketing Insights',
-      explanation: responseData.explanation || responseData.focus_summary || 'Here are insights based on your marketing data.',
-      businessImpact: responseData.business_impact || 'These insights can help improve your marketing effectiveness.',
-      nextActions: responseData.recommended_actions || responseData.next_actions || ['Review the analysis', 'Take action on priority items']
+      title: agentResponse.title || 'AI Marketing Insights',
+      explanation: agentResponse.explanation || agentResponse.focus_summary || 'Here are insights based on your marketing data.',
+      businessImpact: agentResponse.business_impact || 'These insights can help improve your marketing effectiveness.',
+      nextActions: agentResponse.recommended_actions || agentResponse.next_actions || ['Review the analysis', 'Take action on priority items']
     };
   };
 
