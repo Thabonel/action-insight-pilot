@@ -5,6 +5,8 @@ import { MessageSquare, Send, Zap, TrendingUp, Users, Mail, BarChart3, Clock } f
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
+import { useAuth } from '@/contexts/AuthContext';
 import ChatResponse from '@/components/dashboard/ChatResponse';
 import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
@@ -23,6 +25,7 @@ const ConversationalDashboard: React.FC = () => {
   const [insights, setInsights] = useState(behaviorTracker.getInsights());
   const [conversationContext, setConversationContext] = useState<any[]>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     behaviorTracker.trackAction('navigation', 'conversational_dashboard', { section: 'main' });
@@ -46,6 +49,16 @@ const ConversationalDashboard: React.FC = () => {
   const handleQuerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+
+    // Check authentication
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to use the AI assistant.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const actionId = behaviorTracker.trackFeatureStart('conversational_query');
     setIsProcessing(true);
@@ -110,25 +123,19 @@ const ConversationalDashboard: React.FC = () => {
 
   const processQueryWithRealAI = async (userQuery: string, context: any[]) => {
     try {
-      // Step 1: Get real campaign data
-      const campaignsResponse = await fetch('https://wheels-wins-orchestrator.onrender.com/api/campaigns', {
-        headers: {
-          'Authorization': 'Bearer fake-token', // You may need to implement proper auth
-          'Content-Type': 'application/json'
-        }
-      });
+      // Step 1: Get real campaign data using authenticated apiClient
+      const campaignsResponse = await apiClient.getCampaigns();
       
-      if (!campaignsResponse.ok) {
+      if (!campaignsResponse.success) {
         throw new Error('Failed to fetch campaign data');
       }
       
-      const campaignApiResponse = await campaignsResponse.json();
-      const campaignData = campaignApiResponse.success ? campaignApiResponse.data : [];
+      const campaignData = campaignsResponse.data || [];
       
       // Step 2: Determine query type and route to appropriate endpoint
       const queryType = determineQueryType(userQuery);
       
-      // Step 3: Call the appropriate AI agent with real data
+      // Step 3: Call the appropriate AI agent with real data using authenticated apiClient
       let agentResponse;
       
       if (queryType === 'daily_focus') {
@@ -157,49 +164,45 @@ const ConversationalDashboard: React.FC = () => {
   };
 
   const callDailyFocusAgent = async (query: string, campaigns: any[], context: any[]) => {
-    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/daily-focus', {
+    const requestData = {
+      query,
+      campaigns,
+      context,
+      date: new Date().toISOString().split('T')[0] // Today's date
+    };
+
+    const response = await apiClient.httpClient.request('/api/agents/daily-focus', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer fake-token' // You may need to implement proper auth
-      },
-      body: JSON.stringify({
-        query,
-        campaigns,
-        context,
-        date: new Date().toISOString().split('T')[0] // Today's date
-      })
+      body: JSON.stringify(requestData)
     });
     
-    if (!response.ok) {
-      throw new Error(`Daily focus agent failed: ${response.status} ${response.statusText}`);
+    if (!response.success) {
+      throw new Error(`Daily focus agent failed: ${response.error}`);
     }
     
-    return await response.json();
+    return response.data;
   };
 
   const callGeneralCampaignAgent = async (query: string, campaigns: any[], context: any[]) => {
-    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/campaign', {
+    const requestData = {
+      task_type: 'general_query',
+      input_data: {
+        query,
+        campaigns,
+        context
+      }
+    };
+
+    const response = await apiClient.httpClient.request('/api/agents/campaign', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer fake-token' // You may need to implement proper auth
-      },
-      body: JSON.stringify({
-        task_type: 'general_query',
-        input_data: {
-          query,
-          campaigns,
-          context
-        }
-      })
+      body: JSON.stringify(requestData)
     });
     
-    if (!response.ok) {
-      throw new Error(`Campaign agent failed: ${response.status} ${response.statusText}`);
+    if (!response.success) {
+      throw new Error(`Campaign agent failed: ${response.error}`);
     }
     
-    return await response.json();
+    return response.data;
   };
 
   const formatAgentResponse = (agentResponse: any, queryType: string, campaignData: any[]) => {
@@ -259,15 +262,26 @@ const ConversationalDashboard: React.FC = () => {
                   <CardTitle>AI Marketing Assistant</CardTitle>
                   <div className="flex items-center text-sm bg-white/20 px-2 py-1 rounded">
                     <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                    Online
+                    {user ? 'Online' : 'Login Required'}
                   </div>
                 </div>
               </CardHeader>
               
               <CardContent className="p-6">
+                {/* Authentication Message */}
+                {!user && (
+                  <div className="text-center py-8 mb-6 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="w-16 h-16 bg-amber-500 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <MessageSquare className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-medium text-amber-800 mb-2">Authentication Required</h3>
+                    <p className="text-amber-700">Please log in to start chatting with your AI marketing assistant</p>
+                  </div>
+                )}
+
                 {/* Chat History */}
                 <div className="h-96 overflow-y-auto mb-6 space-y-4">
-                  {chatHistory.length === 0 && !isProcessing && (
+                  {chatHistory.length === 0 && !isProcessing && user && (
                     <div className="text-center py-12">
                       <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                         <Zap className="h-8 w-8 text-white" />
@@ -332,13 +346,14 @@ const ConversationalDashboard: React.FC = () => {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Ask me about your marketing performance..."
-                    className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder={user ? "Ask me about your marketing performance..." : "Please log in to chat..."}
+                    disabled={!user}
+                    className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
                   />
                   <Button
                     type="submit"
-                    disabled={!query.trim() || isProcessing}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    disabled={!query.trim() || isProcessing || !user}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:opacity-50"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
