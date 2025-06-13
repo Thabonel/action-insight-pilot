@@ -46,15 +46,23 @@ async def get_campaigns_from_database():
 async def get_campaigns(token: str = Depends(verify_token)):
     """Get all campaigns"""
     try:
-        # Try AI agents first
+        # Try AI agents first (with proper error handling)
         if agent_manager.agents_available:
-            result = await agent_manager.campaign_agent.get_campaigns()
-            if result["success"]:
-                return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+            try:
+                if hasattr(agent_manager.campaign_agent, 'get_campaigns'):
+                    result = await agent_manager.campaign_agent.get_campaigns()
+                    if result.get("success"):
+                        logger.info("✅ Retrieved campaigns from AI agent")
+                        return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+                else:
+                    logger.info("⚠️ AI agent available but missing get_campaigns method")
+            except Exception as agent_error:
+                logger.error(f"❌ AI agent failed: {agent_error}")
         
         # Try database second
         db_campaigns = await get_campaigns_from_database()
         if db_campaigns is not None:
+            logger.info("✅ Using database campaigns")
             return APIResponse(success=True, data=db_campaigns)
         
         # Fallback to mock data
@@ -82,24 +90,29 @@ async def get_campaigns(token: str = Depends(verify_token)):
         return APIResponse(success=True, data=mock_campaigns)
         
     except Exception as e:
-        logger.error(f"Error getting campaigns: {e}")
+        logger.error(f"❌ Error getting campaigns: {e}")
         return APIResponse(success=False, error=str(e))
 
 @router.post("", response_model=APIResponse)
 async def create_campaign(campaign_data: Dict[str, Any], token: str = Depends(verify_token)):
     """Create a new campaign"""
     try:
-        # Try AI agents first
+        # Try AI agents first (with proper error handling)
         if agent_manager.agents_available:
-            result = await agent_manager.campaign_agent.create_campaign(
-                name=campaign_data.get("name"),
-                objective=campaign_data.get("objective"),
-                target_audience=campaign_data.get("target_audience"),
-                budget=campaign_data.get("budget"),
-                channels=campaign_data.get("channels", [])
-            )
-            if result["success"]:
-                return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+            try:
+                if hasattr(agent_manager.campaign_agent, 'create_campaign'):
+                    result = await agent_manager.campaign_agent.create_campaign(
+                        name=campaign_data.get("name"),
+                        objective=campaign_data.get("objective"),
+                        target_audience=campaign_data.get("target_audience"),
+                        budget=campaign_data.get("budget"),
+                        channels=campaign_data.get("channels", [])
+                    )
+                    if result.get("success"):
+                        logger.info("✅ Created campaign via AI agent")
+                        return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+            except Exception as agent_error:
+                logger.error(f"❌ AI agent create failed: {agent_error}")
         
         # Try database second
         try:
@@ -140,7 +153,7 @@ async def create_campaign(campaign_data: Dict[str, Any], token: str = Depends(ve
         return APIResponse(success=True, data=new_campaign)
         
     except Exception as e:
-        logger.error(f"Error creating campaign: {e}")
+        logger.error(f"❌ Error creating campaign: {e}")
         return APIResponse(success=False, error=str(e))
 
 @router.post("/bulk/create", response_model=APIResponse)
@@ -149,22 +162,27 @@ async def bulk_create_campaigns(campaigns_data: Dict[str, list], token: str = De
     try:
         campaigns = campaigns_data.get("campaigns", [])
         
-        # Try AI agents first
+        # Try AI agents first (with proper error handling)
         if agent_manager.agents_available:
-            created_campaigns = []
-            for campaign_data in campaigns:
-                result = await agent_manager.campaign_agent.create_campaign(
-                    name=campaign_data.get("name"),
-                    objective=campaign_data.get("objective"),
-                    target_audience=campaign_data.get("target_audience"),
-                    budget=campaign_data.get("budget"),
-                    channels=campaign_data.get("channels", [])
-                )
-                if result["success"]:
-                    created_campaigns.append(result["data"])
-            
-            if created_campaigns:
-                return APIResponse(success=True, data={"created": len(created_campaigns), "campaigns": created_campaigns})
+            try:
+                if hasattr(agent_manager.campaign_agent, 'create_campaign'):
+                    created_campaigns = []
+                    for campaign_data in campaigns:
+                        result = await agent_manager.campaign_agent.create_campaign(
+                            name=campaign_data.get("name"),
+                            objective=campaign_data.get("objective"),
+                            target_audience=campaign_data.get("target_audience"),
+                            budget=campaign_data.get("budget"),
+                            channels=campaign_data.get("channels", [])
+                        )
+                        if result.get("success"):
+                            created_campaigns.append(result["data"])
+                    
+                    if created_campaigns:
+                        logger.info(f"✅ Bulk created {len(created_campaigns)} campaigns via AI agent")
+                        return APIResponse(success=True, data={"created": len(created_campaigns), "campaigns": created_campaigns})
+            except Exception as agent_error:
+                logger.error(f"❌ AI agent bulk create failed: {agent_error}")
         
         # Try database second
         try:
@@ -214,18 +232,23 @@ async def bulk_create_campaigns(campaigns_data: Dict[str, list], token: str = De
         return APIResponse(success=True, data={"created": len(created_campaigns), "campaigns": created_campaigns})
         
     except Exception as e:
-        logger.error(f"Error bulk creating campaigns: {e}")
+        logger.error(f"❌ Error bulk creating campaigns: {e}")
         return APIResponse(success=False, error=str(e))
 
 @router.get("/{campaign_id}", response_model=APIResponse)
 async def get_campaign(campaign_id: str, token: str = Depends(verify_token)):
     """Get specific campaign"""
     try:
-        # Try AI agents first
+        # Try AI agents first (with proper error handling)
         if agent_manager.agents_available:
-            result = await agent_manager.campaign_agent.get_campaign_performance(campaign_id)
-            if result["success"]:
-                return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+            try:
+                if hasattr(agent_manager.campaign_agent, 'get_campaign_performance'):
+                    result = await agent_manager.campaign_agent.get_campaign_performance(campaign_id)
+                    if result.get("success"):
+                        logger.info(f"✅ Retrieved campaign {campaign_id} from AI agent")
+                        return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+            except Exception as agent_error:
+                logger.error(f"❌ AI agent get campaign failed: {agent_error}")
         
         # Try database second
         try:
@@ -268,22 +291,27 @@ async def get_campaign(campaign_id: str, token: str = Depends(verify_token)):
             "created_at": "2024-01-15T10:00:00Z",
             "updated_at": "2024-01-20T15:30:00Z"
         }
-        logger.info("📢 Returning mock campaign - database unavailable")
+        logger.info(f"📢 Returning mock campaign {campaign_id} - database unavailable")
         return APIResponse(success=True, data=mock_campaign)
         
     except Exception as e:
-        logger.error(f"Error getting campaign {campaign_id}: {e}")
+        logger.error(f"❌ Error getting campaign {campaign_id}: {e}")
         return APIResponse(success=False, error=str(e))
 
 @router.put("/{campaign_id}", response_model=APIResponse)
 async def update_campaign(campaign_id: str, updates: Dict[str, Any], token: str = Depends(verify_token)):
     """Update campaign"""
     try:
-        # Try AI agents first
+        # Try AI agents first (with proper error handling)
         if agent_manager.agents_available:
-            result = await agent_manager.campaign_agent.optimize_campaign(campaign_id)
-            if result["success"]:
-                return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+            try:
+                if hasattr(agent_manager.campaign_agent, 'optimize_campaign'):
+                    result = await agent_manager.campaign_agent.optimize_campaign(campaign_id)
+                    if result.get("success"):
+                        logger.info(f"✅ Updated campaign {campaign_id} via AI agent")
+                        return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
+            except Exception as agent_error:
+                logger.error(f"❌ AI agent update failed: {agent_error}")
         
         # Try database second
         try:
@@ -305,11 +333,11 @@ async def update_campaign(campaign_id: str, updates: Dict[str, Any], token: str 
             "updated_at": datetime.now().isoformat() + "Z",
             **updates
         }
-        logger.info("📢 Mock campaign update - database unavailable")
+        logger.info(f"📢 Mock campaign {campaign_id} update - database unavailable")
         return APIResponse(success=True, data=updated_campaign)
         
     except Exception as e:
-        logger.error(f"Error updating campaign {campaign_id}: {e}")
+        logger.error(f"❌ Error updating campaign {campaign_id}: {e}")
         return APIResponse(success=False, error=str(e))
 
 @router.delete("/{campaign_id}", response_model=APIResponse)
@@ -329,8 +357,9 @@ async def delete_campaign(campaign_id: str, token: str = Depends(verify_token)):
             logger.error(f"❌ Database delete failed: {db_error}")
         
         # Always return success for delete (idempotent)
+        logger.info(f"📢 Mock delete for campaign {campaign_id}")
         return APIResponse(success=True, data={"deleted": True, "id": campaign_id})
         
     except Exception as e:
-        logger.error(f"Error deleting campaign {campaign_id}: {e}")
+        logger.error(f"❌ Error deleting campaign {campaign_id}: {e}")
         return APIResponse(success=False, error=str(e))
