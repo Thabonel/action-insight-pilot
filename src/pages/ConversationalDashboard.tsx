@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { MessageSquare, Send, Zap, TrendingUp, Users, Mail, BarChart3, Clock } from 'lucide-react';
@@ -130,7 +129,8 @@ const ConversationalDashboard: React.FC = () => {
         throw new Error('Failed to fetch campaign data');
       }
       
-      const campaignData = campaignsResponse.data || [];
+      // Safely extract campaign data with proper type checking
+      const campaignData = Array.isArray(campaignsResponse.data) ? campaignsResponse.data : [];
       
       // Step 2: Determine query type and route to appropriate endpoint
       const queryType = determineQueryType(userQuery);
