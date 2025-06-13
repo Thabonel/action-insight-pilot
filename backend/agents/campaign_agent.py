@@ -46,6 +46,44 @@ class CampaignAgent(BaseAgent):
             "monitor_campaigns"
         ]
     
+    async def get_campaigns(self, filters=None, limit=50):
+        """
+        Retrieve active campaigns from the database
+        
+        Args:
+            filters (dict): Optional filters for campaigns
+            limit (int): Maximum number of campaigns to return
+        
+        Returns:
+            list: List of campaign dictionaries
+        """
+        try:
+            # Query the active_campaigns view that your backend expects
+            query = self.supabase.table('active_campaigns').select('*').limit(limit)
+            
+            # Apply filters if provided
+            if filters:
+                if 'status' in filters:
+                    query = query.eq('status', filters['status'])
+                if 'type' in filters:
+                    query = query.eq('type', filters['type'])
+                if 'channel' in filters:
+                    query = query.eq('channel', filters['channel'])
+            
+            # Execute the query
+            result = query.execute()
+            
+            if result.data:
+                self.logger.info(f"✅ Retrieved {len(result.data)} campaigns from database")
+                return result.data
+            else:
+                self.logger.info("⚠️ No campaigns found in database")
+                return []
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error retrieving campaigns: {str(e)}")
+            return []
+    
     async def execute_task(self, task_type: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute campaign management tasks using AI"""
         await self._initialize_ai_service()
