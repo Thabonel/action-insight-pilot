@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { MessageSquare, Send, Zap, TrendingUp, Users, Mail, BarChart3, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import ChatResponse from '@/components/dashboard/ChatResponse';
 import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
@@ -20,6 +22,7 @@ const ConversationalDashboard: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [insights, setInsights] = useState(behaviorTracker.getInsights());
   const [conversationContext, setConversationContext] = useState<any[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     behaviorTracker.trackAction('navigation', 'conversational_dashboard', { section: 'main' });
@@ -48,8 +51,8 @@ const ConversationalDashboard: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // Call real AI agent instead of fake processing
-      const response = await processQueryWithAI(query, conversationContext);
+      // Call real AI agent
+      const response = await processQueryWithRealAI(query, conversationContext);
       
       const newChat = {
         id: Date.now().toString(),
@@ -68,6 +71,11 @@ const ConversationalDashboard: React.FC = () => {
       
       setQuery('');
       behaviorTracker.trackFeatureComplete('conversational_query', actionId, true);
+      
+      toast({
+        title: "AI Response Generated",
+        description: "Your marketing assistant has analyzed your request.",
+      });
     } catch (error) {
       console.error('Query processing failed:', error);
       behaviorTracker.trackFeatureComplete('conversational_query', actionId, false);
@@ -76,7 +84,7 @@ const ConversationalDashboard: React.FC = () => {
       const errorResponse = {
         type: 'error',
         title: 'AI Assistant Temporarily Unavailable',
-        explanation: 'I\'m having trouble processing your request right now. Please try again in a moment.',
+        explanation: error instanceof Error ? error.message : 'I\'m having trouble processing your request right now. Please try again in a moment.',
         businessImpact: 'Your marketing data is safe and campaigns are still running.',
         nextActions: ['Try rephrasing your question', 'Check back in a few minutes', 'Contact support if issue persists']
       };
@@ -89,42 +97,44 @@ const ConversationalDashboard: React.FC = () => {
       };
       
       setChatHistory(prev => [newChat, ...prev]);
+      
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to AI assistant. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const processQueryWithAI = async (userQuery: string, context: any[]) => {
+  const processQueryWithRealAI = async (userQuery: string, context: any[]) => {
     try {
       // Step 1: Get real campaign data
-      const campaignsResponse = await fetch('/api/campaigns');
-      const campaignData = await campaignsResponse.json();
+      const campaignsResponse = await fetch('https://wheels-wins-orchestrator.onrender.com/api/campaigns', {
+        headers: {
+          'Authorization': 'Bearer fake-token', // You may need to implement proper auth
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // Step 2: Determine the type of request and route to appropriate agent
+      if (!campaignsResponse.ok) {
+        throw new Error('Failed to fetch campaign data');
+      }
+      
+      const campaignApiResponse = await campaignsResponse.json();
+      const campaignData = campaignApiResponse.success ? campaignApiResponse.data : [];
+      
+      // Step 2: Determine query type and route to appropriate endpoint
       const queryType = determineQueryType(userQuery);
       
       // Step 3: Call the appropriate AI agent with real data
       let agentResponse;
       
-      switch (queryType) {
-        case 'daily_focus':
-          agentResponse = await callDailyFocusAgent(userQuery, campaignData, context);
-          break;
-        case 'campaign_performance':
-          agentResponse = await callCampaignAgent('analyze_performance', { 
-            campaign_ids: campaignData.map((c: any) => c.id),
-            query: userQuery,
-            context: context
-          });
-          break;
-        case 'content_suggestions':
-          agentResponse = await callContentAgent(userQuery, campaignData, context);
-          break;
-        case 'lead_analysis':
-          agentResponse = await callLeadAgent(userQuery, context);
-          break;
-        default:
-          agentResponse = await callGeneralAgent(userQuery, campaignData, context);
+      if (queryType === 'daily_focus') {
+        agentResponse = await callDailyFocusAgent(userQuery, campaignData, context);
+      } else {
+        agentResponse = await callGeneralCampaignAgent(userQuery, campaignData, context);
       }
       
       // Step 4: Format response for the ChatResponse component
@@ -142,24 +152,17 @@ const ConversationalDashboard: React.FC = () => {
     if (lowerQuery.includes('focus') && (lowerQuery.includes('today') || lowerQuery.includes('should'))) {
       return 'daily_focus';
     }
-    if (lowerQuery.includes('campaign') && (lowerQuery.includes('perform') || lowerQuery.includes('best'))) {
-      return 'campaign_performance';
-    }
-    if (lowerQuery.includes('content') && (lowerQuery.includes('create') || lowerQuery.includes('next'))) {
-      return 'content_suggestions';
-    }
-    if (lowerQuery.includes('lead') && (lowerQuery.includes('convert') || lowerQuery.includes('quality'))) {
-      return 'lead_analysis';
-    }
     
     return 'general';
   };
 
   const callDailyFocusAgent = async (query: string, campaigns: any[], context: any[]) => {
-    // This is the key improvement - analyze TODAY'S priorities based on real data
-    const focusResponse = await fetch('/api/agents/daily-focus', {
+    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/daily-focus', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer fake-token' // You may need to implement proper auth
+      },
       body: JSON.stringify({
         query,
         campaigns,
@@ -168,54 +171,20 @@ const ConversationalDashboard: React.FC = () => {
       })
     });
     
-    return await focusResponse.json();
-  };
-
-  const callCampaignAgent = async (task: string, data: any) => {
-    const response = await fetch('/api/agents/campaign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        task_type: task,
-        input_data: data
-      })
-    });
+    if (!response.ok) {
+      throw new Error(`Daily focus agent failed: ${response.status} ${response.statusText}`);
+    }
     
     return await response.json();
   };
 
-  const callContentAgent = async (query: string, campaigns: any[], context: any[]) => {
-    const response = await fetch('/api/agents/content', {
+  const callGeneralCampaignAgent = async (query: string, campaigns: any[], context: any[]) => {
+    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/campaign', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query,
-        campaigns,
-        context
-      })
-    });
-    
-    return await response.json();
-  };
-
-  const callLeadAgent = async (query: string, context: any[]) => {
-    const response = await fetch('/api/agents/leads', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query,
-        context
-      })
-    });
-    
-    return await response.json();
-  };
-
-  const callGeneralAgent = async (query: string, campaigns: any[], context: any[]) => {
-    // Use campaign agent as general agent for marketing questions
-    const response = await fetch('/api/agents/campaign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer fake-token' // You may need to implement proper auth
+      },
       body: JSON.stringify({
         task_type: 'general_query',
         input_data: {
@@ -226,50 +195,43 @@ const ConversationalDashboard: React.FC = () => {
       })
     });
     
+    if (!response.ok) {
+      throw new Error(`Campaign agent failed: ${response.status} ${response.statusText}`);
+    }
+    
     return await response.json();
   };
 
   const formatAgentResponse = (agentResponse: any, queryType: string, campaignData: any[]) => {
-    // Convert AI agent responses to the format expected by ChatResponse component
+    // Handle the response based on your backend format
+    if (!agentResponse.success) {
+      throw new Error(agentResponse.error || 'AI agent returned an error');
+    }
+    
+    const responseData = agentResponse.data;
     
     if (queryType === 'daily_focus') {
       return {
         type: 'daily_focus',
-        title: 'Your Marketing Focus for Today',
-        explanation: agentResponse.focus_summary || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.',
-        businessImpact: agentResponse.business_impact || 'Focusing on these priorities could improve your marketing ROI significantly.',
-        nextActions: agentResponse.recommended_actions || [
+        title: responseData.title || 'Your Marketing Focus for Today',
+        explanation: responseData.focus_summary || responseData.explanation || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.',
+        businessImpact: responseData.business_impact || 'Focusing on these priorities could improve your marketing ROI significantly.',
+        nextActions: responseData.recommended_actions || [
           'Review underperforming campaigns',
           'Optimize high-potential content',
           'Follow up on hot leads'
         ],
-        data: agentResponse.priority_items || []
+        data: responseData.priority_items || []
       };
     }
     
-    if (queryType === 'campaign_performance' && agentResponse.analyses) {
-      return {
-        type: 'campaigns_performance',
-        title: 'Campaign Performance Analysis',
-        data: agentResponse.analyses.map((analysis: any) => ({
-          name: analysis.campaign_name,
-          performance: analysis.performance_score,
-          leads: analysis.key_metrics?.total_data_points || 0,
-          conversion: `${analysis.key_metrics?.average_performance || 0}%`
-        })),
-        explanation: agentResponse.analyses[0]?.ai_recommendations?.join(' ') || 'Your campaigns are performing well overall.',
-        businessImpact: `Based on current performance, these campaigns are generating significant value.`,
-        nextActions: agentResponse.analyses[0]?.ai_recommendations || ['Continue monitoring', 'Optimize underperformers']
-      };
-    }
-    
-    // Default formatting for other response types
+    // Default formatting for general queries
     return {
       type: 'general',
-      title: agentResponse.title || 'AI Marketing Insights',
-      explanation: agentResponse.explanation || agentResponse.summary || 'Here are insights based on your marketing data.',
-      businessImpact: agentResponse.business_impact || agentResponse.impact || 'These insights can help improve your marketing effectiveness.',
-      nextActions: agentResponse.next_actions || agentResponse.recommendations || ['Review the analysis', 'Take action on priority items']
+      title: responseData.title || 'AI Marketing Insights',
+      explanation: responseData.explanation || responseData.focus_summary || 'Here are insights based on your marketing data.',
+      businessImpact: responseData.business_impact || 'These insights can help improve your marketing effectiveness.',
+      nextActions: responseData.recommended_actions || responseData.next_actions || ['Review the analysis', 'Take action on priority items']
     };
   };
 
@@ -343,10 +305,11 @@ const ConversationalDashboard: React.FC = () => {
                             <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                             <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                           </div>
-                          <span className="text-sm text-slate-600">Analyzing your real campaign data...</span>
+                          <span className="text-sm text-slate-600">Connecting to AI assistant...</span>
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
                   
                   {chatHistory.map((chat) => (
                     <div key={chat.id} className="space-y-4">
