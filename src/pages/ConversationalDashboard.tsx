@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { MessageSquare, Send, Zap, TrendingUp, Users, Mail, BarChart3, Clock } from 'lucide-react';
@@ -6,11 +7,15 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from '@/lib/api-client';
 import ChatResponse from '@/components/dashboard/ChatResponse';
 import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
+import ServerStatusIndicator from '@/components/ServerStatusIndicator';
+
+type ServerStatus = 'sleeping' | 'waking' | 'awake' | 'error';
 
 const ConversationalDashboard: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -23,6 +28,8 @@ const ConversationalDashboard: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [insights, setInsights] = useState(behaviorTracker.getInsights());
   const [conversationContext, setConversationContext] = useState<any[]>([]);
+  const [serverStatus, setServerStatus] = useState<ServerStatus>('awake');
+  const [serverError, setServerError] = useState<string>('');
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -45,6 +52,38 @@ const ConversationalDashboard: React.FC = () => {
     "Schedule posts for next week"
   ];
 
+  const wakeUpServer = async () => {
+    setServerStatus('waking');
+    setServerError('');
+    
+    try {
+      const result = await apiClient.httpClient.wakeUpServer();
+      if (result.success) {
+        setServerStatus('awake');
+        toast({
+          title: "Server Ready",
+          description: "AI assistant is now active and ready to use.",
+        });
+      } else {
+        setServerStatus('error');
+        setServerError(result.error || 'Failed to wake up server');
+        toast({
+          title: "Wake Up Failed",
+          description: result.error || "Failed to wake up the server",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      setServerStatus('error');
+      setServerError('Unexpected error during server wake-up');
+      toast({
+        title: "Wake Up Error",
+        description: "An unexpected error occurred while waking up the server",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleQuerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -63,6 +102,30 @@ const ConversationalDashboard: React.FC = () => {
     setIsProcessing(true);
 
     try {
+      // Wake up server if it's sleeping
+      if (serverStatus === 'sleeping') {
+        console.log('Server is sleeping, waking it up first...');
+        setServerStatus('waking');
+        
+        toast({
+          title: "Preparing AI Assistant",
+          description: "Waking up the backend server, this may take up to 60 seconds...",
+        });
+
+        const wakeUpResult = await apiClient.httpClient.wakeUpServer();
+        if (!wakeUpResult.success) {
+          setServerStatus('error');
+          setServerError(wakeUpResult.error || 'Failed to wake up server');
+          throw new Error(wakeUpResult.error || 'Failed to wake up server');
+        }
+        
+        setServerStatus('awake');
+        toast({
+          title: "AI Assistant Ready",
+          description: "Now processing your request...",
+        });
+      }
+
       // Call real AI agent
       const response = await processQueryWithRealAI(query, conversationContext);
       
@@ -73,7 +136,8 @@ const ConversationalDashboard: React.FC = () => {
         timestamp: new Date(),
       };
 
-      setChatHistory(prev => [newChat, ...prev]);
+      // Fix: Append to end instead of prepending to maintain chronological order
+      setChatHistory(prev => [...prev, newChat]);
       
       // Update conversation context for better continuity
       setConversationContext(prev => [...prev, 
@@ -90,6 +154,8 @@ const ConversationalDashboard: React.FC = () => {
       });
     } catch (error) {
       console.error('Query processing failed:', error);
+      setServerStatus('error');
+      setServerError(error instanceof Error ? error.message : 'Unknown error');
       behaviorTracker.trackFeatureComplete('conversational_query', actionId, false);
       
       // Show error response
@@ -108,7 +174,8 @@ const ConversationalDashboard: React.FC = () => {
         timestamp: new Date(),
       };
       
-      setChatHistory(prev => [newChat, ...prev]);
+      // Fix: Append to end instead of prepending
+      setChatHistory(prev => [...prev, newChat]);
       
       toast({
         title: "Connection Error",
@@ -141,6 +208,10 @@ const ConversationalDashboard: React.FC = () => {
       });
       
       if (!directResponse.ok) {
+        if (directResponse.status === 0 || directResponse.status >= 500) {
+          setServerStatus('sleeping');
+          throw new Error('Backend server is sleeping. Please wake it up first.');
+        }
         throw new Error(`Campaign fetch failed: ${directResponse.status} ${directResponse.statusText}`);
       }
       
@@ -189,7 +260,7 @@ const ConversationalDashboard: React.FC = () => {
       query,
       campaigns,
       context,
-      date: new Date().toISOString().split('T')[0] // Today's date
+      date: new Date().toISOString().split('T')[0]
     };
 
     const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/daily-focus', {
@@ -202,6 +273,10 @@ const ConversationalDashboard: React.FC = () => {
     });
     
     if (!response.ok) {
+      if (response.status === 0 || response.status >= 500) {
+        setServerStatus('sleeping');
+        throw new Error('Backend server is sleeping. Please wake it up first.');
+      }
       throw new Error(`Daily focus agent failed: ${response.status} ${response.statusText}`);
     }
     
@@ -234,6 +309,10 @@ const ConversationalDashboard: React.FC = () => {
     });
     
     if (!response.ok) {
+      if (response.status === 0 || response.status >= 500) {
+        setServerStatus('sleeping');
+        throw new Error('Backend server is sleeping. Please wake it up first.');
+      }
       throw new Error(`Campaign agent failed: ${response.status} ${response.statusText}`);
     }
     
@@ -267,11 +346,24 @@ const ConversationalDashboard: React.FC = () => {
       };
     }
     
-    // Default formatting for general queries
+    // Default formatting for general queries - provide more specific responses based on query content
+    const lowerQuery = agentResponse.query?.toLowerCase() || '';
+    let title = 'AI Marketing Insights';
+    let explanation = agentResponse.explanation || agentResponse.focus_summary || 'Here are insights based on your marketing data.';
+    
+    // Provide more specific responses based on query type
+    if (lowerQuery.includes('campaign') && lowerQuery.includes('running')) {
+      title = `Campaign Status Overview`;
+      explanation = `You currently have ${campaignData.length} campaigns in your system. ${agentResponse.explanation || 'All campaigns appear to be configured and ready for optimization.'}`;
+    } else if (lowerQuery.includes('best') && lowerQuery.includes('performing')) {
+      title = 'Top Performing Campaigns';
+      explanation = agentResponse.explanation || `Based on your campaign data, here are the performance insights for your ${campaignData.length} campaigns.`;
+    }
+    
     return {
       type: 'general',
-      title: agentResponse.title || 'AI Marketing Insights',
-      explanation: agentResponse.explanation || agentResponse.focus_summary || 'Here are insights based on your marketing data.',
+      title,
+      explanation,
       businessImpact: agentResponse.business_impact || 'These insights can help improve your marketing effectiveness.',
       nextActions: agentResponse.recommended_actions || agentResponse.next_actions || ['Review the analysis', 'Take action on priority items']
     };
@@ -284,11 +376,20 @@ const ConversationalDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* AI Greeting - Fixed: pass insights prop */}
+        {/* AI Greeting */}
         <AIGreeting insights={insights} />
 
         {/* System Overview Cards */}
         <SystemOverviewCards />
+
+        {/* Server Status Indicator */}
+        {(serverStatus === 'sleeping' || serverStatus === 'waking' || serverStatus === 'error') && (
+          <ServerStatusIndicator
+            status={serverStatus}
+            onWakeUp={wakeUpServer}
+            errorMessage={serverError}
+          />
+        )}
 
         {/* Main Chat Interface */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -300,8 +401,12 @@ const ConversationalDashboard: React.FC = () => {
                   <MessageSquare className="h-6 w-6" />
                   <CardTitle>AI Marketing Assistant</CardTitle>
                   <div className="flex items-center text-sm bg-white/20 px-2 py-1 rounded">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                    {user ? 'Online' : 'Login Required'}
+                    <div className={`w-2 h-2 rounded-full mr-2 ${
+                      serverStatus === 'awake' ? 'bg-green-400 animate-pulse' : 
+                      serverStatus === 'waking' ? 'bg-yellow-400 animate-pulse' : 
+                      'bg-red-400'
+                    }`}></div>
+                    {user ? (serverStatus === 'awake' ? 'Online' : serverStatus === 'waking' ? 'Starting...' : 'Offline') : 'Login Required'}
                   </div>
                 </div>
               </CardHeader>
@@ -318,7 +423,7 @@ const ConversationalDashboard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Chat History */}
+                {/* Chat History - Fixed ordering */}
                 <div className="h-96 overflow-y-auto mb-6 space-y-4">
                   {chatHistory.length === 0 && !isProcessing && user && (
                     <div className="text-center py-12">
@@ -346,24 +451,7 @@ const ConversationalDashboard: React.FC = () => {
                     </div>
                   )}
                   
-                  {isProcessing && (
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                        <Zap className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="bg-gray-100 rounded-lg px-4 py-3 flex-1">
-                        <div className="flex items-center space-x-2">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          </div>
-                          <span className="text-sm text-slate-600">Connecting to AI assistant...</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
+                  {/* Display messages in chronological order (oldest first) */}
                   {chatHistory.map((chat) => (
                     <div key={chat.id} className="space-y-4">
                       {/* User Query */}
@@ -377,6 +465,36 @@ const ConversationalDashboard: React.FC = () => {
                       <ChatResponse response={chat.response} />
                     </div>
                   ))}
+                  
+                  {isProcessing && (
+                    <div className="space-y-4">
+                      {/* Show user's current query */}
+                      <div className="flex justify-end">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg px-4 py-3 max-w-md">
+                          {query}
+                        </div>
+                      </div>
+                      
+                      {/* Show processing indicator */}
+                      <div className="flex items-start space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                          <Zap className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="bg-gray-100 rounded-lg px-4 py-3 flex-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            </div>
+                            <span className="text-sm text-slate-600">
+                              {serverStatus === 'waking' ? 'Waking up AI assistant...' : 'Processing your request...'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Query Input */}
@@ -386,7 +504,7 @@ const ConversationalDashboard: React.FC = () => {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={user ? "Ask me about your marketing performance..." : "Please log in to chat..."}
-                    disabled={!user}
+                    disabled={!user || isProcessing}
                     className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
                   />
                   <Button
@@ -403,10 +521,10 @@ const ConversationalDashboard: React.FC = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions - Fixed: pass insights prop */}
+            {/* Quick Actions */}
             <QuickActionGrid insights={insights} />
             
-            {/* Learning Insights - Keep insights prop */}
+            {/* Learning Insights */}
             <LearningInsights insights={insights} />
           </div>
         </div>
