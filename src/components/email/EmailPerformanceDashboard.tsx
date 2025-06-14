@@ -70,7 +70,7 @@ const EmailPerformanceDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-green-900">{metrics.avgOpenRate}%</div>
             <div className="text-xs text-green-700">Avg Open Rate</div>
             <Badge {...getPerformanceBadge(metrics.avgOpenRate, 'open')} className="mt-1 text-xs">
-              {getPerformanceBadge(metrics.avgOpenRate,Gon'open').label}
+              {getPerformanceBadge(metrics.avgOpenRate, 'open').label}
             </Badge>
           </div>
           <div className="text-center p-3 bg-purple-50 rounded-lg">
