@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +31,7 @@ const Campaigns: React.FC = () => {
     description: ''
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     behaviorTracker.trackAction('navigation', 'campaigns', { section: 'main' });
@@ -44,14 +46,10 @@ const Campaigns: React.FC = () => {
       const result = await apiClient.getCampaigns();
       
       if (result.success && result.data) {
-        // Extract the campaigns array from result.data
         const campaignsData = Array.isArray(result.data) ? result.data : [];
         setCampaigns(campaignsData);
         behaviorTracker.trackFeatureComplete('campaigns_load', actionId, true);
-        toast({
-          title: "Campaigns loaded",
-          description: `Found ${campaignsData.length} campaigns`,
-        });
+        console.log('Campaigns loaded successfully:', campaignsData);
       } else {
         console.error('Failed to load campaigns:', result.error);
         setConnectionError(true);
@@ -92,21 +90,31 @@ const Campaigns: React.FC = () => {
     setCreating(true);
     
     try {
-      console.log('Creating campaign:', newCampaign);
+      console.log('Creating campaign with data:', newCampaign);
       const result = await apiClient.createCampaign(newCampaign);
       
       if (result.success && result.data) {
-        // Extract the created campaign from result.data
         const createdCampaign = result.data as Campaign;
+        console.log('Campaign created successfully:', createdCampaign);
+        
+        // Update local state
         setCampaigns(prev => [createdCampaign, ...prev]);
+        
+        // Reset form
         setNewCampaign({ name: '', type: 'email', status: 'draft', description: '' });
         setShowCreateForm(false);
         setConnectionError(false);
+        
         behaviorTracker.trackFeatureComplete('campaign_create', actionId, true);
+        
         toast({
           title: "Success!",
           description: `Campaign "${createdCampaign.name}" created successfully`,
         });
+        
+        // Navigate to campaign details
+        navigate(`/campaigns/${createdCampaign.id}`);
+        
       } else {
         console.error('Failed to create campaign:', result.error);
         behaviorTracker.trackFeatureComplete('campaign_create', actionId, false);

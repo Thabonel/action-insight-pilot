@@ -27,10 +27,21 @@ const CampaignForm: React.FC<CampaignFormProps> = ({
   onCancel,
   loading = false
 }) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!newCampaign.name.trim()) {
+      return;
+    }
+    
+    onSubmit(e);
+  };
+
   return (
     <div className="mb-8 bg-white shadow-sm rounded-lg border border-gray-200 p-6">
       <h3 className="text-lg font-medium text-slate-900 mb-4">Create New Campaign</h3>
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-2">
             Campaign Name *
@@ -44,6 +55,9 @@ const CampaignForm: React.FC<CampaignFormProps> = ({
             disabled={loading}
             placeholder="Enter campaign name"
           />
+          {!newCampaign.name.trim() && (
+            <p className="text-sm text-red-600 mt-1">Campaign name is required</p>
+          )}
         </div>
         
         <div>
