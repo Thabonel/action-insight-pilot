@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { MessageSquare, Send, Zap, TrendingUp, Users, Mail, BarChart3, Clock } from 'lucide-react';
@@ -285,8 +284,8 @@ const ConversationalDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* AI Greeting */}
-        <AIGreeting insights={insights} />
+        {/* AI Greeting - Fixed: no props */}
+        <AIGreeting />
 
         {/* System Overview Cards */}
         <SystemOverviewCards />
@@ -404,10 +403,10 @@ const ConversationalDashboard: React.FC = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions */}
-            <QuickActionGrid insights={insights} />
+            {/* Quick Actions - Fixed: no props */}
+            <QuickActionGrid />
             
-            {/* Learning Insights */}
+            {/* Learning Insights - Keep insights prop */}
             <LearningInsights insights={insights} />
           </div>
         </div>
