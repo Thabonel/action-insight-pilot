@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import InsightsCards from '@/components/dashboard/InsightsCards';
-import DashboardChatInterface from '@/components/dashboard/DashboardChatInterface';
-import InsightsPanel from '@/components/dashboard/InsightsPanel';
-import PerformanceChart from '@/components/dashboard/PerformanceChart';
+import AIGreeting from '@/components/dashboard/AIGreeting';
+import ChatResponse from '@/components/dashboard/ChatResponse';
+import LearningInsights from '@/components/dashboard/LearningInsights';
+import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
+import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 
 const Dashboard: React.FC = () => {
   const [insights, setInsights] = useState(behaviorTracker.getInsights());
@@ -30,22 +30,25 @@ const Dashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* Insights Cards */}
-      <InsightsCards insights={insights} />
+      {/* System Overview Cards */}
+      <SystemOverviewCards />
+
+      {/* AI Greeting */}
+      <AIGreeting />
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chat Interface */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        {/* Quick Actions */}
         <div className="lg:col-span-2">
-          <DashboardChatInterface />
+          <QuickActionGrid />
         </div>
-
-        {/* Insights Panel */}
-        <InsightsPanel insights={insights} />
+        
+        {/* Learning Insights */}
+        <LearningInsights insights={insights} />
       </div>
 
-      {/* Performance Chart */}
-      <PerformanceChart />
+      {/* Chat Response */}
+      <ChatResponse />
     </div>
   );
 };
