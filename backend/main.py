@@ -1,73 +1,38 @@
+import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
-# Import route modules
-from routes import campaigns, leads, content, proposals, internal_publishing, email, integrations, agents
+from dotenv import load_dotenv
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-app = FastAPI(title="Agentic AI Marketing Platform API", version="1.0.0")
-# Configure CORS with more permissive settings
+
+# Load environment variables
+load_dotenv()
+
+# Initialize FastAPI app
+app = FastAPI()
+
+# CORS settings
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "https://wheels-wins.vercel.app",
+    "https://wheels-wins-git-staging-wheels-wins.vercel.app",
+    "https://wheels-wins-git-dev-wheels-wins.vercel.app",
+    os.getenv("FRONTEND_URL")
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        # Production URLs
-        "https://main--agentic-ai-marketing.netlify.app",
-        "https://wheels-wins-orchestrator.onrender.com",
-        # Development URLs
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8080",
-        # Lovable URLs (more comprehensive)
-        "https://lovable.dev",
-        "https://app.lovable.dev",
-        "https://preview.lovable.dev",
-        "https://deploy.lovable.dev",
-        # Add wildcard for Lovable subdomains in development
-        "*"  # Temporary - remove in production
-    ],
+    allow_origins=[origin for origin in origins if origin],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
-    allow_headers=[
-        "Accept",
-        "Accept-Language",
-        "Content-Language",
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "Origin",
-        "Access-Control-Request-Method",
-        "Access-Control-Request-Headers",
-    ],
-    expose_headers=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-# Add explicit OPTIONS handler for troubleshooting
-@app.options("/{full_path:path}")
-async def options_handler(full_path: str):
-    """Handle OPTIONS requests explicitly"""
-    return {"message": "OK"}
-# Include routers
-app.include_router(campaigns.router)
-app.include_router(leads.router)
-app.include_router(content.router)
-app.include_router(proposals.router)
-app.include_router(internal_publishing.router)
-app.include_router(email.router)
-app.include_router(integrations.router)
-app.include_router(agents.router)
-@app.get("/")
-async def root():
-    return {"message": "Agentic AI Marketing Platform API", "status": "running"}
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "service": "marketing-platform-api"}
-# Add a test endpoint for CORS debugging
-@app.get("/api/test")
-async def test_cors():
-    return {"message": "CORS test successful", "timestamp": "2025-06-13"}
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+from routes.user_aware_agents import router as user_aware_router
+
+# Add the new user-aware routes
+app.include_router(user_aware_router)
