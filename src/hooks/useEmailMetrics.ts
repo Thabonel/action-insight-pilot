@@ -1,7 +1,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/api-client';
+import { api
+
+apiClient } from '@/lib/api-client';
 
 export interface EmailMetricsData {
   total_sent: number;
@@ -76,22 +78,24 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
       const response = await apiClient.getEmailRealTimeMetrics(campaignId, timeRange);
       
       if (response.success && response.data) {
-        // Ensure all numeric values are properly defined
-        const safeMetrics = {
-          ...DEFAULT_METRICS,
-          ...response.data,
-          total_sent: response.data.total_sent || 0,
-          total_delivered: response.data.total_delivered || 0,
-          total_opened: response.data.total_opened || 0,
-          total_clicked: response.data.total_clicked || 0,
-          total_bounced: response.data.total_bounced || 0,
-          total_unsubscribed: response.data.total_unsubscribed || 0,
-          delivery_rate: response.data.delivery_rate || 0,
-          open_rate: response.data.open_rate || 0,
-          click_rate: response.data.click_rate || 0,
-          bounce_rate: response.data.bounce_rate || 0,
-          unsubscribe_rate: response.data.unsubscribe_rate || 0,
-          engagement_score: response.data.engagement_score || 0,
+        // Safely cast response.data to EmailMetricsData and provide fallbacks
+        const apiData = response.data as Partial<EmailMetricsData>;
+        const safeMetrics: EmailMetricsData = {
+          total_sent: apiData.total_sent ?? 0,
+          total_delivered: apiData.total_delivered ?? 0,
+          total_opened: apiData.total_opened ?? 0,
+          total_clicked: apiData.total_clicked ?? 0,
+          total_bounced: apiData.total_bounced ?? 0,
+          total_unsubscribed: apiData.total_unsubscribed ?? 0,
+          delivery_rate: apiData.delivery_rate ?? 0,
+          open_rate: apiData.open_rate ?? 0,
+          click_rate: apiData.click_rate ?? 0,
+          bounce_rate: apiData.bounce_rate ?? 0,
+          unsubscribe_rate: apiData.unsubscribe_rate ?? 0,
+          engagement_score: apiData.engagement_score ?? 0,
+          trends: apiData.trends ?? [],
+          insights: apiData.insights ?? [],
+          last_updated: apiData.last_updated ?? new Date().toISOString()
         };
         setMetrics(safeMetrics);
         setError(null);
