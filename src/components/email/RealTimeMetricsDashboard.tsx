@@ -30,11 +30,13 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
     );
   }
 
-  const formatNumber = (num: number) => {
+  const formatNumber = (num: number | undefined) => {
+    if (num === undefined || num === null || isNaN(num)) return '0';
     return new Intl.NumberFormat().format(num);
   };
 
-  const formatPercentage = (num: number) => {
+  const formatPercentage = (num: number | undefined) => {
+    if (num === undefined || num === null || isNaN(num)) return '0.0%';
     return `${num.toFixed(1)}%`;
   };
 
@@ -128,7 +130,7 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
                   <Users className="h-4 w-4 text-orange-500" />
                   <span className="text-sm text-gray-600">Engagement</span>
                 </div>
-                <div className="text-2xl font-bold">{metrics.engagement_score}</div>
+                <div className="text-2xl font-bold">{formatNumber(metrics.engagement_score)}</div>
                 <div className="text-sm text-gray-500">Overall score</div>
               </CardContent>
             </Card>
@@ -196,7 +198,7 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
 
           {/* Last Updated */}
           <div className="text-center text-sm text-gray-500">
-            Last updated: {new Date(metrics.last_updated).toLocaleString()}
+            Last updated: {metrics.last_updated ? new Date(metrics.last_updated).toLocaleString() : 'Never'}
           </div>
         </>
       ) : null}
