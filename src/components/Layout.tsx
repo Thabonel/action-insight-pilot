@@ -32,7 +32,7 @@ const Layout: React.FC = () => {
   };
 
   const navigation = [
-    { name: 'AI Dashboard', href: '/', icon: BarChart3, description: 'Conversational AI interface' },
+    { name: 'AI Dashboard', href: '/conversational-dashboard', icon: BarChart3, description: 'Conversational AI interface' },
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3, description: 'Performance overview' },
     { name: 'Campaigns', href: '/campaigns', icon: PlusCircle, description: 'Marketing campaigns' },
     { name: 'Leads', href: '/leads', icon: Users, description: 'Lead generation & scoring' },
