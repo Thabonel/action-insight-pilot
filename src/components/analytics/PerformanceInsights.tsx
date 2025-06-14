@@ -39,6 +39,11 @@ const PerformanceInsights: React.FC = () => {
     { path: 'LinkedIn → Profile → Direct', conversions: 34, rate: 6.7 }
   ]);
 
+  // Ensure all arrays are safely handled
+  const safeRoiAnalysis = Array.isArray(roiAnalysis) ? roiAnalysis : [];
+  const safeContentMetrics = Array.isArray(contentMetrics) ? contentMetrics : [];
+  const safeConversionPaths = Array.isArray(conversionPaths) ? conversionPaths : [];
+
   const getPerformanceBadge = (performance: string) => {
     switch (performance) {
       case 'excellent': return { variant: 'default' as const, label: 'Excellent' };
@@ -66,7 +71,7 @@ const PerformanceInsights: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Campaign ROI Analysis</h4>
           <div className="space-y-3">
-            {roiAnalysis.map((campaign, index) => (
+            {safeRoiAnalysis.map((campaign, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h5 className="font-medium text-gray-900">{campaign.campaign}</h5>
@@ -102,7 +107,7 @@ const PerformanceInsights: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Content Effectiveness Metrics</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {contentMetrics.map((content, index) => (
+            {safeContentMetrics.map((content, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h5 className="font-medium text-gray-900">{content.type}</h5>
@@ -163,7 +168,7 @@ const PerformanceInsights: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Conversion Path Analysis</h4>
           <div className="space-y-2">
-            {conversionPaths.map((path, index) => (
+            {safeConversionPaths.map((path, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <span className="font-medium text-gray-900">{path.path}</span>

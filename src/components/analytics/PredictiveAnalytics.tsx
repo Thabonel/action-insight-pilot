@@ -71,6 +71,12 @@ const PredictiveAnalytics: React.FC = () => {
     { month: 'Month 6', actual: null, predicted: 61000 }
   ]);
 
+  // Ensure all arrays are safely handled
+  const safeCampaignPredictions = Array.isArray(campaignPredictions) ? campaignPredictions : [];
+  const safeLeadPredictions = Array.isArray(leadPredictions) ? leadPredictions : [];
+  const safeBudgetOptimization = Array.isArray(budgetOptimization) ? budgetOptimization : [];
+  const safeForecastData = Array.isArray(forecastData) ? forecastData : [];
+
   return (
     <Card>
       <CardHeader>
@@ -85,13 +91,13 @@ const PredictiveAnalytics: React.FC = () => {
           quarterlyForecast={predictions.quarterlyForecast}
         />
 
-        <RevenueForecastChart forecastData={forecastData} />
+        <RevenueForecastChart forecastData={safeForecastData} />
 
-        <CampaignSuccessPredictions campaignPredictions={campaignPredictions} />
+        <CampaignSuccessPredictions campaignPredictions={safeCampaignPredictions} />
 
-        <LeadConversionPredictions leadPredictions={leadPredictions} />
+        <LeadConversionPredictions leadPredictions={safeLeadPredictions} />
 
-        <BudgetOptimization budgetOptimization={budgetOptimization} />
+        <BudgetOptimization budgetOptimization={safeBudgetOptimization} />
       </CardContent>
     </Card>
   );
