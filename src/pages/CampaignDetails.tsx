@@ -6,7 +6,7 @@ import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, AlertCircle } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -26,6 +26,7 @@ const CampaignDetails: React.FC = () => {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -37,16 +38,22 @@ const CampaignDetails: React.FC = () => {
     if (id) {
       behaviorTracker.trackAction('navigation', 'campaign_details', { campaignId: id });
       loadCampaign(id);
+    } else {
+      setError('No campaign ID provided');
+      setLoading(false);
     }
   }, [id]);
 
   const loadCampaign = async (campaignId: string) => {
     const actionId = behaviorTracker.trackFeatureStart('campaign_load_details');
     try {
+      setError(null);
+      console.log('Loading campaign details for ID:', campaignId);
       const result = await apiClient.getCampaignById(campaignId);
       
       if (result.success && result.data) {
         const campaignData = result.data as Campaign;
+        console.log('Campaign loaded successfully:', campaignData);
         setCampaign(campaignData);
         setFormData({
           name: campaignData.name || '',
@@ -56,24 +63,26 @@ const CampaignDetails: React.FC = () => {
         });
         behaviorTracker.trackFeatureComplete('campaign_load_details', actionId, true);
       } else {
-        console.error('Failed to load campaign:', result.error);
+        const errorMessage = result.error || "Campaign not found";
+        console.error('Failed to load campaign:', errorMessage);
+        setError(errorMessage);
         behaviorTracker.trackFeatureComplete('campaign_load_details', actionId, false);
         toast({
           title: "Failed to load campaign",
-          description: result.error || "Campaign not found",
+          description: errorMessage,
           variant: "destructive",
         });
-        navigate('/campaigns');
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load campaign details';
       console.error('Error loading campaign:', error);
+      setError(errorMessage);
       behaviorTracker.trackFeatureComplete('campaign_load_details', actionId, false);
       toast({
         title: "Error",
-        description: "Failed to load campaign details",
+        description: errorMessage,
         variant: "destructive",
       });
-      navigate('/campaigns');
     } finally {
       setLoading(false);
     }
@@ -93,6 +102,7 @@ const CampaignDetails: React.FC = () => {
     setSaving(true);
 
     try {
+      console.log('Updating campaign with data:', formData);
       const result = await apiClient.updateCampaign(id, formData);
       
       if (result.success) {
@@ -101,7 +111,8 @@ const CampaignDetails: React.FC = () => {
           title: "Success!",
           description: "Campaign updated successfully",
         });
-        navigate('/campaigns');
+        // Reload campaign data to reflect changes
+        await loadCampaign(id);
       } else {
         console.error('Failed to update campaign:', result.error);
         behaviorTracker.trackFeatureComplete('campaign_update', actionId, false);
@@ -131,12 +142,32 @@ const CampaignDetails: React.FC = () => {
     }));
   };
 
+  const handleBackToCampaigns = () => {
+    navigate('/campaigns');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading campaign details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-4 py-6 sm:px-0 max-w-4xl mx-auto">
+        <div className="text-center py-12">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Campaign Not Found</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Button onClick={handleBackToCampaigns} className="flex items-center space-x-2">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Campaigns</span>
+          </Button>
         </div>
       </div>
     );
@@ -149,7 +180,7 @@ const CampaignDetails: React.FC = () => {
         <div className="flex items-center space-x-4">
           <Button
             variant="outline"
-            onClick={() => navigate('/campaigns')}
+            onClick={handleBackToCampaigns}
             className="flex items-center space-x-2"
           >
             <ArrowLeft className="h-4 w-4" />
