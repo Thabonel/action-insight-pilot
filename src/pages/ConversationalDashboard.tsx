@@ -284,8 +284,8 @@ const ConversationalDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* AI Greeting - Fixed: no props */}
-        <AIGreeting />
+        {/* AI Greeting - Fixed: pass insights prop */}
+        <AIGreeting insights={insights} />
 
         {/* System Overview Cards */}
         <SystemOverviewCards />
@@ -403,8 +403,8 @@ const ConversationalDashboard: React.FC = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Actions - Fixed: no props */}
-            <QuickActionGrid />
+            {/* Quick Actions - Fixed: pass insights prop */}
+            <QuickActionGrid insights={insights} />
             
             {/* Learning Insights - Keep insights prop */}
             <LearningInsights insights={insights} />
