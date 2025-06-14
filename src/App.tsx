@@ -1,78 +1,136 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import Layout from "@/components/Layout";
-import Dashboard from "@/pages/Dashboard";
-import ConversationalDashboard from "@/pages/ConversationalDashboard";
-import Campaigns from "@/pages/Campaigns";
-import CampaignManagement from "@/pages/CampaignManagement";
-import Settings from "@/pages/Settings";
-import AuthPage from "@/pages/auth/AuthPage";
-import NotFound from "./pages/NotFound";
-import Leads from "@/pages/Leads";
-import Content from "@/pages/Content";
-import Social from "@/pages/Social";
-import Email from "@/pages/Email";
-import Analytics from "@/pages/Analytics";
-import Workflows from "@/pages/Workflows";
-import UserManual from "@/pages/UserManual";
-import Proposals from "@/pages/Proposals";
-import ConnectPlatforms from "@/pages/ConnectPlatforms";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/contexts/AuthContext';
+import Layout from '@/components/Layout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import ErrorBoundary from '@/components/ErrorBoundary';
+
+// Pages
+import Index from '@/pages/Index';
+import Dashboard from '@/pages/Dashboard';
+import ConversationalDashboard from '@/pages/ConversationalDashboard';
+import Campaigns from '@/pages/Campaigns';
+import CampaignDetails from '@/pages/CampaignDetails';
+import CampaignManagement from '@/pages/CampaignManagement';
+import Leads from '@/pages/Leads';
+import Content from '@/pages/Content';
+import Social from '@/pages/Social';
+import Email from '@/pages/Email';
+import Analytics from '@/pages/Analytics';
+import Workflows from '@/pages/Workflows';
+import Proposals from '@/pages/Proposals';
+import Settings from '@/pages/Settings';
+import UserManual from '@/pages/UserManual';
+import ConnectPlatforms from '@/pages/ConnectPlatforms';
+import NotFound from '@/pages/NotFound';
+import AuthPage from '@/pages/auth/AuthPage';
+
+import './App.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 3,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
     },
   },
 });
 
-const App = () => (
-  <ErrorBoundary>
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<ConversationalDashboard />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="campaigns" element={<Campaigns />} />
-                <Route path="campaign-management" element={<CampaignManagement />} />
-                <Route path="leads" element={<Leads />} />
-                <Route path="content" element={<Content />} />
-                <Route path="social" element={<Social />} />
-                <Route path="email" element={<Email />} />
-                <Route path="analytics" element={<Analytics />} />
-                <Route path="workflows" element={<Workflows />} />
-                <Route path="proposals" element={<Proposals />} />
-                <Route path="connect-platforms" element={<ConnectPlatforms />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="user-manual" element={<UserManual />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
+      <AuthProvider>
+        <ErrorBoundary>
+          <Router>
+            <div className="min-h-screen bg-gray-50">
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Index />} />
+                  <Route path="dashboard" element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="conversational-dashboard" element={
+                    <ProtectedRoute>
+                      <ConversationalDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="campaigns" element={
+                    <ProtectedRoute>
+                      <Campaigns />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="campaigns/:id" element={
+                    <ProtectedRoute>
+                      <CampaignDetails />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="campaign-management" element={
+                    <ProtectedRoute>
+                      <CampaignManagement />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="leads" element={
+                    <ProtectedRoute>
+                      <Leads />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="content" element={
+                    <ProtectedRoute>
+                      <Content />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="social" element={
+                    <ProtectedRoute>
+                      <Social />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="email" element={
+                    <ProtectedRoute>
+                      <Email />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="analytics" element={
+                    <ProtectedRoute>
+                      <Analytics />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="workflows" element={
+                    <ProtectedRoute>
+                      <Workflows />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="proposals" element={
+                    <ProtectedRoute>
+                      <Proposals />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="settings" element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="user-manual" element={<UserManual />} />
+                  <Route path="connect-platforms" element={
+                    <ProtectedRoute>
+                      <ConnectPlatforms />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+            </div>
+            <Toaster />
+          </Router>
+        </ErrorBoundary>
+      </AuthProvider>
     </QueryClientProvider>
-  </ErrorBoundary>
-);
+  );
+}
 
 export default App;
