@@ -85,6 +85,20 @@ export class HttpClient {
           };
         }
 
+        if (response.status === 401) {
+          return {
+            success: false,
+            error: 'Authentication required. Please log in again.',
+          };
+        }
+
+        if (response.status === 403) {
+          return {
+            success: false,
+            error: 'Access denied. You do not have permission to perform this action.',
+          };
+        }
+
         let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
         try {
           const errorData = await response.json();
