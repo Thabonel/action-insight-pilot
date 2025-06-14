@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import CampaignForm from '@/components/CampaignForm';
 import CampaignCard from '@/components/CampaignCard';
 import EmptyState from '@/components/EmptyState';
+import ServerStatusIndicator from '@/components/ServerStatusIndicator';
 import { AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -18,12 +19,16 @@ interface Campaign {
   description?: string;
 }
 
+type ServerStatus = 'sleeping' | 'waking' | 'awake' | 'error';
+
 const Campaigns: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
+  const [serverStatus, setServerStatus] = useState<ServerStatus>('sleeping');
+  const [serverError, setServerError] = useState<string>('');
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     type: 'email',
@@ -38,6 +43,38 @@ const Campaigns: React.FC = () => {
     loadCampaigns();
   }, []);
 
+  const wakeUpServer = async () => {
+    setServerStatus('waking');
+    setServerError('');
+    
+    try {
+      const result = await apiClient.httpClient.wakeUpServer();
+      if (result.success) {
+        setServerStatus('awake');
+        toast({
+          title: "Server Ready",
+          description: "Backend server is now active and ready to use.",
+        });
+      } else {
+        setServerStatus('error');
+        setServerError(result.error || 'Failed to wake up server');
+        toast({
+          title: "Wake Up Failed",
+          description: result.error || "Failed to wake up the server",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      setServerStatus('error');
+      setServerError('Unexpected error during server wake-up');
+      toast({
+        title: "Wake Up Error",
+        description: "An unexpected error occurred while waking up the server",
+        variant: "destructive",
+      });
+    }
+  };
+
   const loadCampaigns = async () => {
     const actionId = behaviorTracker.trackFeatureStart('campaigns_load');
     try {
@@ -48,11 +85,13 @@ const Campaigns: React.FC = () => {
       if (result.success && result.data) {
         const campaignsData = Array.isArray(result.data) ? result.data : [];
         setCampaigns(campaignsData);
+        setServerStatus('awake');
         behaviorTracker.trackFeatureComplete('campaigns_load', actionId, true);
         console.log('Campaigns loaded successfully:', campaignsData);
       } else {
         console.error('Failed to load campaigns:', result.error);
         setConnectionError(true);
+        setServerStatus('sleeping');
         behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
         toast({
           title: "Failed to load campaigns",
@@ -63,6 +102,7 @@ const Campaigns: React.FC = () => {
     } catch (error) {
       console.error('Error loading campaigns:', error);
       setConnectionError(true);
+      setServerStatus('sleeping');
       behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
       toast({
         title: "Connection Error",
@@ -90,6 +130,30 @@ const Campaigns: React.FC = () => {
     setCreating(true);
     
     try {
+      // First, wake up the server if it's sleeping
+      if (serverStatus === 'sleeping') {
+        console.log('Server is sleeping, waking it up first...');
+        setServerStatus('waking');
+        
+        toast({
+          title: "Preparing Server",
+          description: "Waking up the backend server, this may take up to 60 seconds...",
+        });
+
+        const wakeUpResult = await apiClient.httpClient.wakeUpServer();
+        if (!wakeUpResult.success) {
+          setServerStatus('error');
+          setServerError(wakeUpResult.error || 'Failed to wake up server');
+          throw new Error(wakeUpResult.error || 'Failed to wake up server');
+        }
+        
+        setServerStatus('awake');
+        toast({
+          title: "Server Ready",
+          description: "Now creating your campaign...",
+        });
+      }
+
       console.log('Creating campaign with data:', newCampaign);
       const result = await apiClient.createCampaign(newCampaign);
       
@@ -112,11 +176,22 @@ const Campaigns: React.FC = () => {
           description: `Campaign "${createdCampaign.name}" created successfully`,
         });
         
-        // Navigate to campaign details
-        navigate(`/campaigns/${createdCampaign.id}`);
+        // Navigate to campaign details - ensure we have a valid ID
+        if (createdCampaign.id) {
+          navigate(`/campaigns/${createdCampaign.id}`);
+        } else {
+          console.error('Campaign created but no ID returned');
+          toast({
+            title: "Warning",
+            description: "Campaign created but navigation failed. Please refresh the page.",
+            variant: "destructive",
+          });
+        }
         
       } else {
         console.error('Failed to create campaign:', result.error);
+        setServerStatus('error');
+        setServerError(result.error || 'Unknown error occurred');
         behaviorTracker.trackFeatureComplete('campaign_create', actionId, false);
         toast({
           title: "Failed to create campaign",
@@ -127,6 +202,8 @@ const Campaigns: React.FC = () => {
     } catch (error) {
       console.error('Error creating campaign:', error);
       setConnectionError(true);
+      setServerStatus('error');
+      setServerError(error instanceof Error ? error.message : 'Unknown error');
       behaviorTracker.trackFeatureComplete('campaign_create', actionId, false);
       toast({
         title: "Connection Error",
@@ -176,7 +253,16 @@ const Campaigns: React.FC = () => {
         </button>
       </div>
 
-      {connectionError && (
+      {/* Server Status Indicator */}
+      {(serverStatus === 'sleeping' || serverStatus === 'waking' || serverStatus === 'error') && (
+        <ServerStatusIndicator
+          status={serverStatus}
+          onWakeUp={wakeUpServer}
+          errorMessage={serverError}
+        />
+      )}
+
+      {connectionError && serverStatus !== 'sleeping' && (
         <Alert className="mb-6 border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
