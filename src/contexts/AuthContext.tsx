@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthService, supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
@@ -37,26 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Check current user
-    AuthService.getCurrentUser().then(({ user }) => {
-      setUser(user);
-      if (user) {
-        // Get the session to access the token
-        const getSession = async () => {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.access_token) {
-            updateToken(session.access_token);
-          }
-        };
-        getSession();
-        behaviorTracker.trackAction('execution', 'auth', { action: 'auto_login', userId: user.id });
-      } else {
-        updateToken('');
-      }
-      setLoading(false);
-    });
-
-    // Listen for auth changes
+    // Set up auth state listener FIRST
     const { data: { subscription } } = AuthService.onAuthStateChange(async (user) => {
       setUser(user);
       if (user) {
@@ -69,6 +51,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         updateToken('');
         behaviorTracker.trackAction('execution', 'auth', { action: 'logout' });
+      }
+      setLoading(false);
+    });
+
+    // THEN check for existing session
+    AuthService.getCurrentUser().then(async ({ user }) => {
+      setUser(user);
+      if (user) {
+        // Get the session to access the token
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          updateToken(session.access_token);
+        }
+        behaviorTracker.trackAction('execution', 'auth', { action: 'auto_login', userId: user.id });
+      } else {
+        updateToken('');
       }
       setLoading(false);
     });
