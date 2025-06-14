@@ -1,20 +1,28 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-# Security
-security = HTTPBearer(auto_error=False)
+# ... keep existing code
 
-async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Verify JWT token from Supabase or other auth provider"""
-    # TEMPORARY: Skip auth validation for testing
-    # TODO: Add proper JWT validation later
-    return "mock-user-token"
-    
-    # Original validation (commented out for testing):
-    # if not credentials or not credentials.credentials:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="Invalid authentication credentials",
-    #         headers={"WWW-Authenticate": "Bearer"},
-    #     )
-    # return credentials.credentials
+import jwt
+import os
+from typing import Dict, Any
+
+def verify_token(token: str) -> Dict[str, Any]:
+    """Verify JWT token from Supabase and extract user data"""
+    try:
+        # Get Supabase JWT secret
+        jwt_secret = os.getenv("SUPABASE_JWT_SECRET")
+        if not jwt_secret:
+            raise ValueError("SUPABASE_JWT_SECRET not configured")
+        
+        # Decode and verify the token
+        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+        
+        return payload
+        
+    except jwt.ExpiredSignatureError:
+        raise ValueError("Token has expired")
+    except jwt.InvalidTokenError:
+        raise ValueError("Invalid token")
+    except Exception as e:
+        raise ValueError(f"Token verification failed: {str(e)}")
+
+# ... keep existing code
