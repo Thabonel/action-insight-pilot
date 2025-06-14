@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthService, supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
@@ -30,8 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateToken = (newToken: string) => {
     // Only set token if it's different from current token
-    if (new
-Token !== currentToken) {
+    if (newToken !== currentToken) {
       console.log('HTTP Client token updated:', newToken ? 'Token provided' : 'Token cleared');
       apiClient.setToken(newToken);
       setCurrentToken(newToken);
