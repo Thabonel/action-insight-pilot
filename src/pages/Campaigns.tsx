@@ -161,10 +161,7 @@ const Campaigns: React.FC = () => {
         const createdCampaign = result.data as Campaign;
         console.log('Campaign created successfully:', createdCampaign);
         
-        // Update local state
-        setCampaigns(prev => [createdCampaign, ...prev]);
-        
-        // Reset form
+        // Reset form and hide create form
         setNewCampaign({ name: '', type: 'email', status: 'draft', description: '' });
         setShowCreateForm(false);
         setConnectionError(false);
@@ -176,16 +173,12 @@ const Campaigns: React.FC = () => {
           description: `Campaign "${createdCampaign.name}" created successfully`,
         });
         
-        // Navigate to campaign details - ensure we have a valid ID
+        // Reload the campaigns list to show the new campaign
+        await loadCampaigns();
+        
+        // Navigate to campaign details if we have a valid ID
         if (createdCampaign.id) {
           navigate(`/campaigns/${createdCampaign.id}`);
-        } else {
-          console.error('Campaign created but no ID returned');
-          toast({
-            title: "Warning",
-            description: "Campaign created but navigation failed. Please refresh the page.",
-            variant: "destructive",
-          });
         }
         
       } else {
@@ -294,10 +287,15 @@ const Campaigns: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {campaigns.length === 0 ? (
-          <EmptyState onCreateCampaign={handleShowCreateForm} />
+          <div className="col-span-full">
+            <EmptyState onCreateCampaign={handleShowCreateForm} />
+          </div>
         ) : (
           campaigns.map((campaign) => (
-            <CampaignCard key={campaign.id || Math.random()} campaign={campaign} />
+            <CampaignCard 
+              key={campaign.id || `campaign-${Math.random()}`} 
+              campaign={campaign} 
+            />
           ))
         )}
       </div>
