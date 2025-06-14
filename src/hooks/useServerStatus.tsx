@@ -46,7 +46,7 @@ export const useServerStatus = () => {
     setServerStatus('sleeping');
   };
 
-  const setServerError = (error: string) => {
+  const handleServerError = (error: string) => {
     setServerStatus('error');
     setServerError(error);
   };
@@ -56,6 +56,6 @@ export const useServerStatus = () => {
     serverError,
     wakeUpServer,
     setServerSleeping,
-    setServerError: setServerError
+    setServerError: handleServerError
   };
 };
