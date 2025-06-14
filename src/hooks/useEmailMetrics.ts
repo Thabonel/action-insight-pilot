@@ -30,8 +30,26 @@ export interface EmailMetricsData {
   last_updated: string;
 }
 
+const DEFAULT_METRICS: EmailMetricsData = {
+  total_sent: 0,
+  total_delivered: 0,
+  total_opened: 0,
+  total_clicked: 0,
+  total_bounced: 0,
+  total_unsubscribed: 0,
+  delivery_rate: 0,
+  open_rate: 0,
+  click_rate: 0,
+  bounce_rate: 0,
+  unsubscribe_rate: 0,
+  engagement_score: 0,
+  trends: [],
+  insights: [],
+  last_updated: new Date().toISOString()
+};
+
 export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
-  const [metrics, setMetrics] = useState<EmailMetricsData | null>(null);
+  const [metrics, setMetrics] = useState<EmailMetricsData>(DEFAULT_METRICS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,7 +76,24 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
       const response = await apiClient.getEmailRealTimeMetrics(campaignId, timeRange);
       
       if (response.success && response.data) {
-        setMetrics(response.data as EmailMetricsData);
+        // Ensure all numeric values are properly defined
+        const safeMetrics = {
+          ...DEFAULT_METRICS,
+          ...response.data,
+          total_sent: response.data.total_sent || 0,
+          total_delivered: response.data.total_delivered || 0,
+          total_opened: response.data.total_opened || 0,
+          total_clicked: response.data.total_clicked || 0,
+          total_bounced: response.data.total_bounced || 0,
+          total_unsubscribed: response.data.total_unsubscribed || 0,
+          delivery_rate: response.data.delivery_rate || 0,
+          open_rate: response.data.open_rate || 0,
+          click_rate: response.data.click_rate || 0,
+          bounce_rate: response.data.bounce_rate || 0,
+          unsubscribe_rate: response.data.unsubscribe_rate || 0,
+          engagement_score: response.data.engagement_score || 0,
+        };
+        setMetrics(safeMetrics);
         setError(null);
       } else {
         // Use fallback mock data if API fails
@@ -104,31 +139,8 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
       setError(errorMessage);
       console.error('Error loading email metrics:', err);
       
-      // Still provide mock data on error for development
-      setMetrics({
-        total_sent: 0,
-        total_delivered: 0,
-        total_opened: 0,
-        total_clicked: 0,
-        total_bounced: 0,
-        total_unsubscribed: 0,
-        delivery_rate: 0,
-        open_rate: 0,
-        click_rate: 0,
-        bounce_rate: 0,
-        unsubscribe_rate: 0,
-        engagement_score: 0,
-        trends: [],
-        insights: [
-          {
-            type: 'error',
-            metric: 'connection',
-            message: 'Unable to load metrics',
-            recommendation: 'Check your internet connection and try again'
-          }
-        ],
-        last_updated: new Date().toISOString()
-      });
+      // Still provide safe default data on error
+      setMetrics(DEFAULT_METRICS);
     } finally {
       setLoading(false);
     }
