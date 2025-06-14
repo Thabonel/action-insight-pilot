@@ -35,6 +35,9 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   };
 
   const callDailyFocusAgent = async (query: string, campaigns: any[]) => {
+    // First try to wake up the server
+    await apiClient.httpClient.wakeUpServer();
+    
     const requestData = {
       query,
       campaigns,
@@ -55,6 +58,9 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   };
 
   const callGeneralCampaignAgent = async (query: string, campaigns: any[]) => {
+    // First try to wake up the server
+    await apiClient.httpClient.wakeUpServer();
+    
     const requestData = {
       task_type: 'general_query',
       input_data: {
@@ -133,7 +139,8 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
         timestamp: new Date(),
       };
 
-      const updatedHistory = [newChat, ...chatHistory];
+      // Fix: Append to end instead of prepending to maintain chronological order
+      const updatedHistory = [...chatHistory, newChat];
       setChatHistory(updatedHistory);
       setChatMessage('');
       behaviorTracker.trackFeatureComplete('chat', actionId, true);
@@ -159,7 +166,8 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
         timestamp: new Date(),
       };
       
-      const updatedHistory = [newChat, ...chatHistory];
+      // Fix: Append to end instead of prepending
+      const updatedHistory = [...chatHistory, newChat];
       setChatHistory(updatedHistory);
       setChatMessage('');
       
@@ -204,21 +212,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
             </div>
           )}
           
-          {isTyping && (
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">AI</span>
-              </div>
-              <div className="bg-gray-100 rounded-lg px-4 py-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                </div>
-              </div>
-            </div>
-          )}
-          
+          {/* Display messages in chronological order (oldest first) */}
           {chatHistory.map((chat) => (
             <div key={chat.id} className="space-y-3">
               <div className="flex justify-end">
@@ -236,6 +230,28 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
               </div>
             </div>
           ))}
+          
+          {isTyping && (
+            <div className="space-y-3">
+              <div className="flex justify-end">
+                <div className="bg-blue-600 text-white rounded-lg px-4 py-2 max-w-xs">
+                  {chatMessage}
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">AI</span>
+                </div>
+                <div className="bg-gray-100 rounded-lg px-4 py-2">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         
         <form onSubmit={handleChatSubmit} className="flex space-x-2">
@@ -244,7 +260,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
             value={chatMessage}
             onChange={(e) => setChatMessage(e.target.value)}
             placeholder={user ? "Ask your AI assistant..." : "Please log in to chat..."}
-            disabled={!user}
+            disabled={!user || isTyping}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
           />
           <button
