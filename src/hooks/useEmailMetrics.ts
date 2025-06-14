@@ -1,9 +1,6 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { api
-
-apiClient } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 
 export interface EmailMetricsData {
   total_sent: number;
