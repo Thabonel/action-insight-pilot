@@ -26,6 +26,17 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [currentToken, setCurrentToken] = useState<string>('');
+
+  const updateToken = (newToken: string) => {
+    // Only set token if it's different from current token
+    if (new
+Token !== currentToken) {
+      console.log('HTTP Client token updated:', newToken ? 'Token provided' : 'Token cleared');
+      apiClient.setToken(newToken);
+      setCurrentToken(newToken);
+    }
+  };
 
   useEffect(() => {
     // Check current user
@@ -36,30 +47,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const getSession = async () => {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.access_token) {
-            apiClient.setToken(session.access_token);
+            updateToken(session.access_token);
           }
         };
         getSession();
         behaviorTracker.trackAction('execution', 'auth', { action: 'auto_login', userId: user.id });
+      } else {
+        updateToken('');
       }
       setLoading(false);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = AuthService.onAuthStateChange((user) => {
+    const { data: { subscription } } = AuthService.onAuthStateChange(async (user) => {
       setUser(user);
       if (user) {
         // Get the session to access the token
-        const getSession = async () => {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.access_token) {
-            apiClient.setToken(session.access_token);
-          }
-        };
-        getSession();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          updateToken(session.access_token);
+        }
         behaviorTracker.trackAction('execution', 'auth', { action: 'login', userId: user.id });
       } else {
-        apiClient.setToken('');
+        updateToken('');
         behaviorTracker.trackAction('execution', 'auth', { action: 'logout' });
       }
       setLoading(false);

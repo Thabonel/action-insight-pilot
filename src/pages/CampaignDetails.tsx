@@ -24,7 +24,7 @@ const CampaignDetails: React.FC = () => {
   const { toast } = useToast();
   
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -35,17 +35,27 @@ const CampaignDetails: React.FC = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      behaviorTracker.trackAction('navigation', 'campaign_details', { campaignId: id });
-      loadCampaign(id);
-    } else {
-      setError('No campaign ID provided');
+    // Guard against undefined or empty ID
+    if (!id || id.trim() === '') {
+      setError('Invalid campaign ID provided');
       setLoading(false);
+      return;
     }
+
+    behaviorTracker.trackAction('navigation', 'campaign_details', { campaignId: id });
+    loadCampaign(id);
   }, [id]);
 
   const loadCampaign = async (campaignId: string) => {
+    // Additional guard check
+    if (!campaignId || campaignId.trim() === '') {
+      setError('Cannot load campaign: Invalid ID');
+      return;
+    }
+
     const actionId = behaviorTracker.trackFeatureStart('campaign_load_details');
+    setLoading(true);
+    
     try {
       setError(null);
       console.log('Loading campaign details for ID:', campaignId);
@@ -145,6 +155,23 @@ const CampaignDetails: React.FC = () => {
   const handleBackToCampaigns = () => {
     navigate('/campaigns');
   };
+
+  // Show error state for invalid ID
+  if (!id || id.trim() === '') {
+    return (
+      <div className="px-4 py-6 sm:px-0 max-w-4xl mx-auto">
+        <div className="text-center py-12">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Campaign ID</h2>
+          <p className="text-gray-600 mb-6">The campaign ID is missing or invalid.</p>
+          <Button onClick={handleBackToCampaigns} className="flex items-center space-x-2">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Campaigns</span>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
