@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 
 interface Campaign {
@@ -15,6 +16,16 @@ interface CampaignCardProps {
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    behaviorTracker.trackAction('planning', 'campaigns', { 
+      action: 'view_details', 
+      campaignId: campaign.id 
+    });
+    navigate(`/campaigns/${campaign.id}`);
+  };
+
   return (
     <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-center justify-between mb-4">
@@ -41,12 +52,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
           {campaign.type || 'email'} campaign
         </span>
         <button
-          onClick={() => {
-            behaviorTracker.trackAction('planning', 'campaigns', { 
-              action: 'view_details', 
-              campaignId: campaign.id 
-            });
-          }}
+          onClick={handleViewDetails}
           className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
         >
           View Details
