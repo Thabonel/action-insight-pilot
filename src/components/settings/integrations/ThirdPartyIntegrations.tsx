@@ -82,13 +82,16 @@ const ThirdPartyIntegrations: React.FC = () => {
     }
   ];
 
+  // Ensure connections is always an array
+  const safeConnections = Array.isArray(connections) ? connections : [];
+
   const getServiceStatus = (serviceId: string) => {
-    const connection = connections.find(conn => conn.service_name === serviceId);
+    const connection = safeConnections.find(conn => conn.service_name === serviceId);
     return connection?.connection_status || 'disconnected';
   };
 
   const getLastSync = (serviceId: string) => {
-    const connection = connections.find(conn => conn.service_name === serviceId);
+    const connection = safeConnections.find(conn => conn.service_name === serviceId);
     return connection?.last_sync_at ? new Date(connection.last_sync_at).toLocaleString() : null;
   };
 

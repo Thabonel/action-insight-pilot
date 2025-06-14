@@ -33,6 +33,10 @@ const EmailPerformanceDashboard: React.FC = () => {
     { hour: '8 PM', opens: 18, clicks: 2 }
   ]);
 
+  // Ensure all arrays are safely handled
+  const safeCampaignData = Array.isArray(campaignData) ? campaignData : [];
+  const safeTimeData = Array.isArray(timeData) ? timeData : [];
+
   const getPerformanceBadge = (rate: number, type: 'open' | 'click' | 'conversion') => {
     const thresholds = {
       open: { good: 30, excellent: 40 },
@@ -66,7 +70,7 @@ const EmailPerformanceDashboard: React.FC = () => {
             <div className="text-2xl font-bold text-green-900">{metrics.avgOpenRate}%</div>
             <div className="text-xs text-green-700">Avg Open Rate</div>
             <Badge {...getPerformanceBadge(metrics.avgOpenRate, 'open')} className="mt-1 text-xs">
-              {getPerformanceBadge(metrics.avgOpenRate, 'open').label}
+              {getPerformanceBadge(metrics.avgOpenRate,Gon'open').label}
             </Badge>
           </div>
           <div className="text-center p-3 bg-purple-50 rounded-lg">
@@ -89,7 +93,7 @@ const EmailPerformanceDashboard: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Campaign Performance</h4>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={campaignData}>
+            <BarChart data={safeCampaignData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" fontSize={12} />
               <YAxis fontSize={12} />
@@ -105,7 +109,7 @@ const EmailPerformanceDashboard: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Engagement by Time of Day</h4>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={timeData}>
+            <LineChart data={safeTimeData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="hour" fontSize={12} />
               <YAxis fontSize={12} />
@@ -120,7 +124,7 @@ const EmailPerformanceDashboard: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Recent Campaigns</h4>
           <div className="space-y-2">
-            {campaignData.map((campaign, index) => (
+            {safeCampaignData.map((campaign, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <span className="font-medium text-gray-900">{campaign.name}</span>

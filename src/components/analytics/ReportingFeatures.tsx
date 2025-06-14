@@ -62,6 +62,11 @@ const ReportingFeatures: React.FC = () => {
     { name: 'Quarterly Business Review', nextDate: 'Jan 1st', recipients: 12 }
   ]);
 
+  // Ensure all arrays are safely handled
+  const safeAvailableReports = Array.isArray(availableReports) ? availableReports : [];
+  const safeCustomMetrics = Array.isArray(customMetrics) ? customMetrics : [];
+  const safeScheduledReports = Array.isArray(scheduledReports) ? scheduledReports : [];
+
   const handleGenerateReport = (reportId: number) => {
     console.log(`Generating report ${reportId}`);
     // Implement report generation logic
@@ -99,8 +104,10 @@ const ReportingFeatures: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">AI-Generated Reports</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {availableReports.map((report) => {
+            {safeAvailableReports.map((report) => {
               const Icon = report.icon;
+              const safeInsights = Array.isArray(report.insights) ? report.insights : [];
+              
               return (
                 <div key={report.id} className="border rounded-lg p-4">
                   <div className="flex items-start justify-between mb-3">
@@ -124,7 +131,7 @@ const ReportingFeatures: React.FC = () => {
                     <div className="mb-3">
                       <span className="text-sm text-gray-500 mb-1 block">Key Insights:</span>
                       <div className="flex flex-wrap gap-1">
-                        {report.insights.map((insight, index) => (
+                        {safeInsights.map((insight, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
                             {insight}
                           </Badge>
@@ -164,7 +171,7 @@ const ReportingFeatures: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Custom Metric Tracking</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {customMetrics.map((metric, index) => (
+            {safeCustomMetrics.map((metric, index) => (
               <div key={index} className="border rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-gray-900 mb-1">{metric.value}</div>
                 <div className="text-sm text-gray-600 mb-2">{metric.name}</div>
@@ -180,7 +187,7 @@ const ReportingFeatures: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Scheduled Reports</h4>
           <div className="space-y-3">
-            {scheduledReports.map((report, index) => (
+            {safeScheduledReports.map((report, index) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <span className="font-medium text-gray-900">{report.name}</span>
