@@ -38,7 +38,10 @@ export class ChatHistoryService {
         return null;
       }
 
-      return data;
+      return {
+        ...data,
+        metadata: data.metadata as Record<string, any>
+      };
     } catch (error) {
       console.error('Error in createSession:', error);
       return null;
@@ -58,7 +61,10 @@ export class ChatHistoryService {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(session => ({
+        ...session,
+        metadata: session.metadata as Record<string, any>
+      }));
     } catch (error) {
       console.error('Error in getUserSessions:', error);
       return [];
@@ -96,7 +102,11 @@ export class ChatHistoryService {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', sessionId);
 
-      return data;
+      return {
+        ...data,
+        ai_response: data.ai_response as any,
+        metadata: data.metadata as Record<string, any>
+      };
     } catch (error) {
       console.error('Error in addMessage:', error);
       return null;
@@ -116,7 +126,11 @@ export class ChatHistoryService {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(message => ({
+        ...message,
+        ai_response: message.ai_response as any,
+        metadata: message.metadata as Record<string, any>
+      }));
     } catch (error) {
       console.error('Error in getSessionMessages:', error);
       return [];
