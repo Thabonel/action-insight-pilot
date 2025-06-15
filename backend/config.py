@@ -1,3 +1,4 @@
+
 import os
 import logging
 from dotenv import load_dotenv
@@ -21,7 +22,7 @@ class AgentManager:
         self.social_media_agent = None
         self.lead_generation_agent = None
         self.content_agent = None
-        self.email_automation_agent = None
+        self.email_agent = None  # Changed from email_automation_agent to email_agent
         self.analytics_agent = None
         self.proposal_generator = None
         self.mcp_agent = None
@@ -46,7 +47,7 @@ class AgentManager:
             self.social_media_agent = SocialMediaAgent(self.openai_api_key, self.integrations)
             self.lead_generation_agent = LeadGenerationAgent(self.openai_api_key, self.integrations)
             self.content_agent = ContentAgent(self.openai_api_key, self.integrations)
-            self.email_automation_agent = EmailAutomationAgent(self.openai_api_key, self.integrations)
+            self.email_agent = EmailAutomationAgent(self.openai_api_key, self.integrations)  # Changed property name
             self.analytics_agent = AnalyticsAgent(self.openai_api_key, self.integrations)
             self.proposal_generator = ProposalGenerator(self.openai_api_key, self.integrations)
             # self.internal_publisher_agent = InternalPublisherAgent()  # ✅ COMMENTED OUT - FIX LATER
