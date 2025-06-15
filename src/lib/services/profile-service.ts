@@ -87,7 +87,11 @@ export class ProfileService {
         return [];
       }
 
-      return data || [];
+      // Transform the data to match UserPreference interface
+      return (data || []).map(item => ({
+        ...item,
+        preference_data: item.preference_data as Record<string, any>
+      }));
     } catch (error) {
       console.error('Error in getUserPreferences:', error);
       return [];
@@ -115,7 +119,11 @@ export class ProfileService {
         return null;
       }
 
-      return data;
+      // Transform the data to match UserPreference interface
+      return {
+        ...data,
+        preference_data: data.preference_data as Record<string, any>
+      };
     } catch (error) {
       console.error('Error in updateUserPreference:', error);
       return null;

@@ -7,6 +7,16 @@ import PerformanceChart from '@/components/dashboard/PerformanceChart';
 import EnhancedChatInterface from '@/components/dashboard/EnhancedChatInterface';
 
 const Dashboard: React.FC = () => {
+  // Mock dashboard data for the PerformanceChart
+  const mockDashboardData = {
+    analytics: {},
+    campaigns: {},
+    leads: {},
+    email: {},
+    social: {},
+    systemStats: {}
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -28,7 +38,7 @@ const Dashboard: React.FC = () => {
             <CardTitle className="text-slate-900">Performance Overview</CardTitle>
           </CardHeader>
           <CardContent>
-            <PerformanceChart />
+            <PerformanceChart dashboardData={mockDashboardData} />
           </CardContent>
         </Card>
 
