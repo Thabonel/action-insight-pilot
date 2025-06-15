@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,7 @@ import {
   Loader2
 } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ContentSchedulingDialog from './ContentSchedulingDialog';
 
 const IntelligentContentGenerator: React.FC = () => {
   const [contentTopic, setContentTopic] = useState('');
@@ -99,6 +99,7 @@ const IntelligentContentGenerator: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          
           {/* Platform Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -255,10 +256,15 @@ const IntelligentContentGenerator: React.FC = () => {
             />
             <div className="flex justify-between items-center mt-4">
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  <Clock className="h-4 w-4 mr-2" />
-                  Schedule
-                </Button>
+                <ContentSchedulingDialog 
+                  content={generatedContent || contentGeneration.data?.content || ''}
+                  title={contentTopic}
+                >
+                  <Button variant="outline" size="sm">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Schedule
+                  </Button>
+                </ContentSchedulingDialog>
                 <Button variant="outline" size="sm">
                   <Target className="h-4 w-4 mr-2" />
                   A/B Test
