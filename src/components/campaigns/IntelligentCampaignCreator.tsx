@@ -1,15 +1,29 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { apiClient } from '@/lib/api-client';
 import { Clock, Zap, Target, BarChart } from 'lucide-react';
 
-interface CampaignCreatorProps {
-  onCampaignCreated: () => void;
+interface Template {
+  templateData: {
+    name: string;
+    type: string;
+    description: string;
+    budget?: string;
+    targetAudience?: string;
+    timeline?: string;
+  };
 }
 
-const IntelligentCampaignCreator: React.FC<CampaignCreatorProps> = ({ onCampaignCreated }) => {
+interface CampaignCreatorProps {
+  onCampaignCreated: () => void;
+  selectedTemplate?: Template | null;
+}
+
+const IntelligentCampaignCreator: React.FC<CampaignCreatorProps> = ({ 
+  onCampaignCreated, 
+  selectedTemplate 
+}) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [stepStartTime, setStepStartTime] = useState(Date.now());
   const [campaignData, setCampaignData] = useState({
@@ -26,6 +40,34 @@ const IntelligentCampaignCreator: React.FC<CampaignCreatorProps> = ({ onCampaign
     recommendedBudget: '$500',
     optimalTiming: 'Tuesday 10 AM'
   });
+
+  // Pre-populate form when template is selected
+  useEffect(() => {
+    if (selectedTemplate?.templateData) {
+      const templateData = selectedTemplate.templateData;
+      setCampaignData({
+        name: templateData.name,
+        type: templateData.type,
+        description: templateData.description,
+        budget: templateData.budget || '',
+        targetAudience: templateData.targetAudience || '',
+        timeline: templateData.timeline || ''
+      });
+
+      // Update predictions based on template type
+      const successRates = { email: 78, social: 65, content: 82, mixed: 71 };
+      setPredictions(prev => ({
+        ...prev,
+        successProbability: successRates[templateData.type as keyof typeof successRates] || 70,
+        recommendedBudget: templateData.budget || prev.recommendedBudget
+      }));
+
+      behaviorTracker.trackAction('planning', 'template_applied', {
+        templateType: templateData.type,
+        hasPrefilledData: true
+      });
+    }
+  }, [selectedTemplate]);
 
   const steps = [
     { id: 1, name: 'Campaign Basics', icon: Target },
@@ -79,6 +121,19 @@ const IntelligentCampaignCreator: React.FC<CampaignCreatorProps> = ({ onCampaign
 
   return (
     <div className="space-y-6">
+      {selectedTemplate && (
+        <Card className="bg-green-50 border-green-200">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <Zap className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-800">
+                Template Applied: Form pre-populated with template data
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Progress Bar */}
       <Card>
         <CardContent className="p-6">
