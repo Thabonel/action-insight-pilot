@@ -1382,6 +1382,81 @@ export type Database = {
         }
         Relationships: []
       }
+      oauth_connections: {
+        Row: {
+          access_token_encrypted: string
+          connection_metadata: Json | null
+          connection_status: string
+          created_at: string
+          id: string
+          platform_name: string
+          platform_user_id: string | null
+          platform_username: string | null
+          refresh_token_encrypted: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token_encrypted: string
+          connection_metadata?: Json | null
+          connection_status?: string
+          created_at?: string
+          id?: string
+          platform_name: string
+          platform_user_id?: string | null
+          platform_username?: string | null
+          refresh_token_encrypted?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token_encrypted?: string
+          connection_metadata?: Json | null
+          connection_status?: string
+          created_at?: string
+          id?: string
+          platform_name?: string
+          platform_user_id?: string | null
+          platform_username?: string | null
+          refresh_token_encrypted?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      oauth_states: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          platform_name: string
+          redirect_uri: string
+          state_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          platform_name: string
+          redirect_uri: string
+          state_token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          platform_name?: string
+          redirect_uri?: string
+          state_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pam_analytics_logs: {
         Row: {
           api_calls_count: number | null
@@ -2229,6 +2304,10 @@ export type Database = {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      cleanup_expired_oauth_states: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       get_user_role: {
         Args: Record<PropertyKey, never> | { company_uuid: string }
