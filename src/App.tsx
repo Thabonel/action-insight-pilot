@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -45,7 +44,7 @@ const AppContent: React.FC = () => {
       children: [
         {
           index: true,
-          element: <Navigate to="/conversational-dashboard" replace />
+          element: <Navigate to="/dashboard" replace />
         },
         {
           path: "dashboard",
