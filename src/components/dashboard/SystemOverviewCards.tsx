@@ -14,6 +14,16 @@ interface SystemMetrics {
   engagementRate: number;
 }
 
+interface EmailAnalytics {
+  total_sent?: number;
+  open_rate?: number;
+}
+
+interface SocialAnalytics {
+  total_posts?: number;
+  engagement_rate?: number;
+}
+
 const SystemOverviewCards: React.FC = () => {
   const [metrics, setMetrics] = useState<SystemMetrics>({
     totalCampaigns: 0,
@@ -42,8 +52,8 @@ const SystemOverviewCards: React.FC = () => {
 
         const campaigns = campaignsRes.success ? (Array.isArray(campaignsRes.data) ? campaignsRes.data : []) : [];
         const leads = leadsRes.success ? (Array.isArray(leadsRes.data) ? leadsRes.data : []) : [];
-        const emailAnalytics = emailRes.success ? emailRes.data : {};
-        const socialAnalytics = socialRes.success ? socialRes.data : {};
+        const emailAnalytics = emailRes.success ? (emailRes.data as EmailAnalytics) : {};
+        const socialAnalytics = socialRes.success ? (socialRes.data as SocialAnalytics) : {};
 
         setMetrics({
           totalCampaigns: campaigns.length,
