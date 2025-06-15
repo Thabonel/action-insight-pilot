@@ -12,9 +12,12 @@ interface InsightsCardsProps {
 }
 
 const InsightsCards: React.FC<InsightsCardsProps> = ({ insights }) => {
+  // Ensure insights is always an array
+  const safeInsights = Array.isArray(insights) ? insights : [];
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {insights.map((insight, index) => {
+      {safeInsights.map((insight, index) => {
         const icons = [Calendar, MessageSquare, SettingsIcon, TrendingUp];
         const colors = ['text-blue-600', 'text-green-500', 'text-purple-600', 'text-orange-500'];
         const Icon = icons[index % icons.length];
