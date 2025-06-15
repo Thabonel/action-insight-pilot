@@ -1,4 +1,3 @@
-
 import { HttpClient } from './http-client';
 import { CampaignsService } from './api/campaigns-service';
 import { LeadsService } from './api/leads-service';
@@ -15,6 +14,7 @@ import { SocialPlatformsService } from './api/social-platforms-service';
 import { EnhancedCampaignsService } from './api/enhanced-campaigns-service';
 import { RealTimeMetricsService } from './api/real-time-metrics-service';
 import { IntegrationsService } from './api/integrations-service';
+import { SystemHealthService } from './api/system-health-service';
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -39,6 +39,7 @@ export class ApiClient {
   public enhancedCampaigns: EnhancedCampaignsService;
   public realTimeMetrics: RealTimeMetricsService;
   public integrations: IntegrationsService;
+  public systemHealth: SystemHealthService;
 
   constructor() {
     this.httpClient = new HttpClient();
@@ -57,6 +58,7 @@ export class ApiClient {
     this.enhancedCampaigns = new EnhancedCampaignsService(this.httpClient);
     this.realTimeMetrics = new RealTimeMetricsService(this.httpClient);
     this.integrations = new IntegrationsService(this.httpClient);
+    this.systemHealth = new SystemHealthService(this.httpClient);
   }
 
   setToken(token: string) {
@@ -229,6 +231,11 @@ export class ApiClient {
 
   async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string) {
     return this.agents.generateSocialContent(platform, contentTheme, brandVoice);
+  }
+
+  // Add system health method
+  async getSystemHealth() {
+    return this.systemHealth.getSystemHealth();
   }
 }
 
