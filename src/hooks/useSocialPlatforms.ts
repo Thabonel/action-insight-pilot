@@ -34,8 +34,7 @@ export function useSocialPlatforms() {
     try {
       const response = await apiClient.socialPlatforms.initiatePlatformConnection(platform);
       if (response.success && response.data) {
-        // Redirect to OAuth URL
-        window.location.href = response.data.authorization_url;
+        return response.data;
       } else {
         throw new Error(response.error || 'Failed to initiate connection');
       }
@@ -46,6 +45,7 @@ export function useSocialPlatforms() {
         description: errorMessage,
         variant: "destructive",
       });
+      throw err;
     }
   };
 
