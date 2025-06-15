@@ -67,6 +67,7 @@ export type Database = {
           status: string | null
           type: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           config?: Json | null
@@ -78,6 +79,7 @@ export type Database = {
           status?: string | null
           type: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           config?: Json | null
@@ -89,6 +91,7 @@ export type Database = {
           status?: string | null
           type?: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -634,6 +637,7 @@ export type Database = {
           status: string | null
           title: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           content?: string | null
@@ -647,6 +651,7 @@ export type Database = {
           status?: string | null
           title: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           content?: string | null
@@ -660,6 +665,7 @@ export type Database = {
           status?: string | null
           title?: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1291,6 +1297,7 @@ export type Database = {
           email_content: string | null
           headline: string | null
           id: number
+          user_id: string | null
         }
         Insert: {
           campaign_type?: string | null
@@ -1298,6 +1305,7 @@ export type Database = {
           email_content?: string | null
           headline?: string | null
           id?: number
+          user_id?: string | null
         }
         Update: {
           campaign_type?: string | null
@@ -1305,6 +1313,7 @@ export type Database = {
           email_content?: string | null
           headline?: string | null
           id?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1528,6 +1537,7 @@ export type Database = {
           metric_type: string
           previous_value: number | null
           recorded_at: string | null
+          user_id: string | null
         }
         Insert: {
           change_percentage?: number | null
@@ -1538,6 +1548,7 @@ export type Database = {
           metric_type: string
           previous_value?: number | null
           recorded_at?: string | null
+          user_id?: string | null
         }
         Update: {
           change_percentage?: number | null
@@ -1548,6 +1559,7 @@ export type Database = {
           metric_type?: string
           previous_value?: number | null
           recorded_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1602,6 +1614,7 @@ export type Database = {
           raw_data: Json | null
           scraped_at: string | null
           source_url: string
+          user_id: string | null
         }
         Insert: {
           agent_id?: number | null
@@ -1612,6 +1625,7 @@ export type Database = {
           raw_data?: Json | null
           scraped_at?: string | null
           source_url: string
+          user_id?: string | null
         }
         Update: {
           agent_id?: number | null
@@ -1622,6 +1636,7 @@ export type Database = {
           raw_data?: Json | null
           scraped_at?: string | null
           source_url?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2151,7 +2166,7 @@ export type Database = {
         Returns: unknown
       }
       get_user_role: {
-        Args: { company_uuid: string }
+        Args: Record<PropertyKey, never> | { company_uuid: string }
         Returns: string
       }
       halfvec_avg: {
