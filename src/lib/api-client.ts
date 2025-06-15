@@ -13,7 +13,6 @@ import { AgentApi } from './api/agent-api';
 import { ProposalApi } from './api/proposal-api';
 import { WorkflowApi } from './api/workflow-api';
 import { HttpClient } from './http-client';
-import React from 'react';
 
 export type { ApiResponse } from './api/api-client-interface';
 
@@ -277,17 +276,3 @@ export class ApiClient {
 }
 
 export const apiClient = new ApiClient();
-
-interface QuickActionGridProps {
-  // Add your props here
-}
-
-const QuickActionGrid: React.FC<QuickActionGridProps> = () => {
-  return (
-    <div>
-      {/* Add your grid content here */}
-    </div>
-  );
-};
-
-export default QuickActionGrid;
