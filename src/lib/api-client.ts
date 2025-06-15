@@ -1,4 +1,3 @@
-
 import { AnalyticsService } from './api/analytics-service';
 import { WorkflowService } from './api/workflow-service';
 import { UserPreferencesService } from './api/user-preferences-service';
@@ -113,6 +112,14 @@ export class ApiClient {
 
   async createLead(leadData: any) {
     return this.leadMethods.createLead(leadData);
+  }
+
+  async exportLeads(format: 'csv' | 'json' = 'csv') {
+    return this.leadMethods.exportLeads(format);
+  }
+
+  async syncLeads() {
+    return this.leadMethods.syncLeads();
   }
 
   // Content endpoints

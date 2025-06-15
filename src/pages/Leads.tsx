@@ -24,10 +24,18 @@ import LeadScoringDashboard from '@/components/leads/LeadScoringDashboard';
 import ConversionPatternAnalysis from '@/components/leads/ConversionPatternAnalysis';
 import SmartLeadLists from '@/components/leads/SmartLeadLists';
 import LeadWorkflowAutomation from '@/components/leads/LeadWorkflowAutomation';
+import { useLeadActions } from '@/hooks/useLeadActions';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Leads: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { exportLeads, syncLeads, isExporting, isSyncing } = useLeadActions();
 
   useEffect(() => {
     const trackingId = behaviorTracker.trackFeatureStart('leads_page');
@@ -51,6 +59,21 @@ const Leads: React.FC = () => {
     });
   };
 
+  const handleExportLeads = (format: 'csv' | 'json') => {
+    behaviorTracker.trackAction('feature_use', 'export_leads', {
+      format,
+      timestamp: new Date().toISOString()
+    });
+    exportLeads(format);
+  };
+
+  const handleSyncSources = async () => {
+    behaviorTracker.trackAction('feature_use', 'sync_leads', {
+      timestamp: new Date().toISOString()
+    });
+    await syncLeads();
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -61,13 +84,26 @@ const Leads: React.FC = () => {
         </div>
         
         <div className="flex space-x-3">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Leads
-          </Button>
-          <Button variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Sync Sources
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={isExporting}>
+                <Download className="h-4 w-4 mr-2" />
+                {isExporting ? 'Exporting...' : 'Export Leads'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleExportLeads('csv')}>
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExportLeads('json')}>
+                Export as JSON
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <Button variant="outline" size="sm" onClick={handleSyncSources} disabled={isSyncing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Syncing...' : 'Sync Sources'}
           </Button>
         </div>
       </div>

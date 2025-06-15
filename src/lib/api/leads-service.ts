@@ -22,4 +22,16 @@ export class LeadsService {
       body: JSON.stringify(leadData),
     });
   }
+
+  async exportLeads(format: 'csv' | 'json' = 'csv') {
+    return this.httpClient.request(`/api/leads/export?format=${format}`, {
+      method: 'GET',
+    });
+  }
+
+  async syncLeads() {
+    return this.httpClient.request('/api/leads/sync', {
+      method: 'POST',
+    });
+  }
 }
