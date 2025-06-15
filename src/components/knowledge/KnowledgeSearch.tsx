@@ -50,6 +50,10 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
     onOpenChange(false)
   }
 
+  const handleBucketTypeChange = (value: string) => {
+    setBucketType(value as 'campaign' | 'general' | '')
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
@@ -75,7 +79,7 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="bucket-type">Bucket Type (Optional)</Label>
-              <Select value={bucketType} onValueChange={setBucketType}>
+              <Select value={bucketType} onValueChange={handleBucketTypeChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>

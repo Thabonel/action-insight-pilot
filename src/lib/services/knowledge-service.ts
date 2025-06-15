@@ -11,6 +11,7 @@ export interface KnowledgeBucket {
   created_at: string
   updated_at: string
   metadata: Record<string, any>
+  knowledge_documents?: KnowledgeDocument[]
 }
 
 export interface KnowledgeDocument {
