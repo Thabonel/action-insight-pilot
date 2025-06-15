@@ -25,4 +25,12 @@ export class LeadMethods extends BaseApiClient {
   async createLead(leadData: any) {
     return this.leads.createLead(leadData);
   }
+
+  async exportLeads(format: 'csv' | 'json' = 'csv') {
+    return this.leads.exportLeads(format);
+  }
+
+  async syncLeads() {
+    return this.leads.syncLeads();
+  }
 }
