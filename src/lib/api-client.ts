@@ -13,9 +13,9 @@ import { SocialMethods } from './api/social-methods';
 import { EmailMethods } from './api/email-methods';
 import { AgentMethods } from './api/agent-methods';
 import { ProposalMethods } from './api/proposal-methods';
-import { ApiResponse } from './api/api-client-interface';
+import { HttpClient } from './http-client';
 
-export { ApiResponse };
+export type { ApiResponse } from './api/api-client-interface';
 
 export class ApiClient {
   // Method classes
@@ -26,6 +26,9 @@ export class ApiClient {
   private emailMethods: EmailMethods;
   private agentMethods: AgentMethods;
   private proposalMethods: ProposalMethods;
+
+  // Expose httpClient for backward compatibility
+  public httpClient: HttpClient;
 
   // Service instances
   public analytics: AnalyticsService;
@@ -45,6 +48,9 @@ export class ApiClient {
     this.emailMethods = new EmailMethods();
     this.agentMethods = new AgentMethods();
     this.proposalMethods = new ProposalMethods();
+
+    // Set the httpClient reference for backward compatibility
+    this.httpClient = this.campaignMethods.httpClient;
 
     // Initialize services
     this.analytics = new AnalyticsService(this.campaignMethods.httpClient);
