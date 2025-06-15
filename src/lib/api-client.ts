@@ -1,239 +1,236 @@
-import { HttpClient } from './http-client';
-import { CampaignsService } from './api/campaigns-service';
-import { LeadsService } from './api/leads-service';
-import { ContentService } from './api/content-service';
-import { SocialService } from './api/social-service';
-import { EmailService } from './api/email-service';
+
 import { AnalyticsService } from './api/analytics-service';
 import { WorkflowService } from './api/workflow-service';
-import { ProposalsService } from './api/proposals-service';
-import { AgentsService } from './api/agents-service';
-import { EnhancedSocialService } from './api/enhanced-social-service';
 import { UserPreferencesService } from './api/user-preferences-service';
 import { SocialPlatformsService } from './api/social-platforms-service';
-import { EnhancedCampaignsService } from './api/enhanced-campaigns-service';
 import { RealTimeMetricsService } from './api/real-time-metrics-service';
 import { IntegrationsService } from './api/integrations-service';
 import { SystemHealthService } from './api/system-health-service';
+import { CampaignMethods } from './api/campaign-methods';
+import { LeadMethods } from './api/lead-methods';
+import { ContentMethods } from './api/content-methods';
+import { SocialMethods } from './api/social-methods';
+import { EmailMethods } from './api/email-methods';
+import { AgentMethods } from './api/agent-methods';
+import { ProposalMethods } from './api/proposal-methods';
+import { ApiResponse } from './api/api-client-interface';
 
-export interface ApiResponse<T = any> {
-  data?: T;
-  error?: string;
-  success: boolean;
-}
+export { ApiResponse };
 
 export class ApiClient {
-  public httpClient: HttpClient;
-  private campaigns: CampaignsService;
-  private leads: LeadsService;
-  private content: ContentService;
-  private social: SocialService;
-  private email: EmailService;
+  // Method classes
+  private campaignMethods: CampaignMethods;
+  private leadMethods: LeadMethods;
+  private contentMethods: ContentMethods;
+  private socialMethods: SocialMethods;
+  private emailMethods: EmailMethods;
+  private agentMethods: AgentMethods;
+  private proposalMethods: ProposalMethods;
+
+  // Service instances
   public analytics: AnalyticsService;
   private workflow: WorkflowService;
-  private proposals: ProposalsService;
-  private agents: AgentsService;
-  private enhancedSocial: EnhancedSocialService;
   public userPreferences: UserPreferencesService;
   public socialPlatforms: SocialPlatformsService;
-  public enhancedCampaigns: EnhancedCampaignsService;
+  public enhancedCampaigns: any;
   public realTimeMetrics: RealTimeMetricsService;
   public integrations: IntegrationsService;
   public systemHealth: SystemHealthService;
 
   constructor() {
-    this.httpClient = new HttpClient();
-    this.campaigns = new CampaignsService(this.httpClient);
-    this.leads = new LeadsService(this.httpClient);
-    this.content = new ContentService(this.httpClient);
-    this.social = new SocialService(this.httpClient);
-    this.email = new EmailService(this.httpClient);
-    this.analytics = new AnalyticsService(this.httpClient);
-    this.workflow = new WorkflowService(this.httpClient);
-    this.proposals = new ProposalsService(this.httpClient);
-    this.agents = new AgentsService(this.httpClient);
-    this.enhancedSocial = new EnhancedSocialService(this.httpClient);
-    this.userPreferences = new UserPreferencesService(this.httpClient);
-    this.socialPlatforms = new SocialPlatformsService(this.httpClient);
-    this.enhancedCampaigns = new EnhancedCampaignsService(this.httpClient);
-    this.realTimeMetrics = new RealTimeMetricsService(this.httpClient);
-    this.integrations = new IntegrationsService(this.httpClient);
-    this.systemHealth = new SystemHealthService(this.httpClient);
+    this.campaignMethods = new CampaignMethods();
+    this.leadMethods = new LeadMethods();
+    this.contentMethods = new ContentMethods();
+    this.socialMethods = new SocialMethods();
+    this.emailMethods = new EmailMethods();
+    this.agentMethods = new AgentMethods();
+    this.proposalMethods = new ProposalMethods();
+
+    // Initialize services
+    this.analytics = new AnalyticsService(this.campaignMethods.httpClient);
+    this.workflow = new WorkflowService(this.campaignMethods.httpClient);
+    this.userPreferences = new UserPreferencesService(this.campaignMethods.httpClient);
+    this.socialPlatforms = new SocialPlatformsService(this.campaignMethods.httpClient);
+    this.enhancedCampaigns = this.campaignMethods.enhancedCampaigns;
+    this.realTimeMetrics = new RealTimeMetricsService(this.campaignMethods.httpClient);
+    this.integrations = new IntegrationsService(this.campaignMethods.httpClient);
+    this.systemHealth = new SystemHealthService(this.campaignMethods.httpClient);
   }
 
   setToken(token: string) {
-    this.httpClient.setToken(token);
+    this.campaignMethods.setToken(token);
+    this.leadMethods.setToken(token);
+    this.contentMethods.setToken(token);
+    this.socialMethods.setToken(token);
+    this.emailMethods.setToken(token);
+    this.agentMethods.setToken(token);
+    this.proposalMethods.setToken(token);
   }
 
   // Campaign endpoints
   async getCampaigns() {
-    return this.campaigns.getCampaigns();
+    return this.campaignMethods.getCampaigns();
   }
 
   async createCampaign(campaignData: any) {
-    return this.campaigns.createCampaign(campaignData);
+    return this.campaignMethods.createCampaign(campaignData);
   }
 
   async bulkCreateCampaigns(campaigns: any[]) {
-    return this.campaigns.bulkCreateCampaigns(campaigns);
+    return this.campaignMethods.bulkCreateCampaigns(campaigns);
   }
 
   async getCampaignById(id: string) {
-    return this.campaigns.getCampaignById(id);
+    return this.campaignMethods.getCampaignById(id);
   }
 
   async updateCampaign(id: string, updates: any) {
-    return this.campaigns.updateCampaign(id, updates);
+    return this.campaignMethods.updateCampaign(id, updates);
   }
 
   async deleteCampaign(id: string) {
-    return this.campaigns.deleteCampaign(id);
+    return this.campaignMethods.deleteCampaign(id);
   }
 
   // Lead endpoints
   async getLeads() {
-    return this.leads.getLeads();
+    return this.leadMethods.getLeads();
   }
 
   async searchLeads(query: string) {
-    return this.leads.searchLeads(query);
+    return this.leadMethods.searchLeads(query);
   }
 
   async getLeadAnalytics() {
-    return this.leads.getLeadAnalytics();
+    return this.leadMethods.getLeadAnalytics();
   }
 
   async createLead(leadData: any) {
-    return this.leads.createLead(leadData);
+    return this.leadMethods.createLead(leadData);
   }
 
   // Content endpoints
   async generateContent(brief: any) {
-    return this.content.generateContent(brief);
+    return this.contentMethods.generateContent(brief);
   }
 
   async createContent(contentData: any) {
-    return this.content.createContent(contentData);
+    return this.contentMethods.createContent(contentData);
   }
 
   async getContentLibrary() {
-    return this.content.getContentLibrary();
+    return this.contentMethods.getContentLibrary();
   }
 
   // Social media endpoints
   async getSocialMediaPosts() {
-    return this.social.getSocialMediaPosts();
+    return this.socialMethods.getSocialMediaPosts();
   }
 
   async createSocialPost(postData: any) {
-    return this.social.createSocialPost(postData);
+    return this.socialMethods.createSocialPost(postData);
   }
 
   async getSocialAnalytics() {
-    return this.social.getSocialAnalytics();
+    return this.socialMethods.getSocialAnalytics();
   }
 
   async scheduleSocialPost(postData: any) {
-    return this.social.scheduleSocialPost(postData);
+    return this.socialMethods.scheduleSocialPost(postData);
+  }
+
+  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string) {
+    return this.socialMethods.generateSocialContent(platform, contentTheme, brandVoice);
   }
 
   // Email endpoints
   async getEmailCampaigns() {
-    return this.email.getEmailCampaigns();
+    return this.emailMethods.getEmailCampaigns();
   }
 
   async createEmailCampaign(campaignData: any) {
-    return this.email.createEmailCampaign(campaignData);
+    return this.emailMethods.createEmailCampaign(campaignData);
   }
 
   async getEmailAnalytics() {
-    return this.email.getEmailAnalytics();
+    return this.emailMethods.getEmailAnalytics();
   }
 
   async sendEmail(emailData: any) {
-    return this.email.sendEmail(emailData);
+    return this.emailMethods.sendEmail(emailData);
   }
 
-  // New enhanced email methods with correct naming
   async createEmailTemplateVersion(templateId: string, versionData: any) {
-    return this.email.createTemplateVersion(templateId, versionData);
+    return this.emailMethods.createEmailTemplateVersion(templateId, versionData);
   }
 
   async getEmailTemplateVersions(templateId: string) {
-    return this.email.getTemplateVersions(templateId);
+    return this.emailMethods.getEmailTemplateVersions(templateId);
   }
 
   async sendPersonalizedEmail(emailData: any) {
-    return this.email.sendPersonalizedEmail(emailData);
+    return this.emailMethods.sendPersonalizedEmail(emailData);
   }
 
   async getEmailRealTimeMetrics(campaignId: string, timeRange: string = '24h') {
-    return this.email.getRealTimeMetrics(campaignId, timeRange);
+    return this.emailMethods.getEmailRealTimeMetrics(campaignId, timeRange);
   }
 
   async registerEmailWebhook(webhookData: any) {
-    return this.email.registerWebhook(webhookData);
+    return this.emailMethods.registerEmailWebhook(webhookData);
   }
 
   async trackEmailEvent(emailId: string, eventType: string, metadata?: any) {
-    return this.email.trackEmailEvent(emailId, eventType, metadata);
-  }
-
-  // Agent endpoints - fixed method names
-  async executeAgentTask(agentType: string, taskType: string, inputData: any) {
-    return this.agents.executeTask({
-      agent_type: agentType,
-      task_type: taskType,
-      input_data: inputData
-    });
+    return this.emailMethods.trackEmailEvent(emailId, eventType, metadata);
   }
 
   async generateEmailContent(campaignType: string, audience: any, options?: any) {
-    return this.email.generateEmailContent(campaignType, audience, options);
+    return this.emailMethods.generateEmailContent(campaignType, audience, options);
   }
 
   async generateABVariants(baseMessage: string) {
-    return this.email.generateABVariants(baseMessage);
+    return this.emailMethods.generateABVariants(baseMessage);
   }
 
   async suggestSendTime(audienceProfile: any) {
-    return this.email.optimizeSendTime(audienceProfile);
+    return this.emailMethods.suggestSendTime(audienceProfile);
+  }
+
+  // Agent endpoints
+  async executeAgentTask(agentType: string, taskType: string, inputData: any) {
+    return this.agentMethods.executeAgentTask(agentType, taskType, inputData);
+  }
+
+  async scoreLeads(leads?: any[]) {
+    return this.agentMethods.scoreLeads(leads);
+  }
+
+  async enrichLeads(leadData: any) {
+    return this.agentMethods.enrichLeads(leadData);
+  }
+
+  async optimizeCampaign(campaignData: any) {
+    return this.agentMethods.optimizeCampaign(campaignData);
   }
 
   // Proposal endpoints
   async getProposalTemplates() {
-    return this.proposals.getProposalTemplates();
+    return this.proposalMethods.getProposalTemplates();
   }
 
   async generateProposal(proposalData: any) {
-    return this.proposals.generateProposal(proposalData);
+    return this.proposalMethods.generateProposal(proposalData);
   }
 
   async getProposals() {
-    return this.proposals.getProposals();
+    return this.proposalMethods.getProposals();
   }
 
   async exportProposal(proposalId: string, format: string) {
-    return this.proposals.exportProposal(proposalId, format);
+    return this.proposalMethods.exportProposal(proposalId, format);
   }
 
-  async scoreLeads(leads?: any[]) {
-    return this.agents.scoreLeads(leads);
-  }
-
-  async enrichLeads(leadData: any) {
-    return this.agents.enrichLeads(leadData);
-  }
-
-  async optimizeCampaign(campaignData: any) {
-    return this.agents.optimizeCampaign(campaignData);
-  }
-
-  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string) {
-    return this.agents.generateSocialContent(platform, contentTheme, brandVoice);
-  }
-
-  // Add system health method
+  // System health method
   async getSystemHealth() {
     return this.systemHealth.getSystemHealth();
   }
