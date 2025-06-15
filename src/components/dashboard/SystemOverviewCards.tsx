@@ -77,9 +77,21 @@ const SystemOverviewCards: React.FC = () => {
 
       const campaigns = campaignsData.success ? campaignsData.data : [];
       const leads = leadsData.success ? leadsData.data : [];
-      const emailStats = emailData.success ? emailData.data : { totalSent: 0, openRate: 0 };
-      const socialStats = socialData.success ? socialData.data : { posts: 0, engagement: 0 };
-      const analyticsStats = analyticsData.success ? analyticsData.data : { engagement: 0 };
+      
+      // Safe type checking for email data
+      const emailStats = emailData.success && emailData.data && typeof emailData.data === 'object' 
+        ? emailData.data as { totalSent?: number; openRate?: number }
+        : { totalSent: 0, openRate: 0 };
+      
+      // Safe type checking for social data  
+      const socialStats = socialData.success && socialData.data && typeof socialData.data === 'object'
+        ? socialData.data as { posts?: number; engagement?: number }
+        : { posts: 0, engagement: 0 };
+      
+      // Safe type checking for analytics data
+      const analyticsStats = analyticsData.success && analyticsData.data && typeof analyticsData.data === 'object'
+        ? analyticsData.data as { engagement?: number }
+        : { engagement: 0 };
 
       const activeCampaigns = Array.isArray(campaigns) ? campaigns.filter((c: any) => c.status === 'active').length : 0;
       const totalLeads = Array.isArray(leads) ? leads.length : 0;
@@ -92,7 +104,7 @@ const SystemOverviewCards: React.FC = () => {
           title: 'Active Campaigns',
           value: activeCampaigns.toString(),
           change: `${activeCampaigns > 0 ? '+' : ''}${activeCampaigns} active`,
-          trend: activeCampaigns > 0 ? 'up' : 'stable',
+          trend: activeCampaigns > 0 ? 'up' : 'loading',
           icon: Zap,
           color: 'blue',
           performance: Math.min(activeCampaigns * 20, 100)
@@ -101,7 +113,7 @@ const SystemOverviewCards: React.FC = () => {
           title: 'Lead Generation',
           value: totalLeads.toLocaleString(),
           change: `${totalLeads > 100 ? '+' : ''}${Math.floor(totalLeads * 0.1)} this week`,
-          trend: totalLeads > 0 ? 'up' : 'stable',
+          trend: totalLeads > 0 ? 'up' : 'loading',
           icon: Users,
           color: 'green',
           performance: Math.min(totalLeads / 10, 100)
@@ -110,7 +122,7 @@ const SystemOverviewCards: React.FC = () => {
           title: 'Content Engagement',
           value: `${contentEngagement.toFixed(1)}%`,
           change: contentEngagement > 5 ? '+5.3% improvement' : 'Needs improvement',
-          trend: contentEngagement > 5 ? 'up' : 'stable',
+          trend: contentEngagement > 5 ? 'up' : 'loading',
           icon: BarChart3,
           color: 'purple',
           performance: contentEngagement
@@ -119,7 +131,7 @@ const SystemOverviewCards: React.FC = () => {
           title: 'Email Performance',
           value: `${emailOpenRate.toFixed(1)}%`,
           change: emailOpenRate > 20 ? 'Above average' : 'Below average',
-          trend: emailOpenRate > 20 ? 'up' : 'stable',
+          trend: emailOpenRate > 20 ? 'up' : 'loading',
           icon: Mail,
           color: 'orange',
           performance: emailOpenRate
@@ -128,7 +140,7 @@ const SystemOverviewCards: React.FC = () => {
           title: 'Social Reach',
           value: socialPosts > 1000 ? `${(socialPosts / 1000).toFixed(1)}K` : socialPosts.toString(),
           change: socialPosts > 10 ? '+18% this week' : 'Low activity',
-          trend: socialPosts > 10 ? 'up' : 'stable',
+          trend: socialPosts > 10 ? 'up' : 'loading',
           icon: Activity,
           color: 'pink',
           performance: Math.min(socialPosts * 2, 100)

@@ -41,11 +41,19 @@ const Dashboard: React.FC = () => {
         systemStats: systemData
       });
 
-      // Convert dashboard data to insights format
+      // Convert dashboard data to insights format with safe type checking
       const campaignsArray = campaignsData?.data || [];
       const leadsArray = leadsData?.data || [];
-      const emailStats = emailData?.success && emailData.data ? emailData.data : { totalSent: 0 };
-      const socialStats = socialData?.success && socialData.data ? socialData.data : { posts: 0 };
+      
+      // Safe type checking for email data
+      const emailStats = emailData?.success && emailData.data && typeof emailData.data === 'object'
+        ? emailData.data as { totalSent?: number; openRate?: number }
+        : { totalSent: 0 };
+      
+      // Safe type checking for social data
+      const socialStats = socialData?.success && socialData.data && typeof socialData.data === 'object'
+        ? socialData.data as { posts?: number; engagement?: number }
+        : { posts: 0 };
       
       const insightsArray: Insight[] = [
         { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
@@ -67,8 +75,16 @@ const Dashboard: React.FC = () => {
     const interval = setInterval(() => {
       const campaignsArray = dashboardData.campaigns?.data || [];
       const leadsArray = dashboardData.leads?.data || [];
-      const emailStats = dashboardData.email?.success && dashboardData.email.data ? dashboardData.email.data : { totalSent: 0 };
-      const socialStats = dashboardData.social?.success && dashboardData.social.data ? dashboardData.social.data : { posts: 0 };
+      
+      // Safe type checking for email data
+      const emailStats = dashboardData.email?.success && dashboardData.email.data && typeof dashboardData.email.data === 'object'
+        ? dashboardData.email.data as { totalSent?: number; openRate?: number }
+        : { totalSent: 0 };
+      
+      // Safe type checking for social data
+      const socialStats = dashboardData.social?.success && dashboardData.social.data && typeof dashboardData.social.data === 'object'
+        ? dashboardData.social.data as { posts?: number; engagement?: number }
+        : { posts: 0 };
       
       const insightsArray: Insight[] = [
         { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
