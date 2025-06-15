@@ -73,205 +73,229 @@ export class ApiClient {
     this.workflowApi.setToken(token);
   }
 
-  // Campaign endpoints
+  // Enhanced error handling wrapper
+  private async handleApiCall<T>(apiCall: () => Promise<T>): Promise<T> {
+    try {
+      return await apiCall();
+    } catch (error) {
+      console.error('API call failed:', error);
+      
+      // Add specific error handling for common scenarios
+      if (error instanceof Error) {
+        if (error.message.includes('503') || error.message.includes('sleeping')) {
+          throw new Error('Server is sleeping and needs to be woken up');
+        }
+        if (error.message.includes('timeout')) {
+          throw new Error('Request timed out - please try again');
+        }
+        if (error.message.includes('network')) {
+          throw new Error('Network connection issue');
+        }
+      }
+      
+      throw error;
+    }
+  }
+
+  // Campaign endpoints with enhanced error handling
   async getCampaigns() {
-    return this.campaignApi.getCampaigns();
+    return this.handleApiCall(() => this.campaignApi.getCampaigns());
   }
 
   async createCampaign(campaignData: any) {
-    return this.campaignApi.createCampaign(campaignData);
+    return this.handleApiCall(() => this.campaignApi.createCampaign(campaignData));
   }
 
   async bulkCreateCampaigns(campaigns: any[]) {
-    return this.campaignApi.bulkCreateCampaigns(campaigns);
+    return this.handleApiCall(() => this.campaignApi.bulkCreateCampaigns(campaigns));
   }
 
   async getCampaignById(id: string) {
-    return this.campaignApi.getCampaignById(id);
+    return this.handleApiCall(() => this.campaignApi.getCampaignById(id));
   }
 
   async updateCampaign(id: string, updates: any) {
-    return this.campaignApi.updateCampaign(id, updates);
+    return this.handleApiCall(() => this.campaignApi.updateCampaign(id, updates));
   }
 
   async deleteCampaign(id: string) {
-    return this.campaignApi.deleteCampaign(id);
+    return this.handleApiCall(() => this.campaignApi.deleteCampaign(id));
   }
 
-  // Lead endpoints
+  // Lead endpoints with enhanced error handling
   async getLeads() {
-    return this.leadApi.getLeads();
+    return this.handleApiCall(() => this.leadApi.getLeads());
   }
 
   async searchLeads(query: string) {
-    return this.leadApi.searchLeads(query);
+    return this.handleApiCall(() => this.leadApi.searchLeads(query));
   }
 
   async getLeadAnalytics() {
-    return this.leadApi.getLeadAnalytics();
+    return this.handleApiCall(() => this.leadApi.getLeadAnalytics());
   }
 
   async createLead(leadData: any) {
-    return this.leadApi.createLead(leadData);
+    return this.handleApiCall(() => this.leadApi.createLead(leadData));
   }
 
   async exportLeads(format: 'csv' | 'json' = 'csv') {
-    return this.leadApi.exportLeads(format);
+    return this.handleApiCall(() => this.leadApi.exportLeads(format));
   }
 
   async syncLeads() {
-    return this.leadApi.syncLeads();
+    return this.handleApiCall(() => this.leadApi.syncLeads());
   }
 
-  // Content endpoints
+  // Content endpoints with enhanced error handling
   async generateContent(brief: any) {
-    return this.contentApi.generateContent(brief);
+    return this.handleApiCall(() => this.contentApi.generateContent(brief));
   }
 
   async createContent(contentData: any) {
-    return this.contentApi.createContent(contentData);
+    return this.handleApiCall(() => this.contentApi.createContent(contentData));
   }
 
   async getContentLibrary() {
-    return this.contentApi.getContentLibrary();
+    return this.handleApiCall(() => this.contentApi.getContentLibrary());
   }
 
-  // Social media endpoints
+  // Social media endpoints with enhanced error handling
   async getSocialMediaPosts() {
-    return this.socialApi.getSocialMediaPosts();
+    return this.handleApiCall(() => this.socialApi.getSocialMediaPosts());
   }
 
   async createSocialPost(postData: any) {
-    return this.socialApi.createSocialPost(postData);
+    return this.handleApiCall(() => this.socialApi.createSocialPost(postData));
   }
 
   async getSocialAnalytics() {
-    return this.socialApi.getSocialAnalytics();
+    return this.handleApiCall(() => this.socialApi.getSocialAnalytics());
   }
 
   async scheduleSocialPost(postData: any) {
-    return this.socialApi.scheduleSocialPost(postData);
+    return this.handleApiCall(() => this.socialApi.scheduleSocialPost(postData));
   }
 
   async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string) {
-    return this.socialApi.generateSocialContent(platform, contentTheme, brandVoice);
+    return this.handleApiCall(() => this.socialApi.generateSocialContent(platform, contentTheme, brandVoice));
   }
 
-  // Email endpoints
+  // Email endpoints with enhanced error handling
   async getEmailCampaigns() {
-    return this.emailApi.getEmailCampaigns();
+    return this.handleApiCall(() => this.emailApi.getEmailCampaigns());
   }
 
   async createEmailCampaign(campaignData: any) {
-    return this.emailApi.createEmailCampaign(campaignData);
+    return this.handleApiCall(() => this.emailApi.createEmailCampaign(campaignData));
   }
 
   async getEmailAnalytics() {
-    return this.emailApi.getEmailAnalytics();
+    return this.handleApiCall(() => this.emailApi.getEmailAnalytics());
   }
 
   async sendEmail(emailData: any) {
-    return this.emailApi.sendEmail(emailData);
+    return this.handleApiCall(() => this.emailApi.sendEmail(emailData));
   }
 
   async createEmailTemplateVersion(templateId: string, versionData: any) {
-    return this.emailApi.createEmailTemplateVersion(templateId, versionData);
+    return this.handleApiCall(() => this.emailApi.createEmailTemplateVersion(templateId, versionData));
   }
 
   async getEmailTemplateVersions(templateId: string) {
-    return this.emailApi.getEmailTemplateVersions(templateId);
+    return this.handleApiCall(() => this.emailApi.getEmailTemplateVersions(templateId));
   }
 
   async sendPersonalizedEmail(emailData: any) {
-    return this.emailApi.sendPersonalizedEmail(emailData);
+    return this.handleApiCall(() => this.emailApi.sendPersonalizedEmail(emailData));
   }
 
   async getEmailRealTimeMetrics(campaignId: string, timeRange: string = '24h') {
-    return this.emailApi.getEmailRealTimeMetrics(campaignId, timeRange);
+    return this.handleApiCall(() => this.emailApi.getEmailRealTimeMetrics(campaignId, timeRange));
   }
 
   async registerEmailWebhook(webhookData: any) {
-    return this.emailApi.registerEmailWebhook(webhookData);
+    return this.handleApiCall(() => this.emailApi.registerEmailWebhook(webhookData));
   }
 
   async trackEmailEvent(emailId: string, eventType: string, metadata?: any) {
-    return this.emailApi.trackEmailEvent(emailId, eventType, metadata);
+    return this.handleApiCall(() => this.emailApi.trackEmailEvent(emailId, eventType, metadata));
   }
 
   async generateEmailContent(campaignType: string, audience: any, options?: any) {
-    return this.emailApi.generateEmailContent(campaignType, audience, options);
+    return this.handleApiCall(() => this.emailApi.generateEmailContent(campaignType, audience, options));
   }
 
   async generateABVariants(baseMessage: string) {
-    return this.emailApi.generateABVariants(baseMessage);
+    return this.handleApiCall(() => this.emailApi.generateABVariants(baseMessage));
   }
 
   async suggestSendTime(audienceProfile: any) {
-    return this.emailApi.suggestSendTime(audienceProfile);
+    return this.handleApiCall(() => this.emailApi.suggestSendTime(audienceProfile));
   }
 
-  // Agent endpoints
+  // Agent endpoints with enhanced error handling
   async executeAgentTask(agentType: string, taskType: string, inputData: any) {
-    return this.agentApi.executeAgentTask(agentType, taskType, inputData);
+    return this.handleApiCall(() => this.agentApi.executeAgentTask(agentType, taskType, inputData));
   }
 
   async scoreLeads(leads?: any[]) {
-    return this.agentApi.scoreLeads(leads);
+    return this.handleApiCall(() => this.agentApi.scoreLeads(leads));
   }
 
   async enrichLeads(leadData: any) {
-    return this.agentApi.enrichLeads(leadData);
+    return this.handleApiCall(() => this.agentApi.enrichLeads(leadData));
   }
 
   async optimizeCampaign(campaignData: any) {
-    return this.agentApi.optimizeCampaign(campaignData);
+    return this.handleApiCall(() => this.agentApi.optimizeCampaign(campaignData));
   }
 
-  // Proposal endpoints
+  // Proposal endpoints with enhanced error handling
   async getProposalTemplates() {
-    return this.proposalApi.getProposalTemplates();
+    return this.handleApiCall(() => this.proposalApi.getProposalTemplates());
   }
 
   async generateProposal(proposalData: any) {
-    return this.proposalApi.generateProposal(proposalData);
+    return this.handleApiCall(() => this.proposalApi.generateProposal(proposalData));
   }
 
   async getProposals() {
-    return this.proposalApi.getProposals();
+    return this.handleApiCall(() => this.proposalApi.getProposals());
   }
 
   async exportProposal(proposalId: string, format: string) {
-    return this.proposalApi.exportProposal(proposalId, format);
+    return this.handleApiCall(() => this.proposalApi.exportProposal(proposalId, format));
   }
 
-  // Workflow endpoints
+  // Workflow endpoints with enhanced error handling
   async getWorkflows() {
-    return this.workflowApi.getWorkflows();
+    return this.handleApiCall(() => this.workflowApi.getWorkflows());
   }
 
   async createWorkflow(workflowData: any) {
-    return this.workflowApi.createWorkflow(workflowData);
+    return this.handleApiCall(() => this.workflowApi.createWorkflow(workflowData));
   }
 
   async executeWorkflow(workflowId: string) {
-    return this.workflowApi.executeWorkflow(workflowId);
+    return this.handleApiCall(() => this.workflowApi.executeWorkflow(workflowId));
   }
 
   async getWorkflowStatus(workflowId: string) {
-    return this.workflowApi.getWorkflowStatus(workflowId);
+    return this.handleApiCall(() => this.workflowApi.getWorkflowStatus(workflowId));
   }
 
   async updateWorkflow(workflowId: string, updates: any) {
-    return this.workflowApi.updateWorkflow(workflowId, updates);
+    return this.handleApiCall(() => this.workflowApi.updateWorkflow(workflowId, updates));
   }
 
   async deleteWorkflow(workflowId: string) {
-    return this.workflowApi.deleteWorkflow(workflowId);
+    return this.handleApiCall(() => this.workflowApi.deleteWorkflow(workflowId));
   }
 
-  // System health method
+  // System health method with enhanced error handling
   async getSystemHealth() {
-    return this.systemHealth.getSystemHealth();
+    return this.handleApiCall(() => this.systemHealth.getSystemHealth());
   }
 }
 
