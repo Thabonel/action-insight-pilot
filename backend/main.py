@@ -1,3 +1,4 @@
+
 import os
 import logging
 from fastapi import FastAPI
@@ -33,6 +34,8 @@ app.add_middleware(
 )
 
 from routes.user_aware_agents import router as user_aware_router
+from routes.system_health import router as system_health_router
 
 # Add the new user-aware routes
 app.include_router(user_aware_router)
+app.include_router(system_health_router)
