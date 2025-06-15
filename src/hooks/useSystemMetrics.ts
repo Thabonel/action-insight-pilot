@@ -77,8 +77,8 @@ export function useSystemMetrics() {
         apiClient.getSystemHealth().catch(() => ({ success: false, data: { uptime_percentage: 99.8, status: 'operational' } }))
       ]);
 
-      const campaigns = campaignsData.success ? campaignsData.data : [];
-      const leads = leadsData.success ? leadsData.data : [];
+      const campaigns = campaignsData.success ? (Array.isArray(campaignsData.data) ? campaignsData.data : []) : [];
+      const leads = leadsData.success ? (Array.isArray(leadsData.data) ? leadsData.data : []) : [];
       const emailStats = emailData.success && emailData.data && typeof emailData.data === 'object' 
         ? emailData.data as { totalSent?: number; openRate?: number }
         : { totalSent: 0, openRate: 0 };
