@@ -7,6 +7,7 @@ import InsightsCards, { Insight } from '@/components/dashboard/InsightsCards';
 import DashboardChatInterface from '@/components/dashboard/DashboardChatInterface';
 import InsightsPanel from '@/components/dashboard/InsightsPanel';
 import PerformanceChart from '@/components/dashboard/PerformanceChart';
+import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 
 const Dashboard: React.FC = () => {
   const [insights, setInsights] = useState<Insight[]>([]);
@@ -23,12 +24,12 @@ const Dashboard: React.FC = () => {
   const loadData = async () => {
     await withErrorHandling(async () => {
       const [analyticsData, campaignsData, leadsData, emailData, socialData, systemData] = await Promise.all([
-        apiClient.analytics.getAnalyticsOverview().catch(() => ({ data: { totalSent: 0, openRate: 0 } })),
-        apiClient.getCampaigns().catch(() => ({ data: [] })),
-        apiClient.getLeads().catch(() => ({ data: [] })),
-        apiClient.getEmailAnalytics().catch(() => ({ data: { totalSent: 0, openRate: 0 } })),
-        apiClient.getSocialAnalytics().catch(() => ({ data: { posts: 0, engagement: 0 } })),
-        apiClient.analytics.getSystemStats().catch(() => ({ data: { uptime: 99.9, performance: 95 } }))
+        apiClient.analytics.getAnalyticsOverview().catch(() => ({ success: true, data: { totalSent: 0, openRate: 0 } })),
+        apiClient.getCampaigns().catch(() => ({ success: true, data: [] })),
+        apiClient.getLeads().catch(() => ({ success: true, data: [] })),
+        apiClient.getEmailAnalytics().catch(() => ({ success: true, data: { totalSent: 0, openRate: 0 } })),
+        apiClient.getSocialAnalytics().catch(() => ({ success: true, data: { posts: 0, engagement: 0 } })),
+        apiClient.analytics.getSystemStats().catch(() => ({ success: true, data: { uptime: 99.9, performance: 95 } }))
       ]);
 
       setDashboardData({
@@ -40,11 +41,11 @@ const Dashboard: React.FC = () => {
         systemStats: systemData
       });
 
-      // Convert behavior tracker insights to array format for components
+      // Convert dashboard data to insights format
       const campaignsArray = campaignsData?.data || [];
       const leadsArray = leadsData?.data || [];
-      const emailStats = emailData?.data || { totalSent: 0 };
-      const socialStats = socialData?.data || { posts: 0 };
+      const emailStats = emailData?.success && emailData.data ? emailData.data : { totalSent: 0 };
+      const socialStats = socialData?.success && socialData.data ? socialData.data : { posts: 0 };
       
       const insightsArray: Insight[] = [
         { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
@@ -66,8 +67,8 @@ const Dashboard: React.FC = () => {
     const interval = setInterval(() => {
       const campaignsArray = dashboardData.campaigns?.data || [];
       const leadsArray = dashboardData.leads?.data || [];
-      const emailStats = dashboardData.email?.data || { totalSent: 0 };
-      const socialStats = dashboardData.social?.data || { posts: 0 };
+      const emailStats = dashboardData.email?.success && dashboardData.email.data ? dashboardData.email.data : { totalSent: 0 };
+      const socialStats = dashboardData.social?.success && dashboardData.social.data ? dashboardData.social.data : { posts: 0 };
       
       const insightsArray: Insight[] = [
         { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
@@ -89,6 +90,11 @@ const Dashboard: React.FC = () => {
         <p className="mt-2 text-slate-600">
           Your intelligent marketing automation platform is learning your patterns and optimizing for success.
         </p>
+      </div>
+
+      {/* System Overview Cards - Real Data */}
+      <div className="mb-8">
+        <SystemOverviewCards />
       </div>
 
       {/* Insights Cards */}
