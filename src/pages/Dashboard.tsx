@@ -1,134 +1,53 @@
 
-import React, { useEffect, useState } from 'react';
-import { behaviorTracker } from '@/lib/behavior-tracker';
-import { apiClient } from '@/lib/api-client';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
-import InsightsCards, { Insight } from '@/components/dashboard/InsightsCards';
-import DashboardChatInterface from '@/components/dashboard/DashboardChatInterface';
-import InsightsPanel from '@/components/dashboard/InsightsPanel';
-import PerformanceChart from '@/components/dashboard/PerformanceChart';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
+import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
+import PerformanceChart from '@/components/dashboard/PerformanceChart';
+import EnhancedChatInterface from '@/components/dashboard/EnhancedChatInterface';
 
 const Dashboard: React.FC = () => {
-  const [insights, setInsights] = useState<Insight[]>([]);
-  const [dashboardData, setDashboardData] = useState({
-    analytics: null,
-    campaigns: null,
-    leads: null,
-    email: null,
-    social: null,
-    systemStats: null
-  });
-  const { withErrorHandling } = useErrorHandler();
-
-  const loadData = async () => {
-    await withErrorHandling(async () => {
-      const [analyticsData, campaignsData, leadsData, emailData, socialData, systemData] = await Promise.all([
-        apiClient.analytics.getAnalyticsOverview().catch(() => ({ success: true, data: { totalSent: 0, openRate: 0 } })),
-        apiClient.getCampaigns().catch(() => ({ success: true, data: [] })),
-        apiClient.getLeads().catch(() => ({ success: true, data: [] })),
-        apiClient.getEmailAnalytics().catch(() => ({ success: true, data: { totalSent: 0, openRate: 0 } })),
-        apiClient.getSocialAnalytics().catch(() => ({ success: true, data: { posts: 0, engagement: 0 } })),
-        apiClient.analytics.getSystemStats().catch(() => ({ success: true, data: { uptime: 99.9, performance: 95 } }))
-      ]);
-
-      setDashboardData({
-        analytics: analyticsData,
-        campaigns: campaignsData,
-        leads: leadsData,
-        email: emailData,
-        social: socialData,
-        systemStats: systemData
-      });
-
-      // Convert dashboard data to insights format with safe type checking
-      const campaignsArray = campaignsData?.data || [];
-      const leadsArray = leadsData?.data || [];
-      
-      // Safe type checking for email data
-      const emailStats = emailData?.success && emailData.data && typeof emailData.data === 'object'
-        ? emailData.data as { totalSent?: number; openRate?: number }
-        : { totalSent: 0 };
-      
-      // Safe type checking for social data
-      const socialStats = socialData?.success && socialData.data && typeof socialData.data === 'object'
-        ? socialData.data as { posts?: number; engagement?: number }
-        : { posts: 0 };
-      
-      const insightsArray: Insight[] = [
-        { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
-        { title: 'Total Leads', value: Array.isArray(leadsArray) ? leadsArray.length : 23 },
-        { title: 'Emails Sent', value: emailStats.totalSent || 156 },
-        { title: 'Social Posts', value: socialStats.posts || 12 }
-      ];
-      
-      setInsights(insightsArray);
-    });
-  };
-
-  useEffect(() => {
-    behaviorTracker.trackAction('navigation', 'dashboard', { section: 'main' });
-    
-    loadData();
-    
-    // Update insights every 30 seconds
-    const interval = setInterval(() => {
-      const campaignsArray = dashboardData.campaigns?.data || [];
-      const leadsArray = dashboardData.leads?.data || [];
-      
-      // Safe type checking for email data
-      const emailStats = dashboardData.email?.success && dashboardData.email.data && typeof dashboardData.email.data === 'object'
-        ? dashboardData.email.data as { totalSent?: number; openRate?: number }
-        : { totalSent: 0 };
-      
-      // Safe type checking for social data
-      const socialStats = dashboardData.social?.success && dashboardData.social.data && typeof dashboardData.social.data === 'object'
-        ? dashboardData.social.data as { posts?: number; engagement?: number }
-        : { posts: 0 };
-      
-      const insightsArray: Insight[] = [
-        { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
-        { title: 'Total Leads', value: Array.isArray(leadsArray) ? leadsArray.length : 23 },
-        { title: 'Emails Sent', value: emailStats.totalSent || 156 },
-        { title: 'Social Posts', value: socialStats.posts || 12 }
-      ];
-      setInsights(insightsArray);
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [dashboardData]);
-
   return (
-    <div className="px-4 py-6 sm:px-0">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">AI Marketing Command Center</h1>
-        <p className="mt-2 text-slate-600">
-          Your intelligent marketing automation platform is learning your patterns and optimizing for success.
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">Marketing Dashboard</h1>
+        <p className="text-slate-600 mt-2">
+          Monitor your campaigns, analyze performance, and optimize your marketing strategy.
         </p>
       </div>
 
-      {/* System Overview Cards - Real Data */}
-      <div className="mb-8">
-        <SystemOverviewCards />
-      </div>
-
-      {/* Insights Cards */}
-      <InsightsCards insights={insights} />
+      {/* System Overview Cards */}
+      <SystemOverviewCards />
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chat Interface */}
-        <div className="lg:col-span-2">
-          <DashboardChatInterface />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Performance Chart */}
+        <Card className="border-0 shadow-sm bg-white/80 backdrop-blur">
+          <CardHeader>
+            <CardTitle className="text-slate-900">Performance Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PerformanceChart />
+          </CardContent>
+        </Card>
 
-        {/* Insights Panel */}
-        <InsightsPanel insights={insights} />
+        {/* Quick Actions */}
+        <Card className="border-0 shadow-sm bg-white/80 backdrop-blur">
+          <CardHeader>
+            <CardTitle className="text-slate-900">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <QuickActionGrid />
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Performance Chart */}
-      <PerformanceChart dashboardData={dashboardData} />
+      {/* Enhanced AI Chat Interface */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-4">AI Marketing Assistant</h2>
+        <EnhancedChatInterface />
+      </div>
     </div>
   );
 };
