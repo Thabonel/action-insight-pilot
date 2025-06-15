@@ -36,8 +36,8 @@ const SystemOverviewCards: React.FC = () => {
         const [campaignsRes, leadsRes, emailRes, socialRes] = await Promise.all([
           apiClient.getCampaigns(),
           apiClient.getLeads(),
-          apiClient.emailService.getAnalytics(),
-          apiClient.socialService.getAnalytics()
+          apiClient.getEmailAnalytics(),
+          apiClient.getSocialAnalytics()
         ]);
 
         const campaigns = campaignsRes.success ? (Array.isArray(campaignsRes.data) ? campaignsRes.data : []) : [];

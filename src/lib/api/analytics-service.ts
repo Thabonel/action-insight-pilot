@@ -39,7 +39,7 @@ export class AnalyticsService {
     
     if (response.success && response.data) {
       // Create download link for the exported file
-      const blob = new Blob([response.data], { 
+      const blob = new Blob([JSON.stringify(response.data)], { 
         type: format === 'pdf' ? 'application/pdf' : 'text/csv' 
       });
       const url = window.URL.createObjectURL(blob);

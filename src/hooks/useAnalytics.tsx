@@ -31,9 +31,9 @@ export const useAnalytics = () => {
       const [campaignsRes, leadsRes, emailRes, socialRes, healthRes] = await Promise.all([
         apiClient.getCampaigns(),
         apiClient.getLeads(),
-        apiClient.emailService.getAnalytics(),
-        apiClient.socialService.getAnalytics(),
-        apiClient.analyticsService.getSystemStats()
+        apiClient.getEmailAnalytics(),
+        apiClient.getSocialAnalytics(),
+        apiClient.analytics.getSystemStats()
       ]);
 
       setAnalyticsData({
@@ -61,7 +61,7 @@ export const useAnalytics = () => {
 
   const exportReport = async (format: 'pdf' | 'csv' | 'excel', timeRange: string = '30d') => {
     try {
-      await apiClient.analyticsService.exportAnalyticsReport(format, timeRange);
+      await apiClient.analytics.exportAnalyticsReport(format, timeRange);
       toast({
         title: "Export Successful",
         description: `Analytics report exported as ${format.toUpperCase()}`,
