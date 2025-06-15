@@ -8,11 +8,14 @@ interface InsightsPanelProps {
 }
 
 const InsightsPanel: React.FC<InsightsPanelProps> = ({ insights }) => {
+  // Ensure insights is always an array
+  const safeInsights = Array.isArray(insights) ? insights : [];
+  
   const activityData = [
-    { feature: 'Campaigns', usage: insights.find(i => i.title === 'Campaigns')?.value || 5 },
-    { feature: 'Content', usage: insights.find(i => i.title === 'Content Pieces')?.value || 8 },
-    { feature: 'Social', usage: insights.find(i => i.title === 'Posts')?.value || 12 },
-    { feature: 'Email', usage: insights.find(i => i.title === 'Emails Sent')?.value || 15 },
+    { feature: 'Campaigns', usage: safeInsights.find(i => i.title === 'Active Campaigns')?.value || 5 },
+    { feature: 'Content', usage: safeInsights.find(i => i.title === 'Content Pieces')?.value || 8 },
+    { feature: 'Social', usage: safeInsights.find(i => i.title === 'Social Posts')?.value || 12 },
+    { feature: 'Email', usage: safeInsights.find(i => i.title === 'Emails Sent')?.value || 15 },
     { feature: 'Analytics', usage: 6 },
   ];
 
