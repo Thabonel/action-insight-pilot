@@ -121,9 +121,10 @@ export class ChatAgentRouter {
 
     try {
       const campaigns = await apiClient.getCampaigns();
+      const campaignCount = Array.isArray(campaigns.data) ? campaigns.data.length : 0;
       return {
         type: 'campaign_data',
-        content: `You have ${campaigns.data?.length || 0} campaigns. Here's what I can help you with:`,
+        content: `You have ${campaignCount} campaigns. Here's what I can help you with:`,
         data: campaigns.data,
         agentType: 'campaign'
       };
@@ -170,9 +171,10 @@ export class ChatAgentRouter {
   private static async handleLeadsQuery(query: string) {
     try {
       const leads = await apiClient.getLeads();
+      const leadCount = Array.isArray(leads.data) ? leads.data.length : 0;
       return {
         type: 'leads_data',
-        content: `You have ${leads.data?.length || 0} leads in your pipeline.`,
+        content: `You have ${leadCount} leads in your pipeline.`,
         data: leads.data,
         agentType: 'leads'
       };
@@ -219,9 +221,10 @@ export class ChatAgentRouter {
   private static async handleProposalQuery(query: string) {
     try {
       const proposals = await apiClient.getProposals();
+      const proposalCount = Array.isArray(proposals.data) ? proposals.data.length : 0;
       return {
         type: 'proposal_data',
-        content: `You have ${proposals.data?.length || 0} proposals.`,
+        content: `You have ${proposalCount} proposals.`,
         data: proposals.data,
         agentType: 'proposal'
       };
