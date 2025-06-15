@@ -49,6 +49,20 @@ const Social: React.FC = () => {
     });
   };
 
+  const handleCreatePost = () => {
+    setActiveTab('scheduler');
+    behaviorTracker.trackAction('feature_use', 'create_post_button', {
+      source: 'main_header'
+    });
+  };
+
+  const handleSchedulePosts = () => {
+    setActiveTab('scheduler');
+    behaviorTracker.trackAction('feature_use', 'schedule_posts_button', {
+      source: 'main_header'
+    });
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -67,11 +81,18 @@ const Social: React.FC = () => {
             <Settings className="h-4 w-4 mr-2" />
             Manage Platforms
           </Button>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleSchedulePosts}
+          >
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Posts
           </Button>
-          <Button size="sm">
+          <Button 
+            size="sm"
+            onClick={handleCreatePost}
+          >
             <Zap className="h-4 w-4 mr-2" />
             Create Post
           </Button>
