@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import { 
@@ -21,13 +20,13 @@ const Layout: React.FC = () => {
 
   const navItems = [
     { 
-      name: 'Conversational Dashboard', 
+      name: 'AI Dashboard', 
       href: '/conversational-dashboard', 
       icon: LayoutDashboard,
       description: 'AI-powered insights'
     },
     { 
-      name: 'Classic Dashboard', 
+      name: 'Dashboard', 
       href: '/dashboard', 
       icon: LayoutDashboard,
       description: 'Traditional view'
