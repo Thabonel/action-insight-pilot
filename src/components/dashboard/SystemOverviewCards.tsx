@@ -3,6 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, DollarSign, Target, BarChart3 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
+interface EmailAnalytics {
+  total_sent?: number;
+}
+
+interface SocialAnalytics {
+  total_posts?: number;
+  engagement_rate?: number;
+}
+
 interface SystemMetrics {
   totalCampaigns: number;
   activeCampaigns: number;
@@ -12,16 +21,6 @@ interface SystemMetrics {
   emailsSent: number;
   socialPosts: number;
   engagementRate: number;
-}
-
-interface EmailAnalytics {
-  total_sent?: number;
-  open_rate?: number;
-}
-
-interface SocialAnalytics {
-  total_posts?: number;
-  engagement_rate?: number;
 }
 
 const SystemOverviewCards: React.FC = () => {
@@ -41,8 +40,7 @@ const SystemOverviewCards: React.FC = () => {
     const fetchSystemMetrics = async () => {
       try {
         setLoading(true);
-        
-        // Fetch data from multiple endpoints
+
         const [campaignsRes, leadsRes, emailRes, socialRes] = await Promise.all([
           apiClient.getCampaigns(),
           apiClient.getLeads(),
@@ -50,24 +48,37 @@ const SystemOverviewCards: React.FC = () => {
           apiClient.getSocialAnalytics()
         ]);
 
-        const campaigns = campaignsRes.success ? (Array.isArray(campaignsRes.data) ? campaignsRes.data : []) : [];
-        const leads = leadsRes.success ? (Array.isArray(leadsRes.data) ? leadsRes.data : []) : [];
-        const emailAnalytics: EmailAnalytics = emailRes.success ? (emailRes.data as EmailAnalytics) : {};
-        const socialAnalytics: SocialAnalytics = socialRes.success ? (socialRes.data as SocialAnalytics) : {};
+        const campaigns = campaignsRes.success && Array.isArray(campaignsRes.data)
+          ? campaignsRes.data
+          : [];
+        const leads = leadsRes.success && Array.isArray(leadsRes.data)
+          ? leadsRes.data
+          : [];
+
+        const emailAnalyticsData: EmailAnalytics =
+          emailRes.success && typeof emailRes.data === 'object'
+            ? (emailRes.data as EmailAnalytics)
+            : {};
+        const socialAnalyticsData: SocialAnalytics =
+          socialRes.success && typeof socialRes.data === 'object'
+            ? (socialRes.data as SocialAnalytics)
+            : {};
 
         setMetrics({
           totalCampaigns: campaigns.length,
           activeCampaigns: campaigns.filter((c: any) => c.status === 'active').length,
           totalLeads: leads.length,
-          conversionRate: leads.length > 0 ? (leads.filter((l: any) => l.status === 'converted').length / leads.length * 100) : 0,
+          conversionRate:
+            leads.length > 0
+              ? (leads.filter((l: any) => l.status === 'converted').length / leads.length) * 100
+              : 0,
           monthlyRevenue: campaigns.reduce((sum: number, c: any) => sum + (c.budget_spent || 0), 0),
-          emailsSent: emailAnalytics.total_sent || 0,
-          socialPosts: socialAnalytics.total_posts || 0,
-          engagementRate: socialAnalytics.engagement_rate || 0
+          emailsSent: emailAnalyticsData.total_sent || 0,
+          socialPosts: socialAnalyticsData.total_posts || 0,
+          engagementRate: socialAnalyticsData.engagement_rate || 0
         });
       } catch (error) {
         console.error('Error fetching system metrics:', error);
-        // Keep default values on error
       } finally {
         setLoading(false);
       }
@@ -88,7 +99,7 @@ const SystemOverviewCards: React.FC = () => {
     {
       title: 'Total Leads',
       value: loading ? '...' : metrics.totalLeads.toString(),
-      total: `${loading ? '...' : metrics.conversionRate.toFixed(1)}% conversion`,
+      total: loading ? '...' : `${metrics.conversionRate.toFixed(1)}% conversion`,
       icon: Users,
       trend: '+18%',
       color: 'text-green-600'
@@ -104,7 +115,7 @@ const SystemOverviewCards: React.FC = () => {
     {
       title: 'Engagement',
       value: loading ? '...' : `${metrics.engagementRate.toFixed(1)}%`,
-      total: `${loading ? '...' : metrics.emailsSent + metrics.socialPosts} interactions`,
+      total: loading ? '...' : `${metrics.emailsSent + metrics.socialPosts} interactions`,
       icon: BarChart3,
       trend: '+15%',
       color: 'text-purple-600'
