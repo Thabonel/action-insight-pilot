@@ -23,6 +23,9 @@ const WebhookManagement: React.FC = () => {
     refreshIntegrations
   } = useIntegrations();
 
+  // Ensure webhooks is always an array
+  const webhooksList = Array.isArray(webhooks) ? webhooks : [];
+
   const getStatusColor = (isActive: boolean) => {
     return isActive ? 'green' : 'gray';
   };
@@ -125,7 +128,7 @@ const WebhookManagement: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {webhooks.map(webhook => (
+          {webhooksList.map(webhook => (
             <div key={webhook.id} className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium">{webhook.name}</h4>
@@ -180,7 +183,7 @@ const WebhookManagement: React.FC = () => {
               )}
             </div>
           ))}
-          {webhooks.length === 0 && (
+          {webhooksList.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No webhooks configured. Create your first webhook above.
             </div>
