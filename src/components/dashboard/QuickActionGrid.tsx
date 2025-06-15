@@ -170,23 +170,6 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       </CardContent>
     </Card>
   );
-
-  function getColorClasses(color: string) {
-    const colors = {
-      blue: 'from-blue-500 to-blue-600 border-blue-200 hover:border-blue-300',
-      green: 'from-green-500 to-green-600 border-green-200 hover:border-green-300',
-      orange: 'from-orange-500 to-orange-600 border-orange-200 hover:border-orange-300',
-      purple: 'from-purple-500 to-purple-600 border-purple-200 hover:border-purple-300',
-      emerald: 'from-emerald-500 to-emerald-600 border-emerald-200 hover:border-emerald-300',
-      gray: 'from-gray-500 to-gray-600 border-gray-200 hover:border-gray-300'
-    };
-    return colors[color as keyof typeof colors] || colors.blue;
-  }
-
-  function handleActionClick(action: typeof actions[0]) {
-    behaviorTracker.trackAction('planning', action.id, { source: 'quick_actions' });
-    navigate(action.route);
-  }
 };
 
 export default QuickActionGrid;
