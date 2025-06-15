@@ -7,7 +7,7 @@ import logging
 import json
 from datetime import datetime
 
-from ..agents.user_ai_service import UserAIService
+from ..agents.enhanced_user_ai_service import EnhancedUserAIService
 from ..database.supabase_client import get_supabase
 from ..auth import verify_token
 
@@ -79,29 +79,29 @@ async def daily_focus_agent(
     user_id: str = Depends(get_current_user)
 ):
     """
-    Generate daily focus recommendations using user's own OpenAI API key
+    Generate daily focus recommendations using user's OpenAI API key and knowledge base
     """
     try:
         logger.info(f"Daily focus request for user {user_id}: {request.query}")
         
-        # Initialize user-specific AI service
-        user_ai = UserAIService(user_id)
+        # Initialize enhanced AI service
+        enhanced_ai = EnhancedUserAIService(user_id)
         
         # Check if user has API key configured
-        if not await user_ai.has_api_key():
+        if not await enhanced_ai.has_api_key():
             raise HTTPException(
                 status_code=400, 
                 detail="OpenAI API key not configured. Please add your API key in Settings > Integrations."
             )
         
-        # Get fresh campaign data from Supabase instead of using request data
+        # Get fresh campaign data from Supabase
         campaigns = await get_user_campaigns(user_id)
         
         if not campaigns:
             logger.warning(f"No campaigns found for user {user_id}")
         
-        # Generate AI response using user's API key
-        result = await user_ai.generate_daily_focus(
+        # Generate AI response using enhanced service with knowledge base
+        result = await enhanced_ai.generate_daily_focus_with_knowledge(
             query=request.query,
             campaigns=campaigns,
             context=request.context
@@ -110,7 +110,7 @@ async def daily_focus_agent(
         if not result.get('success'):
             raise HTTPException(status_code=500, detail=result.get('error', 'AI processing failed'))
         
-        logger.info(f"✅ Daily focus generated successfully for user {user_id}")
+        logger.info(f"✅ Enhanced daily focus generated successfully for user {user_id}")
         return result
         
     except HTTPException:
@@ -125,16 +125,16 @@ async def general_campaign_agent(
     user_id: str = Depends(get_current_user)
 ):
     """
-    Handle general campaign queries using user's own OpenAI API key
+    Handle general campaign queries using user's OpenAI API key and knowledge base
     """
     try:
         logger.info(f"General query request for user {user_id}: {request.task_type}")
         
-        # Initialize user-specific AI service
-        user_ai = UserAIService(user_id)
+        # Initialize enhanced AI service
+        enhanced_ai = EnhancedUserAIService(user_id)
         
         # Check if user has API key configured
-        if not await user_ai.has_api_key():
+        if not await enhanced_ai.has_api_key():
             raise HTTPException(
                 status_code=400, 
                 detail="OpenAI API key not configured. Please add your API key in Settings > Integrations."
@@ -151,8 +151,8 @@ async def general_campaign_agent(
         if not campaigns:
             logger.warning(f"No campaigns found for user {user_id}")
         
-        # Process query using user's API key
-        result = await user_ai.process_general_query(
+        # Process query using enhanced service with knowledge base
+        result = await enhanced_ai.process_general_query_with_knowledge(
             query=query,
             campaigns=campaigns,
             context=context
@@ -161,7 +161,7 @@ async def general_campaign_agent(
         if not result.get('success'):
             raise HTTPException(status_code=500, detail=result.get('error', 'AI processing failed'))
         
-        logger.info(f"✅ General query processed successfully for user {user_id}")
+        logger.info(f"✅ Enhanced general query processed successfully for user {user_id}")
         return result
         
     except HTTPException:
@@ -170,29 +170,4 @@ async def general_campaign_agent(
         logger.error(f"❌ General campaign agent failed for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/api/campaigns")
-async def get_campaigns(user_id: str = Depends(get_current_user)):
-    """
-    Get user's campaigns with accurate count
-    """
-    try:
-        campaigns = await get_user_campaigns(user_id)
-        
-        return {
-            "success": True,
-            "data": campaigns,
-            "count": len(campaigns)
-        }
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to get campaigns for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
-        "service": "user-aware-agents"
-    }
+# ... keep existing code (campaigns endpoint and health check)

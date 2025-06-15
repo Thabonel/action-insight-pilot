@@ -10,3 +10,6 @@ max_rows = 1000
 
 [functions.agent-executor]
 verify_jwt = true
+
+[functions.knowledge-processor]
+verify_jwt = true
