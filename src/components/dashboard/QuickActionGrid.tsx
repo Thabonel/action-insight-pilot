@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Zap, Mail, Users, BarChart3, Settings, TrendingUp } from 'lucide-react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { useNavigate } from 'react-router-dom';
 
 interface QuickActionGridProps {
   insights: {
@@ -16,6 +17,8 @@ interface QuickActionGridProps {
 }
 
 const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
+  const navigate = useNavigate();
+
   const baseActions = [
     {
       id: 'create_campaign',
@@ -24,7 +27,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       icon: Zap,
       color: 'blue',
       successRate: 87,
-      lastUsed: '2 hours ago'
+      lastUsed: '2 hours ago',
+      route: '/campaigns'
     },
     {
       id: 'analyze_leads',
@@ -33,7 +37,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       icon: Users,
       color: 'green',
       successRate: 94,
-      lastUsed: '1 day ago'
+      lastUsed: '1 day ago',
+      route: '/leads'
     },
     {
       id: 'email_campaign',
@@ -42,7 +47,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       icon: Mail,
       color: 'orange',
       successRate: 76,
-      lastUsed: '3 hours ago'
+      lastUsed: '3 hours ago',
+      route: '/email'
     },
     {
       id: 'performance_review',
@@ -51,7 +57,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       icon: BarChart3,
       color: 'purple',
       successRate: 92,
-      lastUsed: '30 minutes ago'
+      lastUsed: '30 minutes ago',
+      route: '/analytics'
     },
     {
       id: 'optimize_content',
@@ -60,7 +67,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       icon: TrendingUp,
       color: 'emerald',
       successRate: 88,
-      lastUsed: '1 hour ago'
+      lastUsed: '1 hour ago',
+      route: '/content'
     },
     {
       id: 'system_settings',
@@ -69,7 +77,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       icon: Settings,
       color: 'gray',
       successRate: 65,
-      lastUsed: '1 week ago'
+      lastUsed: '1 week ago',
+      route: '/settings'
     }
   ];
 
@@ -94,8 +103,9 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
     return colors[color as keyof typeof colors] || colors.blue;
   };
 
-  const handleActionClick = (actionId: string) => {
-    behaviorTracker.trackAction('planning', actionId, { source: 'quick_actions' });
+  const handleActionClick = (action: typeof actions[0]) => {
+    behaviorTracker.trackAction('planning', action.id, { source: 'quick_actions' });
+    navigate(action.route);
   };
 
   return (
@@ -118,7 +128,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
             <Button
               key={action.id}
               variant="outline"
-              onClick={() => handleActionClick(action.id)}
+              onClick={() => handleActionClick(action)}
               className={`h-auto p-4 justify-start hover:shadow-md transition-all duration-200 ${colorClasses.split(' ').slice(2).join(' ')}`}
             >
               <div className="flex items-center space-x-3 w-full">
