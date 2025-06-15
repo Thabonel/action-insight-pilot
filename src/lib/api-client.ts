@@ -1,3 +1,4 @@
+
 import { HttpClient } from './http-client';
 import { CampaignsService } from './api/campaigns-service';
 import { LeadsService } from './api/leads-service';
@@ -28,7 +29,7 @@ export class ApiClient {
   private content: ContentService;
   private social: SocialService;
   private email: EmailService;
-  private analytics: AnalyticsService;
+  public analytics: AnalyticsService;
   private workflow: WorkflowService;
   private proposals: ProposalsService;
   private agents: AgentsService;

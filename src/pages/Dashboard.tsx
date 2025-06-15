@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '@/lib/api-client';
@@ -6,41 +7,46 @@ import DashboardChatInterface from '@/components/dashboard/DashboardChatInterfac
 import InsightsPanel from '@/components/dashboard/InsightsPanel';
 import PerformanceChart from '@/components/dashboard/PerformanceChart';
 import { Button } from '@/components/ui/button';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [insights, setInsights] = useState<Insight[]>([]);
   const [chartData, setChartData] = useState<any>(null);
+  const { loading, withErrorHandling } = useErrorHandler();
 
   useEffect(() => {
     const loadData = async () => {
-      const [campaignsRes, leadsRes, socialRes, emailRes, contentRes, perfRes] = await Promise.all([
-        apiClient.getCampaigns(),
-        apiClient.getLeads(),
-        apiClient.getSocialMediaPosts(),
-        apiClient.getEmailAnalytics(),
-        apiClient.getContentLibrary(),
-        apiClient.analytics.getPerformanceMetrics('24h'),
-      ]);
+      await withErrorHandling(async () => {
+        const [campaignsRes, leadsRes, socialRes, emailRes, contentRes, perfRes] = await Promise.all([
+          apiClient.getCampaigns(),
+          apiClient.getLeads(),
+          apiClient.getSocialMediaPosts(),
+          apiClient.getEmailAnalytics(),
+          apiClient.getContentLibrary(),
+          apiClient.analytics.getPerformanceMetrics('24h'),
+        ]);
 
-      const newInsights: Insight[] = [
-        { title: 'Campaigns', value: campaignsRes.success && Array.isArray(campaignsRes.data) ? campaignsRes.data.length : 0 },
-        { title: 'Leads', value: leadsRes.success && Array.isArray(leadsRes.data) ? leadsRes.data.length : 0 },
-        { title: 'Posts', value: socialRes.success && Array.isArray(socialRes.data) ? socialRes.data.length : 0 },
-        { title: 'Emails Sent', value: emailRes.success && typeof emailRes.data.totalSent === 'number' ? emailRes.data.totalSent : 0 },
-        { title: 'Content Pieces', value: contentRes.success && Array.isArray(contentRes.data) ? contentRes.data.length : 0 },
-      ];
-      setInsights(newInsights);
+        const newInsights: Insight[] = [
+          { title: 'Campaigns', value: campaignsRes.success && Array.isArray(campaignsRes.data) ? campaignsRes.data.length : 0 },
+          { title: 'Leads', value: leadsRes.success && Array.isArray(leadsRes.data) ? leadsRes.data.length : 0 },
+          { title: 'Posts', value: socialRes.success && Array.isArray(socialRes.data) ? socialRes.data.length : 0 },
+          { title: 'Emails Sent', value: emailRes.success && emailRes.data && typeof emailRes.data === 'object' && 'totalSent' in emailRes.data ? (emailRes.data as any).totalSent : 0 },
+          { title: 'Content Pieces', value: contentRes.success && Array.isArray(contentRes.data) ? contentRes.data.length : 0 },
+        ];
+        setInsights(newInsights);
 
-      if (perfRes.success) {
-        setChartData(perfRes.data);
-      }
+        if (perfRes.success) {
+          setChartData(perfRes.data);
+        }
+      });
     };
 
     loadData();
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [withErrorHandling]);
 
   const quickActions = [
     { label: 'Create Campaign', onClick: () => navigate('/campaigns/new') },
@@ -50,6 +56,14 @@ const Dashboard: React.FC = () => {
     { label: 'Email Blast', onClick: () => navigate('/email/new') },
     { label: 'View Analytics', onClick: () => navigate('/analytics') },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -81,7 +95,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Performance Chart */}
-      {chartData && <PerformanceChart data={chartData} />}
+      {chartData && <PerformanceChart />}
     </div>
   );
 };

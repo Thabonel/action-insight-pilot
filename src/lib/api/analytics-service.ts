@@ -12,7 +12,7 @@ export class AnalyticsService {
     return this.httpClient.request('/api/system/stats');
   }
 
-  async getPerformanceMetrics() {
-    return this.httpClient.request('/api/analytics/performance');
+  async getPerformanceMetrics(timeRange: string = '24h') {
+    return this.httpClient.request(`/api/analytics/performance?timeRange=${timeRange}`);
   }
 }
