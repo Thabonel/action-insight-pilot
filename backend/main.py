@@ -36,8 +36,10 @@ app.add_middleware(
 from routes.user_aware_agents import router as user_aware_router
 from routes.system_health import router as system_health_router
 from routes.email import router as email_router
+from routes.workflows import router as workflows_router
 
 # Add all routers
 app.include_router(user_aware_router)
 app.include_router(system_health_router)
 app.include_router(email_router)
+app.include_router(workflows_router)
