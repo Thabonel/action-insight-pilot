@@ -23,12 +23,21 @@ export function useIntegrations() {
         apiClient.integrations.getConnections()
       ]);
 
-      if (webhooksResponse.success) {
-        setWebhooks(webhooksResponse.data || []);
+      console.log('Webhooks response:', webhooksResponse);
+      console.log('Connections response:', connectionsResponse);
+
+      if (webhooksResponse.success && Array.isArray(webhooksResponse.data)) {
+        setWebhooks(webhooksResponse.data);
+      } else {
+        console.warn('Webhooks response data is not an array:', webhooksResponse.data);
+        setWebhooks([]);
       }
 
-      if (connectionsResponse.success) {
-        setConnections(connectionsResponse.data || []);
+      if (connectionsResponse.success && Array.isArray(connectionsResponse.data)) {
+        setConnections(connectionsResponse.data);
+      } else {
+        console.warn('Connections response data is not an array:', connectionsResponse.data);
+        setConnections([]);
       }
 
       setError(null);
@@ -36,6 +45,9 @@ export function useIntegrations() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load integrations';
       setError(errorMessage);
       console.error('Error loading integrations:', err);
+      // Ensure arrays are set even on error
+      setWebhooks([]);
+      setConnections([]);
     } finally {
       setLoading(false);
     }
