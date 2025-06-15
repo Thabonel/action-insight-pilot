@@ -5,11 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, TrendingUp, Target, Zap, Send } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, Target, Zap, Send, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
+import { behaviorTracker } from '@/lib/behavior-tracker';
 
 const IntelligentPostScheduler: React.FC = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['linkedin']);
   const [postContent, setPostContent] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const { toast } = useToast();
   
   const platforms = [
     { id: 'linkedin', name: 'LinkedIn', engagement: '12.3%', bestTime: '10:30 AM', color: 'blue' },
@@ -42,6 +48,133 @@ const IntelligentPostScheduler: React.FC = () => {
       case 'Medium': return 'bg-yellow-100 text-yellow-800';
       case 'Low': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handlePostNow = async () => {
+    if (!postContent.trim()) {
+      toast({
+        title: "Content Required",
+        description: "Please enter content for your post",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedPlatforms.length === 0) {
+      toast({
+        title: "Platform Required",
+        description: "Please select at least one platform",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsPosting(true);
+    
+    try {
+      behaviorTracker.trackAction('feature_use', 'post_now', {
+        platforms: selectedPlatforms,
+        contentLength: postContent.length
+      });
+
+      // Post to each selected platform
+      for (const platform of selectedPlatforms) {
+        await apiClient.createSocialPost({
+          content: postContent,
+          platform,
+          scheduled_for: null, // Post immediately
+          status: 'published'
+        });
+      }
+
+      toast({
+        title: "Post Published",
+        description: `Successfully posted to ${selectedPlatforms.length} platform(s)`,
+      });
+
+      // Clear form
+      setPostContent('');
+      setSelectedPlatforms(['linkedin']);
+
+    } catch (error) {
+      console.error('Error posting:', error);
+      toast({
+        title: "Post Failed",
+        description: "Failed to publish post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
+  const handleScheduleForLater = async () => {
+    if (!postContent.trim()) {
+      toast({
+        title: "Content Required",
+        description: "Please enter content for your post",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedPlatforms.length === 0) {
+      toast({
+        title: "Platform Required",
+        description: "Please select at least one platform",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsScheduling(true);
+    
+    try {
+      behaviorTracker.trackAction('feature_use', 'schedule_post', {
+        platforms: selectedPlatforms,
+        contentLength: postContent.length
+      });
+
+      // Find the best time slot for scheduling
+      const bestTimeSlot = timeSlots.find(slot => slot.prediction === 'Excellent') || timeSlots[0];
+      const scheduledTime = new Date();
+      scheduledTime.setHours(parseInt(bestTimeSlot.time.split(':')[0]));
+      scheduledTime.setMinutes(parseInt(bestTimeSlot.time.split(' ')[0].split(':')[1]));
+      
+      // If the time has passed today, schedule for tomorrow
+      if (scheduledTime <= new Date()) {
+        scheduledTime.setDate(scheduledTime.getDate() + 1);
+      }
+
+      // Schedule on each selected platform
+      for (const platform of selectedPlatforms) {
+        await apiClient.scheduleSocialPost({
+          content: postContent,
+          platform,
+          scheduled_for: scheduledTime.toISOString(),
+          status: 'scheduled'
+        });
+      }
+
+      toast({
+        title: "Post Scheduled",
+        description: `Scheduled for ${scheduledTime.toLocaleString()} on ${selectedPlatforms.length} platform(s)`,
+      });
+
+      // Clear form
+      setPostContent('');
+      setSelectedPlatforms(['linkedin']);
+
+    } catch (error) {
+      console.error('Error scheduling:', error);
+      toast({
+        title: "Scheduling Failed",
+        description: "Failed to schedule post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsScheduling(false);
     }
   };
 
@@ -88,13 +221,39 @@ const IntelligentPostScheduler: React.FC = () => {
           </div>
 
           <div className="flex space-x-3">
-            <Button className="flex-1">
-              <Zap className="h-4 w-4 mr-2" />
-              Post Now (Optimal Time)
+            <Button 
+              className="flex-1"
+              onClick={handlePostNow}
+              disabled={isPosting || isScheduling}
+            >
+              {isPosting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Post Now (Optimal Time)
+                </>
+              )}
             </Button>
-            <Button variant="outline">
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule for Later
+            <Button 
+              variant="outline"
+              onClick={handleScheduleForLater}
+              disabled={isPosting || isScheduling}
+            >
+              {isScheduling ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule for Later
+                </>
+              )}
             </Button>
           </div>
         </CardContent>
