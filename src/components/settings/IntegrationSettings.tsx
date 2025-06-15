@@ -7,11 +7,13 @@ import WebhookManagement from './integrations/WebhookManagement';
 import ApiAccess from './integrations/ApiAccess';
 import DataSyncSettings from './integrations/DataSyncSettings';
 import PlatformCredentialsSetup from './integrations/PlatformCredentialsSetup';
+import KnowledgeManagement from '../knowledge/KnowledgeManagement';
 
 const IntegrationSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <PlatformCredentialsSetup />
+      <KnowledgeManagement />
       <SocialPlatformConnectors />
       <UserApiKeysSettings />
       <ThirdPartyIntegrations />

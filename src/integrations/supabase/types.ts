@@ -1174,6 +1174,231 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_access_logs: {
+        Row: {
+          agent_type: string | null
+          bucket_id: string | null
+          chunk_id: string | null
+          created_at: string
+          document_id: string | null
+          id: string
+          query_text: string | null
+          similarity_score: number | null
+          used_in_response: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          agent_type?: string | null
+          bucket_id?: string | null
+          chunk_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          query_text?: string | null
+          similarity_score?: number | null
+          used_in_response?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          agent_type?: string | null
+          bucket_id?: string | null
+          chunk_id?: string | null
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          query_text?: string | null
+          similarity_score?: number | null
+          used_in_response?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_access_logs_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_buckets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_access_logs_chunk_id_fkey"
+            columns: ["chunk_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_chunks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_access_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_buckets: {
+        Row: {
+          bucket_type: string
+          campaign_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          bucket_type: string
+          campaign_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          bucket_type?: string
+          campaign_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_buckets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "active_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_buckets_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_chunks: {
+        Row: {
+          bucket_id: string
+          chunk_index: number
+          content: string
+          content_hash: string
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          metadata: Json | null
+          token_count: number | null
+        }
+        Insert: {
+          bucket_id: string
+          chunk_index: number
+          content: string
+          content_hash: string
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+          token_count?: number | null
+        }
+        Update: {
+          bucket_id?: string
+          chunk_index?: number
+          content?: string
+          content_hash?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+          token_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_chunks_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_buckets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_documents: {
+        Row: {
+          bucket_id: string
+          content: string
+          created_at: string
+          created_by: string
+          file_name: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          metadata: Json | null
+          processing_error: string | null
+          status: string
+          title: string
+          updated_at: string
+          upload_path: string | null
+        }
+        Insert: {
+          bucket_id: string
+          content: string
+          created_at?: string
+          created_by: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          metadata?: Json | null
+          processing_error?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          upload_path?: string | null
+        }
+        Update: {
+          bucket_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          metadata?: Json | null
+          processing_error?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          upload_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_documents_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_activities: {
         Row: {
           activity_data: Json | null
@@ -2364,6 +2589,27 @@ export type Database = {
       l2_normalize: {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: unknown
+      }
+      search_knowledge_chunks: {
+        Args: {
+          p_user_id: string
+          p_query_embedding: string
+          p_bucket_type?: string
+          p_campaign_id?: string
+          p_limit?: number
+          p_similarity_threshold?: number
+        }
+        Returns: {
+          chunk_id: string
+          bucket_id: string
+          document_id: string
+          bucket_name: string
+          document_title: string
+          chunk_content: string
+          chunk_index: number
+          similarity_score: number
+          metadata: Json
+        }[]
       }
       sparsevec_out: {
         Args: { "": unknown }
