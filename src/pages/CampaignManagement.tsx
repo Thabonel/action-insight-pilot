@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { apiClient } from '@/lib/api-client';
+import { useCampaigns } from '@/hooks/useCampaigns';
 import CampaignAIAssistant from '@/components/campaigns/CampaignAIAssistant';
 import IntelligentCampaignCreator from '@/components/campaigns/IntelligentCampaignCreator';
 import CampaignPerformanceDashboard from '@/components/campaigns/CampaignPerformanceDashboard';
@@ -46,34 +47,26 @@ interface Template {
 }
 
 const CampaignManagement: React.FC = () => {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { campaigns: campaignsData, isLoading, error, reload } = useCampaigns();
   const [activeView, setActiveView] = useState<'overview' | 'create' | 'templates'>('overview');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
+  // Transform the campaigns data to match the expected interface
+  const campaigns = campaignsData.map(campaign => ({
+    ...campaign,
+    type: 'email', // Default type since it's not in the database
+    status: 'active', // Default status
+    createdAt: new Date(campaign.created_at),
+    performance: {
+      successScore: 75, // Mock data
+      budgetEfficiency: 80,
+      channelBreakdown: { email: 60, social: 40 }
+    }
+  }));
+
   useEffect(() => {
     behaviorTracker.trackAction('navigation', 'campaign_management', { section: 'main' });
-    loadCampaigns();
   }, []);
-
-  const loadCampaigns = async () => {
-    const actionId = behaviorTracker.trackFeatureStart('campaigns_load');
-    try {
-      const result = await apiClient.getCampaigns();
-      if (result.success) {
-        setCampaigns((result.data as Campaign[]) || []);
-        behaviorTracker.trackFeatureComplete('campaigns_load', actionId, true);
-      } else {
-        console.error('Failed to load campaigns:', result.error);
-        behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
-      }
-    } catch (error) {
-      console.error('Error loading campaigns:', error);
-      behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleTemplateSelect = (template: Template) => {
     setSelectedTemplate(template);
@@ -87,7 +80,7 @@ const CampaignManagement: React.FC = () => {
     setActiveView(view);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -147,14 +140,14 @@ const CampaignManagement: React.FC = () => {
               <CampaignPerformanceDashboard campaigns={campaigns} />
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <TimingIntelligencePanel />
-                <WorkflowAutomation campaigns={campaigns} onCampaignUpdate={loadCampaigns} />
+                <WorkflowAutomation campaigns={campaigns} onCampaignUpdate={reload} />
               </div>
             </div>
           )}
           
           {activeView === 'create' && (
             <IntelligentCampaignCreator 
-              onCampaignCreated={loadCampaigns} 
+              onCampaignCreated={reload} 
               selectedTemplate={selectedTemplate}
             />
           )}

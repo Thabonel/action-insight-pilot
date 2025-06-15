@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { behaviorTracker } from '@/lib/behavior-tracker';
@@ -19,7 +18,10 @@ interface WorkflowAutomationProps {
   onCampaignUpdate: () => void;
 }
 
-const WorkflowAutomation: React.FC<WorkflowAutomationProps> = ({ campaigns, onCampaignUpdate }) => {
+const WorkflowAutomation: React.FC<WorkflowAutomationProps> = ({ campaigns = [], onCampaignUpdate }) => {
+  // Ensure campaigns is always an array
+  const safeCampaigns = Array.isArray(campaigns) ? campaigns : [];
+
   const quickActions = [
     {
       id: 'duplicate-best',
@@ -27,7 +29,7 @@ const WorkflowAutomation: React.FC<WorkflowAutomationProps> = ({ campaigns, onCa
       description: 'Create a copy of your highest performing campaign',
       icon: Copy,
       color: 'blue',
-      enabled: campaigns.length > 0
+      enabled: safeCampaigns.length > 0
     },
     {
       id: 'launch-optimal',
@@ -43,7 +45,7 @@ const WorkflowAutomation: React.FC<WorkflowAutomationProps> = ({ campaigns, onCa
       description: 'Automatically adjust budgets based on performance',
       icon: Target,
       color: 'purple',
-      enabled: campaigns.some(c => c.status === 'active')
+      enabled: safeCampaigns.some(c => c.status === 'active')
     },
     {
       id: 'pause-underperforming',
@@ -51,7 +53,7 @@ const WorkflowAutomation: React.FC<WorkflowAutomationProps> = ({ campaigns, onCa
       description: 'Automatically pause campaigns below threshold',
       icon: Pause,
       color: 'orange',
-      enabled: campaigns.some(c => c.status === 'active')
+      enabled: safeCampaigns.some(c => c.status === 'active')
     },
     {
       id: 'quick-launch',
@@ -67,14 +69,14 @@ const WorkflowAutomation: React.FC<WorkflowAutomationProps> = ({ campaigns, onCa
       description: 'Increase budget on campaigns exceeding targets',
       icon: Play,
       color: 'emerald',
-      enabled: campaigns.some(c => c.performance?.successScore && c.performance.successScore > 80)
+      enabled: safeCampaigns.some(c => c.performance?.successScore && c.performance.successScore > 80)
     }
   ];
 
   const handleQuickAction = (actionId: string) => {
     behaviorTracker.trackAction('execution', 'workflow_automation', {
       actionId,
-      campaignCount: campaigns.length
+      campaignCount: safeCampaigns.length
     });
     
     // Simulate action execution
