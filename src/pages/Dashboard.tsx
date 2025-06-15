@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { apiClient } from '@/lib/api-client';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
-import InsightsCards from '@/components/dashboard/InsightsCards';
+import InsightsCards, { Insight } from '@/components/dashboard/InsightsCards';
 import DashboardChatInterface from '@/components/dashboard/DashboardChatInterface';
 import InsightsPanel from '@/components/dashboard/InsightsPanel';
 import PerformanceChart from '@/components/dashboard/PerformanceChart';
 
 const Dashboard: React.FC = () => {
-  const [insights, setInsights] = useState(behaviorTracker.getInsights());
+  const [insights, setInsights] = useState<Insight[]>([]);
   const [dashboardData, setDashboardData] = useState({
     analytics: null,
     campaigns: null,
@@ -23,12 +23,12 @@ const Dashboard: React.FC = () => {
   const loadData = async () => {
     await withErrorHandling(async () => {
       const [analyticsData, campaignsData, leadsData, emailData, socialData, systemData] = await Promise.all([
-        apiClient.analytics.getAnalyticsOverview().catch(() => ({ totalSent: 0, openRate: 0 })),
+        apiClient.analytics.getAnalyticsOverview().catch(() => ({ data: { totalSent: 0, openRate: 0 } })),
         apiClient.getCampaigns().catch(() => ({ data: [] })),
         apiClient.getLeads().catch(() => ({ data: [] })),
-        apiClient.getEmailAnalytics().catch(() => ({ totalSent: 0, openRate: 0 })),
-        apiClient.getSocialAnalytics().catch(() => ({ posts: 0, engagement: 0 })),
-        apiClient.analytics.getSystemStats().catch(() => ({ uptime: 99.9, performance: 95 }))
+        apiClient.getEmailAnalytics().catch(() => ({ data: { totalSent: 0, openRate: 0 } })),
+        apiClient.getSocialAnalytics().catch(() => ({ data: { posts: 0, engagement: 0 } })),
+        apiClient.analytics.getSystemStats().catch(() => ({ data: { uptime: 99.9, performance: 95 } }))
       ]);
 
       setDashboardData({
@@ -41,12 +41,16 @@ const Dashboard: React.FC = () => {
       });
 
       // Convert behavior tracker insights to array format for components
-      const behaviorInsights = behaviorTracker.getInsights();
-      const insightsArray = [
-        { title: 'Active Campaigns', value: campaignsData?.data?.length || 5 },
-        { title: 'Total Leads', value: leadsData?.data?.length || 23 },
-        { title: 'Emails Sent', value: emailData?.totalSent || 156 },
-        { title: 'Social Posts', value: socialData?.posts || 12 }
+      const campaignsArray = campaignsData?.data || [];
+      const leadsArray = leadsData?.data || [];
+      const emailStats = emailData?.data || { totalSent: 0 };
+      const socialStats = socialData?.data || { posts: 0 };
+      
+      const insightsArray: Insight[] = [
+        { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
+        { title: 'Total Leads', value: Array.isArray(leadsArray) ? leadsArray.length : 23 },
+        { title: 'Emails Sent', value: emailStats.totalSent || 156 },
+        { title: 'Social Posts', value: socialStats.posts || 12 }
       ];
       
       setInsights(insightsArray);
@@ -60,12 +64,16 @@ const Dashboard: React.FC = () => {
     
     // Update insights every 30 seconds
     const interval = setInterval(() => {
-      const behaviorInsights = behaviorTracker.getInsights();
-      const insightsArray = [
-        { title: 'Active Campaigns', value: dashboardData.campaigns?.data?.length || 5 },
-        { title: 'Total Leads', value: dashboardData.leads?.data?.length || 23 },
-        { title: 'Emails Sent', value: dashboardData.email?.totalSent || 156 },
-        { title: 'Social Posts', value: dashboardData.social?.posts || 12 }
+      const campaignsArray = dashboardData.campaigns?.data || [];
+      const leadsArray = dashboardData.leads?.data || [];
+      const emailStats = dashboardData.email?.data || { totalSent: 0 };
+      const socialStats = dashboardData.social?.data || { posts: 0 };
+      
+      const insightsArray: Insight[] = [
+        { title: 'Active Campaigns', value: Array.isArray(campaignsArray) ? campaignsArray.length : 5 },
+        { title: 'Total Leads', value: Array.isArray(leadsArray) ? leadsArray.length : 23 },
+        { title: 'Emails Sent', value: emailStats.totalSent || 156 },
+        { title: 'Social Posts', value: socialStats.posts || 12 }
       ];
       setInsights(insightsArray);
     }, 30000);
@@ -98,7 +106,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Performance Chart */}
-      <PerformanceChart data={dashboardData} />
+      <PerformanceChart dashboardData={dashboardData} />
     </div>
   );
 };
