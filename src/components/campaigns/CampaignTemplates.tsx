@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { behaviorTracker } from '@/lib/behavior-tracker';
@@ -15,6 +14,15 @@ interface Template {
   color: string;
   difficulty: 'Quick' | 'Detailed';
   bestFor: string[];
+  // Template data for pre-populating forms
+  templateData: {
+    name: string;
+    type: string;
+    description: string;
+    budget?: string;
+    targetAudience?: string;
+    timeline?: string;
+  };
 }
 
 interface CampaignTemplatesProps {
@@ -33,7 +41,15 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
       icon: Mail,
       color: 'blue',
       difficulty: 'Quick',
-      bestFor: ['Lead generation', 'Customer retention']
+      bestFor: ['Lead generation', 'Customer retention'],
+      templateData: {
+        name: 'Email Nurture Campaign',
+        type: 'email',
+        description: 'A 7-part email sequence designed to nurture leads through the sales funnel with valuable content and gentle calls-to-action.',
+        budget: '$300',
+        targetAudience: 'Qualified leads who downloaded lead magnets',
+        timeline: '2 weeks'
+      }
     },
     {
       id: 'product-launch',
@@ -45,7 +61,15 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
       icon: Target,
       color: 'green',
       difficulty: 'Detailed',
-      bestFor: ['Product launches', 'Brand awareness']
+      bestFor: ['Product launches', 'Brand awareness'],
+      templateData: {
+        name: 'New Product Launch',
+        type: 'mixed',
+        description: 'Comprehensive multi-channel campaign including email, social media, and content marketing to maximize product launch impact.',
+        budget: '$1,500',
+        targetAudience: 'Existing customers and warm prospects',
+        timeline: '4 weeks'
+      }
     },
     {
       id: 'social-engagement',
@@ -57,7 +81,15 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
       icon: Users,
       color: 'purple',
       difficulty: 'Quick',
-      bestFor: ['Social engagement', 'Community building']
+      bestFor: ['Social engagement', 'Community building'],
+      templateData: {
+        name: 'Social Engagement Boost',
+        type: 'social',
+        description: 'Quick-launch social media campaign focused on increasing engagement through interactive content and community building.',
+        budget: '$200',
+        targetAudience: 'Social media followers and community members',
+        timeline: '1 week'
+      }
     },
     {
       id: 'content-series',
@@ -69,7 +101,15 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
       icon: BarChart,
       color: 'orange',
       difficulty: 'Detailed',
-      bestFor: ['Thought leadership', 'SEO', 'Education']
+      bestFor: ['Thought leadership', 'SEO', 'Education'],
+      templateData: {
+        name: 'Thought Leadership Content Series',
+        type: 'content',
+        description: 'Educational content series including blog posts, whitepapers, and webinars to establish industry thought leadership.',
+        budget: '$800',
+        targetAudience: 'Industry professionals and decision makers',
+        timeline: '6 weeks'
+      }
     },
     {
       id: 'flash-promotion',
@@ -81,7 +121,15 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
       icon: Zap,
       color: 'red',
       difficulty: 'Quick',
-      bestFor: ['Sales boost', 'Inventory clearance']
+      bestFor: ['Sales boost', 'Inventory clearance'],
+      templateData: {
+        name: 'Flash Sale Campaign',
+        type: 'mixed',
+        description: 'Urgent promotional campaign with limited-time offers to drive immediate sales and clear inventory.',
+        budget: '$500',
+        targetAudience: 'Email subscribers and social media followers',
+        timeline: '3 days'
+      }
     },
     {
       id: 'webinar-promotion',
@@ -93,7 +141,15 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
       icon: Clock,
       color: 'indigo',
       difficulty: 'Detailed',
-      bestFor: ['Lead generation', 'Education', 'Demos']
+      bestFor: ['Lead generation', 'Education', 'Demos'],
+      templateData: {
+        name: 'Webinar Registration Campaign',
+        type: 'mixed',
+        description: 'Multi-touch campaign to promote webinar registration including email sequences, social media posts, and landing page optimization.',
+        budget: '$600',
+        targetAudience: 'Prospects interested in the webinar topic',
+        timeline: '3 weeks'
+      }
     }
   ];
 
@@ -130,7 +186,7 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
             <Zap className="h-5 w-5 text-yellow-600" />
             <span>Quick Launch Templates</span>
           </CardTitle>
-          <p className="text-sm text-gray-600">Fast setup, proven results</p>
+          <p className="text-sm text-gray-600">Fast setup, proven results - click to pre-populate campaign form</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -142,7 +198,7 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
                 <div
                   key={template.id}
                   onClick={() => handleTemplateSelect(template)}
-                  className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:border-blue-300"
+                  className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:border-blue-300 hover:bg-blue-50"
                 >
                   <div className="flex items-start space-x-3 mb-3">
                     <div className={`p-2 rounded-lg ${colorClasses}`}>
@@ -175,6 +231,12 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
                       ))}
                     </div>
                   </div>
+
+                  <div className="mt-3 pt-2 border-t bg-blue-50 -mx-4 -mb-4 px-4 py-2 rounded-b-lg">
+                    <p className="text-xs text-blue-700 font-medium">
+                      ✨ Click to auto-fill campaign form with this template
+                    </p>
+                  </div>
                 </div>
               );
             })}
@@ -189,7 +251,7 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
             <Target className="h-5 w-5 text-blue-600" />
             <span>Detailed Planning Templates</span>
           </CardTitle>
-          <p className="text-sm text-gray-600">Comprehensive campaigns for maximum impact</p>
+          <p className="text-sm text-gray-600">Comprehensive campaigns for maximum impact - click to pre-populate campaign form</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -201,7 +263,7 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
                 <div
                   key={template.id}
                   onClick={() => handleTemplateSelect(template)}
-                  className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:border-blue-300"
+                  className="border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:border-blue-300 hover:bg-blue-50"
                 >
                   <div className="flex items-start space-x-3 mb-3">
                     <div className={`p-2 rounded-lg ${colorClasses}`}>
@@ -233,6 +295,12 @@ const CampaignTemplates: React.FC<CampaignTemplatesProps> = ({ onTemplateSelect 
                         </span>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="mt-3 pt-2 border-t bg-blue-50 -mx-4 -mb-4 px-4 py-2 rounded-b-lg">
+                    <p className="text-xs text-blue-700 font-medium">
+                      ✨ Click to auto-fill campaign form with this template
+                    </p>
                   </div>
                 </div>
               );

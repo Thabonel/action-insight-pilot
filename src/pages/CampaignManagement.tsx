@@ -24,10 +24,32 @@ interface Campaign {
   };
 }
 
+interface Template {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  successRate: number;
+  avgTime: string;
+  icon: any;
+  color: string;
+  difficulty: 'Quick' | 'Detailed';
+  bestFor: string[];
+  templateData: {
+    name: string;
+    type: string;
+    description: string;
+    budget?: string;
+    targetAudience?: string;
+    timeline?: string;
+  };
+}
+
 const CampaignManagement: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'overview' | 'create' | 'templates'>('overview');
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
   useEffect(() => {
     behaviorTracker.trackAction('navigation', 'campaign_management', { section: 'main' });
@@ -53,6 +75,18 @@ const CampaignManagement: React.FC = () => {
     }
   };
 
+  const handleTemplateSelect = (template: Template) => {
+    setSelectedTemplate(template);
+    setActiveView('create');
+  };
+
+  const handleViewChange = (view: 'overview' | 'create' | 'templates') => {
+    if (view !== 'create') {
+      setSelectedTemplate(null);
+    }
+    setActiveView(view);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -70,7 +104,7 @@ const CampaignManagement: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <button
-            onClick={() => setActiveView('overview')}
+            onClick={() => handleViewChange('overview')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               activeView === 'overview' 
                 ? 'bg-blue-600 text-white' 
@@ -80,7 +114,7 @@ const CampaignManagement: React.FC = () => {
             Overview
           </button>
           <button
-            onClick={() => setActiveView('create')}
+            onClick={() => handleViewChange('create')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               activeView === 'create' 
                 ? 'bg-blue-600 text-white' 
@@ -90,7 +124,7 @@ const CampaignManagement: React.FC = () => {
             Create
           </button>
           <button
-            onClick={() => setActiveView('templates')}
+            onClick={() => handleViewChange('templates')}
             className={`px-4 py-2 rounded-lg transition-colors ${
               activeView === 'templates' 
                 ? 'bg-blue-600 text-white' 
@@ -119,14 +153,14 @@ const CampaignManagement: React.FC = () => {
           )}
           
           {activeView === 'create' && (
-            <IntelligentCampaignCreator onCampaignCreated={loadCampaigns} />
+            <IntelligentCampaignCreator 
+              onCampaignCreated={loadCampaigns} 
+              selectedTemplate={selectedTemplate}
+            />
           )}
           
           {activeView === 'templates' && (
-            <CampaignTemplates onTemplateSelect={(template) => {
-              setActiveView('create');
-              // Template selection logic would go here
-            }} />
+            <CampaignTemplates onTemplateSelect={handleTemplateSelect} />
           )}
         </div>
       </div>
