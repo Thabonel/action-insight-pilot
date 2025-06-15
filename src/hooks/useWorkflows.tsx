@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +12,7 @@ interface WorkflowStep {
   status: string;
 }
 
-interface Workflow {
+export interface Workflow {
   id: string;
   name: string;
   description: string;
@@ -23,7 +22,7 @@ interface Workflow {
   updated_at: string;
 }
 
-interface WorkflowStatus {
+export interface WorkflowStatus {
   workflow_id: string;
   status: string;
   current_step: number;
@@ -42,11 +41,11 @@ export const useWorkflows = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await apiClient.getWorkflows();
-      
-      if (response.success && response.data) {
-        setWorkflows(response.data);
+
+      if (response.success && Array.isArray(response.data)) {
+        setWorkflows(response.data as Workflow[]);
       } else {
         throw new Error('Failed to fetch workflows');
       }
@@ -54,11 +53,11 @@ export const useWorkflows = () => {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workflows';
       setError(errorMessage);
       console.error('Workflows fetch error:', err);
-      
+
       toast({
-        title: "Error",
-        description: "Failed to load workflows",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load workflows',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -68,22 +67,22 @@ export const useWorkflows = () => {
   const createWorkflow = async (workflowData: any) => {
     try {
       const response = await apiClient.createWorkflow(workflowData);
-      
+
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Workflow created successfully",
+          title: 'Success',
+          description: 'Workflow created successfully',
         });
-        await fetchWorkflows(); // Refresh list
+        await fetchWorkflows();
         return response.data;
       } else {
         throw new Error('Failed to create workflow');
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create workflow",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to create workflow',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -92,11 +91,11 @@ export const useWorkflows = () => {
   const executeWorkflow = async (workflowId: string) => {
     try {
       const response = await apiClient.executeWorkflow(workflowId);
-      
+
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Workflow execution started",
+          title: 'Success',
+          description: 'Workflow execution started',
         });
         return response.data;
       } else {
@@ -104,20 +103,22 @@ export const useWorkflows = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to execute workflow",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to execute workflow',
+        variant: 'destructive',
       });
       throw error;
     }
   };
 
-  const getWorkflowStatus = async (workflowId: string): Promise<WorkflowStatus | null> => {
+  const getWorkflowStatus = async (
+    workflowId: string
+  ): Promise<WorkflowStatus | null> => {
     try {
       const response = await apiClient.getWorkflowStatus(workflowId);
-      
-      if (response.success && response.data) {
-        return response.data;
+
+      if (response.success && response.data && typeof response.data === 'object') {
+        return response.data as WorkflowStatus;
       }
       return null;
     } catch (error) {
@@ -129,22 +130,22 @@ export const useWorkflows = () => {
   const updateWorkflow = async (workflowId: string, updates: any) => {
     try {
       const response = await apiClient.updateWorkflow(workflowId, updates);
-      
+
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Workflow updated successfully",
+          title: 'Success',
+          description: 'Workflow updated successfully',
         });
-        await fetchWorkflows(); // Refresh list
+        await fetchWorkflows();
         return response.data;
       } else {
         throw new Error('Failed to update workflow');
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update workflow",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to update workflow',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -153,22 +154,22 @@ export const useWorkflows = () => {
   const deleteWorkflow = async (workflowId: string) => {
     try {
       const response = await apiClient.deleteWorkflow(workflowId);
-      
+
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Workflow deleted successfully",
+          title: 'Success',
+          description: 'Workflow deleted successfully',
         });
-        await fetchWorkflows(); // Refresh list
+        await fetchWorkflows();
         return response.data;
       } else {
         throw new Error('Failed to delete workflow');
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete workflow",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to delete workflow',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -187,6 +188,6 @@ export const useWorkflows = () => {
     executeWorkflow,
     getWorkflowStatus,
     updateWorkflow,
-    deleteWorkflow
+    deleteWorkflow,
   };
 };
