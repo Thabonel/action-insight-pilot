@@ -36,7 +36,7 @@ export interface ChatSession {
   title: string;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata: Record<string, any>;
 }
 
 export interface ChatMessage {
@@ -46,5 +46,5 @@ export interface ChatMessage {
   ai_response: any;
   agent_type?: string;
   timestamp: string;
-  metadata?: Record<string, any>;
+  metadata: Record<string, any>;
 }

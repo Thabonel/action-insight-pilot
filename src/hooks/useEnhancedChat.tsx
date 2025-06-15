@@ -1,9 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { ChatHistoryService } from '@/lib/services/chat-history-service';
+import { ChatHistoryService, ChatSession, ChatMessage } from '@/lib/services/chat-history-service';
 import { ChatAgentRouter } from '@/lib/services/chat-agent-router';
-import { ChatSession, ChatMessage } from '@/types/profile';
 import { useToast } from '@/hooks/use-toast';
 
 interface EnhancedChatMessage {
@@ -22,11 +21,13 @@ export const useEnhancedChat = () => {
   const [messages, setMessages] = useState<EnhancedChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState('');
+  const [backendStatus, setBackendStatus] = useState<'awake' | 'sleeping' | 'error'>('sleeping');
 
   // Load user sessions on mount
   useEffect(() => {
     if (user) {
       loadUserSessions();
+      checkBackendStatus();
     }
   }, [user]);
 
@@ -36,6 +37,21 @@ export const useEnhancedChat = () => {
       loadSessionMessages(currentSession.id);
     }
   }, [currentSession]);
+
+  // Periodic backend status check
+  useEffect(() => {
+    const interval = setInterval(checkBackendStatus, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const checkBackendStatus = async () => {
+    try {
+      const status = await ChatAgentRouter.getBackendStatus();
+      setBackendStatus(status);
+    } catch (error) {
+      setBackendStatus('error');
+    }
+  };
 
   const loadUserSessions = async () => {
     if (!user) return;
@@ -47,8 +63,6 @@ export const useEnhancedChat = () => {
       // Auto-select the most recent session or create a new one
       if (userSessions.length > 0) {
         setCurrentSession(userSessions[0]);
-      } else {
-        await createNewSession();
       }
     } catch (error) {
       console.error('Error loading sessions:', error);
@@ -127,8 +141,23 @@ export const useEnhancedChat = () => {
         }
       }
 
+      // Show backend status notification if needed
+      if (backendStatus === 'sleeping') {
+        toast({
+          title: "Preparing AI Assistant",
+          description: "Waking up the backend server, this may take up to 60 seconds...",
+        });
+      }
+
       // Route the query to appropriate agent
-      const response = await ChatAgentRouter.routeQuery(userQuery, user.id);
+      const response = await ChatAgentRouter.routeQuery(userQuery, user.id, messages.slice(-5));
+      
+      // Update backend status based on response
+      if (response.type === 'server_sleeping') {
+        setBackendStatus('sleeping');
+      } else if (response.type !== 'error') {
+        setBackendStatus('awake');
+      }
       
       // Save message to database
       const savedMessage = await ChatHistoryService.addMessage(
@@ -161,13 +190,40 @@ export const useEnhancedChat = () => {
           );
           setCurrentSession(prev => prev ? { ...prev, title: shortTitle } : null);
         }
+
+        // Show success toast for successful responses
+        if (response.type !== 'error' && response.type !== 'server_sleeping') {
+          toast({
+            title: "AI Response Generated",
+            description: "Your marketing assistant has analyzed your request.",
+          });
+        }
       }
     } catch (error) {
       console.error('Error processing query:', error);
+      setBackendStatus('error');
+      
+      const errorResponse = {
+        type: 'error',
+        title: 'AI Assistant Temporarily Unavailable',
+        explanation: error instanceof Error ? error.message : 'I\'m having trouble processing your request right now. Please try again in a moment.',
+        businessImpact: 'Your marketing data is safe and campaigns are still running.',
+        nextActions: ['Try rephrasing your question', 'Check back in a few minutes', 'Contact support if issue persists']
+      };
+      
+      const newMessage: EnhancedChatMessage = {
+        id: Date.now().toString(),
+        query: userQuery,
+        response: errorResponse,
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
+      
       toast({
-        title: 'Error',
-        description: 'Failed to process your message',
-        variant: 'destructive',
+        title: "Connection Error",
+        description: "Unable to connect to AI assistant. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
@@ -214,6 +270,7 @@ export const useEnhancedChat = () => {
     createNewSession,
     switchSession,
     deleteSession,
-    user
+    user,
+    backendStatus
   };
 };

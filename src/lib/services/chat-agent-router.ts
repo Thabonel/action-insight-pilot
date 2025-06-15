@@ -1,247 +1,103 @@
 
-import { apiClient } from '@/lib/api-client';
-
-export interface AgentRouteResult {
-  agentType: string;
-  confidence: number;
-  context: Record<string, any>;
-}
+import { ConversationalService } from './conversational-service';
+import { QueryProcessor } from '@/lib/utils/query-processor';
 
 export class ChatAgentRouter {
-  private static agentPatterns = {
-    campaign: [
-      /campaign/i, /marketing campaign/i, /create campaign/i, /campaign performance/i,
-      /campaign analytics/i, /campaign optimization/i, /budget/i, /roi/i
-    ],
-    content: [
-      /content/i, /blog/i, /article/i, /write/i, /generate content/i,
-      /social post/i, /copy/i, /headline/i, /seo/i
-    ],
-    email: [
-      /email/i, /newsletter/i, /email campaign/i, /email automation/i,
-      /email template/i, /subject line/i, /email marketing/i
-    ],
-    leads: [
-      /lead/i, /prospect/i, /lead generation/i, /lead scoring/i,
-      /lead nurturing/i, /conversion/i, /sales funnel/i
-    ],
-    social: [
-      /social/i, /facebook/i, /twitter/i, /instagram/i, /linkedin/i,
-      /social media/i, /post scheduling/i, /engagement/i
-    ],
-    analytics: [
-      /analytics/i, /metrics/i, /performance/i, /report/i, /dashboard/i,
-      /insights/i, /kpi/i, /data/i, /statistics/i
-    ],
-    proposal: [
-      /proposal/i, /quote/i, /estimate/i, /contract/i, /pricing/i,
-      /proposal template/i, /client proposal/i
-    ]
-  };
+  static async routeQuery(userQuery: string, userId: string, context: any[] = []): Promise<any> {
+    try {
+      console.log('Routing query:', userQuery);
+      
+      // Check server status before making requests
+      const authToken = await ConversationalService.getAuthToken();
+      if (!authToken) {
+        throw new Error('Unable to authenticate with backend service');
+      }
 
-  static analyzeQuery(query: string): AgentRouteResult {
-    const lowerQuery = query.toLowerCase();
-    const scores = new Map<string, number>();
-
-    // Calculate pattern match scores
-    for (const [agentType, patterns] of Object.entries(this.agentPatterns)) {
-      let score = 0;
-      for (const pattern of patterns) {
-        if (pattern.test(lowerQuery)) {
-          score += 1;
+      const campaignData = await ConversationalService.fetchCampaignData(authToken);
+      const queryType = QueryProcessor.determineQueryType(userQuery);
+      
+      let agentResponse;
+      
+      // Route to appropriate agent based on query type
+      switch (queryType) {
+        case 'daily_focus':
+          agentResponse = await ConversationalService.callDailyFocusAgent(userQuery, campaignData, context, authToken);
+          break;
+        case 'campaign_analysis':
+        case 'lead_analysis':
+        case 'content_strategy':
+        case 'performance_metrics':
+        default:
+          agentResponse = await ConversationalService.callGeneralCampaignAgent(userQuery, campaignData, context, authToken);
+          break;
+      }
+      
+      return QueryProcessor.formatAgentResponse(agentResponse, queryType, campaignData);
+      
+    } catch (error) {
+      console.error('Agent routing error:', error);
+      
+      // Enhanced error handling with specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('sleeping') || error.message.includes('503')) {
+          return {
+            type: 'server_sleeping',
+            title: 'AI Assistant Starting Up',
+            explanation: 'The AI backend is currently starting up. This usually takes 30-60 seconds.',
+            businessImpact: 'Your data is safe and campaigns are still running normally.',
+            nextActions: ['Please wait a moment and try again', 'The system will be ready shortly']
+          };
+        }
+        
+        if (error.message.includes('timeout') || error.message.includes('network')) {
+          return {
+            type: 'network_error',
+            title: 'Connection Issue',
+            explanation: 'There seems to be a temporary network issue preventing communication with the AI assistant.',
+            businessImpact: 'This is a temporary issue and doesn\'t affect your campaigns or data.',
+            nextActions: ['Check your internet connection', 'Try again in a few moments', 'Refresh the page if the issue persists']
+          };
         }
       }
-      if (score > 0) {
-        scores.set(agentType, score);
-      }
-    }
-
-    // Find the highest scoring agent
-    let bestAgent = 'general';
-    let bestScore = 0;
-    for (const [agent, score] of scores.entries()) {
-      if (score > bestScore) {
-        bestAgent = agent;
-        bestScore = score;
-      }
-    }
-
-    return {
-      agentType: bestAgent,
-      confidence: bestScore > 0 ? Math.min(bestScore * 0.3, 1) : 0.1,
-      context: { matchedPatterns: bestScore }
-    };
-  }
-
-  static async routeQuery(query: string, userId?: string): Promise<any> {
-    const routeResult = this.analyzeQuery(query);
-    
-    try {
-      switch (routeResult.agentType) {
-        case 'campaign':
-          return await this.handleCampaignQuery(query);
-        case 'content':
-          return await this.handleContentQuery(query);
-        case 'email':
-          return await this.handleEmailQuery(query);
-        case 'leads':
-          return await this.handleLeadsQuery(query);
-        case 'social':
-          return await this.handleSocialQuery(query);
-        case 'analytics':
-          return await this.handleAnalyticsQuery(query);
-        case 'proposal':
-          return await this.handleProposalQuery(query);
-        default:
-          return await this.handleGeneralQuery(query, userId);
-      }
-    } catch (error) {
-      console.error('Error routing query:', error);
+      
+      // Generic error fallback
       return {
         type: 'error',
-        content: 'I encountered an error processing your request. Please try again.',
-        agentType: routeResult.agentType
+        title: 'AI Assistant Temporarily Unavailable',
+        explanation: 'The AI assistant is experiencing technical difficulties. Our team has been notified.',
+        businessImpact: 'Your marketing data is safe and campaigns continue to run normally.',
+        nextActions: [
+          'Try rephrasing your question',
+          'Check back in a few minutes',
+          'Contact support if the issue persists',
+          'Use the manual dashboard features in the meantime'
+        ]
       };
     }
   }
 
-  private static async handleCampaignQuery(query: string) {
-    if (query.toLowerCase().includes('create') || query.toLowerCase().includes('new')) {
-      return {
-        type: 'campaign_action',
-        content: 'I can help you create a new marketing campaign. What type of campaign would you like to create?',
-        actions: [
-          { label: 'Create Email Campaign', action: 'create_email_campaign' },
-          { label: 'Create Social Campaign', action: 'create_social_campaign' },
-          { label: 'Create Content Campaign', action: 'create_content_campaign' }
-        ],
-        agentType: 'campaign'
-      };
-    }
-
+  // Helper method to check if backend is available
+  static async checkBackendHealth(): Promise<boolean> {
     try {
-      const campaigns = await apiClient.getCampaigns();
-      const campaignCount = Array.isArray(campaigns.data) ? campaigns.data.length : 0;
-      return {
-        type: 'campaign_data',
-        content: `You have ${campaignCount} campaigns. Here's what I can help you with:`,
-        data: campaigns.data,
-        agentType: 'campaign'
-      };
+      const authToken = await ConversationalService.getAuthToken();
+      if (!authToken) return false;
+      
+      // Simple health check - try to fetch campaign data
+      await ConversationalService.fetchCampaignData(authToken);
+      return true;
     } catch (error) {
-      return {
-        type: 'campaign_info',
-        content: 'I can help you with campaign management, creation, and optimization. What would you like to do?',
-        agentType: 'campaign'
-      };
+      console.log('Backend health check failed:', error);
+      return false;
     }
   }
 
-  private static async handleContentQuery(query: string) {
-    return {
-      type: 'content_assistance',
-      content: 'I can help you create and optimize content. What type of content would you like to work on?',
-      actions: [
-        { label: 'Generate Blog Post', action: 'generate_blog' },
-        { label: 'Create Social Content', action: 'generate_social' },
-        { label: 'Write Email Copy', action: 'generate_email' }
-      ],
-      agentType: 'content'
-    };
-  }
-
-  private static async handleEmailQuery(query: string) {
+  // Method to get backend status
+  static async getBackendStatus(): Promise<'awake' | 'sleeping' | 'error'> {
     try {
-      const analytics = await apiClient.getEmailAnalytics();
-      return {
-        type: 'email_data',
-        content: 'Here\'s your email marketing overview:',
-        data: analytics.data,
-        agentType: 'email'
-      };
+      const isHealthy = await this.checkBackendHealth();
+      return isHealthy ? 'awake' : 'sleeping';
     } catch (error) {
-      return {
-        type: 'email_assistance',
-        content: 'I can help you with email campaigns, automation, and analytics. What would you like to do?',
-        agentType: 'email'
-      };
+      return 'error';
     }
-  }
-
-  private static async handleLeadsQuery(query: string) {
-    try {
-      const leads = await apiClient.getLeads();
-      const leadCount = Array.isArray(leads.data) ? leads.data.length : 0;
-      return {
-        type: 'leads_data',
-        content: `You have ${leadCount} leads in your pipeline.`,
-        data: leads.data,
-        agentType: 'leads'
-      };
-    } catch (error) {
-      return {
-        type: 'leads_assistance',
-        content: 'I can help you with lead generation, scoring, and nurturing. What would you like to know?',
-        agentType: 'leads'
-      };
-    }
-  }
-
-  private static async handleSocialQuery(query: string) {
-    try {
-      const analytics = await apiClient.getSocialAnalytics();
-      return {
-        type: 'social_data',
-        content: 'Here\'s your social media performance:',
-        data: analytics.data,
-        agentType: 'social'
-      };
-    } catch (error) {
-      return {
-        type: 'social_assistance',
-        content: 'I can help you with social media management, scheduling, and analytics. What would you like to do?',
-        agentType: 'social'
-      };
-    }
-  }
-
-  private static async handleAnalyticsQuery(query: string) {
-    return {
-      type: 'analytics_overview',
-      content: 'I can provide insights on your marketing performance. What metrics would you like to explore?',
-      actions: [
-        { label: 'Campaign Performance', action: 'show_campaign_analytics' },
-        { label: 'Lead Analytics', action: 'show_lead_analytics' },
-        { label: 'Social Analytics', action: 'show_social_analytics' }
-      ],
-      agentType: 'analytics'
-    };
-  }
-
-  private static async handleProposalQuery(query: string) {
-    try {
-      const proposals = await apiClient.getProposals();
-      const proposalCount = Array.isArray(proposals.data) ? proposals.data.length : 0;
-      return {
-        type: 'proposal_data',
-        content: `You have ${proposalCount} proposals.`,
-        data: proposals.data,
-        agentType: 'proposal'
-      };
-    } catch (error) {
-      return {
-        type: 'proposal_assistance',
-        content: 'I can help you create and manage proposals. Would you like to create a new proposal?',
-        agentType: 'proposal'
-      };
-    }
-  }
-
-  private static async handleGeneralQuery(query: string, userId?: string) {
-    return {
-      type: 'general_assistance',
-      content: 'I\'m here to help with your marketing automation. I can assist with campaigns, content creation, email marketing, lead management, social media, analytics, and proposals. What would you like to work on?',
-      agentType: 'general'
-    };
   }
 }

@@ -20,7 +20,8 @@ const EnhancedChatInterface: React.FC = () => {
     createNewSession,
     switchSession,
     deleteSession,
-    user
+    user,
+    backendStatus
   } = useEnhancedChat();
 
   if (!user) {
@@ -42,6 +43,24 @@ const EnhancedChatInterface: React.FC = () => {
       </Card>
     );
   }
+
+  const getStatusColor = () => {
+    switch (backendStatus) {
+      case 'awake': return 'bg-green-400 animate-pulse';
+      case 'sleeping': return 'bg-yellow-400 animate-pulse';
+      case 'error': return 'bg-red-400';
+      default: return 'bg-gray-400';
+    }
+  };
+
+  const getStatusText = () => {
+    switch (backendStatus) {
+      case 'awake': return 'Online';
+      case 'sleeping': return 'Starting...';
+      case 'error': return 'Offline';
+      default: return 'Unknown';
+    }
+  };
 
   return (
     <div className="flex h-[600px] bg-white rounded-lg shadow-lg overflow-hidden">
@@ -103,11 +122,17 @@ const EnhancedChatInterface: React.FC = () => {
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="flex items-center space-x-3">
-            <MessageSquare className="h-5 w-5" />
-            <span className="font-medium">
-              {currentSession?.title || 'AI Marketing Assistant'}
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <MessageSquare className="h-5 w-5" />
+              <span className="font-medium">
+                {currentSession?.title || 'AI Marketing Assistant'}
+              </span>
+            </div>
+            <div className="flex items-center text-sm bg-white/20 px-2 py-1 rounded">
+              <div className={`w-2 h-2 rounded-full mr-2 ${getStatusColor()}`}></div>
+              {getStatusText()}
+            </div>
           </div>
         </div>
 
@@ -166,7 +191,9 @@ const EnhancedChatInterface: React.FC = () => {
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
-                      <span className="text-sm text-gray-600">Processing your request...</span>
+                      <span className="text-sm text-gray-600">
+                        {backendStatus === 'sleeping' ? 'Waking up AI assistant...' : 'Processing your request...'}
+                      </span>
                     </div>
                   </div>
                 </div>
