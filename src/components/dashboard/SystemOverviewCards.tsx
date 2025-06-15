@@ -52,8 +52,8 @@ const SystemOverviewCards: React.FC = () => {
 
         const campaigns = campaignsRes.success ? (Array.isArray(campaignsRes.data) ? campaignsRes.data : []) : [];
         const leads = leadsRes.success ? (Array.isArray(leadsRes.data) ? leadsRes.data : []) : [];
-        const emailAnalytics = emailRes.success ? (emailRes.data as EmailAnalytics) : {};
-        const socialAnalytics = socialRes.success ? (socialRes.data as SocialAnalytics) : {};
+        const emailAnalytics: EmailAnalytics = emailRes.success ? (emailRes.data as EmailAnalytics) : {};
+        const socialAnalytics: SocialAnalytics = socialRes.success ? (socialRes.data as SocialAnalytics) : {};
 
         setMetrics({
           totalCampaigns: campaigns.length,
