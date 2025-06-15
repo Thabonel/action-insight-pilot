@@ -4,6 +4,14 @@ import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 
+interface SyncResponse {
+  synced_count: number;
+  new_leads: number;
+  updated_leads: number;
+  sync_time: string;
+  sources: string[];
+}
+
 export const useLeadActions = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -15,9 +23,10 @@ export const useLeadActions = () => {
     try {
       const response = await apiClient.exportLeads(format);
       
-      if (response.success) {
-        // Create download link
-        const blob = new Blob([response.data], { 
+      if (response.success && response.data) {
+        // Create download link - ensure data is properly typed as string
+        const dataString = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        const blob = new Blob([dataString], { 
           type: format === 'csv' ? 'text/csv' : 'application/json' 
         });
         const url = window.URL.createObjectURL(blob);
@@ -48,13 +57,15 @@ export const useLeadActions = () => {
     try {
       const response = await apiClient.syncLeads();
       
-      if (response.success) {
-        const { synced_count, new_leads, updated_leads } = response.data;
+      if (response.success && response.data) {
+        // Properly type the response data
+        const syncData = response.data as SyncResponse;
+        const { synced_count, new_leads, updated_leads } = syncData;
         toast({
           title: "Sync Successful",
           description: `Synced ${synced_count} leads (${new_leads} new, ${updated_leads} updated)`,
         });
-        return response.data;
+        return syncData;
       } else {
         throw new Error(response.error || 'Sync failed');
       }
