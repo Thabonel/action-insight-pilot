@@ -1,4 +1,3 @@
-
 import { AnalyticsService } from './api/analytics-service';
 import { UserPreferencesService } from './api/user-preferences-service';
 import { SocialPlatformsService } from './api/social-platforms-service';
@@ -188,10 +187,7 @@ export class ApiClient {
   }
 
   async getEmailRealTimeMetrics(campaignId: string, timeRange: string = '24h') {
-    return this.emailApi.getEmailReal
-
-
- timeRange);
+    return this.emailApi.getEmailReal(timeRange);
   }
 
   async registerEmailWebhook(webhookData: any) {
