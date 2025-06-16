@@ -1,149 +1,167 @@
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Users, DollarSign, Target, BarChart3 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Activity, 
+  Users, 
+  TrendingUp, 
+  Zap,
+  AlertCircle,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
+import { useCampaigns } from '@/hooks/useCampaigns';
 import { apiClient } from '@/lib/api-client';
-
-interface EmailAnalytics {
-  total_sent?: number;
-}
-
-interface SocialAnalytics {
-  total_posts?: number;
-  engagement_rate?: number;
-}
+import { useState, useEffect } from 'react';
 
 interface SystemMetrics {
-  totalCampaigns: number;
   activeCampaigns: number;
   totalLeads: number;
-  conversionRate: number;
-  monthlyRevenue: number;
-  emailsSent: number;
-  socialPosts: number;
-  engagementRate: number;
+  systemStatus: 'healthy' | 'warning' | 'error';
+  lastUpdated: Date;
 }
 
 const SystemOverviewCards: React.FC = () => {
-  const [metrics, setMetrics] = useState<SystemMetrics>({
-    totalCampaigns: 0,
+  const { campaigns, isLoading: campaignsLoading } = useCampaigns();
+  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics>({
     activeCampaigns: 0,
     totalLeads: 0,
-    conversionRate: 0,
-    monthlyRevenue: 0,
-    emailsSent: 0,
-    socialPosts: 0,
-    engagementRate: 0
+    systemStatus: 'healthy',
+    lastUpdated: new Date()
   });
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSystemMetrics = async () => {
-      try {
-        setLoading(true);
-
-        const [campaignsRes, leadsRes, emailRes, socialRes] = await Promise.all([
-          apiClient.getCampaigns(),
-          apiClient.getLeads(),
-          apiClient.getEmailAnalytics(),
-          apiClient.getSocialAnalytics()
-        ]);
-
-        const campaigns = campaignsRes.success && Array.isArray(campaignsRes.data)
-          ? campaignsRes.data
-          : [];
-        const leads = leadsRes.success && Array.isArray(leadsRes.data)
-          ? leadsRes.data
-          : [];
-
-        const emailAnalyticsData: EmailAnalytics =
-          emailRes.success && typeof emailRes.data === 'object'
-            ? (emailRes.data as EmailAnalytics)
-            : {};
-        const socialAnalyticsData: SocialAnalytics =
-          socialRes.success && typeof socialRes.data === 'object'
-            ? (socialRes.data as SocialAnalytics)
-            : {};
-
-        setMetrics({
-          totalCampaigns: campaigns.length,
-          activeCampaigns: campaigns.filter((c: any) => c.status === 'active').length,
-          totalLeads: leads.length,
-          conversionRate:
-            leads.length > 0
-              ? (leads.filter((l: any) => l.status === 'converted').length / leads.length) * 100
-              : 0,
-          monthlyRevenue: campaigns.reduce((sum: number, c: any) => sum + (c.budget_spent || 0), 0),
-          emailsSent: emailAnalyticsData.total_sent || 0,
-          socialPosts: socialAnalyticsData.total_posts || 0,
-          engagementRate: socialAnalyticsData.engagement_rate || 0
-        });
-      } catch (error) {
-        console.error('Error fetching system metrics:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSystemMetrics();
+    loadSystemMetrics();
   }, []);
 
-  const cards = [
-    {
-      title: 'Active Campaigns',
-      value: loading ? '...' : metrics.activeCampaigns.toString(),
-      total: loading ? '...' : `of ${metrics.totalCampaigns}`,
-      icon: Target,
-      trend: '+12%',
-      color: 'text-blue-600'
-    },
-    {
-      title: 'Total Leads',
-      value: loading ? '...' : metrics.totalLeads.toString(),
-      total: loading ? '...' : `${metrics.conversionRate.toFixed(1)}% conversion`,
-      icon: Users,
-      trend: '+18%',
-      color: 'text-green-600'
-    },
-    {
-      title: 'Revenue',
-      value: loading ? '...' : `$${metrics.monthlyRevenue.toLocaleString()}`,
-      total: 'this month',
-      icon: DollarSign,
-      trend: '+23%',
-      color: 'text-emerald-600'
-    },
-    {
-      title: 'Engagement',
-      value: loading ? '...' : `${metrics.engagementRate.toFixed(1)}%`,
-      total: loading ? '...' : `${metrics.emailsSent + metrics.socialPosts} interactions`,
-      icon: BarChart3,
-      trend: '+15%',
-      color: 'text-purple-600'
+  const loadSystemMetrics = async () => {
+    try {
+      setIsLoading(true);
+      
+      const [leads, systemHealth] = await Promise.all([
+        apiClient.getLeads().catch(() => []),
+        apiClient.getSystemHealth().catch(() => ({ status: 'unknown' }))
+      ]);
+
+      const activeCampaigns = campaigns?.filter(c => 
+        c.created_at && new Date(c.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      ).length || 0;
+
+      setSystemMetrics({
+        activeCampaigns,
+        totalLeads: leads.length,
+        systemStatus: systemHealth.status === 'healthy' ? 'healthy' : 
+                     systemHealth.status === 'degraded' ? 'warning' : 'error',
+        lastUpdated: new Date()
+      });
+    } catch (error) {
+      console.error('Failed to load system metrics:', error);
+      setSystemMetrics({
+        activeCampaigns: campaigns?.length || 0,
+        totalLeads: 0,
+        systemStatus: 'error',
+        lastUpdated: new Date()
+      });
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'healthy': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'warning': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      case 'error': return <AlertCircle className="h-4 w-4 text-red-600" />;
+      default: return <Clock className="h-4 w-4 text-gray-400" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return 'text-green-600 bg-green-50';
+      case 'warning': return 'text-yellow-600 bg-yellow-50';
+      case 'error': return 'text-red-600 bg-red-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  if (isLoading || campaignsLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="h-4 bg-gray-200 rounded w-20"></div>
+              <div className="h-4 w-4 bg-gray-200 rounded"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-24"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {cards.map((card, index) => (
-        <Card key={index} className="border-0 shadow-sm bg-white/80 backdrop-blur">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
-              {card.title}
-            </CardTitle>
-            <card.icon className={`h-4 w-4 ${card.color}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{card.value}</div>
-            <div className="flex items-center justify-between mt-2">
-              <p className="text-xs text-slate-600">{card.total}</p>
-              <div className="flex items-center text-xs text-emerald-600">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                {card.trend}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+          <Activity className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{systemMetrics.activeCampaigns}</div>
+          <p className="text-xs text-muted-foreground">
+            {systemMetrics.activeCampaigns > 0 ? 'Running campaigns' : 'No active campaigns'}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{systemMetrics.totalLeads}</div>
+          <p className="text-xs text-muted-foreground">
+            {systemMetrics.totalLeads > 0 ? 'Leads in pipeline' : 'No leads yet'}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">System Status</CardTitle>
+          {getStatusIcon(systemMetrics.systemStatus)}
+        </CardHeader>
+        <CardContent>
+          <Badge className={getStatusColor(systemMetrics.systemStatus)}>
+            {systemMetrics.systemStatus.charAt(0).toUpperCase() + systemMetrics.systemStatus.slice(1)}
+          </Badge>
+          <p className="text-xs text-muted-foreground mt-2">
+            Last checked {systemMetrics.lastUpdated.toLocaleTimeString()}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">AI Assistant</CardTitle>
+          <Zap className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">Ready</div>
+          <p className="text-xs text-muted-foreground">
+            <TrendingUp className="h-3 w-3 inline mr-1" />
+            Available for queries
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

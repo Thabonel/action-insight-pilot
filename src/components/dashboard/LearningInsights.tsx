@@ -1,133 +1,199 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, TrendingUp, Zap, Target, Users, Mail } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { 
+  Brain, 
+  TrendingUp, 
+  Clock, 
+  Activity,
+  AlertCircle,
+  CheckCircle,
+  ArrowRight
+} from 'lucide-react';
 
-interface LearningInsightsProps {
-  insights: {
-    totalActions: number;
-    sessionDuration: number;
-    topFeatures: string[];
-    productivityScore: number;
-    recommendations: string[];
+interface RealInsights {
+  totalUsers?: number;
+  activeFeatures?: string[];
+  recentActions?: Array<{
+    action: string;
+    timestamp: Date;
+    feature: string;
+  }>;
+  systemHealth?: {
+    status: 'healthy' | 'warning' | 'error';
+    uptime: number;
+    lastCheck: Date;
   };
 }
 
+interface LearningInsightsProps {
+  insights: RealInsights | null;
+}
+
 const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
-  const getOptimalHours = () => {
-    const hour = new Date().getHours();
-    return hour >= 9 && hour <= 11 ? "Peak hours (9-11 AM)" : "9-11 AM typically best";
-  };
+  const generateInsights = () => {
+    if (!insights) return [];
 
-  const getContentTypes = () => {
-    const types = ['Email sequences', 'Blog posts', 'Social media content'];
-    return types[Math.floor(Math.random() * types.length)];
-  };
+    const generatedInsights = [];
 
-  const getLeadSources = () => {
-    const sources = ['Organic search', 'Social media', 'Email campaigns'];
-    return sources[Math.floor(Math.random() * sources.length)];
-  };
-
-  const learningData = [
-    {
-      title: 'Optimal Working Hours',
-      value: getOptimalHours(),
-      icon: Clock,
-      color: 'blue',
-      confidence: 87,
-      insight: 'Your productivity peaks during morning hours'
-    },
-    {
-      title: 'Best Content Type',
-      value: getContentTypes(),
-      icon: TrendingUp,
-      color: 'green',
-      confidence: 94,
-      insight: 'Email content performs 40% better for your audience'
-    },
-    {
-      title: 'Top Lead Source',
-      value: getLeadSources(),
-      icon: Users,
-      color: 'purple',
-      confidence: 76,
-      insight: 'Highest quality leads with 15% conversion rate'
-    },
-    {
-      title: 'Workflow Pattern',
-      value: 'Plan → Execute → Optimize',
-      icon: Target,
-      color: 'orange',
-      confidence: 92,
-      insight: 'This pattern yields 25% better results'
+    // System health insight
+    if (insights.systemHealth) {
+      const { status, uptime } = insights.systemHealth;
+      if (status === 'healthy' && uptime > 0) {
+        generatedInsights.push({
+          type: 'positive',
+          title: 'System Running Smoothly',
+          description: `Your system has been running reliably${uptime > 3600 ? ` for ${Math.floor(uptime / 3600)} hours` : ''}`,
+          action: 'View System Status',
+          priority: 'low'
+        });
+      } else if (status === 'warning') {
+        generatedInsights.push({
+          type: 'warning',
+          title: 'System Performance Notice',
+          description: 'Some features may be running slower than usual',
+          action: 'Check System Health',
+          priority: 'medium'
+        });
+      }
     }
-  ];
 
-  const getColorClasses = (color: string) => {
-    const colors = {
-      blue: 'text-blue-600 bg-blue-50',
-      green: 'text-green-600 bg-green-50',
-      purple: 'text-purple-600 bg-purple-50',
-      orange: 'text-orange-600 bg-orange-50'
-    };
-    return colors[color as keyof typeof colors] || colors.blue;
+    // Activity-based insights
+    if (insights.recentActions && insights.recentActions.length > 0) {
+      const recentFeatures = [...new Set(insights.recentActions.map(a => a.feature))];
+      if (recentFeatures.length === 1) {
+        generatedInsights.push({
+          type: 'info',
+          title: `Focused on ${recentFeatures[0]}`,
+          description: `You've been actively working with ${recentFeatures[0].toLowerCase()} features`,
+          action: 'Explore More Features',
+          priority: 'low'
+        });
+      } else if (recentFeatures.length > 2) {
+        generatedInsights.push({
+          type: 'positive',
+          title: 'Multi-Feature Usage',
+          description: `You're effectively using ${recentFeatures.length} different features`,
+          action: 'View Usage Analytics',
+          priority: 'low'
+        });
+      }
+    }
+
+    // Feature availability insight
+    if (insights.activeFeatures && insights.activeFeatures.length > 0) {
+      generatedInsights.push({
+        type: 'info',
+        title: 'Available Features',
+        description: `${insights.activeFeatures.length} features are ready to help optimize your marketing`,
+        action: 'Explore Features',
+        priority: 'low'
+      });
+    }
+
+    // Default helpful insight
+    if (generatedInsights.length === 0) {
+      generatedInsights.push({
+        type: 'info',
+        title: 'Getting Started',
+        description: 'Ask me anything about your marketing campaigns, leads, or performance metrics',
+        action: 'Start Conversation',
+        priority: 'medium'
+      });
+    }
+
+    return generatedInsights.slice(0, 3); // Limit to 3 insights
   };
+
+  const getInsightIcon = (type: string) => {
+    switch (type) {
+      case 'positive': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'warning': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+      case 'info': return <Brain className="h-4 w-4 text-blue-600" />;
+      default: return <Activity className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
+  const getInsightColor = (type: string) => {
+    switch (type) {
+      case 'positive': return 'border-l-green-500 bg-green-50';
+      case 'warning': return 'border-l-yellow-500 bg-yellow-50';
+      case 'info': return 'border-l-blue-500 bg-blue-50';
+      default: return 'border-l-gray-500 bg-gray-50';
+    }
+  };
+
+  const displayInsights = generateInsights();
+
+  if (!insights) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Brain className="h-5 w-5 animate-pulse" />
+            <span>Learning Insights</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="shadow-lg border-0 bg-white/90 backdrop-blur">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Zap className="h-5 w-5 text-purple-600" />
-          <span>AI Learning Insights</span>
+          <Brain className="h-5 w-5" />
+          <span>AI Insights</span>
         </CardTitle>
-        <p className="text-sm text-slate-600">What I've learned about your patterns</p>
       </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {learningData.map((item, index) => {
-          const Icon = item.icon;
-          const colorClasses = getColorClasses(item.color);
-          
-          return (
-            <div key={index} className="p-3 bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-100">
-              <div className="flex items-start space-x-3">
-                <div className={`p-2 rounded-lg ${colorClasses}`}>
-                  <Icon className="h-4 w-4" />
+      <CardContent>
+        <div className="space-y-4">
+          {displayInsights.map((insight, index) => (
+            <div 
+              key={index}
+              className={`p-3 rounded-lg border-l-4 ${getInsightColor(insight.type)}`}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  {getInsightIcon(insight.type)}
+                  <h4 className="font-medium text-sm">{insight.title}</h4>
                 </div>
-                
-                <div className="flex-1">
-                  <h4 className="font-medium text-slate-900 text-sm">{item.title}</h4>
-                  <p className="text-sm text-slate-700 font-medium">{item.value}</p>
-                  <p className="text-xs text-slate-500 mt-1">{item.insight}</p>
-                  
-                  <div className="flex items-center space-x-2 mt-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-1">
-                      <div 
-                        className="bg-gradient-to-r from-blue-400 to-purple-500 h-1 rounded-full transition-all duration-1000"
-                        style={{ width: `${item.confidence}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-xs font-medium text-slate-600">{item.confidence}%</span>
-                  </div>
-                </div>
+                {insight.priority === 'medium' && (
+                  <Badge variant="outline" className="text-xs">Important</Badge>
+                )}
+              </div>
+              <p className="text-xs text-gray-600 mb-3">{insight.description}</p>
+              <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
+                {insight.action}
+                <ArrowRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          ))}
+
+          <div className="pt-2 border-t">
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <div className="flex items-center space-x-1">
+                <Clock className="h-3 w-3" />
+                <span>Updated {new Date().toLocaleTimeString()}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <TrendingUp className="h-3 w-3" />
+                <span>Learning from your usage</span>
               </div>
             </div>
-          );
-        })}
-        
-        {/* Recent Discoveries */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100">
-          <h4 className="font-medium text-indigo-900 mb-2 flex items-center space-x-2">
-            <Zap className="h-4 w-4" />
-            <span>Recent Discovery</span>
-          </h4>
-          <p className="text-sm text-indigo-800">
-            You're 60% more productive when you start with campaign analysis rather than content creation.
-          </p>
-          <p className="text-xs text-indigo-600 mt-1">
-            Based on your last 15 sessions
-          </p>
+          </div>
         </div>
       </CardContent>
     </Card>

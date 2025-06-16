@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,13 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ExternalLink, Zap, RefreshCw, Settings, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
 
 interface MCPConnector {
   id: string;
   name: string;
   description: string;
   category: 'crm' | 'marketing' | 'social' | 'ecommerce' | 'analytics' | 'content' | 'communication' | 'seo' | 'support' | 'project';
-  status: 'connected' | 'disconnected' | 'error';
+  status: 'connected' | 'disconnected' | 'error' | 'checking';
   icon: string;
   authType: 'oauth' | 'api_key' | 'token';
   docsUrl: string;
@@ -26,16 +26,17 @@ const MCPConnectors: React.FC = () => {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
   const [connecting, setConnecting] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string>('crm');
+  const [connectors, setConnectors] = useState<MCPConnector[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const connectors: MCPConnector[] = [
+  const baseConnectors: Omit<MCPConnector, 'status'>[] = [
     // CRM
     {
       id: 'hubspot',
       name: 'HubSpot',
       description: 'Complete CRM platform with marketing automation',
       category: 'crm',
-      status: 'disconnected',
       icon: '🔄',
       authType: 'oauth',
       docsUrl: 'https://developers.hubspot.com/',
@@ -46,7 +47,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Salesforce',
       description: 'Enterprise CRM and customer platform',
       category: 'crm',
-      status: 'disconnected',
       icon: '☁️',
       authType: 'oauth',
       docsUrl: 'https://developer.salesforce.com/',
@@ -57,7 +57,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Pipedrive',
       description: 'Sales-focused CRM platform',
       category: 'crm',
-      status: 'disconnected',
       icon: '📊',
       authType: 'api_key',
       docsUrl: 'https://developers.pipedrive.com/',
@@ -70,7 +69,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Marketo',
       description: 'Marketing automation and lead management',
       category: 'marketing',
-      status: 'disconnected',
       icon: '🎯',
       authType: 'api_key',
       docsUrl: 'https://developers.marketo.com/',
@@ -81,7 +79,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Pardot',
       description: 'B2B marketing automation by Salesforce',
       category: 'marketing',
-      status: 'disconnected',
       icon: '📈',
       authType: 'oauth',
       docsUrl: 'https://developer.pardot.com/',
@@ -92,20 +89,17 @@ const MCPConnectors: React.FC = () => {
       name: 'ActiveCampaign',
       description: 'Email marketing and marketing automation',
       category: 'marketing',
-      status: 'connected',
       icon: '✉️',
       authType: 'api_key',
       docsUrl: 'https://developers.activecampaign.com/',
       features: ['Email Automation', 'CRM', 'Machine Learning', 'Site Tracking']
     },
-
     // Social Media
     {
       id: 'facebook_business',
       name: 'Meta Business',
       description: 'Facebook and Instagram business management',
       category: 'social',
-      status: 'connected',
       icon: '👥',
       authType: 'oauth',
       docsUrl: 'https://developers.facebook.com/',
@@ -116,7 +110,6 @@ const MCPConnectors: React.FC = () => {
       name: 'X Business',
       description: 'Twitter/X business and advertising platform',
       category: 'social',
-      status: 'disconnected',
       icon: '🐦',
       authType: 'oauth',
       docsUrl: 'https://developer.twitter.com/',
@@ -127,7 +120,6 @@ const MCPConnectors: React.FC = () => {
       name: 'YouTube',
       description: 'Video content management and analytics',
       category: 'social',
-      status: 'disconnected',
       icon: '📺',
       authType: 'oauth',
       docsUrl: 'https://developers.google.com/youtube/',
@@ -140,7 +132,6 @@ const MCPConnectors: React.FC = () => {
       name: 'WooCommerce',
       description: 'WordPress e-commerce platform',
       category: 'ecommerce',
-      status: 'disconnected',
       icon: '🛒',
       authType: 'api_key',
       docsUrl: 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
@@ -151,7 +142,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Magento',
       description: 'Enterprise e-commerce platform',
       category: 'ecommerce',
-      status: 'disconnected',
       icon: '🏪',
       authType: 'api_key',
       docsUrl: 'https://devdocs.magento.com/',
@@ -164,7 +154,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Google Ads',
       description: 'Google advertising platform',
       category: 'analytics',
-      status: 'connected',
       icon: '🎯',
       authType: 'oauth',
       docsUrl: 'https://developers.google.com/google-ads/',
@@ -175,7 +164,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Meta Ads',
       description: 'Facebook and Instagram advertising',
       category: 'analytics',
-      status: 'disconnected',
       icon: '📊',
       authType: 'oauth',
       docsUrl: 'https://developers.facebook.com/docs/marketing-apis/',
@@ -188,7 +176,6 @@ const MCPConnectors: React.FC = () => {
       name: 'WordPress',
       description: 'Content management system',
       category: 'content',
-      status: 'disconnected',
       icon: '📝',
       authType: 'api_key',
       docsUrl: 'https://developer.wordpress.org/rest-api/',
@@ -199,7 +186,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Contentful',
       description: 'Headless content management platform',
       category: 'content',
-      status: 'disconnected',
       icon: '📚',
       authType: 'api_key',
       docsUrl: 'https://www.contentful.com/developers/',
@@ -212,7 +198,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Twilio',
       description: 'SMS and voice communication platform',
       category: 'communication',
-      status: 'disconnected',
       icon: '📱',
       authType: 'api_key',
       docsUrl: 'https://www.twilio.com/docs/',
@@ -223,7 +208,6 @@ const MCPConnectors: React.FC = () => {
       name: 'SendGrid',
       description: 'Email delivery and marketing platform',
       category: 'communication',
-      status: 'connected',
       icon: '📧',
       authType: 'api_key',
       docsUrl: 'https://docs.sendgrid.com/',
@@ -236,7 +220,6 @@ const MCPConnectors: React.FC = () => {
       name: 'SEMrush',
       description: 'SEO and competitive research platform',
       category: 'seo',
-      status: 'disconnected',
       icon: '🔍',
       authType: 'api_key',
       docsUrl: 'https://developer.semrush.com/',
@@ -247,7 +230,6 @@ const MCPConnectors: React.FC = () => {
       name: 'Ahrefs',
       description: 'SEO toolset for backlinks and keywords',
       category: 'seo',
-      status: 'disconnected',
       icon: '🔗',
       authType: 'api_key',
       docsUrl: 'https://ahrefs.com/api/',
@@ -266,6 +248,37 @@ const MCPConnectors: React.FC = () => {
     { id: 'seo', name: 'SEO Tools', icon: '🔍' }
   ];
 
+  useEffect(() => {
+    loadConnectorStatuses();
+  }, []);
+
+  const loadConnectorStatuses = async () => {
+    setIsLoading(true);
+    try {
+      // Check existing integration connections
+      const connections = await apiClient.integrations.getConnections().catch(() => []);
+      
+      const connectorsWithStatus = baseConnectors.map(connector => ({
+        ...connector,
+        status: connections.find(c => c.service_name === connector.id)?.connection_status === 'connected' 
+          ? 'connected' as const
+          : 'disconnected' as const
+      }));
+
+      setConnectors(connectorsWithStatus);
+    } catch (error) {
+      console.error('Failed to load connector statuses:', error);
+      // Set all to disconnected on error
+      const connectorsWithStatus = baseConnectors.map(connector => ({
+        ...connector,
+        status: 'disconnected' as const
+      }));
+      setConnectors(connectorsWithStatus);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleConnect = async (connector: MCPConnector) => {
     const apiKey = apiKeys[connector.id];
     if (connector.authType === 'api_key' && !apiKey) {
@@ -278,9 +291,25 @@ const MCPConnectors: React.FC = () => {
     }
 
     setConnecting(prev => new Set(prev).add(connector.id));
+    
+    // Update connector status to checking
+    setConnectors(prev => prev.map(c => 
+      c.id === connector.id ? { ...c, status: 'checking' as const } : c
+    ));
+
     try {
-      // Simulate connection process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await apiClient.integrations.createConnection({
+        service_name: connector.id,
+        configuration: {
+          api_key: apiKey,
+          auth_type: connector.authType
+        }
+      });
+      
+      // Update connector status to connected
+      setConnectors(prev => prev.map(c => 
+        c.id === connector.id ? { ...c, status: 'connected' as const } : c
+      ));
       
       toast({
         title: "Connected Successfully",
@@ -291,9 +320,47 @@ const MCPConnectors: React.FC = () => {
         setApiKeys(prev => ({ ...prev, [connector.id]: '' }));
       }
     } catch (error) {
+      console.error('Connection failed:', error);
+      
+      // Update connector status to error
+      setConnectors(prev => prev.map(c => 
+        c.id === connector.id ? { ...c, status: 'error' as const } : c
+      ));
+      
       toast({
         title: "Connection Failed",
         description: `Failed to connect to ${connector.name}`,
+        variant: "destructive",
+      });
+    } finally {
+      setConnecting(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(connector.id);
+        return newSet;
+      });
+    }
+  };
+
+  const handleDisconnect = async (connector: MCPConnector) => {
+    setConnecting(prev => new Set(prev).add(connector.id));
+    
+    try {
+      await apiClient.integrations.deleteConnection(connector.id);
+      
+      // Update connector status to disconnected
+      setConnectors(prev => prev.map(c => 
+        c.id === connector.id ? { ...c, status: 'disconnected' as const } : c
+      ));
+      
+      toast({
+        title: "Disconnected Successfully",
+        description: `Disconnected from ${connector.name}`,
+      });
+    } catch (error) {
+      console.error('Disconnection failed:', error);
+      toast({
+        title: "Disconnection Failed",
+        description: `Failed to disconnect from ${connector.name}`,
         variant: "destructive",
       });
     } finally {
@@ -316,6 +383,7 @@ const MCPConnectors: React.FC = () => {
       case 'connected': return 'text-green-600';
       case 'disconnected': return 'text-gray-600';
       case 'error': return 'text-red-600';
+      case 'checking': return 'text-blue-600';
       default: return 'text-gray-600';
     }
   };
@@ -325,9 +393,34 @@ const MCPConnectors: React.FC = () => {
       case 'connected': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'disconnected': return <XCircle className="h-4 w-4 text-gray-400" />;
       case 'error': return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'checking': return <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />;
       default: return <XCircle className="h-4 w-4 text-gray-400" />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Zap className="h-5 w-5" />
+            <span>MCP Connectors</span>
+          </CardTitle>
+          <p className="text-sm text-gray-600">Loading connector status...</p>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const filteredConnectors = connectors.filter(c => c.category === activeCategory);
 
@@ -396,7 +489,7 @@ const MCPConnectors: React.FC = () => {
                       )}
                     </div>
                     
-                    {connector.status === 'disconnected' ? (
+                    {connector.status === 'disconnected' || connector.status === 'error' ? (
                       <div className="space-y-2">
                         {connector.authType === 'oauth' ? (
                           <Button 
@@ -468,9 +561,14 @@ const MCPConnectors: React.FC = () => {
                           </Dialog>
                         )}
                       </div>
-                    ) : (
+                    ) : connector.status === 'connected' ? (
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => loadConnectorStatuses()}
+                          disabled={connecting.has(connector.id)}
+                        >
                           <RefreshCw className="h-3 w-3 mr-1" />
                           Sync
                         </Button>
@@ -478,9 +576,25 @@ const MCPConnectors: React.FC = () => {
                           <Settings className="h-3 w-3 mr-1" />
                           Configure
                         </Button>
-                        <Button variant="outline" size="sm">
-                          Disconnect
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDisconnect(connector)}
+                          disabled={connecting.has(connector.id)}
+                        >
+                          {connecting.has(connector.id) ? (
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                          ) : (
+                            'Disconnect'
+                          )}
                         </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center py-2">
+                        <div className="flex items-center space-x-2 text-blue-600">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-sm">Checking status...</span>
+                        </div>
                       </div>
                     )}
                   </div>

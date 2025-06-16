@@ -1,83 +1,113 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, Zap, TrendingUp } from 'lucide-react';
+import { Sparkles, Clock, TrendingUp } from 'lucide-react';
 
-interface AIGreetingProps {
-  insights: {
-    totalActions: number;
-    sessionDuration: number;
-    topFeatures: string[];
-    productivityScore: number;
-    recommendations: string[];
+interface RealInsights {
+  totalUsers?: number;
+  activeFeatures?: string[];
+  recentActions?: Array<{
+    action: string;
+    timestamp: Date;
+    feature: string;
+  }>;
+  systemHealth?: {
+    status: 'healthy' | 'warning' | 'error';
+    uptime: number;
+    lastCheck: Date;
   };
 }
 
+interface AIGreetingProps {
+  insights: RealInsights | null;
+}
+
 const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
-  const getTimeBasedGreeting = () => {
+  const getGreeting = () => {
     const hour = new Date().getHours();
-    const isWeekend = [0, 6].includes(new Date().getDay());
-    
-    if (hour >= 5 && hour < 12) {
-      return isWeekend 
-        ? "Good morning, weekend warrior! 🌅 Ready to get ahead of the competition?"
-        : "Good morning! ☀️ Let's make today's marketing efforts count.";
-    } else if (hour >= 12 && hour < 17) {
-      return "Good afternoon! 🚀 Your campaigns are running - let's optimize them.";
-    } else if (hour >= 17 && hour < 22) {
-      return "Good evening! 🌙 Perfect time to review today's performance.";
-    } else {
-      return "Working late? 🌟 I'm here to help you maximize every minute.";
-    }
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
   };
 
-  const getContextualSuggestion = () => {
-    const hour = new Date().getHours();
+  const getPersonalizedMessage = () => {
+    if (!insights) return "Let's optimize your marketing strategy today.";
     
-    if (insights.productivityScore > 80) {
-      return "You're on fire today! Your productivity score is " + insights.productivityScore + "%. Time to tackle your biggest challenges.";
-    } else if (hour >= 9 && hour < 11) {
-      return "Peak morning hours - perfect time for strategic campaign planning.";
-    } else if (hour >= 14 && hour < 16) {
-      return "Afternoon focus time - ideal for content creation and optimization.";
-    } else {
-      return "Let's analyze your data and find opportunities for growth.";
+    const { activeFeatures, recentActions, systemHealth } = insights;
+    
+    if (systemHealth?.status === 'error') {
+      return "I'm experiencing some connectivity issues, but I'm here to help with what I can.";
     }
+    
+    if (activeFeatures && activeFeatures.length > 0) {
+      return `You have ${activeFeatures.length} active features. Ready to dive deeper into your ${activeFeatures[0].toLowerCase()}?`;
+    }
+    
+    if (recentActions && recentActions.length > 0) {
+      return `I see you've been working on ${recentActions[0].feature.toLowerCase()}. Let's continue optimizing your strategy.`;
+    }
+    
+    return "Ready to help you build and optimize your marketing campaigns.";
   };
 
-  return (
-    <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white overflow-hidden relative">
-      <div className="absolute inset-0 bg-black/10"></div>
-      <CardContent className="p-6 relative z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Zap className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{getTimeBasedGreeting()}</h1>
-                <p className="text-blue-100">{getContextualSuggestion()}</p>
-              </div>
+  if (!insights) {
+    // Loading state
+    return (
+      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">{getGreeting()}! 👋</h2>
+              <div className="h-4 bg-white/20 rounded w-48 mt-1 animate-pulse"></div>
             </div>
           </div>
+          <div className="h-4 bg-white/20 rounded w-64 animate-pulse"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <CardContent className="p-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">{getGreeting()}! 👋</h2>
+            <p className="text-blue-100">I'm your AI Marketing Assistant</p>
+          </div>
+        </div>
+        
+        <p className="text-white/90 mb-4">
+          {getPersonalizedMessage()}
+        </p>
+        
+        <div className="flex items-center space-x-4 text-sm">
+          {insights.systemHealth && (
+            <div className="flex items-center space-x-1">
+              <div className={`w-2 h-2 rounded-full ${
+                insights.systemHealth.status === 'healthy' ? 'bg-green-400' :
+                insights.systemHealth.status === 'warning' ? 'bg-yellow-400' : 'bg-red-400'
+              }`}></div>
+              <span className="text-white/80">System {insights.systemHealth.status}</span>
+            </div>
+          )}
           
-          <div className="flex items-center space-x-6 text-right">
-            <div className="bg-white/10 rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-1">
-                <Clock className="h-4 w-4" />
-                <span className="text-sm font-medium">Session</span>
-              </div>
-              <p className="text-xl font-bold">{Math.floor(insights.sessionDuration / 60000)}m</p>
+          {insights.activeFeatures && insights.activeFeatures.length > 0 && (
+            <div className="flex items-center space-x-1">
+              <TrendingUp className="h-3 w-3" />
+              <span className="text-white/80">{insights.activeFeatures.length} active features</span>
             </div>
-            
-            <div className="bg-white/10 rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-1">
-                <TrendingUp className="h-4 w-4" />
-                <span className="text-sm font-medium">Productivity</span>
-              </div>
-              <p className="text-xl font-bold">{insights.productivityScore}%</p>
-            </div>
+          )}
+          
+          <div className="flex items-center space-x-1">
+            <Clock className="h-3 w-3" />
+            <span className="text-white/80">Updated now</span>
           </div>
         </div>
       </CardContent>

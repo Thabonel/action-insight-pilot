@@ -33,14 +33,43 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   user,
   serverStatus
 }) => {
-  const quickSuggestions = [
-    "What should I focus on today?",
-    "Show me my best performing campaigns",
-    "What content should I create next?",
-    "How are my leads converting?",
-    "Why is my budget running out so fast?",
-    "Schedule posts for next week"
-  ];
+  const getContextualSuggestions = () => {
+    // If there's chat history, provide context-aware suggestions
+    if (chatHistory.length > 0) {
+      const lastChat = chatHistory[chatHistory.length - 1];
+      if (lastChat.response?.type === 'campaign_analysis') {
+        return [
+          "How can I improve this campaign?",
+          "What's the ROI for this campaign?",
+          "Show me similar successful campaigns"
+        ];
+      }
+      if (lastChat.response?.type === 'lead_analysis') {
+        return [
+          "How do I nurture these leads?",
+          "What's the conversion probability?",
+          "Create a follow-up sequence"
+        ];
+      }
+      return [
+        "Tell me more about this",
+        "What should I do next?",
+        "Show me related metrics"
+      ];
+    }
+
+    // Default suggestions for new conversations
+    return [
+      "What should I focus on today?",
+      "Show me my campaign performance",
+      "How are my leads converting?",
+      "What content should I create next?",
+      "Help me optimize my marketing strategy",
+      "Analyze my recent marketing data"
+    ];
+  };
+
+  const suggestions = getContextualSuggestions();
 
   return (
     <Card className="shadow-lg border-0 bg-white/90 backdrop-blur">
@@ -81,11 +110,11 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
               <h3 className="text-lg font-medium text-slate-900 mb-2">Ready to optimize your marketing?</h3>
               <p className="text-slate-600 mb-4">Ask me anything about your campaigns, leads, or performance</p>
               
-              {/* Quick Suggestions */}
+              {/* Dynamic Suggestions */}
               <div className="space-y-2">
                 <p className="text-sm text-slate-500">Try asking:</p>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  {quickSuggestions.slice(0, 3).map((suggestion, index) => (
+                  {suggestions.slice(0, 3).map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
@@ -136,7 +165,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                     <span className="text-sm text-slate-600">
-                      {serverStatus === 'waking' ? 'Waking up AI assistant...' : 'Processing your request...'}
+                      {serverStatus === 'waking' ? 'Waking up AI assistant...' : 'Analyzing your marketing data...'}
                     </span>
                   </div>
                 </div>
@@ -163,6 +192,24 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             <Send className="h-4 w-4" />
           </Button>
         </form>
+        
+        {/* Contextual Suggestions */}
+        {user && chatHistory.length === 0 && !isProcessing && suggestions.length > 3 && (
+          <div className="mt-4 pt-4 border-t">
+            <p className="text-xs text-gray-500 mb-2">More suggestions:</p>
+            <div className="flex flex-wrap gap-1">
+              {suggestions.slice(3).map((suggestion, index) => (
+                <button
+                  key={index + 3}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200 transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
