@@ -1,133 +1,117 @@
-import React from 'react';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import { ErrorBoundary } from '@/components/ui/error-boundary';
-import Layout from '@/components/Layout';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from '@/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Menu } from "lucide-react"
+import { SettingsForm } from '@/components/settings/SettingsForm'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { Link } from 'react-router-dom'
+import { usePlatformDocumentation } from '@/hooks/usePlatformDocumentation'
 
-// Import all pages
-import AuthPage from '@/pages/auth/AuthPage';
-import Dashboard from '@/pages/Dashboard';
-import ConversationalDashboard from '@/pages/ConversationalDashboard';
-import Campaigns from '@/pages/Campaigns';
-import CampaignDetails from '@/pages/CampaignDetails';
-import CampaignManagement from '@/pages/CampaignManagement';
-import Leads from '@/pages/Leads';
-import Content from '@/pages/Content';
-import Social from '@/pages/Social';
-import Email from '@/pages/Email';
-import Analytics from '@/pages/Analytics';
-import Workflows from '@/pages/Workflows';
-import Proposals from '@/pages/Proposals';
-import Settings from '@/pages/Settings';
-import UserManual from '@/pages/UserManual';
-import ConnectPlatforms from '@/pages/ConnectPlatforms';
-import NotFound from '@/pages/NotFound';
+function App() {
+  const { user, signOut } = useAuth()
+  const { toast } = useToast()
+  const [open, setOpen] = useState(false)
 
-const queryClient = new QueryClient();
+  // Initialize platform documentation for AI assistance
+  usePlatformDocumentation()
 
-const AppContent: React.FC = () => {
-  const router = createBrowserRouter([
-    {
-      path: "/auth",
-      element: <AuthPage />
-    },
-    {
-      path: "/",
-      element: (
-        <ProtectedRoute>
-          <Layout />
-        </ProtectedRoute>
-      ),
-      children: [
-        {
-          index: true,
-          element: <Navigate to="/dashboard" replace />
-        },
-        {
-          path: "dashboard",
-          element: <Dashboard />
-        },
-        {
-          path: "conversational-dashboard",
-          element: <ConversationalDashboard />
-        },
-        {
-          path: "campaigns",
-          element: <Campaigns />
-        },
-        {
-          path: "campaigns/:id",
-          element: <CampaignDetails />
-        },
-        {
-          path: "campaign-management",
-          element: <CampaignManagement />
-        },
-        {
-          path: "leads",
-          element: <Leads />
-        },
-        {
-          path: "content",
-          element: <Content />
-        },
-        {
-          path: "social",
-          element: <Social />
-        },
-        {
-          path: "email",
-          element: <Email />
-        },
-        {
-          path: "analytics",
-          element: <Analytics />
-        },
-        {
-          path: "workflows",
-          element: <Workflows />
-        },
-        {
-          path: "proposals",
-          element: <Proposals />
-        },
-        {
-          path: "settings",
-          element: <Settings />
-        },
-        {
-          path: "user-manual",
-          element: <UserManual />
-        },
-        {
-          path: "connect-platforms",
-          element: <ConnectPlatforms />
-        }
-      ]
-    },
-    {
-      path: "*",
-      element: <NotFound />
-    }
-  ]);
-
-  return <RouterProvider router={router} />;
-};
-
-const App: React.FC = () => {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <AppContent />
-          <Toaster />
-        </AuthProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  );
-};
+    <div className="flex items-center justify-between space-x-2">
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="sm" className="p-2">
+            <Menu className="h-5 w-5" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className='w-96'>
+          <SheetHeader>
+            <SheetTitle>Account Settings</SheetTitle>
+            <SheetDescription>
+              Make changes to your account here. Click save when you're done.
+            </SheetDescription>
+          </SheetHeader>
+          <SettingsForm />
+        </SheetContent>
+      </Sheet>
 
-export default App;
+      <div className="flex items-center space-x-2">
+        <ThemeToggle />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.image} alt={user?.name} />
+                <AvatarFallback>CN</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/profile">Profile</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/billing">Billing</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/campaigns">Campaigns</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/conversational">AI Dashboard</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/user-manual">User Manual</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/settings">Settings</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                signOut()
+                  .then(() => {
+                    apiClient.post('/api/logout')
+                    toast({
+                      title: 'Success',
+                      description: 'Signed out successfully.',
+                    })
+                  })
+                  .catch(() => {
+                    toast({
+                      title: 'Error',
+                      description: 'There was an error signing out.',
+                      variant: 'destructive',
+                    })
+                  })
+              }}
+            >
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  )
+}
+
+export default App

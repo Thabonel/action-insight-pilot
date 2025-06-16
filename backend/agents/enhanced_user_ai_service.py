@@ -9,7 +9,7 @@ from ..database.user_secrets_client import UserSecretsClient
 logger = logging.getLogger(__name__)
 
 class EnhancedUserAIService:
-    """Enhanced AI service with knowledge base integration"""
+    """Enhanced AI service with knowledge base integration including platform documentation"""
     
     def __init__(self, user_id: str):
         self.user_id = user_id
@@ -29,9 +29,10 @@ class EnhancedUserAIService:
         query: str, 
         bucket_type: Optional[str] = None,
         campaign_id: Optional[str] = None,
-        limit: int = 5
+        limit: int = 5,
+        include_platform_docs: bool = True
     ) -> List[Dict[str, Any]]:
-        """Search user's knowledge base for relevant information"""
+        """Search user's knowledge base including platform documentation for relevant information"""
         try:
             supabase = get_supabase()
             
@@ -62,7 +63,7 @@ class EnhancedUserAIService:
                 embedding_data = response.json()
                 query_embedding = embedding_data['data'][0]['embedding']
             
-            # Search knowledge chunks using the database function
+            # Search user's knowledge chunks
             result = supabase.rpc('search_knowledge_chunks', {
                 'p_user_id': self.user_id,
                 'p_query_embedding': query_embedding,
@@ -72,14 +73,89 @@ class EnhancedUserAIService:
                 'p_similarity_threshold': 0.7
             }).execute()
             
-            if result.data:
-                logger.info(f"Found {len(result.data)} relevant knowledge chunks for query: {query}")
-                return result.data
+            knowledge_results = result.data if result.data else []
+            
+            # If including platform docs and query seems to be about platform usage, search platform docs
+            if include_platform_docs and self._is_platform_help_query(query):
+                platform_results = await self._search_platform_documentation(query, api_key, limit=3)
+                knowledge_results.extend(platform_results)
+            
+            if knowledge_results:
+                logger.info(f"Found {len(knowledge_results)} relevant knowledge chunks for query: {query}")
+                return knowledge_results
             
             return []
             
         except Exception as e:
             logger.error(f"Knowledge search error for user {self.user_id}: {e}")
+            return []
+    
+    def _is_platform_help_query(self, query: str) -> bool:
+        """Determine if query is asking for help with platform features"""
+        help_keywords = [
+            'how do i', 'how to', 'where do i', 'where is', 'how can i',
+            'create', 'upload', 'configure', 'set up', 'setup', 'find',
+            'knowledge bucket', 'campaign', 'settings', 'api key',
+            'dashboard', 'navigation', 'help', 'guide', 'tutorial',
+            'troubleshoot', 'error', 'not working', 'problem'
+        ]
+        query_lower = query.lower()
+        return any(keyword in query_lower for keyword in help_keywords)
+    
+    async def _search_platform_documentation(
+        self, 
+        query: str, 
+        api_key: str, 
+        limit: int = 3
+    ) -> List[Dict[str, Any]]:
+        """Search platform documentation for help-related queries"""
+        try:
+            supabase = get_supabase()
+            
+            # Generate embedding for platform doc search
+            import httpx
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    'https://api.openai.com/v1/embeddings',
+                    headers={
+                        'Authorization': f'Bearer {api_key}',
+                        'Content-Type': 'application/json',
+                    },
+                    json={
+                        'input': f"platform help documentation {query}",
+                        'model': 'text-embedding-ada-002'
+                    }
+                )
+                
+                if response.status_code != 200:
+                    return []
+                
+                embedding_data = response.json()
+                query_embedding = embedding_data['data'][0]['embedding']
+            
+            # Search for platform documentation (assuming bucket name 'platform-documentation')
+            result = supabase.rpc('search_knowledge_chunks', {
+                'p_user_id': self.user_id,
+                'p_query_embedding': query_embedding,
+                'p_bucket_type': 'general',
+                'p_campaign_id': None,
+                'p_limit': limit,
+                'p_similarity_threshold': 0.6
+            }).execute()
+            
+            if result.data:
+                # Filter for platform documentation
+                platform_docs = [
+                    chunk for chunk in result.data 
+                    if 'platform' in chunk.get('bucket_name', '').lower() or 
+                       'documentation' in chunk.get('bucket_name', '').lower()
+                ]
+                return platform_docs
+            
+            return []
+            
+        except Exception as e:
+            logger.error(f"Platform documentation search error: {e}")
             return []
     
     async def generate_daily_focus_with_knowledge(
@@ -90,10 +166,11 @@ class EnhancedUserAIService:
     ) -> Dict[str, Any]:
         """Generate daily focus recommendations enhanced with knowledge base"""
         try:
-            # Search knowledge base for relevant information
+            # Search knowledge base for relevant information (including platform docs)
             knowledge_chunks = await self.search_knowledge_base(
                 query=f"daily focus marketing strategy {query}",
-                limit=3
+                limit=3,
+                include_platform_docs=True
             )
             
             # Get OpenAI API key
@@ -111,8 +188,10 @@ class EnhancedUserAIService:
                 for i, chunk in enumerate(knowledge_chunks, 1):
                     knowledge_context += f"{i}. From '{chunk['document_title']}' in {chunk['bucket_name']}:\n{chunk['chunk_content']}\n\n"
             
-            system_prompt = f"""You are a marketing AI assistant with access to the user's specific knowledge base. 
+            system_prompt = f"""You are a marketing AI assistant with access to the user's specific knowledge base and platform documentation. 
             Provide personalized daily focus recommendations based on their campaigns and knowledge.
+            
+            If the user asks for help with platform features, use the platform documentation to provide step-by-step guidance.
             
             User's Marketing Data:
             - Active Campaigns: {len([c for c in campaigns if c.get('status') == 'active'])}
@@ -134,6 +213,7 @@ class EnhancedUserAIService:
             2. Informed by the knowledge in my knowledge base
             3. Actionable and prioritized
             4. Include specific next steps
+            5. If this is a platform help question, provide step-by-step guidance from the documentation
             """
             
             # Call OpenAI API
@@ -187,12 +267,13 @@ class EnhancedUserAIService:
         campaigns: List[Dict[str, Any]],
         context: List[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Process general queries enhanced with knowledge base search"""
+        """Process general queries enhanced with knowledge base search including platform help"""
         try:
-            # Search knowledge base for relevant information
+            # Search knowledge base for relevant information (including platform docs for help queries)
             knowledge_chunks = await self.search_knowledge_base(
                 query=query,
-                limit=5
+                limit=5,
+                include_platform_docs=True
             )
             
             # Get OpenAI API key
@@ -206,12 +287,14 @@ class EnhancedUserAIService:
             # Build enhanced prompt
             knowledge_context = ""
             if knowledge_chunks:
-                knowledge_context = "\n\nRelevant information from your knowledge base:\n"
+                knowledge_context = "\n\nRelevant information from your knowledge base and platform documentation:\n"
                 for i, chunk in enumerate(knowledge_chunks, 1):
                     knowledge_context += f"{i}. From '{chunk['document_title']}' ({chunk['bucket_name']}):\n{chunk['chunk_content']}\n\n"
             
-            system_prompt = f"""You are a knowledgeable marketing AI assistant with access to the user's personal knowledge base and campaign data. 
+            system_prompt = f"""You are a knowledgeable marketing AI assistant with access to the user's personal knowledge base, campaign data, and complete platform documentation. 
             Provide helpful, accurate responses that incorporate both their specific knowledge and general marketing expertise.
+            
+            When users ask "how to" questions about the platform, provide detailed step-by-step guidance from the platform documentation.
             
             {knowledge_context}
             
@@ -226,9 +309,10 @@ class EnhancedUserAIService:
             
             Please provide a comprehensive answer that incorporates:
             1. Information from my knowledge base (if relevant)
-            2. My current campaign context
-            3. General marketing best practices
-            4. Specific actionable recommendations
+            2. Platform documentation (if this is a how-to question)
+            3. My current campaign context
+            4. General marketing best practices
+            5. Specific actionable recommendations
             """
             
             # Call OpenAI API
