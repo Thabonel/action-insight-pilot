@@ -90,7 +90,7 @@ function App() {
               onClick={() => {
                 signOut()
                   .then(() => {
-                    apiClient.post('/api/logout')
+                    apiClient.httpClient.post('/api/logout')
                     toast({
                       title: 'Success',
                       description: 'Signed out successfully.',
