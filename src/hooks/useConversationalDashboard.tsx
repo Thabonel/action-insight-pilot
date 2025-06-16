@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -6,6 +5,7 @@ import { behaviorTracker } from '@/lib/behavior-tracker';
 import { useServerStatus } from '@/hooks/useServerStatus';
 import { useQueryProcessor } from '@/hooks/useQueryProcessor';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/http-client';
 
 interface ChatMessage {
   id: string;
@@ -79,11 +79,24 @@ export const useConversationalDashboard = () => {
       setIsLoadingInsights(true);
       
       // Get real system health and analytics
-      const [systemHealth, campaigns, leads] = await Promise.all([
-        apiClient.getSystemHealth().catch(() => ({ status: 'unknown', uptime: 0 })),
-        apiClient.getCampaigns().catch(() => []),
-        apiClient.getLeads().catch(() => [])
+      const [systemHealthResponse, campaignsResponse, leadsResponse] = await Promise.all([
+        apiClient.getSystemHealth().catch(() => ({ success: false, data: { status: 'unknown', uptime: 0 } })),
+        apiClient.getCampaigns().catch(() => ({ success: false, data: [] })),
+        apiClient.getLeads().catch(() => ({ success: false, data: [] }))
       ]);
+
+      // Extract data from API responses
+      const systemHealthData = (systemHealthResponse as ApiResponse<any>).success ? (systemHealthResponse as ApiResponse<any>).data : { status: 'unknown', uptime: 0 };
+      const campaigns = (campaignsResponse as ApiResponse<any[]>).success ? (campaignsResponse as ApiResponse<any[]>).data || [] : [];
+      const leads = (leadsResponse as ApiResponse<any[]>).success ? (leadsResponse as ApiResponse<any[]>).data || [] : [];
+
+      // Get behavior insights
+      const behaviorInsights = behaviorTracker.getInsights();
+      const recentActions = behaviorInsights.topFeatures?.slice(0, 5).map((feature, index) => ({
+        action: `Used ${feature}`,
+        timestamp: new Date(Date.now() - index * 60000), // Stagger timestamps
+        feature: feature
+      })) || [];
 
       const realInsights: RealInsights = {
         totalUsers: 1, // Current user count - could be expanded
@@ -92,15 +105,11 @@ export const useConversationalDashboard = () => {
           ...(leads.length > 0 ? ['Lead Management'] : []),
           'AI Assistant'
         ],
-        recentActions: behaviorTracker.getInsights().recentActions?.slice(0, 5).map(action => ({
-          action: action.action || 'Unknown Action',
-          timestamp: new Date(action.timestamp || Date.now()),
-          feature: action.feature || 'System'
-        })) || [],
+        recentActions,
         systemHealth: {
-          status: systemHealth.status === 'healthy' ? 'healthy' : 
-                  systemHealth.status === 'degraded' ? 'warning' : 'error',
-          uptime: systemHealth.uptime || 0,
+          status: systemHealthData.status === 'operational' || systemHealthData.status === 'healthy' ? 'healthy' : 
+                  systemHealthData.status === 'degraded' || systemHealthData.status === 'warning' ? 'warning' : 'error',
+          uptime: systemHealthData.uptime || 0,
           lastCheck: new Date()
         }
       };

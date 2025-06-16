@@ -17,6 +17,18 @@ const Dashboard: React.FC = () => {
     systemStats: {}
   };
 
+  // Mock insights for QuickActionGrid - will be replaced with real data later
+  const mockInsights = {
+    totalUsers: 1,
+    activeFeatures: ['AI Assistant'],
+    recentActions: [],
+    systemHealth: {
+      status: 'healthy' as const,
+      uptime: 0,
+      lastCheck: new Date()
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -48,7 +60,7 @@ const Dashboard: React.FC = () => {
             <CardTitle className="text-slate-900">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <QuickActionGrid />
+            <QuickActionGrid insights={mockInsights} />
           </CardContent>
         </Card>
       </div>

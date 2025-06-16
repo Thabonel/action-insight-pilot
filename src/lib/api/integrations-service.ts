@@ -98,6 +98,13 @@ export class IntegrationsService {
     return this.httpClient.request<IntegrationConnection[]>('/api/integrations/connections');
   }
 
+  async createConnection(connectionData: { service_name: string; configuration: Record<string, any> }) {
+    return this.httpClient.request<ConnectionResult>('/api/integrations/connections', {
+      method: 'POST',
+      body: JSON.stringify(connectionData),
+    });
+  }
+
   async connectService(service: string, apiKey: string) {
     return this.httpClient.request<ConnectionResult>(`/api/integrations/${service}/connect`, {
       method: 'POST',
@@ -108,6 +115,12 @@ export class IntegrationsService {
   async syncService(service: string) {
     return this.httpClient.request<any>(`/api/integrations/${service}/sync`, {
       method: 'POST',
+    });
+  }
+
+  async deleteConnection(serviceId: string) {
+    return this.httpClient.request<any>(`/api/integrations/connections/${serviceId}`, {
+      method: 'DELETE',
     });
   }
 
