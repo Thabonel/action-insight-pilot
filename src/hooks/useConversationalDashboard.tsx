@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { useServerStatus } from '@/hooks/useServerStatus';
 import { useQueryProcessor } from '@/hooks/useQueryProcessor';
+import { apiClient } from '@/lib/api-client';
 
 interface ChatMessage {
   id: string;
@@ -13,12 +14,37 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+interface RealInsights {
+  totalUsers: number;
+  activeFeatures: string[];
+  recentActions: Array<{
+    action: string;
+    timestamp: Date;
+    feature: string;
+  }>;
+  systemHealth: {
+    status: 'healthy' | 'warning' | 'error';
+    uptime: number;
+    lastCheck: Date;
+  };
+}
+
 export const useConversationalDashboard = () => {
   const [query, setQuery] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [insights, setInsights] = useState(behaviorTracker.getInsights());
+  const [insights, setInsights] = useState<RealInsights>({
+    totalUsers: 0,
+    activeFeatures: [],
+    recentActions: [],
+    systemHealth: {
+      status: 'healthy',
+      uptime: 0,
+      lastCheck: new Date()
+    }
+  });
   const [conversationContext, setConversationContext] = useState<any[]>([]);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
   
@@ -34,13 +60,69 @@ export const useConversationalDashboard = () => {
 
   useEffect(() => {
     behaviorTracker.trackAction('navigation', 'conversational_dashboard', { section: 'main' });
+    loadRealInsights();
     
     const interval = setInterval(() => {
-      setInsights(behaviorTracker.getInsights());
+      loadRealInsights();
     }, 30000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const loadRealInsights = async () => {
+    if (!user) {
+      setIsLoadingInsights(false);
+      return;
+    }
+
+    try {
+      setIsLoadingInsights(true);
+      
+      // Get real system health and analytics
+      const [systemHealth, campaigns, leads] = await Promise.all([
+        apiClient.getSystemHealth().catch(() => ({ status: 'unknown', uptime: 0 })),
+        apiClient.getCampaigns().catch(() => []),
+        apiClient.getLeads().catch(() => [])
+      ]);
+
+      const realInsights: RealInsights = {
+        totalUsers: 1, // Current user count - could be expanded
+        activeFeatures: [
+          ...(campaigns.length > 0 ? ['Campaigns'] : []),
+          ...(leads.length > 0 ? ['Lead Management'] : []),
+          'AI Assistant'
+        ],
+        recentActions: behaviorTracker.getInsights().recentActions?.slice(0, 5).map(action => ({
+          action: action.action || 'Unknown Action',
+          timestamp: new Date(action.timestamp || Date.now()),
+          feature: action.feature || 'System'
+        })) || [],
+        systemHealth: {
+          status: systemHealth.status === 'healthy' ? 'healthy' : 
+                  systemHealth.status === 'degraded' ? 'warning' : 'error',
+          uptime: systemHealth.uptime || 0,
+          lastCheck: new Date()
+        }
+      };
+
+      setInsights(realInsights);
+    } catch (error) {
+      console.error('Failed to load real insights:', error);
+      // Set minimal fallback data on error
+      setInsights({
+        totalUsers: 0,
+        activeFeatures: ['AI Assistant'],
+        recentActions: [],
+        systemHealth: {
+          status: 'error',
+          uptime: 0,
+          lastCheck: new Date()
+        }
+      });
+    } finally {
+      setIsLoadingInsights(false);
+    }
+  };
 
   const handleQuerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +180,9 @@ export const useConversationalDashboard = () => {
         title: "AI Response Generated",
         description: "Your marketing assistant has analyzed your request.",
       });
+
+      // Refresh insights after successful query
+      loadRealInsights();
     } catch (error) {
       console.error('Query processing failed:', error);
       setServerError(error instanceof Error ? error.message : 'Unknown error');
@@ -139,12 +224,14 @@ export const useConversationalDashboard = () => {
     setQuery,
     chatHistory,
     isProcessing,
-    insights,
+    insights: isLoadingInsights ? null : insights,
+    isLoadingInsights,
     serverStatus,
     serverError,
     user,
     handleQuerySubmit,
     handleSuggestionClick,
-    wakeUpServer
+    wakeUpServer,
+    refreshInsights: loadRealInsights
   };
 };
