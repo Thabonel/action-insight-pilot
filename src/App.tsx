@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { apiClient } from '@/lib/api-client'
@@ -90,7 +91,7 @@ function App() {
               onClick={() => {
                 signOut()
                   .then(() => {
-                    apiClient.httpClient.post('/api/logout')
+                    apiClient.httpClient.request('/api/logout', { method: 'POST' })
                     toast({
                       title: 'Success',
                       description: 'Signed out successfully.',
