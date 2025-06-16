@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +13,7 @@ import {
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { apiClient } from '@/lib/api-client';
 import { useState, useEffect } from 'react';
+import { ApiResponse } from '@/lib/http-client';
 
 interface SystemMetrics {
   activeCampaigns: number;
@@ -40,10 +40,14 @@ const SystemOverviewCards: React.FC = () => {
     try {
       setIsLoading(true);
       
-      const [leads, systemHealth] = await Promise.all([
-        apiClient.getLeads().catch(() => []),
-        apiClient.getSystemHealth().catch(() => ({ status: 'unknown' }))
+      const [leadsResponse, systemHealthResponse] = await Promise.all([
+        apiClient.getLeads().catch(() => ({ success: false, data: [] })),
+        apiClient.getSystemHealth().catch(() => ({ success: false, data: { status: 'unknown' } }))
       ]);
+
+      // Extract data from API responses
+      const leads = (leadsResponse as ApiResponse<any[]>).success ? (leadsResponse as ApiResponse<any[]>).data || [] : [];
+      const systemHealthData = (systemHealthResponse as ApiResponse<any>).success ? (systemHealthResponse as ApiResponse<any>).data : { status: 'unknown' };
 
       const activeCampaigns = campaigns?.filter(c => 
         c.created_at && new Date(c.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -52,8 +56,8 @@ const SystemOverviewCards: React.FC = () => {
       setSystemMetrics({
         activeCampaigns,
         totalLeads: leads.length,
-        systemStatus: systemHealth.status === 'healthy' ? 'healthy' : 
-                     systemHealth.status === 'degraded' ? 'warning' : 'error',
+        systemStatus: systemHealthData.status === 'operational' || systemHealthData.status === 'healthy' ? 'healthy' : 
+                     systemHealthData.status === 'degraded' || systemHealthData.status === 'warning' ? 'warning' : 'error',
         lastUpdated: new Date()
       });
     } catch (error) {

@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ExternalLink, Zap, RefreshCw, Settings, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { ExternalLink, Zap, RefreshCw, Settings, Loader2, CheckCircle, XCircle,  } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/http-client';
 
 interface MCPConnector {
   id: string;
@@ -256,7 +257,10 @@ const MCPConnectors: React.FC = () => {
     setIsLoading(true);
     try {
       // Check existing integration connections
-      const connections = await apiClient.integrations.getConnections().catch(() => []);
+      const connectionsResponse = await apiClient.integrations.getConnections().catch(() => ({ success: false, data: [] }));
+      
+      // Extract data from API response
+      const connections = (connectionsResponse as ApiResponse<any[]>).success ? (connectionsResponse as ApiResponse<any[]>).data || [] : [];
       
       const connectorsWithStatus = baseConnectors.map(connector => ({
         ...connector,
