@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthService, supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   user: any;
@@ -99,6 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     behaviorTracker.trackAction('execution', 'auth', { action: 'sign_out_attempt' });
     await AuthService.signOut();
+    // Navigate to home page immediately after sign out
+    window.location.href = '/';
   };
 
   const resetPassword = async (email: string) => {
