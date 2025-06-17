@@ -1,0 +1,108 @@
+
+/* Color and Background Overrides */
+
+/* Override any dark backgrounds globally to use blue */
+.bg-black,
+.bg-gray-900,
+.bg-gray-800,
+.bg-slate-900,
+.bg-slate-800 {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+/* Ensure all colored backgrounds use blue and have white text */
+.bg-blue-600,
+.bg-blue-500,
+.bg-purple-600,
+.bg-purple-500,
+.bg-green-600,
+.bg-green-500,
+.bg-red-600,
+.bg-red-500,
+.bg-yellow-600,
+.bg-yellow-500,
+.bg-orange-600,
+.bg-orange-500,
+.bg-indigo-600,
+.bg-indigo-500,
+.bg-pink-600,
+.bg-pink-500,
+.bg-gray-600,
+.bg-gray-500,
+.bg-teal-600,
+.bg-teal-500,
+.bg-cyan-600,
+.bg-cyan-500,
+.bg-emerald-600,
+.bg-emerald-500,
+.bg-lime-600,
+.bg-lime-500,
+.bg-amber-600,
+.bg-amber-500,
+.bg-rose-600,
+.bg-rose-500,
+.bg-violet-600,
+.bg-violet-500,
+.bg-fuchsia-600,
+.bg-fuchsia-500,
+.bg-sky-600,
+.bg-sky-500,
+.bg-slate-600,
+.bg-slate-500,
+.bg-stone-600,
+.bg-stone-500,
+.bg-neutral-600,
+.bg-neutral-500,
+.bg-zinc-600,
+.bg-zinc-500 {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+/* Ensure gradient backgrounds use blue and have white text */
+.bg-gradient-to-r {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+/* Override text-white on light backgrounds only when needed */
+.bg-white .text-white,
+.bg-gray-50 .text-white,
+.bg-gray-100 .text-white {
+  @apply text-black !important;
+}
+
+/* Ensure hover states also use blue */
+.hover\:bg-gray-700:hover,
+.hover\:bg-gray-800:hover,
+.hover\:bg-gray-900:hover,
+.hover\:bg-black:hover {
+  background-color: #1d4ed8 !important;
+}
+
+/* Ensure all hover state backgrounds use blue */
+.hover\:bg-purple-600:hover,
+.hover\:bg-green-600:hover,
+.hover\:bg-red-600:hover,
+.hover\:bg-yellow-600:hover,
+.hover\:bg-orange-600:hover,
+.hover\:bg-indigo-600:hover,
+.hover\:bg-pink-600:hover,
+.hover\:bg-gray-600:hover,
+.hover\:bg-teal-600:hover,
+.hover\:bg-cyan-600:hover,
+.hover\:bg-emerald-600:hover,
+.hover\:bg-lime-600:hover,
+.hover\:bg-amber-600:hover,
+.hover\:bg-rose-600:hover,
+.hover\:bg-violet-600:hover,
+.hover\:bg-fuchsia-600:hover,
+.hover\:bg-sky-600:hover,
+.hover\:bg-slate-600:hover,
+.hover\:bg-stone-600:hover,
+.hover\:bg-neutral-600:hover,
+.hover\:bg-zinc-600:hover {
+  background-color: #1d4ed8 !important;
+  color: white !important;
+}
