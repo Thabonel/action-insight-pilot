@@ -1,7 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Clock, TrendingUp } from 'lucide-react';
+import { Sparkles, Clock, TrendingUp, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 interface RealInsights {
   totalUsers?: number;
@@ -23,6 +36,20 @@ interface AIGreetingProps {
 }
 
 const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
+  const { signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await signOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -53,8 +80,38 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
   if (!insights) {
     // Loading state
     return (
-      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white relative">
         <CardContent className="p-6">
+          {/* Logout button in top-right corner */}
+          <div className="absolute top-4 right-4">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:bg-white/20 p-2"
+                  disabled={isLoggingOut}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sign out</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to sign out of your account?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+                    {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
               <Sparkles className="h-5 w-5" />
@@ -71,8 +128,38 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
   }
 
   return (
-    <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+    <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white relative">
       <CardContent className="p-6">
+        {/* Logout button in top-right corner */}
+        <div className="absolute top-4 right-4">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-white hover:bg-white/20 p-2"
+                disabled={isLoggingOut}
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Sign out</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to sign out of your account?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+                  {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+
         <div className="flex items-center space-x-3 mb-4">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <Sparkles className="h-5 w-5" />

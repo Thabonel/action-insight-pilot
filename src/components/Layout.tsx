@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -12,11 +12,39 @@ import {
   FileCheck,
   Settings,
   BookOpen,
-  Link
+  Link,
+  LogOut,
+  User
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 const Layout: React.FC = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await signOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const navItems = [
     { 
@@ -112,6 +140,48 @@ const Layout: React.FC = () => {
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-900">AI Marketing Hub</h2>
           <p className="text-sm text-gray-600 mt-1">Intelligent Automation Platform</p>
+          
+          {/* User info and logout section */}
+          {user && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+                </div>
+              </div>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    disabled={isLoggingOut}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Sign out</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to sign out of your account?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+                      {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </div>
         
         <nav className="px-3 pb-6">
