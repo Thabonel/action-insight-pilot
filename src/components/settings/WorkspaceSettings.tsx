@@ -91,15 +91,15 @@ const WorkspaceSettings: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div>Loading workspace settings...</div>;
+    return <div className="text-black">Loading workspace settings...</div>;
   }
 
   return (
     <div className="space-y-6">
       {/* Workspace Overview */}
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-black">
             <Building2 className="h-5 w-5" />
             <span>Workspace Information</span>
             <Badge className="bg-green-100 text-green-800">Enterprise</Badge>
@@ -108,40 +108,40 @@ const WorkspaceSettings: React.FC = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="workspace-name">Workspace Name</Label>
+              <Label htmlFor="workspace-name" className="text-black">Workspace Name</Label>
               <Input
                 id="workspace-name"
                 value={workspaceData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                className="mt-1"
+                className="mt-1 bg-white border-gray-300 text-black"
               />
             </div>
             <div>
-              <Label htmlFor="custom-domain">Custom Domain</Label>
+              <Label htmlFor="custom-domain" className="text-black">Custom Domain</Label>
               <Input
                 id="custom-domain"
                 value={workspaceData.domain}
                 onChange={(e) => handleInputChange('domain', e.target.value)}
-                className="mt-1"
+                className="mt-1 bg-white border-gray-300 text-black"
                 placeholder="your-company.com"
               />
             </div>
             <div>
-              <Label htmlFor="industry">Industry</Label>
+              <Label htmlFor="industry" className="text-black">Industry</Label>
               <Input
                 id="industry"
                 value={workspaceData.industry}
                 onChange={(e) => handleInputChange('industry', e.target.value)}
-                className="mt-1"
+                className="mt-1 bg-white border-gray-300 text-black"
               />
             </div>
             <div>
-              <Label htmlFor="team-size">Team Size</Label>
+              <Label htmlFor="team-size" className="text-black">Team Size</Label>
               <Input
                 id="team-size"
                 value={workspaceData.teamSize}
                 onChange={(e) => handleInputChange('teamSize', e.target.value)}
-                className="mt-1"
+                className="mt-1 bg-white border-gray-300 text-black"
               />
             </div>
           </div>
@@ -149,9 +149,9 @@ const WorkspaceSettings: React.FC = () => {
       </Card>
 
       {/* White-Label Branding */}
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-black">
             <Palette className="h-5 w-5" />
             <span>White-Label Branding</span>
             <Crown className="h-4 w-4 text-yellow-500" />
@@ -160,7 +160,7 @@ const WorkspaceSettings: React.FC = () => {
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Enable White-Label Mode</h4>
+              <h4 className="font-medium text-black">Enable White-Label Mode</h4>
               <p className="text-sm text-gray-600">Hide MarketingAI branding and use your own</p>
             </div>
             <Switch
@@ -171,7 +171,7 @@ const WorkspaceSettings: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label>Company Logo</Label>
+              <Label className="text-black">Company Logo</Label>
               <div className="mt-2 flex items-center space-x-4">
                 <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
                   {workspaceData.branding.logo ? (
@@ -188,7 +188,7 @@ const WorkspaceSettings: React.FC = () => {
                     className="hidden"
                     id="logo-upload"
                   />
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="border-gray-300 text-black hover:bg-gray-50">
                     <label htmlFor="logo-upload" className="cursor-pointer">
                       <Upload className="h-4 w-4 mr-2" />
                       Upload Logo
@@ -199,7 +199,7 @@ const WorkspaceSettings: React.FC = () => {
             </div>
 
             <div>
-              <Label>Primary Color</Label>
+              <Label className="text-black">Primary Color</Label>
               <div className="mt-2 flex items-center space-x-4">
                 <div 
                   className="w-16 h-16 rounded-lg border-2 border-gray-200"
@@ -209,7 +209,7 @@ const WorkspaceSettings: React.FC = () => {
                   type="color"
                   value={workspaceData.branding.primaryColor}
                   onChange={(e) => handleBrandingChange('primaryColor', e.target.value)}
-                  className="w-20 h-10"
+                  className="w-20 h-10 bg-white border-gray-300"
                 />
               </div>
             </div>
@@ -218,9 +218,9 @@ const WorkspaceSettings: React.FC = () => {
       </Card>
 
       {/* Enterprise Features */}
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-black">
             <Crown className="h-5 w-5 text-yellow-500" />
             <span>Enterprise Features</span>
           </CardTitle>
@@ -230,7 +230,7 @@ const WorkspaceSettings: React.FC = () => {
             {Object.entries(workspaceData.features).map(([feature, enabled]) => (
               <div key={feature} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <h4 className="font-medium capitalize">{feature.replace(/([A-Z])/g, ' $1').trim()}</h4>
+                  <h4 className="font-medium capitalize text-black">{feature.replace(/([A-Z])/g, ' $1').trim()}</h4>
                   <p className="text-sm text-gray-600">
                     {feature === 'multiTenant' && 'Isolate data between workspaces'}
                     {feature === 'customDomain' && 'Use your own domain name'}
@@ -248,9 +248,9 @@ const WorkspaceSettings: React.FC = () => {
       </Card>
 
       {/* Usage Stats */}
-      <Card>
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-black">
             <Users className="h-5 w-5" />
             <span>Workspace Usage</span>
           </CardTitle>
@@ -282,7 +282,7 @@ const WorkspaceSettings: React.FC = () => {
         <Button 
           onClick={handleSave} 
           disabled={isSaving}
-          className="flex items-center space-x-2"
+          className="flex items-center space-x-2 bg-blue-600 text-white hover:bg-blue-700"
         >
           <Save className="h-4 w-4" />
           <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>

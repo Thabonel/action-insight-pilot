@@ -81,10 +81,10 @@ const Settings: React.FC = () => {
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <h1 className="text-3xl font-bold text-black">Settings</h1>
           <p className="text-gray-600 mt-2">Manage your workspace, integrations, and AI behavior</p>
         </div>
         <div className="flex space-x-2">
@@ -99,14 +99,14 @@ const Settings: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 lg:w-fit">
+        <TabsList className="grid w-full grid-cols-6 lg:w-fit bg-gray-100">
           {availableSections.map((section) => {
             const Icon = section.icon;
             return (
               <TabsTrigger 
                 key={section.id} 
                 value={section.id}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 text-black data-[state=active]:bg-white data-[state=active]:text-black"
               >
                 <Icon className="h-4 w-4" />
                 <span className="hidden lg:inline">{section.name}</span>
@@ -125,7 +125,7 @@ const Settings: React.FC = () => {
             return (
               <Card 
                 key={section.id}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                className={`cursor-pointer transition-all duration-200 hover:shadow-md bg-white border-gray-200 ${
                   activeTab === section.id ? 'ring-2 ring-blue-500' : ''
                 }`}
                 onClick={() => setActiveTab(section.id)}
@@ -137,7 +137,7 @@ const Settings: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-medium">{section.name}</h3>
+                        <h3 className="font-medium text-black">{section.name}</h3>
                         {section.enterprise && (
                           <Badge variant="secondary" className="text-xs">
                             Enterprise
