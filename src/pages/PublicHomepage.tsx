@@ -26,37 +26,49 @@ const PublicHomepage: React.FC = () => {
       icon: Brain,
       title: "AI-Powered Campaign Management",
       description: "Create, optimize, and manage marketing campaigns with intelligent automation that learns from performance data.",
-      benefits: ["Smart audience targeting", "Automated A/B testing", "Performance optimization"]
+      benefits: ["Smart audience targeting", "Automated A/B testing", "Performance optimization"],
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      alt: "Marketing analytics dashboard on computer screen"
     },
     {
       icon: Users,
       title: "Intelligent Lead Generation",
       description: "Advanced AI algorithms identify, score, and nurture leads automatically for maximum conversion rates.",
-      benefits: ["Predictive lead scoring", "Automated nurturing", "Conversion optimization"]
+      benefits: ["Predictive lead scoring", "Automated nurturing", "Conversion optimization"],
+      image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      alt: "Team collaborating around a laptop with charts and graphs"
     },
     {
       icon: Sparkles,
       title: "Automated Content Creation",
       description: "Generate high-converting content across all channels with AI that understands your brand voice.",
-      benefits: ["Brand-consistent messaging", "Multi-platform optimization", "Performance tracking"]
+      benefits: ["Brand-consistent messaging", "Multi-platform optimization", "Performance tracking"],
+      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      alt: "MacBook showing code on screen representing content creation"
     },
     {
       icon: Mail,
       title: "Email Marketing Intelligence",
       description: "Personalized email campaigns powered by behavioral analysis and predictive send-time optimization.",
-      benefits: ["Behavioral triggers", "Send-time optimization", "Personalization at scale"]
+      benefits: ["Behavioral triggers", "Send-time optimization", "Personalization at scale"],
+      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      alt: "Person typing on laptop with email interface visible"
     },
     {
       icon: BarChart3,
       title: "Predictive Analytics",
       description: "Advanced insights and forecasting that help you make data-driven marketing decisions.",
-      benefits: ["Revenue forecasting", "Performance predictions", "ROI optimization"]
+      benefits: ["Revenue forecasting", "Performance predictions", "ROI optimization"],
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      alt: "Data visualization charts and graphs on computer screen"
     },
     {
       icon: Workflow,
       title: "Workflow Automation",
       description: "Connect all your marketing tools and automate complex workflows without coding.",
-      benefits: ["No-code automation", "Cross-platform integration", "Smart triggers"]
+      benefits: ["No-code automation", "Cross-platform integration", "Smart triggers"],
+      image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      alt: "Multiple people working with laptops in a collaborative workspace"
     }
   ];
 
@@ -221,8 +233,12 @@ const PublicHomepage: React.FC = () => {
                   </Card>
                 </div>
                 <div className="flex-1">
-                  <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-8 h-80 flex items-center justify-center">
-                    <feature.icon className="w-32 h-32 text-blue-600 opacity-20" />
+                  <div className="rounded-2xl overflow-hidden shadow-lg">
+                    <img 
+                      src={feature.image} 
+                      alt={feature.alt}
+                      className="w-full h-80 object-cover"
+                    />
                   </div>
                 </div>
               </div>
