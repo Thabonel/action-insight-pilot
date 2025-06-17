@@ -3,7 +3,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthService, supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api-client';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   user: any;
