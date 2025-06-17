@@ -21,85 +21,85 @@ const Layout: React.FC = () => {
   const navItems = [
     { 
       name: 'AI Dashboard', 
-      href: '/conversational-dashboard', 
+      href: '/app/conversational-dashboard', 
       icon: LayoutDashboard,
       description: 'AI-powered insights'
     },
     { 
       name: 'Dashboard', 
-      href: '/dashboard', 
+      href: '/app/dashboard', 
       icon: LayoutDashboard,
       description: 'Traditional view'
     },
     { 
       name: 'Campaigns', 
-      href: '/campaigns', 
+      href: '/app/campaigns', 
       icon: Zap,
       description: 'Marketing campaigns'
     },
     { 
       name: 'Campaign Management', 
-      href: '/campaign-management', 
+      href: '/app/campaign-management', 
       icon: Zap,
       description: 'Advanced campaign tools'
     },
     { 
       name: 'Leads', 
-      href: '/leads', 
+      href: '/app/leads', 
       icon: Users,
       description: 'Lead management'
     },
     { 
       name: 'Content', 
-      href: '/content', 
+      href: '/app/content', 
       icon: FileText,
       description: 'Content creation'
     },
     { 
       name: 'Social', 
-      href: '/social', 
+      href: '/app/social', 
       icon: Share2,
       description: 'Social media'
     },
     { 
       name: 'Email', 
-      href: '/email', 
+      href: '/app/email', 
       icon: Mail,
       description: 'Email automation'
     },
     { 
       name: 'Analytics', 
-      href: '/analytics', 
+      href: '/app/analytics', 
       icon: BarChart3,
       description: 'Performance metrics'
     },
     { 
       name: 'Workflows', 
-      href: '/workflows', 
+      href: '/app/workflows', 
       icon: Workflow,
       description: 'Automation workflows'
     },
     { 
       name: 'Proposals', 
-      href: '/proposals', 
+      href: '/app/proposals', 
       icon: FileCheck,
       description: 'Proposal generation'
     },
     { 
       name: 'Settings', 
-      href: '/settings', 
+      href: '/app/settings', 
       icon: Settings,
       description: 'System configuration'
     },
     { 
       name: 'User Manual', 
-      href: '/user-manual', 
+      href: '/app/user-manual', 
       icon: BookOpen,
       description: 'Documentation'
     },
     { 
       name: 'Connect Platforms', 
-      href: '/connect-platforms', 
+      href: '/app/connect-platforms', 
       icon: Link,
       description: 'Integration setup'
     }

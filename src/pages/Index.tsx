@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import PublicHomepage from './PublicHomepage';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -14,8 +15,8 @@ const Index = () => {
     );
   }
 
-  // Redirect based on authentication status
-  return user ? <Navigate to="/" replace /> : <Navigate to="/auth" replace />;
+  // Show public homepage for unauthenticated users, redirect authenticated users to dashboard
+  return user ? <Navigate to="/dashboard" replace /> : <PublicHomepage />;
 };
 
 export default Index;

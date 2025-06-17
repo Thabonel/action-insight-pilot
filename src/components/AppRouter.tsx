@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -18,13 +17,15 @@ import Proposals from '@/pages/Proposals';
 import UserManual from '@/pages/UserManual';
 import ConnectPlatforms from '@/pages/ConnectPlatforms';
 import AuthPage from '@/pages/auth/AuthPage';
+import Index from '@/pages/Index';
 
 const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/" element={
+        <Route path="/" element={<Index />} />
+        <Route path="/app" element={
           <ProtectedRoute>
             <Layout />
           </ProtectedRoute>
