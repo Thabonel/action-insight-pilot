@@ -1,0 +1,22 @@
+
+/* Utility Classes and Text Wrapping */
+
+/* Button text wrapping and overflow prevention */
+button {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  white-space: normal !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+}
+
+/* Specific button content wrapping */
+button .text-center,
+button div,
+button span {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+  line-height: 1.2 !important;
+}
