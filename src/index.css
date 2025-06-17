@@ -103,7 +103,34 @@
   @apply bg-white !important;
 }
 
-/* Ensure text remains visible on white backgrounds */
-.text-white {
+/* Ensure colored/dark buttons have white text */
+.bg-blue-600,
+.bg-blue-500,
+.bg-purple-600,
+.bg-purple-500,
+.bg-green-600,
+.bg-green-500,
+.bg-red-600,
+.bg-red-500,
+.bg-yellow-600,
+.bg-yellow-500,
+.bg-indigo-600,
+.bg-indigo-500,
+.bg-pink-600,
+.bg-pink-500,
+.bg-gray-600,
+.bg-gray-500 {
+  color: white !important;
+}
+
+/* Ensure gradient backgrounds have white text */
+.bg-gradient-to-r {
+  color: white !important;
+}
+
+/* Override text-white on light backgrounds only when needed */
+.bg-white .text-white,
+.bg-gray-50 .text-white,
+.bg-gray-100 .text-white {
   @apply text-black !important;
 }
