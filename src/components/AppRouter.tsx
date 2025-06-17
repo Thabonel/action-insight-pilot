@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -25,12 +26,17 @@ const AppRouter: React.FC = () => {
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={<Index />} />
+        
+        {/* Add direct dashboard route that redirects to app/dashboard */}
+        <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+        <Route path="/conversational-dashboard" element={<Navigate to="/app/conversational-dashboard" replace />} />
+        
         <Route path="/app" element={
           <ProtectedRoute>
             <Layout />
           </ProtectedRoute>
         }>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
           <Route path="campaigns" element={<Campaigns />} />

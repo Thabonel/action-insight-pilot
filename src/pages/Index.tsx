@@ -15,8 +15,8 @@ const Index = () => {
     );
   }
 
-  // Show public homepage for unauthenticated users, redirect authenticated users to dashboard
-  return user ? <Navigate to="/dashboard" replace /> : <PublicHomepage />;
+  // Show public homepage for unauthenticated users, redirect authenticated users to app/dashboard
+  return user ? <Navigate to="/app/dashboard" replace /> : <PublicHomepage />;
 };
 
 export default Index;
