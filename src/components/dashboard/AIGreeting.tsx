@@ -117,7 +117,7 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold">{getGreeting()}! 👋</h2>
+              <h2 className="text-xl font-semibold">{getGreeting()}!</h2>
               <div className="h-4 bg-white/20 rounded w-48 mt-1 animate-pulse"></div>
             </div>
           </div>
@@ -165,7 +165,7 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">{getGreeting()}! 👋</h2>
+            <h2 className="text-xl font-semibold">{getGreeting()}!</h2>
             <p className="text-blue-100">I'm your AI Marketing Assistant</p>
           </div>
         </div>

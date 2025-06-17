@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Plus, Link } from 'lucide-react';
 
 interface PlatformConnectionBannerProps {
   connectedPlatforms: number;
@@ -20,7 +20,9 @@ const PlatformConnectionBanner: React.FC<PlatformConnectionBannerProps> = ({ con
     <Card className="bg-blue-50 border-blue-200">
       <CardContent className="p-6">
         <div className="flex items-center space-x-4">
-          <div className="text-4xl">🔗</div>
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <Link className="w-6 h-6 text-blue-600" />
+          </div>
           <div className="flex-1">
             <h3 className="font-semibold text-blue-900 mb-2">Connect Your Social Media Tools</h3>
             <p className="text-blue-800 mb-4">
