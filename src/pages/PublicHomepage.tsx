@@ -75,13 +75,13 @@ const PublicHomepage: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <Brain className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">AI Marketing Hub</span>
+              <span className="text-xl font-bold text-black">AI Marketing Hub</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/auth')}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-black hover:text-blue-600 hover:bg-blue-50"
               >
                 Sign In
               </Button>
@@ -104,11 +104,11 @@ const PublicHomepage: React.FC = () => {
               <Sparkles className="w-4 h-4 mr-2" />
               Powered by Advanced AI
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold text-black mb-6 leading-tight">
               AI Marketing Hub
               <span className="block text-blue-600">Intelligent Automation Platform</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
               Transform your marketing operations with AI-powered automation that learns, adapts, and optimizes 
               every campaign for maximum ROI. From lead generation to content creation, let artificial intelligence 
               handle the complexity while you focus on strategy.
@@ -137,7 +137,7 @@ const PublicHomepage: React.FC = () => {
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
                   <div className="text-3xl font-bold text-blue-600">{stat.value}</div>
-                  <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
+                  <div className="text-sm text-gray-700 mt-1">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -149,10 +149,10 @@ const PublicHomepage: React.FC = () => {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl font-bold text-black mb-6">
               Marketing Teams Are Drowning in Manual Tasks
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
               Modern marketing requires managing dozens of platforms, analyzing endless data points, 
               and creating personalized experiences at scale. Without AI assistance, teams spend 
               80% of their time on repetitive tasks instead of strategic growth.
@@ -163,24 +163,24 @@ const PublicHomepage: React.FC = () => {
             <Card className="p-6 border-red-200 bg-red-50">
               <CardContent className="p-0">
                 <Target className="w-12 h-12 text-red-600 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Inefficient Targeting</h3>
-                <p className="text-gray-600">Manual audience segmentation leads to broad, ineffective campaigns and wasted ad spend.</p>
+                <h3 className="text-lg font-semibold text-black mb-2">Inefficient Targeting</h3>
+                <p className="text-gray-700">Manual audience segmentation leads to broad, ineffective campaigns and wasted ad spend.</p>
               </CardContent>
             </Card>
             
             <Card className="p-6 border-orange-200 bg-orange-50">
               <CardContent className="p-0">
                 <BarChart3 className="w-12 h-12 text-orange-600 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Data Overwhelm</h3>
-                <p className="text-gray-600">Teams struggle to extract actionable insights from multiple analytics platforms and data sources.</p>
+                <h3 className="text-lg font-semibold text-black mb-2">Data Overwhelm</h3>
+                <p className="text-gray-700">Teams struggle to extract actionable insights from multiple analytics platforms and data sources.</p>
               </CardContent>
             </Card>
             
             <Card className="p-6 border-yellow-200 bg-yellow-50">
               <CardContent className="p-0">
                 <Zap className="w-12 h-12 text-yellow-600 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Slow Execution</h3>
-                <p className="text-gray-600">Manual processes delay campaign launches and prevent real-time optimization opportunities.</p>
+                <h3 className="text-lg font-semibold text-black mb-2">Slow Execution</h3>
+                <p className="text-gray-700">Manual processes delay campaign launches and prevent real-time optimization opportunities.</p>
               </CardContent>
             </Card>
           </div>
@@ -191,10 +191,10 @@ const PublicHomepage: React.FC = () => {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl font-bold text-black mb-6">
               Meet Your AI Marketing Assistant
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
               Our intelligent automation platform combines machine learning, predictive analytics, 
               and natural language processing to handle every aspect of your marketing operations.
             </p>
@@ -204,16 +204,16 @@ const PublicHomepage: React.FC = () => {
             {features.map((feature, index) => (
               <div key={index} className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12`}>
                 <div className="flex-1">
-                  <Card className="p-8 border-0 shadow-lg">
+                  <Card className="p-8 border-0 shadow-lg bg-white">
                     <CardContent className="p-0">
                       <feature.icon className="w-16 h-16 text-blue-600 mb-6" />
-                      <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                      <p className="text-lg text-gray-600 mb-6 leading-relaxed">{feature.description}</p>
+                      <h3 className="text-2xl font-bold text-black mb-4">{feature.title}</h3>
+                      <p className="text-lg text-gray-700 mb-6 leading-relaxed">{feature.description}</p>
                       <ul className="space-y-3">
                         {feature.benefits.map((benefit, benefitIndex) => (
                           <li key={benefitIndex} className="flex items-center">
                             <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                            <span className="text-gray-700">{benefit}</span>
+                            <span className="text-black">{benefit}</span>
                           </li>
                         ))}
                       </ul>
@@ -263,14 +263,14 @@ const PublicHomepage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-white text-black py-12 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Brain className="h-8 w-8 text-blue-400" />
-              <span className="text-xl font-bold">AI Marketing Hub</span>
+              <Brain className="h-8 w-8 text-blue-600" />
+              <span className="text-xl font-bold text-black">AI Marketing Hub</span>
             </div>
-            <div className="text-gray-400">
+            <div className="text-gray-600">
               © 2024 AI Marketing Hub. Intelligent Automation Platform.
             </div>
           </div>
