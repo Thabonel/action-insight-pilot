@@ -27,9 +27,18 @@ const AppRouter: React.FC = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={<Index />} />
         
-        {/* Add direct dashboard route that redirects to app/dashboard */}
+        {/* Add direct routes that redirect to app/* */}
         <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
         <Route path="/conversational-dashboard" element={<Navigate to="/app/conversational-dashboard" replace />} />
+        <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
+        <Route path="/campaigns" element={<Navigate to="/app/campaigns" replace />} />
+        <Route path="/leads" element={<Navigate to="/app/leads" replace />} />
+        <Route path="/content" element={<Navigate to="/app/content" replace />} />
+        <Route path="/social" element={<Navigate to="/app/social" replace />} />
+        <Route path="/email" element={<Navigate to="/app/email" replace />} />
+        <Route path="/analytics" element={<Navigate to="/app/analytics" replace />} />
+        <Route path="/workflows" element={<Navigate to="/app/workflows" replace />} />
+        <Route path="/proposals" element={<Navigate to="/app/proposals" replace />} />
         
         <Route path="/app" element={
           <ProtectedRoute>
