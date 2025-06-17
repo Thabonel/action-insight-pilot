@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -133,13 +132,13 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
             <Button
               key={index}
               variant="ghost"
-              className={`h-auto p-4 flex flex-col items-center space-y-2 text-white ${action.color} hover:text-white`}
+              className={`h-auto p-3 flex flex-col items-center space-y-2 text-white ${action.color} hover:text-white min-h-[80px] max-w-full`}
               onClick={action.action}
             >
-              <action.icon className="h-6 w-6" />
-              <div className="text-center">
-                <div className="font-medium text-sm">{action.title}</div>
-                <div className="text-xs opacity-90">{action.description}</div>
+              <action.icon className="h-5 w-5 flex-shrink-0" />
+              <div className="text-center w-full px-1">
+                <div className="font-medium text-xs leading-tight mb-1 text-white break-words">{action.title}</div>
+                <div className="text-xs opacity-90 leading-tight text-white break-words">{action.description}</div>
               </div>
             </Button>
           ))}

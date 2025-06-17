@@ -131,18 +131,76 @@
   color: white !important;
 }
 
-/* Force white text on all blue buttons and elements */
+/* Comprehensive white text enforcement for all colored buttons and their content */
 button.bg-blue-600,
 button.bg-blue-500,
+button.bg-purple-600,
+button.bg-purple-500,
+button.bg-green-600,
+button.bg-green-500,
+button.bg-red-600,
+button.bg-red-500,
+button.bg-yellow-600,
+button.bg-yellow-500,
+button.bg-indigo-600,
+button.bg-indigo-500,
+button.bg-pink-600,
+button.bg-pink-500,
+button.bg-gray-600,
+button.bg-gray-500,
 .bg-blue-600 button,
 .bg-blue-500 button,
-.bg-blue-600 a,
-.bg-blue-500 a,
-.bg-blue-600 span,
-.bg-blue-500 span,
+.bg-purple-600 button,
+.bg-purple-500 button,
+.bg-green-600 button,
+.bg-green-500 button,
+.bg-red-600 button,
+.bg-red-500 button,
+.bg-yellow-600 button,
+.bg-yellow-500 button,
+.bg-indigo-600 button,
+.bg-indigo-500 button,
+.bg-pink-600 button,
+.bg-pink-500 button,
+.bg-gray-600 button,
+.bg-gray-500 button,
 .bg-blue-600 *,
-.bg-blue-500 * {
+.bg-blue-500 *,
+.bg-purple-600 *,
+.bg-purple-500 *,
+.bg-green-600 *,
+.bg-green-500 *,
+.bg-red-600 *,
+.bg-red-500 *,
+.bg-yellow-600 *,
+.bg-yellow-500 *,
+.bg-indigo-600 *,
+.bg-indigo-500 *,
+.bg-pink-600 *,
+.bg-pink-500 *,
+.bg-gray-600 *,
+.bg-gray-500 * {
   color: white !important;
+}
+
+/* Button text wrapping and overflow prevention */
+button {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  white-space: normal !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+}
+
+/* Specific button content wrapping */
+button .text-center,
+button div,
+button span {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+  line-height: 1.2 !important;
 }
 
 /* Override text-white on light backgrounds only when needed */
@@ -160,9 +218,34 @@ button.bg-blue-500,
   background-color: #1d4ed8 !important;
 }
 
-/* Ensure hover states maintain white text */
+/* Ensure hover states maintain white text for all colored buttons */
 .hover\:bg-blue-700:hover,
 .hover\:bg-blue-600:hover,
-.hover\:bg-blue-500:hover {
+.hover\:bg-blue-500:hover,
+.hover\:bg-purple-700:hover,
+.hover\:bg-purple-600:hover,
+.hover\:bg-green-700:hover,
+.hover\:bg-green-600:hover,
+.hover\:bg-red-700:hover,
+.hover\:bg-red-600:hover,
+.hover\:bg-yellow-700:hover,
+.hover\:bg-yellow-600:hover,
+.hover\:bg-indigo-700:hover,
+.hover\:bg-indigo-600:hover,
+.hover\:bg-pink-700:hover,
+.hover\:bg-pink-600:hover,
+.hover\:bg-gray-700:hover,
+.hover\:bg-gray-600:hover {
   color: white !important;
+}
+
+/* Ensure all hover state backgrounds use blue */
+.hover\:bg-purple-600:hover,
+.hover\:bg-green-600:hover,
+.hover\:bg-red-600:hover,
+.hover\:bg-yellow-600:hover,
+.hover\:bg-indigo-600:hover,
+.hover\:bg-pink-600:hover,
+.hover\:bg-gray-600:hover {
+  background-color: #1d4ed8 !important;
 }
