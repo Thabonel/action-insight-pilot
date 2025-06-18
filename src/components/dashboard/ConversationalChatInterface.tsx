@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MessageSquare, Send, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +19,6 @@ interface ConversationalChatInterfaceProps {
   handleQuerySubmit: (e: React.FormEvent) => void;
   handleSuggestionClick: (suggestion: string) => void;
   user: any;
-  serverStatus: 'sleeping' | 'waking' | 'awake' | 'error';
 }
 
 const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = ({
@@ -30,8 +28,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   setQuery,
   handleQuerySubmit,
   handleSuggestionClick,
-  user,
-  serverStatus
+  user
 }) => {
   const getContextualSuggestions = () => {
     // If there's chat history, provide context-aware suggestions
@@ -78,12 +75,8 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
           <MessageSquare className="h-6 w-6" />
           <CardTitle>AI Marketing Assistant</CardTitle>
           <div className="flex items-center text-sm bg-white/20 px-2 py-1 rounded">
-            <div className={`w-2 h-2 rounded-full mr-2 ${
-              serverStatus === 'awake' ? 'bg-green-400 animate-pulse' : 
-              serverStatus === 'waking' ? 'bg-yellow-400 animate-pulse' : 
-              'bg-red-400'
-            }`}></div>
-            {user ? (serverStatus === 'awake' ? 'Online' : serverStatus === 'waking' ? 'Starting...' : 'Offline') : 'Login Required'}
+            <div className="w-2 h-2 rounded-full mr-2 bg-green-400 animate-pulse"></div>
+            {user ? 'Online' : 'Login Required'}
           </div>
         </div>
       </CardHeader>
@@ -164,9 +157,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
-                    <span className="text-sm text-slate-600">
-                      {serverStatus === 'waking' ? 'Waking up AI assistant...' : 'Analyzing your marketing data...'}
-                    </span>
+                    <span className="text-sm text-slate-600">Analyzing your marketing data...</span>
                   </div>
                 </div>
               </div>

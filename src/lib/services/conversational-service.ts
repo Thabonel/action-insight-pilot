@@ -12,9 +12,6 @@ export class ConversationalService {
     });
     
     if (!response.ok) {
-      if (response.status === 0 || response.status >= 500) {
-        throw new Error('Backend server is sleeping. Please wake it up first.');
-      }
       throw new Error(`Campaign fetch failed: ${response.status} ${response.statusText}`);
     }
     
@@ -45,9 +42,6 @@ export class ConversationalService {
     });
     
     if (!response.ok) {
-      if (response.status === 0 || response.status >= 500) {
-        throw new Error('Backend server is sleeping. Please wake it up first.');
-      }
       throw new Error(`Daily focus agent failed: ${response.status} ${response.statusText}`);
     }
     
@@ -80,9 +74,6 @@ export class ConversationalService {
     });
     
     if (!response.ok) {
-      if (response.status === 0 || response.status >= 500) {
-        throw new Error('Backend server is sleeping. Please wake it up first.');
-      }
       throw new Error(`Campaign agent failed: ${response.status} ${response.statusText}`);
     }
     
@@ -93,11 +84,6 @@ export class ConversationalService {
     }
     
     return data.data;
-  }
-
-  static async wakeUpServer() {
-    const result = await apiClient.httpClient.wakeUpServer();
-    return result;
   }
 
   static async getAuthToken() {

@@ -7,7 +7,7 @@ import { QueryProcessor } from '@/lib/utils/query-processor';
 export const useQueryProcessor = () => {
   const { toast } = useToast();
 
-  const processQueryWithRealAI = async (userQuery: string, context: any[], setServerSleeping: () => void) => {
+  const processQueryWithRealAI = async (userQuery: string, context: any[]) => {
     try {
       console.log('Fetching campaign data...');
       
@@ -27,9 +27,6 @@ export const useQueryProcessor = () => {
       
     } catch (error) {
       console.error('AI processing error:', error);
-      if (error instanceof Error && error.message.includes('sleeping')) {
-        setServerSleeping();
-      }
       throw error;
     }
   };
