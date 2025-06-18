@@ -106,3 +106,95 @@
   background-color: #1d4ed8 !important;
   color: white !important;
 }
+
+/* Input Field Specific Overrides */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #d1d5db !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  background-color: white !important;
+  color: black !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="number"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="url"]::placeholder,
+input[type="search"]::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+/* Ensure Shadcn UI input components use white backgrounds */
+.bg-background {
+  background-color: white !important;
+}
+
+.text-foreground {
+  color: black !important;
+}
+
+/* Override any CSS variables that might cause dark inputs */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: white !important;
+  color: black !important;
+  border-color: #d1d5db !important;
+}
+
+/* Form field container overrides */
+.form-field input,
+.form-field textarea,
+.form-field select,
+.form-control input,
+.form-control textarea,
+.form-control select {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* Select dropdown specific fixes */
+select option {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Disable system dark mode for inputs */
+@media (prefers-color-scheme: dark) {
+  input,
+  textarea,
+  select {
+    background-color: white !important;
+    color: black !important;
+    border-color: #d1d5db !important;
+  }
+}
