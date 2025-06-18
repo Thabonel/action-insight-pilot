@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ChatHistoryService, ChatSession, ChatMessage } from '@/lib/services/chat-history-service';
@@ -21,13 +20,11 @@ export const useEnhancedChat = () => {
   const [messages, setMessages] = useState<EnhancedChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState('');
-  const [backendStatus, setBackendStatus] = useState<'awake' | 'sleeping' | 'error'>('sleeping');
 
   // Load user sessions on mount
   useEffect(() => {
     if (user) {
       loadUserSessions();
-      checkBackendStatus();
     }
   }, [user]);
 
@@ -37,21 +34,6 @@ export const useEnhancedChat = () => {
       loadSessionMessages(currentSession.id);
     }
   }, [currentSession]);
-
-  // Periodic backend status check
-  useEffect(() => {
-    const interval = setInterval(checkBackendStatus, 30000); // Check every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const checkBackendStatus = async () => {
-    try {
-      const status = await ChatAgentRouter.getBackendStatus();
-      setBackendStatus(status);
-    } catch (error) {
-      setBackendStatus('error');
-    }
-  };
 
   const loadUserSessions = async () => {
     if (!user) return;
@@ -141,23 +123,8 @@ export const useEnhancedChat = () => {
         }
       }
 
-      // Show backend status notification if needed
-      if (backendStatus === 'sleeping') {
-        toast({
-          title: "Preparing AI Assistant",
-          description: "Waking up the backend server, this may take up to 60 seconds...",
-        });
-      }
-
       // Route the query to appropriate agent
       const response = await ChatAgentRouter.routeQuery(userQuery, user.id, messages.slice(-5));
-      
-      // Update backend status based on response
-      if (response.type === 'server_sleeping') {
-        setBackendStatus('sleeping');
-      } else if (response.type !== 'error') {
-        setBackendStatus('awake');
-      }
       
       // Save message to database
       const savedMessage = await ChatHistoryService.addMessage(
@@ -192,7 +159,7 @@ export const useEnhancedChat = () => {
         }
 
         // Show success toast for successful responses
-        if (response.type !== 'error' && response.type !== 'server_sleeping') {
+        if (response.type !== 'error') {
           toast({
             title: "AI Response Generated",
             description: "Your marketing assistant has analyzed your request.",
@@ -201,7 +168,6 @@ export const useEnhancedChat = () => {
       }
     } catch (error) {
       console.error('Error processing query:', error);
-      setBackendStatus('error');
       
       const errorResponse = {
         type: 'error',
@@ -270,7 +236,6 @@ export const useEnhancedChat = () => {
     createNewSession,
     switchSession,
     deleteSession,
-    user,
-    backendStatus
+    user
   };
 };

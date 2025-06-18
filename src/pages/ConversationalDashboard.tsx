@@ -6,7 +6,6 @@ import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
-import ServerStatusIndicator from '@/components/ServerStatusIndicator';
 
 const ConversationalDashboard: React.FC = () => {
   const {
@@ -15,12 +14,9 @@ const ConversationalDashboard: React.FC = () => {
     chatHistory,
     isProcessing,
     insights,
-    serverStatus,
-    serverError,
     user,
     handleQuerySubmit,
-    handleSuggestionClick,
-    wakeUpServer
+    handleSuggestionClick
   } = useConversationalDashboard();
 
   return (
@@ -31,15 +27,6 @@ const ConversationalDashboard: React.FC = () => {
 
         {/* System Overview Cards */}
         <SystemOverviewCards />
-
-        {/* Server Status Indicator */}
-        {(serverStatus === 'sleeping' || serverStatus === 'waking' || serverStatus === 'error') && (
-          <ServerStatusIndicator
-            status={serverStatus}
-            onWakeUp={wakeUpServer}
-            errorMessage={serverError}
-          />
-        )}
 
         {/* Main Chat Interface */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -53,7 +40,6 @@ const ConversationalDashboard: React.FC = () => {
               handleQuerySubmit={handleQuerySubmit}
               handleSuggestionClick={handleSuggestionClick}
               user={user}
-              serverStatus={serverStatus}
             />
           </div>
 

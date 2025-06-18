@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { useServerStatus } from '@/hooks/useServerStatus';
 import { useQueryProcessor } from '@/hooks/useQueryProcessor';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/http-client';
@@ -47,14 +46,6 @@ export const useConversationalDashboard = () => {
   const [isLoadingInsights, setIsLoadingInsights] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
-  
-  const {
-    serverStatus,
-    serverError,
-    wakeUpServer,
-    setServerSleeping,
-    setServerError
-  } = useServerStatus();
   
   const { processQueryWithRealAI } = useQueryProcessor();
 
@@ -150,23 +141,7 @@ export const useConversationalDashboard = () => {
     setIsProcessing(true);
 
     try {
-      if (serverStatus === 'sleeping') {
-        console.log('Server is sleeping, waking it up first...');
-        
-        toast({
-          title: "Preparing AI Assistant",
-          description: "Waking up the backend server, this may take up to 60 seconds...",
-        });
-
-        await wakeUpServer();
-        
-        toast({
-          title: "AI Assistant Ready",
-          description: "Now processing your request...",
-        });
-      }
-
-      const response = await processQueryWithRealAI(query, conversationContext, setServerSleeping);
+      const response = await processQueryWithRealAI(query, conversationContext);
       
       const newChat = {
         id: Date.now().toString(),
@@ -194,7 +169,6 @@ export const useConversationalDashboard = () => {
       loadRealInsights();
     } catch (error) {
       console.error('Query processing failed:', error);
-      setServerError(error instanceof Error ? error.message : 'Unknown error');
       behaviorTracker.trackFeatureComplete('conversational_query', actionId, false);
       
       const errorResponse = {
@@ -235,12 +209,9 @@ export const useConversationalDashboard = () => {
     isProcessing,
     insights: isLoadingInsights ? null : insights,
     isLoadingInsights,
-    serverStatus,
-    serverError,
     user,
     handleQuerySubmit,
     handleSuggestionClick,
-    wakeUpServer,
     refreshInsights: loadRealInsights
   };
 };

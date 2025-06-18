@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -34,8 +33,6 @@ export const useChatLogic = ({ onChatUpdate }: UseChatLogicProps = {}) => {
   };
 
   const callDailyFocusAgent = async (query: string, campaigns: any[]) => {
-    await apiClient.httpClient.wakeUpServer();
-    
     const requestData = {
       query,
       campaigns,
@@ -56,8 +53,6 @@ export const useChatLogic = ({ onChatUpdate }: UseChatLogicProps = {}) => {
   };
 
   const callGeneralCampaignAgent = async (query: string, campaigns: any[]) => {
-    await apiClient.httpClient.wakeUpServer();
-    
     const requestData = {
       task_type: 'general_query',
       input_data: {
