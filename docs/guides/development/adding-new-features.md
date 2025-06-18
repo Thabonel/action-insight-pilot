@@ -1,196 +1,257 @@
 
 # Adding New Features
 
-## Feature Development Workflow
+## Feature Development Process
 
 ### 1. Planning Phase
 - Define feature requirements
-- Design user interface mockups
+- Create technical specifications
+- Design API endpoints
 - Plan database schema changes
-- Identify API integrations needed
-- Create technical specification
+- Identify integration points
 
-### 2. Database Changes (if needed)
-```sql
--- Example: Adding new feature table
-CREATE TABLE feature_data (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users NOT NULL,
-  feature_config JSONB,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
+### 2. Design Phase
+- Create UI/UX mockups
+- Define component structure
+- Plan state management approach
+- Design error handling
+- Consider performance implications
 
--- Add RLS policies
-ALTER TABLE feature_data ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage their feature data" 
-  ON feature_data FOR ALL 
-  USING (auth.uid() = user_id);
-```
+### 3. Implementation Phase
+- Set up feature branch
+- Implement backend services
+- Create frontend components
+- Add API integrations
+- Implement error handling
 
-### 3. Backend Implementation
-```typescript
-// Create Edge Function for feature
-export async function handler(req: Request) {
-  const { method } = req;
-  
-  switch (method) {
-    case 'GET':
-      return handleGet(req);
-    case 'POST':
-      return handlePost(req);
-    default:
-      return new Response('Method not allowed', { status: 405 });
-  }
-}
-```
+### 4. Testing Phase
+- Write unit tests
+- Create integration tests
+- Perform manual testing
+- Test edge cases
+- Validate error scenarios
 
-### 4. Frontend Implementation
-
-#### Service Layer
-```typescript
-// lib/services/feature-service.ts
-export class FeatureService {
-  static async getFeatureData(): Promise<ApiResponse<FeatureData[]>> {
-    // Implementation
-  }
-  
-  static async createFeature(data: CreateFeatureData): Promise<ApiResponse<FeatureData>> {
-    // Implementation
-  }
-}
-```
-
-#### Custom Hook
-```typescript
-// hooks/useFeature.tsx
-export const useFeature = () => {
-  const [data, setData] = useState<FeatureData[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  const loadData = async () => {
-    // Implementation
-  };
-  
-  return { data, loading, loadData };
-};
-```
-
-#### Component
-```typescript
-// components/feature/FeatureComponent.tsx
-export const FeatureComponent: React.FC = () => {
-  const { data, loading } = useFeature();
-  
-  return (
-    <div className="feature-container">
-      {/* Component implementation */}
-    </div>
-  );
-};
-```
-
-#### Page Integration
-```typescript
-// pages/FeaturePage.tsx
-import { FeatureComponent } from '@/components/feature/FeatureComponent';
-
-export const FeaturePage: React.FC = () => {
-  return (
-    <div className="page-container">
-      <h1>Feature Page</h1>
-      <FeatureComponent />
-    </div>
-  );
-};
-```
-
-### 5. Testing
-- Unit tests for components
-- Integration tests for API
-- End-to-end tests for workflows
-- Performance testing
-- Security testing
-
-### 6. Documentation
+### 5. Documentation Phase
 - Update API documentation
-- Add feature documentation
-- Update user guides
+- Create user guides
+- Document component usage
+- Update architecture docs
 - Create troubleshooting guides
 
-## Best Practices
+## Backend Development
 
-### Code Quality
-- Follow established patterns
-- Use TypeScript strictly
-- Implement proper error handling
-- Add comprehensive logging
-- Follow naming conventions
+### Adding New API Endpoints
+1. **Route Definition**
+   ```python
+   # In backend/routes/
+   @router.post("/new-feature")
+   async def create_feature(request: FeatureRequest):
+       # Implementation
+   ```
 
-### Security
-- Implement proper authentication
-- Add RLS policies for data access
-- Validate all inputs
-- Sanitize user data
-- Use secure communication
+2. **Service Implementation**
+   ```python
+   # In backend/agents/
+   class NewFeatureService:
+       def __init__(self, supabase: Client):
+           self.supabase = supabase
+   ```
 
-### Performance
-- Optimize database queries
-- Implement caching where appropriate
-- Use lazy loading for components
-- Minimize bundle size impact
-- Monitor performance metrics
+3. **Database Integration**
+   - Add new tables if needed
+   - Update RLS policies
+   - Create necessary indexes
+   - Add migration scripts
 
-### User Experience
-- Provide loading states
-- Handle errors gracefully
-- Add success feedback
-- Ensure responsive design
-- Test accessibility
+### AI Agent Integration
+1. **Create Agent Service**
+   - Extend BaseAgent class
+   - Implement required methods
+   - Add AI service integration
+   - Handle error scenarios
 
-## Feature Checklist
+2. **Register Agent**
+   - Add to agent registry
+   - Configure task types
+   - Set up routing
+   - Add monitoring
 
-### Before Development
-- [ ] Requirements documented
-- [ ] UI/UX designs approved
-- [ ] Database schema planned
-- [ ] API endpoints designed
-- [ ] Security considerations reviewed
+## Frontend Development
 
-### During Development
-- [ ] Follow code standards
-- [ ] Implement error handling
-- [ ] Add logging
-- [ ] Write tests
-- [ ] Update documentation
+### Creating New Components
+1. **Component Structure**
+   ```typescript
+   // components/feature/NewFeature.tsx
+   import React from 'react';
+   
+   const NewFeature: React.FC = () => {
+     return (
+       <div>New Feature</div>
+     );
+   };
+   
+   export default NewFeature;
+   ```
 
-### Before Release
+2. **Add Custom Hooks**
+   ```typescript
+   // hooks/useNewFeature.ts
+   export const useNewFeature = () => {
+     // Hook implementation
+   };
+   ```
+
+3. **API Integration**
+   ```typescript
+   // lib/api/new-feature-api.ts
+   export const newFeatureApi = {
+     create: (data: NewFeatureData) => apiClient.post('/new-feature', data),
+     get: (id: string) => apiClient.get(`/new-feature/${id}`),
+   };
+   ```
+
+### Adding New Pages
+1. **Create Page Component**
+   ```typescript
+   // pages/NewFeaturePage.tsx
+   import React from 'react';
+   
+   const NewFeaturePage: React.FC = () => {
+     return (
+       <div>New Feature Page</div>
+     );
+   };
+   
+   export default NewFeaturePage;
+   ```
+
+2. **Add Route Configuration**
+   ```typescript
+   // Update AppRouter.tsx
+   <Route path="/new-feature" element={<NewFeaturePage />} />
+   ```
+
+3. **Update Navigation**
+   - Add menu items
+   - Update navigation components
+   - Add breadcrumbs if needed
+
+## Database Changes
+
+### Schema Migrations
+1. **Create Migration File**
+   ```sql
+   -- supabase/migrations/timestamp_new_feature.sql
+   CREATE TABLE new_feature (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id UUID REFERENCES auth.users NOT NULL,
+     -- other fields
+   );
+   ```
+
+2. **Add RLS Policies**
+   ```sql
+   ALTER TABLE new_feature ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "Users can manage own data" ON new_feature
+     FOR ALL USING (auth.uid() = user_id);
+   ```
+
+## Integration Guidelines
+
+### External Service Integration
+1. **Create Connector Class**
+   ```python
+   class NewServiceConnector:
+       def __init__(self, api_key: str):
+           self.api_key = api_key
+   ```
+
+2. **Add Authentication**
+   - OAuth flow implementation
+   - Token management
+   - Refresh token handling
+   - Error recovery
+
+3. **Add Configuration**
+   - Environment variables
+   - User settings
+   - API key management
+   - Connection status tracking
+
+## Testing New Features
+
+### Unit Testing
+```typescript
+// __tests__/NewFeature.test.tsx
+import { render, screen } from '@testing-library/react';
+import NewFeature from '../NewFeature';
+
+test('renders new feature', () => {
+  render(<NewFeature />);
+  expect(screen.getByText('New Feature')).toBeInTheDocument();
+});
+```
+
+### Integration Testing
+```python
+# backend/tests/test_new_feature.py
+def test_create_new_feature():
+    response = client.post("/new-feature", json=test_data)
+    assert response.status_code == 201
+```
+
+## Performance Considerations
+
+### Frontend Optimization
+- Implement code splitting
+- Add lazy loading
+- Optimize bundle size
+- Cache API responses
+
+### Backend Optimization
+- Add database indexes
+- Implement caching
+- Optimize queries
+- Add rate limiting
+
+## Security Checklist
+
+### Frontend Security
+- [ ] Input validation implemented
+- [ ] XSS prevention measures
+- [ ] Authentication checks
+- [ ] Authorization validation
+
+### Backend Security
+- [ ] API authentication required
+- [ ] Input sanitization implemented
+- [ ] RLS policies configured
+- [ ] Rate limiting added
+
+## Documentation Checklist
+
+### Technical Documentation
+- [ ] API endpoints documented
+- [ ] Component props documented
+- [ ] Database schema updated
+- [ ] Integration guide created
+
+### User Documentation
+- [ ] Feature guide written
+- [ ] Screenshots added
+- [ ] Use cases documented
+- [ ] Troubleshooting section added
+
+## Deployment Checklist
+
+### Pre-deployment
+- [ ] All tests passing
 - [ ] Code review completed
-- [ ] Tests passing
-- [ ] Security review
-- [ ] Performance testing
 - [ ] Documentation updated
-- [ ] Deployment tested
+- [ ] Security review done
 
-## Integration Points
-
-### Existing Systems
-- Authentication system
-- Behavior tracking
-- Error handling
-- Toast notifications
-- Loading states
-
-### External APIs
-- Authentication tokens
-- Rate limiting
-- Error handling
-- Data transformation
-- Caching strategy
-
-## Rollback Strategy
-- Database migration rollbacks
-- Feature flags for gradual rollout
-- Environment-specific deployments
-- Monitoring and alerting
-- Quick revert procedures
+### Post-deployment
+- [ ] Feature flags configured
+- [ ] Monitoring set up
+- [ ] Performance metrics tracked
+- [ ] User feedback collected

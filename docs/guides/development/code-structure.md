@@ -1,195 +1,177 @@
 
-# Code Structure Guidelines
+# Code Structure
 
-## File Organization
+## Project Architecture
 
-### Component Structure
-```typescript
-// ComponentName.tsx
-import { ComponentProps } from './types';
-import { useComponentLogic } from './hooks';
-
-interface ComponentNameProps {
-  // Props interface
-}
-
-export const ComponentName: React.FC<ComponentNameProps> = (props) => {
-  const { logic } = useComponentLogic(props);
-  
-  return (
-    <div className="component-wrapper">
-      {/* Component JSX */}
-    </div>
-  );
-};
-
-export default ComponentName;
+### Frontend Structure
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui base components
+│   ├── dashboard/      # Dashboard-specific components
+│   ├── campaigns/      # Campaign management components
+│   ├── content/        # Content creation components
+│   ├── email/          # Email campaign components
+│   ├── social/         # Social media components
+│   ├── analytics/      # Analytics and reporting components
+│   ├── workflows/      #----flow builder components
+│   ├── leads/          # Lead management components
+│   ├── settings/       # Settings and configuration components
+│   └── knowledge/      # Knowledge management components
+├── pages/              # Route components
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions and services
+│   ├── api/           # API client and service methods
+│   ├── services/      # Business logic services
+│   └── utils/         # Helper utilities
+├── contexts/           # React contexts
+├── types/              # TypeScript type definitions
+└── integrations/       # External service integrations
 ```
 
-### Hook Structure
-```typescript
-// useHookName.tsx
-import { useState, useEffect } from 'react';
-import { HookReturn, HookParams } from './types';
-
-export const useHookName = (params: HookParams): HookReturn => {
-  const [state, setState] = useState(initialState);
-  
-  // Hook logic
-  
-  return {
-    // Return object
-  };
-};
+### Backend Structure
+```
+backend/
+├── agents/             # AI agents and services
+│   ├── ai/            # AI service implementations
+│   ├── content/       # Content generation services
+│   ├── email/         # Email automation services
+│   ├── leads/         # Lead management services
+│   └── social/        # Social media services
+├── routes/             # API route handlers
+├── database/           # Database connection and utilities
+├── social_connectors/  # Social media platform connectors
+└── tests/             # Test files
 ```
 
-### Service Structure
-```typescript
-// service-name.ts
-import { ApiResponse } from '../types';
+## Component Organization
 
-export class ServiceName {
-  static async methodName(params: ParamsType): Promise<ApiResponse<DataType>> {
-    try {
-      // Service logic
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-}
-```
+### Component Hierarchy
+- **Pages**: Top-level route components
+- **Feature Components**: Feature-specific functionality
+- **UI Components**: Reusable interface elements
+- **Utility Components**: Helper and wrapper components
 
-## Naming Conventions
+### Component Naming Conventions
+- PascalCase for component names
+- Descriptive, action-oriented names
+- Consistent naming patterns within features
+- Clear distinction between components and utilities
 
-### Files and Folders
-- **Components**: PascalCase (`UserProfile.tsx`)
-- **Hooks**: camelCase with 'use' prefix (`useUserProfile.tsx`)
-- **Services**: kebab-case (`user-service.ts`)
-- **Utilities**: kebab-case (`string-utils.ts`)
-- **Types**: kebab-case (`user-types.ts`)
-
-### Variables and Functions
-- **Variables**: camelCase (`userName`, `isLoading`)
-- **Functions**: camelCase (`handleSubmit`, `validateForm`)
-- **Constants**: UPPER_SNAKE_CASE (`API_ENDPOINTS`, `DEFAULT_CONFIG`)
-- **Interfaces**: PascalCase (`UserProfile`, `ApiResponse`)
-
-## Code Organization Principles
-
-### Single Responsibility
+### File Organization
 - One component per file
-- One hook per file
-- One service per file
-- Clear separation of concerns
+- Co-locate related files (component, styles, tests)
+- Use index files for cleaner imports
+- Separate types and interfaces
 
-### Dependency Management
-- Import order: external libraries → internal modules → relative imports
-- Barrel exports for cleaner imports
-- Avoid circular dependencies
+## State Management
 
-### Error Handling
-- Consistent error response format
-- Graceful error boundaries
-- User-friendly error messages
-- Proper error logging
+### React Hooks Pattern
+- Custom hooks for business logic
+- useQuery for data fetching
+- Context for shared state
+- Local state for component-specific data
 
-### TypeScript Best Practices
+### Data Flow
+- Props down, events up
+- Centralized state management where needed
+- Separation of concerns
+- Predictable state updates
+
+## API Architecture
+
+### Service Layer Pattern
+- API clients for external services
+- Service classes for business logic
+- Error handling and retry logic
+- Type safety with TypeScript
+
+### Integration Patterns
+- Supabase for backend services
+- Edge Functions for serverless logic
+- Real-time subscriptions
+- File upload handling
+
+## Styling Architecture
+
+### Tailwind CSS Structure
+- Utility-first approach
+- Component-level styling
+- Responsive design patterns
+- Dark mode support
+
+### Component Styling
+- shadcn/ui component library
+- Consistent design tokens
+- Reusable style patterns
+- Custom CSS for complex layouts
+
+## Type Safety
+
+### TypeScript Usage
 - Strict type checking
-- Interface over type aliases
-- Generic types where appropriate
-- Avoid 'any' type
+- Interface definitions
+- Generic type usage
+- Type guards and assertions
 
-## Component Guidelines
+### API Type Safety
+- Generated types from Supabase
+- Request/response type validation
+- Error type definitions
+- Integration type safety
 
-### Props Interface
-```typescript
-interface ComponentProps {
-  // Required props first
-  title: string;
-  onSubmit: (data: FormData) => void;
-  
-  // Optional props with defaults
-  className?: string;
-  disabled?: boolean;
-  variant?: 'primary' | 'secondary';
-}
-```
+## Testing Strategy
 
-### State Management
-- Use useState for local state
-- Use useReducer for complex state
-- Custom hooks for reusable logic
-- Context for global state
+### Testing Pyramid
+- Unit tests for utilities
+- Component tests for UI
+- Integration tests for features
+- End-to-end tests for workflows
 
-### Event Handling
-```typescript
-const handleSubmit = useCallback((e: React.FormEvent) => {
-  e.preventDefault();
-  // Handle submission
-}, [dependencies]);
-```
-
-## Testing Structure
-
-### Test File Naming
-- Component tests: `ComponentName.test.tsx`
-- Hook tests: `useHookName.test.tsx`
-- Utility tests: `utility-name.test.ts`
-
-### Test Organization
-```typescript
-describe('ComponentName', () => {
-  describe('rendering', () => {
-    // Rendering tests
-  });
-  
-  describe('interactions', () => {
-    // User interaction tests
-  });
-  
-  describe('edge cases', () => {
-    // Edge case tests
-  });
-});
-```
+### Testing Tools
+- Jest for unit testing
+- React Testing Library for components
+- Playwright for E2E testing
+- Mock Service Worker for API mocking
 
 ## Performance Considerations
 
-### Component Optimization
-- Use React.memo for pure components
-- Implement useCallback for event handlers
-- Use useMemo for expensive calculations
-- Code splitting with React.lazy
-
-### Bundle Optimization
-- Tree shaking
+### Code Splitting
+- Route-based splitting
+- Component lazy loading
 - Dynamic imports
-- Asset optimization
-- Dependency analysis
+- Bundle size optimization
+
+### Optimization Patterns
+- Memoization for expensive calculations
+- Virtual scrolling for large lists
+- Image optimization
+- Caching strategies
+
+## Security Implementation
+
+### Frontend Security
+- Input validation
+- XSS prevention
+- CSRF protection
+- Secure authentication
+
+### API Security
+- Authentication middleware
+- Authorization checks
+- Rate limiting
+- Input sanitization
 
 ## Documentation Standards
 
-### Component Documentation
-```typescript
-/**
- * UserProfile component displays user information and allows editing
- * 
- * @param user - User object containing profile data
- * @param onUpdate - Callback fired when user data is updated
- * @param editable - Whether the profile can be edited
- * 
- * @example
- * <UserProfile 
- *   user={currentUser} 
- *   onUpdate={handleUserUpdate}
- *   editable={true}
- * />
- */
-```
+### Code Documentation
+- JSDoc comments for functions
+- README files for complex features
+- Architecture decision records
+- API documentation
 
-### Code Comments
-- Explain "why" not "what"
-- Document complex business logic
-- Add TODO comments for future improvements
-- Keep comments up to date
+### Component Documentation
+- Props documentation
+- Usage examples
+- Storybook stories
+- Design system documentation
