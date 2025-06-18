@@ -1,6 +1,11 @@
 
 import React from 'react';
 import { Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface CampaignFormProps {
   newCampaign: {
@@ -39,78 +44,87 @@ const CampaignForm: React.FC<CampaignFormProps> = ({
   };
 
   return (
-    <div className="mb-8 bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-medium text-slate-900 mb-4">Create New Campaign</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Campaign Name *
-          </label>
-          <input
-            type="text"
-            value={newCampaign.name}
-            onChange={(e) => setNewCampaign(prev => ({ ...prev, name: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-            disabled={loading}
-            placeholder="Enter campaign name"
-          />
-          {!newCampaign.name.trim() && (
-            <p className="text-sm text-red-600 mt-1">Campaign name is required</p>
-          )}
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Campaign Type
-          </label>
-          <select
-            value={newCampaign.type}
-            onChange={(e) => setNewCampaign(prev => ({ ...prev, type: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={loading}
-          >
-            <option value="email">Email</option>
-            <option value="social">Social Media</option>
-            <option value="content">Content</option>
-            <option value="mixed">Mixed</option>
-          </select>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Description
-          </label>
-          <textarea
-            value={newCampaign.description}
-            onChange={(e) => setNewCampaign(prev => ({ ...prev, description: e.target.value }))}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={loading}
-            placeholder="Describe your campaign objectives..."
-          />
-        </div>
-        
-        <div className="flex space-x-3">
-          <button
-            type="submit"
-            disabled={loading || !newCampaign.name.trim()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>{loading ? 'Creating Campaign...' : 'Create Campaign'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={loading}
-            className="px-6 py-2 border border-gray-300 text-slate-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle>Create New Campaign</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Campaign Name *
+            </label>
+            <Input
+              type="text"
+              value={newCampaign.name}
+              onChange={(e) => setNewCampaign(prev => ({ ...prev, name: e.target.value }))}
+              required
+              disabled={loading}
+              placeholder="Enter campaign name"
+              className="bg-white text-black border-gray-300"
+            />
+            {!newCampaign.name.trim() && (
+              <p className="text-sm text-red-600 mt-1">Campaign name is required</p>
+            )}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Campaign Type
+            </label>
+            <Select
+              value={newCampaign.type}
+              onValueChange={(value) => setNewCampaign(prev => ({ ...prev, type: value }))}
+              disabled={loading}
+            >
+              <SelectTrigger className="bg-white text-black border-gray-300">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-gray-300">
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="social">Social Media</SelectItem>
+                <SelectItem value="content">Content</SelectItem>
+                <SelectItem value="mixed">Mixed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Description
+            </label>
+            <Textarea
+              value={newCampaign.description}
+              onChange={(e) => setNewCampaign(prev => ({ ...prev, description: e.target.value }))}
+              rows={3}
+              disabled={loading}
+              placeholder="Describe your campaign objectives..."
+              className="bg-white text-black border-gray-300"
+            />
+          </div>
+          
+          <div className="flex space-x-3">
+            <Button
+              type="submit"
+              disabled={loading || !newCampaign.name.trim()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {loading ? 'Creating Campaign...' : 'Create Campaign'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={loading}
+              className="bg-white text-slate-700 border-gray-300 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
