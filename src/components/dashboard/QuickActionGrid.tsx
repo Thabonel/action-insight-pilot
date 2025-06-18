@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,9 +41,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       {
         icon: MessageSquare,
         title: 'Ask AI Assistant',
-        description: 'Get instant help with your marketing',
+        description: 'Get instant help with marketing',
         action: () => {
-          // Focus on chat input if on conversational dashboard
           const chatInput = document.querySelector('input[placeholder*="Ask me about"]') as HTMLInputElement;
           if (chatInput) {
             chatInput.focus();
@@ -54,7 +54,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       {
         icon: PlusCircle,
         title: 'Create Campaign',
-        description: 'Start a new marketing campaign',
+        description: 'Start new marketing campaign',
         action: () => navigate('/campaigns'),
         color: 'bg-green-500 hover:bg-green-600',
         priority: 2
@@ -62,7 +62,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
       {
         icon: Users,
         title: 'View Leads',
-        description: 'Manage your lead pipeline',
+        description: 'Manage lead pipeline',
         action: () => navigate('/leads'),
         color: 'bg-purple-500 hover:bg-purple-600',
         priority: 3
@@ -132,13 +132,13 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
             <Button
               key={index}
               variant="ghost"
-              className={`h-auto p-3 flex flex-col items-center space-y-2 text-white ${action.color} hover:text-white min-h-[80px] max-w-full`}
+              className={`quick-action-card ${action.color} hover:text-white text-white border-0`}
               onClick={action.action}
             >
-              <action.icon className="h-5 w-5 flex-shrink-0" />
-              <div className="text-center w-full px-1">
-                <div className="font-medium text-xs leading-tight mb-1 text-white break-words">{action.title}</div>
-                <div className="text-xs opacity-90 leading-tight text-white break-words">{action.description}</div>
+              <action.icon className="h-5 w-5 flex-shrink-0 mb-2" />
+              <div className="text-center w-full">
+                <div className="action-title">{action.title}</div>
+                <div className="action-description">{action.description}</div>
               </div>
             </Button>
           ))}
@@ -147,8 +147,8 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         {!insights && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center space-x-2 text-blue-700">
-              <Zap className="h-4 w-4" />
-              <span className="text-sm">Actions will personalize as you use the platform</span>
+              <Zap className="h-4 w-4 flex-shrink-0" />
+              <span className="text-sm break-words">Actions will personalize as you use the platform</span>
             </div>
           </div>
         )}
