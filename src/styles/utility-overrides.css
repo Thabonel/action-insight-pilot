@@ -20,3 +20,85 @@ button span {
   white-space: normal !important;
   line-height: 1.2 !important;
 }
+
+/* Card content overflow prevention */
+.card, 
+[class*="card"] {
+  overflow: hidden !important;
+}
+
+.card * {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Specific fixes for action cards */
+.quick-action-card {
+  min-height: 120px !important;
+  max-height: 140px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 12px !important;
+  overflow: hidden !important;
+}
+
+.quick-action-card .action-title {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  margin-bottom: 4px !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.quick-action-card .action-description {
+  font-size: 0.75rem !important;
+  line-height: 1.1 !important;
+  opacity: 0.9 !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+/* System overview cards text fixes */
+.system-card {
+  overflow: hidden !important;
+}
+
+.system-card h3,
+.system-card p,
+.system-card span {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* General text overflow prevention */
+h1, h2, h3, h4, h5, h6,
+p, span, div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Badge and small text elements */
+.badge,
+[class*="badge"] {
+  word-break: break-word !important;
+  hyphens: auto !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
