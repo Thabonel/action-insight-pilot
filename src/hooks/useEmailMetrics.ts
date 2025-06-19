@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
@@ -72,7 +73,7 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
     
     try {
       setLoading(true);
-      const response = await apiClient.getEmailRealTimeMetrics(campaignId, timeRange);
+      const response = await apiClient.getEmailRealTimeMetrics();
       
       if (response.success && response.data) {
         const apiData = response.data as Partial<EmailMetricsData>;
@@ -133,7 +134,7 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
           ],
           last_updated: new Date().toISOString()
         });
-        setError('Failed to load metrics from API');
+        setError(response.error || 'Failed to load metrics from API');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load email metrics';
