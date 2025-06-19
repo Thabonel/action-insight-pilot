@@ -6,12 +6,40 @@ export interface ApiResponse<T = any> {
 }
 
 export class HttpClient {
-  private baseUrl = 'https://wheels-wins-orchestrator.onrender.com';
+  private baseUrl: string;
   private token: string | null = null;
   private timeout = 30000; // 30 seconds timeout
 
+  constructor(baseUrl: string = 'https://wheels-wins-orchestrator.onrender.com') {
+    this.baseUrl = baseUrl;
+  }
+
   setToken(token: string) {
     this.token = token;
+  }
+
+  async get<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' });
+  }
+
+  async post<T>(endpoint: string, data?: any, options: RequestInit = {}): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async put<T>(endpoint: string, data?: any, options: RequestInit = {}): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async delete<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
