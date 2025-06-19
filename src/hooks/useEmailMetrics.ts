@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
@@ -99,7 +98,7 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
         setError(null);
       } else {
         // Use fallback mock data if API fails
-        console.warn('API failed, using mock data:', response.error);
+        console.warn('API failed, using mock data');
         setMetrics({
           total_sent: 1250,
           total_delivered: 1200,
@@ -134,7 +133,7 @@ export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
           ],
           last_updated: new Date().toISOString()
         });
-        setError(response.error || null);
+        setError('Failed to load metrics from API');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load email metrics';
