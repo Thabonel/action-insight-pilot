@@ -4,86 +4,38 @@ import { apiClient } from '@/lib/api-client';
 
 export class ConversationalService {
   static async fetchCampaignData(authToken: string) {
-    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/campaigns', {
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
+    try {
+      const response = await apiClient.getCampaigns();
+      
+      if (!response.success) {
+        throw new Error('Failed to fetch campaign data');
       }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Campaign fetch failed: ${response.status} ${response.statusText}`);
+      
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Campaign fetch failed:', error);
+      return [];
     }
-    
-    const campaignsResponse = await response.json();
-    
-    if (!campaignsResponse.success) {
-      throw new Error('Failed to fetch campaign data');
-    }
-    
-    return Array.isArray(campaignsResponse.data) ? campaignsResponse.data : [];
   }
 
   static async callDailyFocusAgent(query: string, campaigns: any[], context: any[], authToken: string) {
-    const requestData = {
-      query,
-      campaigns,
-      context,
-      date: new Date().toISOString().split('T')[0]
-    };
-
-    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/daily-focus', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Daily focus agent failed: ${response.status} ${response.statusText}`);
+    try {
+      const response = await apiClient.callDailyFocusAgent(query, campaigns, context);
+      return response;
+    } catch (error) {
+      console.error('Daily focus agent failed:', error);
+      throw error;
     }
-    
-    const data = await response.json();
-    
-    if (!data.success) {
-      throw new Error(`Daily focus agent failed: ${data.error}`);
-    }
-    
-    return data.data;
   }
 
   static async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[], authToken: string) {
-    const requestData = {
-      task_type: 'general_query',
-      input_data: {
-        query,
-        campaigns,
-        context
-      }
-    };
-
-    const response = await fetch('https://wheels-wins-orchestrator.onrender.com/api/agents/campaign', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Campaign agent failed: ${response.status} ${response.statusText}`);
+    try {
+      const response = await apiClient.callGeneralCampaignAgent(query, campaigns, context);
+      return response;
+    } catch (error) {
+      console.error('General campaign agent failed:', error);
+      throw error;
     }
-    
-    const data = await response.json();
-    
-    if (!data.success) {
-      throw new Error(`Campaign agent failed: ${data.error}`);
-    }
-    
-    return data.data;
   }
 
   static async getAuthToken() {

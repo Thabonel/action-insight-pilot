@@ -19,6 +19,7 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "http://localhost:5173",
     "https://wheels-wins.vercel.app",
     "https://wheels-wins-git-staging-wheels-wins.vercel.app",
     "https://wheels-wins-git-dev-wheels-wins.vercel.app",
@@ -37,9 +38,19 @@ from routes.user_aware_agents import router as user_aware_router
 from routes.system_health import router as system_health_router
 from routes.email import router as email_router
 from routes.workflows import router as workflows_router
+from routes.ai_agents import router as ai_agents_router
 
 # Add all routers
 app.include_router(user_aware_router)
 app.include_router(system_health_router)
 app.include_router(email_router)
 app.include_router(workflows_router)
+app.include_router(ai_agents_router)
+
+@app.get("/")
+async def root():
+    return {"message": "Marketing Automation Backend API", "status": "running"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": "2024-01-01T00:00:00Z"}
