@@ -3,7 +3,7 @@ import { HttpClient } from './http-client';
 import { supabase } from '@/integrations/supabase/client';
 
 class ApiClient {
-  private httpClient: HttpClient;
+  public httpClient: HttpClient; // Make public for direct access
 
   constructor() {
     // Use local backend URL instead of external orchestrator
@@ -38,7 +38,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to get campaigns:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to get campaigns' };
     }
   }
 
@@ -60,7 +60,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to get campaign:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to get campaign' };
     }
   }
 
@@ -82,7 +82,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to create campaign:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to create campaign' };
     }
   }
 
@@ -104,7 +104,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to update campaign:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update campaign' };
     }
   }
 
@@ -127,11 +127,11 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to get leads:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to get leads' };
     }
   }
 
-  async scoreLeads() {
+  async exportLeads(format: string = 'csv') {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const authToken = session?.access_token;
@@ -140,29 +140,7 @@ class ApiClient {
         throw new Error('Authentication required');
       }
 
-      const response = await this.httpClient.post('/api/leads/score', {}, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to score leads:', error);
-      throw error;
-    }
-  }
-
-  async exportLeads() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.get('/api/leads/export', {
+      const response = await this.httpClient.get(`/api/leads/export?format=${format}`, {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
@@ -171,7 +149,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to export leads:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to export leads' };
     }
   }
 
@@ -193,7 +171,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to sync leads:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to sync leads' };
     }
   }
 
@@ -216,7 +194,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Failed to get system health:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to get system health' };
     }
   }
 
@@ -246,7 +224,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error(`Failed to execute ${agentType} task:`, error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to execute agent task' };
     }
   }
 
@@ -276,7 +254,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Daily focus agent failed:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Daily focus agent failed' };
     }
   }
 
@@ -308,7 +286,7 @@ class ApiClient {
       return response;
     } catch (error) {
       console.error('Campaign agent failed:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'Campaign agent failed' };
     }
   }
 
@@ -399,7 +377,17 @@ class ApiClient {
   }
 
   async getWorkflowStatus(workflowId: string) {
-    return { success: true, data: { id: workflowId, status: 'running' } };
+    return { 
+      success: true, 
+      data: { 
+        workflow_id: workflowId, 
+        status: 'running',
+        current_step: 1,
+        total_steps: 5,
+        started_at: new Date().toISOString(),
+        estimated_completion: new Date(Date.now() + 3600000).toISOString()
+      } 
+    };
   }
 
   async updateWorkflow(workflowId: string, workflowData: any) {
@@ -410,33 +398,53 @@ class ApiClient {
     return { success: true, data: { id: workflowId, deleted: true } };
   }
 
-  // Placeholder properties for compatibility
+  // Enhanced placeholder properties for compatibility
   analytics = {
     getMetrics: () => ({ success: true, data: [] }),
-    getReports: () => ({ success: true, data: [] })
+    getReports: () => ({ success: true, data: [] }),
+    getSystemStats: () => ({ success: true, data: {} }),
+    exportAnalyticsReport: (format: string, timeRange: string) => ({ success: true, data: {} }),
+    getAnalyticsOverview: () => ({ success: true, data: { engagement: 0 } })
   };
 
   integrations = {
     getConnections: () => ({ success: true, data: [] }),
     connect: () => ({ success: true, data: {} }),
-    disconnect: () => ({ success: true, data: {} })
+    disconnect: () => ({ success: true, data: {} }),
+    getWebhooks: () => ({ success: true, data: [] }),
+    createWebhook: (data: any) => ({ success: true, data }),
+    deleteWebhook: (id: string) => ({ success: true, data: {} }),
+    testWebhook: (id: string) => ({ success: true, data: {} }),
+    connectService: (service: string, apiKey: string) => ({ success: true, data: {} }),
+    syncService: (service: string) => ({ success: true, data: {} }),
+    disconnectService: (service: string) => ({ success: true, data: {} }),
+    createConnection: (data: any) => ({ success: true, data }),
+    deleteConnection: (id: string) => ({ success: true, data: {} })
   };
 
   realTimeMetrics = {
     getMetrics: () => ({ success: true, data: [] }),
-    subscribe: () => ({ success: true, data: {} })
+    subscribe: () => ({ success: true, data: {} }),
+    getEntityMetrics: (entityType: string, entityId: string) => ({ success: true, data: [] }),
+    getDashboardMetrics: () => ({ success: true, data: {} })
   };
 
   socialPlatforms = {
     getConnected: () => ({ success: true, data: [] }),
     connect: () => ({ success: true, data: {} }),
     disconnect: () => ({ success: true, data: {} }),
-    getMetrics: () => ({ success: true, data: [] })
+    getMetrics: () => ({ success: true, data: [] }),
+    getPlatformConnections: () => ({ success: true, data: [] }),
+    initiatePlatformConnection: (platform: string) => ({ success: true, data: {} }),
+    disconnectPlatform: (platform: string) => ({ success: true, data: {} }),
+    testPlatformConnection: (platform: string) => ({ success: true, data: {} })
   };
 
   userPreferences = {
     get: () => ({ success: true, data: {} }),
-    update: () => ({ success: true, data: {} })
+    update: () => ({ success: true, data: {} }),
+    getUserPreferences: (category: string) => ({ success: true, data: [] }),
+    updateUserPreferences: (category: string, data: any) => ({ success: true, data: {} })
   };
 }
 
