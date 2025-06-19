@@ -131,6 +131,28 @@ class ApiClient {
     }
   }
 
+  async scoreLeads() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+      
+      if (!authToken) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await this.httpClient.post('/api/leads/score', {}, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response;
+    } catch (error) {
+      console.error('Failed to score leads:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to score leads' };
+    }
+  }
+
   async exportLeads(format: string = 'csv') {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -435,9 +457,9 @@ class ApiClient {
     disconnect: () => ({ success: true, data: {} }),
     getMetrics: () => ({ success: true, data: [] }),
     getPlatformConnections: () => ({ success: true, data: [] }),
-    initiatePlatformConnection: (platform: string) => ({ success: true, data: {} }),
+    initiatePlatformConnection: (platform: string) => ({ success: true, data: { authorization_url: `https://oauth.example.com/${platform}` } }),
     disconnectPlatform: (platform: string) => ({ success: true, data: {} }),
-    testPlatformConnection: (platform: string) => ({ success: true, data: {} })
+    testPlatformConnection: (platform: string) => ({ success: true, data: { message: 'Connection test successful' } })
   };
 
   userPreferences = {
