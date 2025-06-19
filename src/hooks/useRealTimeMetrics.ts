@@ -1,100 +1,80 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import type { RealTimeMetric } from '@/lib/api/real-time-metrics-service';
+
+export interface RealTimeMetric {
+  id: string;
+  entity_type: string;
+  entity_id: string;
+  metric_type: string;
+  value: number;
+  change: number;
+  timestamp: string;
+  unit?: string;
+}
 
 export function useRealTimeMetrics(entityType?: string, entityId?: string) {
   const [metrics, setMetrics] = useState<RealTimeMetric[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (entityType && entityId) {
-      loadMetrics();
-      startPolling();
-    } else {
-      loadDashboardMetrics();
-      startPolling();
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
+    loadMetrics();
+    const interval = setInterval(loadMetrics, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
   }, [entityType, entityId]);
 
   const loadMetrics = async () => {
-    if (!entityType || !entityId) return;
-    
     try {
-      setIsLoading(true);
-      const response = await apiClient.realTimeMetrics.getEntityMetrics(entityType, entityId);
-      if (response.success && response.data) {
-        setMetrics(response.data);
-      }
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load metrics');
-      console.error('Error loading metrics:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadDashboardMetrics = async () => {
-    try {
-      setIsLoading(true);
-      const response = await apiClient.realTimeMetrics.getDashboardMetrics();
-      if (response.success && response.data) {
-        // Flatten all metrics from different entities
-        const allMetrics = Object.values(response.data).flat();
-        setMetrics(allMetrics);
-      }
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard metrics');
-      console.error('Error loading dashboard metrics:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const startPolling = () => {
-    // Poll for updates every 30 seconds
-    intervalRef.current = setInterval(() => {
+      setLoading(true);
+      let response;
+      
       if (entityType && entityId) {
-        loadMetrics();
+        response = await apiClient.realTimeMetrics.getEntityMetrics(entityType, entityId);
       } else {
-        loadDashboardMetrics();
+        response = await apiClient.realTimeMetrics.getMetrics();
       }
-    }, 30000);
+      
+      if (response.success && Array.isArray(response.data)) {
+        // Safely map the data to RealTimeMetric objects
+        const safeMetrics: RealTimeMetric[] = response.data.map((item: any, index: number) => ({
+          id: item.id || `metric_${index}`,
+          entity_type: item.entity_type || 'unknown',
+          entity_id: item.entity_id || 'unknown',
+          metric_type: item.metric_type || 'generic',
+          value: typeof item.value === 'number' ? item.value : 0,
+          change: typeof item.change === 'number' ? item.change : 0,
+          timestamp: item.timestamp || new Date().toISOString(),
+          unit: item.unit
+        }));
+        setMetrics(safeMetrics);
+      } else {
+        setMetrics([]);
+      }
+      setError(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load metrics';
+      setError(errorMessage);
+      setMetrics([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getMetricByType = (metricType: string): RealTimeMetric | undefined => {
-    return metrics.find(metric => metric.metric_type === metricType);
-  };
-
-  const getMetricValue = (metricType: string): number => {
-    const metric = getMetricByType(metricType);
-    return metric?.current_value || 0;
-  };
-
-  const getMetricChange = (metricType: string): number => {
-    const metric = getMetricByType(metricType);
-    return metric?.change_percentage || 0;
+  const refreshMetrics = () => {
+    loadMetrics();
+    toast({
+      title: "Metrics Updated",
+      description: "Real-time metrics have been refreshed",
+    });
   };
 
   return {
     metrics,
-    isLoading,
+    loading,
     error,
-    getMetricByType,
-    getMetricValue,
-    getMetricChange,
-    reload: entityType && entityId ? loadMetrics : loadDashboardMetrics
+    refreshMetrics
   };
 }
