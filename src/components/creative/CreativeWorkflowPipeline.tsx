@@ -35,7 +35,7 @@ interface CreativeProject {
   id: string;
   name: string;
   campaign: string;
-  status: 'planning' | 'in_progress' | 'review' | 'approved' | 'completed';
+  status: 'in_progress' | 'review' | 'approved' | 'completed';
   progress: number;
   tasks: WorkflowTask[];
   timeline: {
