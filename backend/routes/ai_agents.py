@@ -6,8 +6,8 @@ import logging
 import json
 from datetime import datetime
 
-from backend.auth import verify_token
-from backend.database.supabase_client import get_supabase
+from ..auth import verify_token
+from ..database.supabase_client import get_supabase
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
