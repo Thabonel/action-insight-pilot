@@ -314,7 +314,7 @@ class ApiClient {
 
   // Content methods
   async createContent(contentData: any) {
-    return { success: true, data: contentData };
+    return { success: true, data: contentData, error: undefined };
   }
 
   async generateSocialContent(platform: string, topic: string, brandVoice: string) {
@@ -322,7 +322,8 @@ class ApiClient {
       success: true,
       data: {
         content: `Generated ${brandVoice} content for ${platform} about ${topic}. This is AI-generated content that would normally come from your AI service.`
-      }
+      },
+      error: undefined
     };
   }
 
@@ -337,7 +338,8 @@ class ApiClient {
           { text: `Important ${campaignType} Information`, score: 78 },
           { text: `Don't Miss This ${campaignType}`, score: 82 }
         ]
-      }
+      },
+      error: undefined
     };
   }
 
@@ -350,7 +352,8 @@ class ApiClient {
           { text: subject + " - Variant B", score: 84 },
           { text: subject + " - Variant C", score: 89 }
         ]
-      }
+      },
+      error: undefined
     };
   }
 
@@ -360,42 +363,43 @@ class ApiClient {
       data: {
         optimal_time: "Tuesday 10:30 AM",
         improvement: "15"
-      }
+      },
+      error: undefined
     };
   }
 
   async getEmailAnalytics() {
-    return { success: true, data: [] };
+    return { success: true, data: [], error: undefined };
   }
 
   async getSocialAnalytics() {
-    return { success: true, data: [] };
+    return { success: true, data: [], error: undefined };
   }
 
   async getEmailRealTimeMetrics() {
-    return { success: true, data: [] };
+    return { success: true, data: [], error: undefined };
   }
 
   // Social methods
   async createSocialPost(postData: any) {
-    return { success: true, data: postData };
+    return { success: true, data: postData, error: undefined };
   }
 
   async scheduleSocialPost(postData: any) {
-    return { success: true, data: postData };
+    return { success: true, data: postData, error: undefined };
   }
 
   // Workflow methods
   async getWorkflows() {
-    return { success: true, data: [] };
+    return { success: true, data: [], error: undefined };
   }
 
   async createWorkflow(workflowData: any) {
-    return { success: true, data: workflowData };
+    return { success: true, data: workflowData, error: undefined };
   }
 
   async executeWorkflow(workflowId: string) {
-    return { success: true, data: { id: workflowId, status: 'executed' } };
+    return { success: true, data: { id: workflowId, status: 'executed' }, error: undefined };
   }
 
   async getWorkflowStatus(workflowId: string) {
@@ -408,65 +412,66 @@ class ApiClient {
         total_steps: 5,
         started_at: new Date().toISOString(),
         estimated_completion: new Date(Date.now() + 3600000).toISOString()
-      } 
+      },
+      error: undefined
     };
   }
 
   async updateWorkflow(workflowId: string, workflowData: any) {
-    return { success: true, data: { id: workflowId, ...workflowData } };
+    return { success: true, data: { id: workflowId, ...workflowData }, error: undefined };
   }
 
   async deleteWorkflow(workflowId: string) {
-    return { success: true, data: { id: workflowId, deleted: true } };
+    return { success: true, data: { id: workflowId, deleted: true }, error: undefined };
   }
 
   // Enhanced placeholder properties for compatibility - now properly including error property
   analytics = {
-    getMetrics: () => ({ success: true, data: [] }),
-    getReports: () => ({ success: true, data: [] }),
-    getSystemStats: () => ({ success: true, data: { uptime: 99.9, performance: 95, errors: 0, engagement: 0 } }),
-    exportAnalyticsReport: (format: string, timeRange: string) => ({ success: true, data: {} }),
-    getAnalyticsOverview: () => ({ success: true, data: { uptime: 99.9, performance: 95, errors: 0, engagement: 0 } })
+    getMetrics: () => ({ success: true, data: [], error: undefined }),
+    getReports: () => ({ success: true, data: [], error: undefined }),
+    getSystemStats: () => ({ success: true, data: { uptime: 99.9, performance: 95, errors: 0, engagement: 0 }, error: undefined }),
+    exportAnalyticsReport: (format: string, timeRange: string) => ({ success: true, data: {}, error: undefined }),
+    getAnalyticsOverview: () => ({ success: true, data: { uptime: 99.9, performance: 95, errors: 0, engagement: 0 }, error: undefined })
   };
 
   integrations = {
-    getConnections: () => ({ success: true, data: [] }),
-    connect: () => ({ success: true, data: {} }),
-    disconnect: () => ({ success: true, data: {} }),
-    getWebhooks: () => ({ success: true, data: [] }),
-    createWebhook: (data: any) => ({ success: true, data }),
-    deleteWebhook: (id: string) => ({ success: true, data: {} }),
-    testWebhook: (id: string) => ({ success: true, data: {} }),
-    connectService: (service: string, apiKey: string) => ({ success: true, data: {} }),
-    syncService: (service: string) => ({ success: true, data: {} }),
-    disconnectService: (service: string) => ({ success: true, data: {} }),
-    createConnection: (data: any) => ({ success: true, data }),
-    deleteConnection: (id: string) => ({ success: true, data: {} })
+    getConnections: () => ({ success: true, data: [], error: undefined }),
+    connect: () => ({ success: true, data: {}, error: undefined }),
+    disconnect: () => ({ success: true, data: {}, error: undefined }),
+    getWebhooks: () => ({ success: true, data: [], error: undefined }),
+    createWebhook: (data: any) => ({ success: true, data, error: undefined }),
+    deleteWebhook: (id: string) => ({ success: true, data: {}, error: undefined }),
+    testWebhook: (id: string) => ({ success: true, data: {}, error: undefined }),
+    connectService: (service: string, apiKey: string) => ({ success: true, data: {}, error: undefined }),
+    syncService: (service: string) => ({ success: true, data: {}, error: undefined }),
+    disconnectService: (service: string) => ({ success: true, data: {}, error: undefined }),
+    createConnection: (data: any) => ({ success: true, data, error: undefined }),
+    deleteConnection: (id: string) => ({ success: true, data: {}, error: undefined })
   };
 
   realTimeMetrics = {
-    getMetrics: () => ({ success: true, data: [] }),
-    subscribe: () => ({ success: true, data: {} }),
-    getEntityMetrics: (entityType: string, entityId: string) => ({ success: true, data: [] }),
-    getDashboardMetrics: () => ({ success: true, data: {} })
+    getMetrics: () => ({ success: true, data: [], error: undefined }),
+    subscribe: () => ({ success: true, data: {}, error: undefined }),
+    getEntityMetrics: (entityType: string, entityId: string) => ({ success: true, data: [], error: undefined }),
+    getDashboardMetrics: () => ({ success: true, data: {}, error: undefined })
   };
 
   socialPlatforms = {
-    getConnected: () => ({ success: true, data: [] }),
-    connect: () => ({ success: true, data: {} }),
-    disconnect: () => ({ success: true, data: {} }),
-    getMetrics: () => ({ success: true, data: [] }),
-    getPlatformConnections: () => ({ success: true, data: [] }),
-    initiatePlatformConnection: (platform: string) => ({ success: true, data: { authorization_url: `https://oauth.example.com/${platform}` } }),
-    disconnectPlatform: (platform: string) => ({ success: true, data: {} }),
-    testPlatformConnection: (platform: string) => ({ success: true, data: { message: 'Connection test successful' } })
+    getConnected: () => ({ success: true, data: [], error: undefined }),
+    connect: () => ({ success: true, data: {}, error: undefined }),
+    disconnect: () => ({ success: true, data: {}, error: undefined }),
+    getMetrics: () => ({ success: true, data: [], error: undefined }),
+    getPlatformConnections: () => ({ success: true, data: [], error: undefined }),
+    initiatePlatformConnection: (platform: string) => ({ success: true, data: { authorization_url: `https://oauth.example.com/${platform}` }, error: undefined }),
+    disconnectPlatform: (platform: string) => ({ success: true, data: {}, error: undefined }),
+    testPlatformConnection: (platform: string) => ({ success: true, data: { message: 'Connection test successful' }, error: undefined })
   };
 
   userPreferences = {
-    get: () => ({ success: true, data: [] }),
-    update: () => ({ success: true, data: {} }),
-    getUserPreferences: (category: string) => ({ success: true, data: [] }),
-    updateUserPreferences: (category: string, data: any) => ({ success: true, data: [] })
+    get: () => ({ success: true, data: [], error: undefined }),
+    update: () => ({ success: true, data: {}, error: undefined }),
+    getUserPreferences: (category: string) => ({ success: true, data: [], error: undefined }),
+    updateUserPreferences: (category: string, data: any) => ({ success: true, data: [], error: undefined })
   };
 }
 
