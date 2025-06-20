@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -7,9 +6,9 @@ import logging
 import json
 from datetime import datetime
 
-from ..agents.enhanced_user_ai_service import EnhancedUserAIService
-from ..database.supabase_client import get_supabase
-from ..auth import verify_token
+from backend.agents.enhanced_user_ai_service import EnhancedUserAIService
+from backend.database.supabase_client import get_supabase
+from backend.auth import verify_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -170,4 +169,23 @@ async def general_campaign_agent(
         logger.error(f"❌ General campaign agent failed for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ... keep existing code (campaigns endpoint and health check)
+# Campaigns endpoint
+@router.get("/api/campaigns")
+async def get_campaigns(user_id: str = Depends(get_current_user)):
+    """
+    Retrieve campaigns for the authenticated user.
+    """
+    try:
+        campaigns = await get_user_campaigns(user_id)
+        return {"success": True, "data": campaigns}
+    except Exception as e:
+        logger.error(f"Failed to retrieve campaigns for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Health check endpoint
+@router.get("/healthcheck")
+async def health_check():
+    """
+    Endpoint to check the health of the agent service.
+    """
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
