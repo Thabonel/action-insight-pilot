@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -260,17 +259,27 @@ const MCPConnectors: React.FC = () => {
       // Check existing integration connections
       const connectionsResponse = await apiClient.integrations.getConnections();
       
-      // Extract data from API response
-      const connections = connectionsResponse.success ? (connectionsResponse.data || []) : [];
-      
-      const connectorsWithStatus = baseConnectors.map(connector => ({
-        ...connector,
-        status: connections.find(c => c.service_name === connector.id)?.connection_status === 'connected' 
-          ? 'connected' as const
-          : 'disconnected' as const
-      }));
+      // Check if the response was successful
+      if (connectionsResponse.success) {
+        const connections = connectionsResponse.data || [];
+        
+        const connectorsWithStatus = baseConnectors.map(connector => ({
+          ...connector,
+          status: connections.find(c => c.service_name === connector.id)?.connection_status === 'connected' 
+            ? 'connected' as const
+            : 'disconnected' as const
+        }));
 
-      setConnectors(connectorsWithStatus);
+        setConnectors(connectorsWithStatus);
+      } else {
+        // Handle API error
+        console.error('API Error:', connectionsResponse.error);
+        const connectorsWithStatus = baseConnectors.map(connector => ({
+          ...connector,
+          status: 'disconnected' as const
+        }));
+        setConnectors(connectorsWithStatus);
+      }
     } catch (error) {
       console.error('Failed to load connector statuses:', error);
       // Set all to disconnected on error
@@ -303,26 +312,30 @@ const MCPConnectors: React.FC = () => {
     ));
 
     try {
-      await apiClient.integrations.createConnection({
+      const response = await apiClient.integrations.createConnection({
         service_name: connector.id,
         configuration: {
           api_key: apiKey,
           auth_type: connector.authType
         }
       });
-      
-      // Update connector status to connected
-      setConnectors(prev => prev.map(c => 
-        c.id === connector.id ? { ...c, status: 'connected' as const } : c
-      ));
-      
-      toast({
-        title: "Connected Successfully",
-        description: `Successfully connected to ${connector.name}`,
-      });
-      
-      if (connector.authType === 'api_key') {
-        setApiKeys(prev => ({ ...prev, [connector.id]: '' }));
+
+      if (response.success) {
+        // Update connector status to connected
+        setConnectors(prev => prev.map(c => 
+          c.id === connector.id ? { ...c, status: 'connected' as const } : c
+        ));
+        
+        toast({
+          title: "Connected Successfully",
+          description: `Successfully connected to ${connector.name}`,
+        });
+        
+        if (connector.authType === 'api_key') {
+          setApiKeys(prev => ({ ...prev, [connector.id]: '' }));
+        }
+      } else {
+        throw new Error(response.error || 'Connection failed');
       }
     } catch (error) {
       console.error('Connection failed:', error);
@@ -350,17 +363,21 @@ const MCPConnectors: React.FC = () => {
     setConnecting(prev => new Set(prev).add(connector.id));
     
     try {
-      await apiClient.integrations.deleteConnection(connector.id);
+      const response = await apiClient.integrations.deleteConnection(connector.id);
       
-      // Update connector status to disconnected
-      setConnectors(prev => prev.map(c => 
-        c.id === connector.id ? { ...c, status: 'disconnected' as const } : c
-      ));
-      
-      toast({
-        title: "Disconnected Successfully",
-        description: `Disconnected from ${connector.name}`,
-      });
+      if (response.success) {
+        // Update connector status to disconnected
+        setConnectors(prev => prev.map(c => 
+          c.id === connector.id ? { ...c, status: 'disconnected' as const } : c
+        ));
+        
+        toast({
+          title: "Disconnected Successfully",
+          description: `Disconnected from ${connector.name}`,
+        });
+      } else {
+        throw new Error(response.error || 'Disconnection failed');
+      }
     } catch (error) {
       console.error('Disconnection failed:', error);
       toast({
