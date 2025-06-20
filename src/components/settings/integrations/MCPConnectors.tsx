@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -257,10 +258,10 @@ const MCPConnectors: React.FC = () => {
     setIsLoading(true);
     try {
       // Check existing integration connections
-      const connectionsResponse = await apiClient.integrations.getConnections().catch(() => ({ success: false, data: [] }));
+      const connectionsResponse = await apiClient.integrations.getConnections();
       
       // Extract data from API response
-      const connections = (connectionsResponse as ApiResponse<any[]>).success ? (connectionsResponse as ApiResponse<any[]>).data || [] : [];
+      const connections = connectionsResponse.success ? (connectionsResponse.data || []) : [];
       
       const connectorsWithStatus = baseConnectors.map(connector => ({
         ...connector,
