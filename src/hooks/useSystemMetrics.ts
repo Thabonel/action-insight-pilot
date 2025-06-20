@@ -69,12 +69,12 @@ export function useSystemMetrics() {
   const loadMetrics = async () => {
     await withErrorHandling(async () => {
       const [campaignsData, leadsData, emailData, socialData, analyticsData, systemHealthData] = await Promise.all([
-        apiClient.getCampaigns().catch(() => ({ success: false, data: [] })),
-        apiClient.getLeads().catch(() => ({ success: false, data: [] })),
-        apiClient.getEmailAnalytics().catch(() => ({ success: false, data: { totalSent: 0, openRate: 0 } })),
-        apiClient.getSocialAnalytics().catch(() => ({ success: false, data: { posts: 0, engagement: 0 } })),
-        apiClient.analytics.getAnalyticsOverview().catch(() => ({ success: false, data: { engagement: 0 } })),
-        apiClient.getSystemHealth().catch(() => ({ success: false, data: { uptime_percentage: 99.8, status: 'operational' } }))
+        Promise.resolve(apiClient.getCampaigns()).catch(() => ({ success: false, data: [] })),
+        Promise.resolve(apiClient.getLeads()).catch(() => ({ success: false, data: [] })),
+        Promise.resolve(apiClient.getEmailAnalytics()).catch(() => ({ success: false, data: { totalSent: 0, openRate: 0 } })),
+        Promise.resolve(apiClient.getSocialAnalytics()).catch(() => ({ success: false, data: { posts: 0, engagement: 0 } })),
+        Promise.resolve(apiClient.analytics.getAnalyticsOverview()).catch(() => ({ success: false, data: { engagement: 0 } })),
+        Promise.resolve(apiClient.getSystemHealth()).catch(() => ({ success: false, data: { uptime_percentage: 99.8, status: 'operational' } }))
       ]);
 
       const campaigns = campaignsData.success ? (Array.isArray(campaignsData.data) ? campaignsData.data : []) : [];
