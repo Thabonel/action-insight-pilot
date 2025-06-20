@@ -1,68 +1,68 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import Settings from '@/pages/Settings';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import Layout from './Layout';
+import ProtectedRoute from './ProtectedRoute';
+import PublicHomepage from '@/pages/PublicHomepage';
+import AuthPage from '@/pages/auth/AuthPage';
 import Dashboard from '@/pages/Dashboard';
 import ConversationalDashboard from '@/pages/ConversationalDashboard';
 import Campaigns from '@/pages/Campaigns';
+import CampaignDetails from '@/pages/CampaignDetails';
 import CampaignManagement from '@/pages/CampaignManagement';
 import Leads from '@/pages/Leads';
-import Content from '@/pages/Content';
-import Social from '@/pages/Social';
 import Email from '@/pages/Email';
+import Social from '@/pages/Social';
+import Content from '@/pages/Content';
 import Analytics from '@/pages/Analytics';
+import Settings from '@/pages/Settings';
 import Workflows from '@/pages/Workflows';
+import ConnectPlatforms from '@/pages/ConnectPlatforms';
+import NotFound from '@/pages/NotFound';
 import Proposals from '@/pages/Proposals';
 import UserManual from '@/pages/UserManual';
-import ConnectPlatforms from '@/pages/ConnectPlatforms';
-import AuthPage from '@/pages/auth/AuthPage';
-import Index from '@/pages/Index';
+import CompetitiveIntelligence from '@/pages/CompetitiveIntelligence';
+import CreativeWorkflow from '@/pages/CreativeWorkflow';
 
 const AppRouter: React.FC = () => {
+  const { user } = useAuth();
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/" element={<Index />} />
-        
-        {/* Add direct routes that redirect to app/* */}
-        <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
-        <Route path="/conversational-dashboard" element={<Navigate to="/app/conversational-dashboard" replace />} />
-        <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
-        <Route path="/campaigns" element={<Navigate to="/app/campaigns" replace />} />
-        <Route path="/leads" element={<Navigate to="/app/leads" replace />} />
-        <Route path="/content" element={<Navigate to="/app/content" replace />} />
-        <Route path="/social" element={<Navigate to="/app/social" replace />} />
-        <Route path="/email" element={<Navigate to="/app/email" replace />} />
-        <Route path="/analytics" element={<Navigate to="/app/analytics" replace />} />
-        <Route path="/workflows" element={<Navigate to="/app/workflows" replace />} />
-        <Route path="/proposals" element={<Navigate to="/app/proposals" replace />} />
-        
-        <Route path="/app" element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
-          <Route path="campaigns" element={<Campaigns />} />
-          <Route path="campaign-management" element={<CampaignManagement />} />
-          <Route path="leads" element={<Leads />} />
-          <Route path="content" element={<Content />} />
-          <Route path="social" element={<Social />} />
-          <Route path="email" element={<Email />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="workflows" element={<Workflows />} />
-          <Route path="proposals" element={<Proposals />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="user-manual" element={<UserManual />} />
-          <Route path="connect-platforms" element={<ConnectPlatforms />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={user ? <Navigate to="/app/dashboard" replace /> : <PublicHomepage />} />
+      <Route path="/auth" element={user ? <Navigate to="/app/dashboard" replace /> : <AuthPage />} />
+      
+      {/* Protected app routes */}
+      <Route path="/app" element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<Navigate to="/app/dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="chat" element={<ConversationalDashboard />} />
+        <Route path="campaigns" element={<Campaigns />} />
+        <Route path="campaigns/:id" element={<CampaignDetails />} />
+        <Route path="campaign-management" element={<CampaignManagement />} />
+        <Route path="leads" element={<Leads />} />
+        <Route path="email" element={<Email />} />
+        <Route path="social" element={<Social />} />
+        <Route path="content" element={<Content />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="workflows" element={<Workflows />} />
+        <Route path="competitive-intelligence" element={<CompetitiveIntelligence />} />
+        <Route path="creative-workflow" element={<CreativeWorkflow />} />
+        <Route path="connect-platforms" element={<ConnectPlatforms />} />
+        <Route path="proposals" element={<Proposals />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="user-manual" element={<UserManual />} />
+      </Route>
+      
+      {/* Fallback route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 
