@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from typing import Dict, Any, Optional
@@ -9,9 +8,9 @@ import json
 import io
 from datetime import datetime
 
-from models import APIResponse
-from auth import verify_token
-from config import agent_manager
+from backend.models import APIResponse
+from backend.auth import verify_token
+from backend.config import agent_manager
 
 logger = logging.getLogger(__name__)
 

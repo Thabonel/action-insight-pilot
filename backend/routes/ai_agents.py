@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -7,8 +6,8 @@ import logging
 import json
 from datetime import datetime
 
-from ..auth import verify_token
-from ..database.supabase_client import get_supabase
+from backend.auth import verify_token
+from backend.database.supabase_client import get_supabase
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

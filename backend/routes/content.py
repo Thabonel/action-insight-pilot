@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends
 from typing import Dict, Any, List, Optional
 import uuid
@@ -6,9 +5,9 @@ from datetime import datetime
 import logging
 from pydantic import BaseModel
 
-from models import APIResponse
-from auth import verify_token
-from config import agent_manager
+from backend.models import APIResponse
+from backend.auth import verify_token
+from backend.config import agent_manager
 
 logger = logging.getLogger(__name__)
 

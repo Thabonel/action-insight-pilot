@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
-from config import agent_manager
+from backend.config import agent_manager
 
 router = APIRouter()
 
