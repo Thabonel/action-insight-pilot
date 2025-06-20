@@ -4,10 +4,10 @@ import uuid
 from datetime import datetime, date
 import logging
 
-from backend.models import APIResponse
-from backend.auth import verify_token
-from backend.config import agent_manager
-from backend.database import get_supabase
+from ..models import APIResponse
+from ..auth import verify_token
+from ..config import agent_manager
+from ..database import get_supabase
 
 logger = logging.getLogger(__name__)
 
