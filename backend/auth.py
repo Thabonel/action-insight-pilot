@@ -17,7 +17,7 @@ def verify_token(token: str) -> Dict[str, Any]:
         print(f"DEBUG: Token length: {len(token)}")
         print(f"DEBUG: Token starts with: {token[:20]}...")
         print(f"DEBUG: JWT Secret configured: {bool(jwt_secret)}")
-        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"], options={"verify_aud": False})
         
         return payload
         
