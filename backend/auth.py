@@ -23,6 +23,8 @@ def verify_token(token: str) -> Dict[str, Any]:
         
     except jwt.ExpiredSignatureError:
         raise ValueError("Token has expired")
+    except Exception as e:
+        print(f"DEBUG: JWT decode error: {str(e)}")
     except jwt.InvalidTokenError:
         raise ValueError("Invalid token")
     except Exception as e:
