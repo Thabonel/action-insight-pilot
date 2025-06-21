@@ -26,3 +26,15 @@ def verify_token(token: str) -> Dict[str, Any]:
         raise ValueError(f"Token verification failed: {str(e)}")
 
 # ... keep existing code
+
+def get_current_user(token: str) -> Dict[str, Any]:
+    """Get current user from JWT token"""
+    try:
+        payload = verify_token(token)
+        return {
+            "id": payload.get("sub"),
+            "email": payload.get("email"),
+            "role": payload.get("role", "user")
+        }
+    except Exception as e:
+        raise ValueError(f"Failed to get current user: {str(e)}")
