@@ -28,9 +28,14 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin for origin in origins if origin],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=[
+        "https://aiboostcampaign.com",
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://wheels-wins-orchestrator.onrender.com",
+        "https://lovable.dev",
+        "https://app.lovable.dev"
+    ],
     allow_headers=["*"],
 )
 
