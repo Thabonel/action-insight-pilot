@@ -189,3 +189,43 @@ async def health_check():
     Endpoint to check the health of the agent service.
     """
     return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+
+class CampaignCreateRequest(BaseModel):
+    name: str
+    type: str = "marketing"
+    channel: str = "email"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+
+@router.post("/api/campaigns")
+async def create_campaign(
+    request: CampaignCreateRequest,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Create a new campaign for the authenticated user.
+    """
+    try:
+        supabase = get_supabase()
+        
+        campaign_data = {
+            "name": request.name,
+            "type": request.type,
+            "channel": request.channel,
+            "status": "draft",
+            "created_by": user_id
+        }
+        
+        if request.start_date:
+            campaign_data["start_date"] = request.start_date
+        if request.end_date:
+            campaign_data["end_date"] = request.end_date
+            
+        result = supabase.table('campaigns').insert(campaign_data).execute()
+        
+        logger.info(f"✅ Created campaign for user {user_id}")
+        return {"success": True, "data": result.data[0]}
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to create campaign for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
