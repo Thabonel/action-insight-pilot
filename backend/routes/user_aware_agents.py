@@ -192,7 +192,7 @@ async def health_check():
 
 class CampaignCreateRequest(BaseModel):
     name: str
-    type: str = "marketing"
+    type: str = "content"
     channel: str = "email"
     start_date: Optional[str] = None
     end_date: Optional[str] = None
@@ -209,8 +209,16 @@ async def create_campaign(
         supabase = get_supabase()
         
         campaign_data = {
+        # Map frontend type to valid enum value
+        type_mapping = {
+            "mixed": "content",
+            "marketing": "content",
+            "email": "email",
+            "social": "social"
+        }
+        campaign_type = type_mapping.get(request.type, "content")
             "name": request.name,
-            "type": request.type,
+            "type": campaign_type,
             "channel": request.channel,
             "status": "draft",
             "created_by": user_id
