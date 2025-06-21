@@ -395,7 +395,7 @@ export type Database = {
           channel: string
           content: Json | null
           created_at: string | null
-          created_by: string | null
+          created_by: string
           description: string | null
           end_date: string | null
           id: string
@@ -414,7 +414,7 @@ export type Database = {
           channel: string
           content?: Json | null
           created_at?: string | null
-          created_by?: string | null
+          created_by: string
           description?: string | null
           end_date?: string | null
           id?: string
@@ -433,7 +433,7 @@ export type Database = {
           channel?: string
           content?: Json | null
           created_at?: string | null
-          created_by?: string | null
+          created_by?: string
           description?: string | null
           end_date?: string | null
           id?: string
