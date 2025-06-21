@@ -14,6 +14,9 @@ def verify_token(token: str) -> Dict[str, Any]:
             raise ValueError("SUPABASE_JWT_SECRET not configured")
         
         # Decode and verify the token
+        print(f"DEBUG: Token length: {len(token)}")
+        print(f"DEBUG: Token starts with: {token[:20]}...")
+        print(f"DEBUG: JWT Secret configured: {bool(jwt_secret)}")
         payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
         
         return payload
