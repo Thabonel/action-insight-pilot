@@ -12,3 +12,4 @@ pyjwt>=2.8.0
 httpx>=0.24.0
 psutil==5.9.8
 pandas==2.0.3
+numpy==1.24.3
