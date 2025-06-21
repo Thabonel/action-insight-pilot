@@ -34,11 +34,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from .routes.user_aware_agents import router as user_aware_router
-from .routes.system_health import router as system_health_router
-from .routes.email import router as email_router
-from .routes.workflows import router as workflows_router
-from .routes.ai_agents import router as ai_agents_router
+from routes.user_aware_agents import router as user_aware_router
+from routes.system_health import router as system_health_router
+from routes.email import router as email_router
+from routes.workflows import router as workflows_router
+from routes.ai_agents import router as ai_agents_router
 
 # Add all routers
 app.include_router(user_aware_router)
