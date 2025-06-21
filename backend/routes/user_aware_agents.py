@@ -208,7 +208,6 @@ async def create_campaign(
     try:
         supabase = get_supabase()
         
-        campaign_data = {
         # Map frontend type to valid enum value
         type_mapping = {
             "mixed": "content",
@@ -217,6 +216,8 @@ async def create_campaign(
             "social": "social"
         }
         campaign_type = type_mapping.get(request.type, "content")
+        
+        campaign_data = {
             "name": request.name,
             "type": campaign_type,
             "channel": request.channel,
