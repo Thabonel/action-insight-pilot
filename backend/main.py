@@ -37,6 +37,8 @@ app.add_middleware(
         "https://app.lovable.dev"
     ],
     allow_headers=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
 )
 
 from routes.user_aware_agents import router as user_aware_router
