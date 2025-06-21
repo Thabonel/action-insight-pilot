@@ -8,7 +8,7 @@ class ApiClient {
   constructor() {
     // Use local backend URL instead of external orchestrator
     const baseURL = import.meta.env.DEV 
-      ? 'http://localhost:8000' 
+      ? 'https://wheels-wins-orchestrator.onrender.com' 
       : 'https://wheels-wins-orchestrator.onrender.com';
     
     this.httpClient = new HttpClient(baseURL);
