@@ -3,8 +3,8 @@ import asyncio
 import json
 import logging
 from typing import Dict, Any, Optional, List
-from ..database.supabase_client import get_supabase
-from ..database.user_secrets_client import UserSecretsClient
+from database.supabase_client import get_supabase
+from database.user_secrets_client import UserSecretsClient
 
 logger = logging.getLogger(__name__)
 

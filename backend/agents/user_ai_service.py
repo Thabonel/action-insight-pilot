@@ -9,7 +9,7 @@ from .ai.email_ai_service import EmailAIService
 from .ai.social_ai_service import SocialAIService
 from .ai.lead_ai_service import LeadAIService
 from .ai.campaign_ai_service import CampaignAIService
-from ..database.user_secrets_client import get_user_secrets
+from database.user_secrets_client import get_user_secrets
 
 logger = logging.getLogger(__name__)
 
