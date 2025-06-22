@@ -66,7 +66,7 @@ export class ApiClient {
 
   // Lead methods
   async getLeads(): Promise<ApiResponse<any[]>> {
-    return this.leads.getLeads();
+    return this.httpClient.get<any[]>('/api/leads');
   }
 
   async exportLeads(format: 'csv' | 'json' = 'csv'): Promise<ApiResponse<string>> {
