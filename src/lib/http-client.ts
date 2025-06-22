@@ -128,11 +128,11 @@ export class HttpClient {
         };
       }
 
-      const data = await response.json();
-      return {
-        success: true,
-        data,
-      };
+const data = await response.json();
+return {
+  success: true,
+  data: data as T,
+};
     } catch (error) {
       console.error('API Request failed:', error);
 
