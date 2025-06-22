@@ -12,8 +12,11 @@ export class HttpClient {
 
   constructor(baseUrl: string = 'https://wheels-wins-orchestrator.onrender.com') {
     this.baseUrl = baseUrl;
-    // Use your Supabase API key - you may need to adjust this
-    this.apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjaXV1eG9xeGZzb2dqdXFmbG91Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNzE4NTY5NywiZXhwIjoyMDMyNzYxNjk3fQ.w_2tVvaS6AHY7IJ6PKAkFXBb7fS0-vIEkOz_Eg4O6qc';
+    // Get the API key from environment variables
+    this.apiKey = import.meta.env.VITE_SUPABASE_KEY || '';
+    if (!this.apiKey) {
+      console.warn('VITE_SUPABASE_KEY not found in environment variables');
+    }
   }
 
   setToken(token: string) {
@@ -54,6 +57,12 @@ export class HttpClient {
         ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
         ...options.headers,
       };
+
+      console.log('Making request with headers:', { 
+        hasApiKey: !!this.apiKey, 
+        hasToken: !!this.token,
+        url 
+      });
 
       // Add timeout to fetch
       const controller = new AbortController();
