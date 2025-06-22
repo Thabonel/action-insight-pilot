@@ -135,5 +135,17 @@ export class HttpClient {
       };
     } catch (error) {
       console.error('API Request failed:', error);
-      
-      if (error instanceof Er
+
+      if (error instanceof Error) {
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+      return {
+        success: false,
+        error: 'An unknown error occurred.',
+      };
+    }
+  }
+}

@@ -1,4 +1,3 @@
-
 import { HttpClient, ApiResponse } from './http-client';
 import { LeadsService } from './api/leads-service';
 import { SystemHealthService } from './api/system-health-service';
@@ -282,21 +281,6 @@ export class ApiClient {
       return this.httpClient.put('/api/user/preferences', preferences);
     }
   };
-
-  // HTTP client access for direct requests
-  get httpClient() {
-    return {
-      post: (url: string, data?: any): Promise<ApiResponse<any>> => {
-        return this.httpClient.post(url, data);
-      },
-      get: (url: string): Promise<ApiResponse<any>> => {
-        return this.httpClient.get(url);
-      },
-      request: (url: string, options?: any): Promise<ApiResponse<any>> => {
-        return this.httpClient.request(url, options);
-      }
-    };
-  }
 }
 
 export const apiClient = new ApiClient();
