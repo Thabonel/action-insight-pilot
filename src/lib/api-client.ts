@@ -226,6 +226,142 @@ class ApiClient {
       };
     }
   }
+
+  // Legacy methods that return empty promises to prevent build errors
+  // These can be implemented later when their backend endpoints are available
+  async callDailyFocusAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse> {
+    return this.sendDailyFocusQuery(query, campaigns, context);
+  }
+
+  async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse> {
+    return this.sendGeneralQuery('general', { query, campaigns, context });
+  }
+
+  // Placeholder methods to prevent build errors - these should be implemented when backend is ready
+  setToken(token: string): void {
+    console.log('setToken called with:', token);
+  }
+
+  createContent(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  generateSocialContent(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  generateEmailContent(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  generateABVariants(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  suggestSendTime(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  executeAgentTask(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  scoreLeads(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  createSocialPost(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  scheduleSocialPost(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  getLeads(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  getEmailAnalytics(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  getSocialAnalytics(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  getSystemHealth(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  getEmailRealTimeMetrics(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  exportLeads(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  syncLeads(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  getWorkflows(): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  createWorkflow(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  executeWorkflow(data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  getWorkflowStatus(id: string): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  updateWorkflow(id: string, data: any): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  deleteWorkflow(id: string): Promise<ApiResponse> {
+    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  }
+
+  // Property placeholders to prevent build errors
+  integrations = {
+    getConnected: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    connect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    disconnect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+  };
+
+  analytics = {
+    getOverview: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+  };
+
+  realTimeMetrics = {
+    getMetrics: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    getEngagement: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+  };
+
+  socialPlatforms = {
+    getConnected: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    connect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    disconnect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    post: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+  };
+
+  userPreferences = {
+    get: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    update: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+  };
+
+  httpClient = {
+    post: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    get: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+  };
 }
 
 export const apiClient = new ApiClient();
