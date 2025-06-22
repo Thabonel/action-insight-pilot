@@ -247,6 +247,7 @@ export class ApiClient {
       return {
         data: [],
         success: false,
+        error: 'Failed to fetch workflows',
       };
     }
   }
