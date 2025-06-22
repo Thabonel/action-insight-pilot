@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -10,16 +9,14 @@ import { Campaign } from '@/lib/api-client';
 
 interface CampaignCardProps {
   campaign: Campaign;
-  onCampaignUpdate?: (updatedCampaign: Campaign) => void;
-  onCampaignDelete?: (campaignId: string) => void;
-  onAction?: (campaignId: string, action: 'delete' | 'archive' | 'restore') => void;
+  onCampaignUpdate: (updatedCampaign: Campaign) => void;
+  onCampaignDelete: (campaignId: string) => void;
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({ 
   campaign, 
   onCampaignUpdate, 
-  onCampaignDelete,
-  onAction
+  onCampaignDelete 
 }) => {
   const navigate = useNavigate();
 
@@ -47,7 +44,12 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
     }
   };
 
-  const isArchived = campaign.status === 'archived' || campaign.is_archived;
+  // Safely handle potentially empty values
+  const safeStatus = campaign.status || 'draft';
+  const safeType = campaign.type || 'email';
+  const safeChannel = campaign.channel || 'unknown';
+  
+  const isArchived = safeStatus === 'archived';
 
   return (
     <Card 
@@ -58,35 +60,32 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className={`text-sm font-medium ${isArchived ? 'text-slate-600' : ''}`}>
-          {campaign.name}
+          {campaign.name || 'Untitled Campaign'}
         </CardTitle>
         <div className="flex items-center space-x-2">
-          <Badge className={getStatusColor(campaign.status)}>
-            {campaign.status}
+          <Badge className={getStatusColor(safeStatus)}>
+            {safeStatus}
           </Badge>
-          {(onCampaignUpdate || onCampaignDelete || onAction) && (
-            <CampaignActionMenu
-              campaign={campaign}
-              onCampaignUpdate={onCampaignUpdate}
-              onCampaignDelete={onCampaignDelete}
-              onAction={onAction}
-            />
-          )}
+          <CampaignActionMenu
+            campaign={campaign}
+            onCampaignUpdate={onCampaignUpdate}
+            onCampaignDelete={onCampaignDelete}
+          />
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           <div className="flex items-center text-sm text-muted-foreground">
             <BarChart3 className="mr-2 h-4 w-4" />
-            <span className="capitalize">{campaign.type}</span>
+            <span className="capitalize">{safeType}</span>
             <span className="mx-2">•</span>
-            <span className="capitalize">{campaign.channel}</span>
+            <span className="capitalize">{safeChannel}</span>
           </div>
           
-          {(campaign.budget_allocated || campaign.budget) && (
+          {campaign.budget_allocated && (
             <div className="flex items-center text-sm text-muted-foreground">
               <DollarSign className="mr-2 h-4 w-4" />
-              <span>Budget: {campaign.budget_allocated ? `$${campaign.budget_allocated.toLocaleString()}` : campaign.budget}</span>
+              <span>Budget: ${campaign.budget_allocated.toLocaleString()}</span>
               {campaign.budget_spent && (
                 <span className="ml-2 text-xs">
                   (${campaign.budget_spent.toLocaleString()} spent)
