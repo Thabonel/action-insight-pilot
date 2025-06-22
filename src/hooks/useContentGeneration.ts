@@ -39,7 +39,7 @@ export function useContentGeneration() {
     setError(null);
     
     try {
-      const response = await apiClient.httpClient.request('/api/content/generate', {
+      const response = await apiClient.getHttpClient().request('/api/content/generate', {
         method: 'POST',
         body: JSON.stringify(brief),
       });

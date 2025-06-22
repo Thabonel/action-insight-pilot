@@ -33,16 +33,14 @@ export const useChatLogic = ({ onChatUpdate }: UseChatLogicProps = {}) => {
   };
 
   const callDailyFocusAgent = async (query: string, campaigns: any[]) => {
-    const requestData = {
-      query,
-      campaigns,
-      context: [],
-      date: new Date().toISOString().split('T')[0]
-    };
-
-    const response = await apiClient.httpClient.request('/api/agents/daily-focus', {
+    const response = await apiClient.getHttpClient().request('/api/agents/daily-focus', {
       method: 'POST',
-      body: JSON.stringify(requestData)
+      body: JSON.stringify({
+        query,
+        campaigns,
+        context: [],
+        date: new Date().toISOString().split('T')[0]
+      })
     });
     
     if (!response.success) {
@@ -53,18 +51,16 @@ export const useChatLogic = ({ onChatUpdate }: UseChatLogicProps = {}) => {
   };
 
   const callGeneralCampaignAgent = async (query: string, campaigns: any[]) => {
-    const requestData = {
-      task_type: 'general_query',
-      input_data: {
-        query,
-        campaigns,
-        context: []
-      }
-    };
-
-    const response = await apiClient.httpClient.request('/api/agents/campaign', {
+    const response = await apiClient.getHttpClient().request('/api/agents/campaign', {
       method: 'POST',
-      body: JSON.stringify(requestData)
+      body: JSON.stringify({
+        task_type: 'general_query',
+        input_data: {
+          query,
+          campaigns,
+          context: []
+        }
+      })
     });
     
     if (!response.success) {

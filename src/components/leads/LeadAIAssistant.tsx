@@ -1,264 +1,281 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { behaviorTracker } from '@/lib/behavior-tracker';
+import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import { useAIOperation } from '@/hooks/useAIOperation';
-import { Bot, TrendingUp, Target, Users, Lightbulb, Loader2, RefreshCw } from 'lucide-react';
-import LoadingSpinner from '@/components/LoadingSpinner';
+import { Sparkles, Target, TrendingUp, Users, Loader2 } from 'lucide-react';
+
+interface AIInsight {
+  type: 'opportunity' | 'risk' | 'recommendation';
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  confidence: number;
+}
+
+interface LeadScore {
+  leadId: string;
+  score: number;
+  factors: string[];
+  recommendation: string;
+}
 
 const LeadAIAssistant: React.FC = () => {
-  const [insights, setInsights] = useState({
-    conversionRate: '23.4%',
-    topSource: 'LinkedIn',
-    bestTimeToContact: '10:30 AM',
-    averageScoreAccuracy: 87,
-    learningProgress: 'Improving daily'
-  });
+  const [query, setQuery] = useState('');
+  const [insights, setInsights] = useState<AIInsight[]>([]);
+  const [leadScores, setLeadScores] = useState<LeadScore[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isScoring, setIsScoring] = useState(false);
+  const [scoringCriteria, setScoringCriteria] = useState('');
+  const { toast } = useToast();
 
-  const [suggestions, setSuggestions] = useState([
-    {
-      id: 1,
-      type: 'search',
-      message: "Your SaaS leads from LinkedIn convert 34% better than average",
-      confidence: 92,
-      icon: Target,
-      action: "Search similar leads"
-    },
-    {
-      id: 2,
-      type: 'timing',
-      message: "Leads contacted within 2 hours have 67% higher conversion",
-      confidence: 89,
-      icon: TrendingUp,
-      action: "Set up auto-outreach"
-    },
-    {
-      id: 3,
-      type: 'scoring',
-      message: "Consider adjusting company size weight in scoring algorithm",
-      confidence: 76,
-      icon: Users,
-      action: "Update scoring"
+  const analyzeLeads = async () => {
+    if (!query.trim()) {
+      toast({
+        title: "Query Required",
+        description: "Please enter a question or request for lead analysis.",
+        variant: "destructive",
+      });
+      return;
     }
-  ]);
 
-  const [quickActions] = useState([
-    { label: "Find leads like my best converters", confidence: 94 },
-    { label: "Score leads with new pattern data", confidence: 88 },
-    { label: "Export hot leads for outreach", confidence: 92 },
-    { label: "Analyze conversion bottlenecks", confidence: 85 }
-  ]);
-
-  const leadScoring = useAIOperation({
-    successMessage: "Lead scoring completed successfully!",
-    onSuccess: (data) => {
-      if (data.insights) {
-        setInsights(prev => ({ ...prev, ...data.insights }));
+    setIsAnalyzing(true);
+    try {
+      const response = await apiClient.executeAgentTask('lead_analysis', JSON.stringify({}));
+      if (response.success && response.data) {
+        setInsights(response.data.insights || []);
+        toast({
+          title: "Analysis Complete",
+          description: "AI has analyzed your lead data and generated insights!",
+        });
       }
-      if (data.suggestions) {
-        setSuggestions(data.suggestions);
+    } catch (error) {
+      toast({
+        title: "Analysis Failed",
+        description: "Failed to analyze leads. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const scoreLeads = async () => {
+    setIsScoring(true);
+    try {
+      const response = await apiClient.scoreLeads(JSON.stringify({}));
+      if (response.success && response.data) {
+        setLeadScores(response.data.scores || []);
+        toast({
+          title: "Scoring Complete",
+          description: "AI has scored your leads based on conversion probability!",
+        });
       }
-    }
-  });
-
-  const leadEnrichment = useAIOperation({
-    successMessage: "Lead enrichment completed!"
-  });
-
-  const performanceAnalysis = useAIOperation({
-    successMessage: "Performance analysis completed!"
-  });
-
-  useEffect(() => {
-    // Auto-load initial insights on component mount
-    handleRefreshInsights();
-  }, []);
-
-  const handleRefreshInsights = async () => {
-    behaviorTracker.trackAction('feature_use', 'lead_ai_refresh', {
-      timestamp: new Date().toISOString()
-    });
-
-    await performanceAnalysis.execute(() => 
-      apiClient.executeAgentTask('lead_generator', 'analyze_performance', {})
-    );
-  };
-
-  const handleScoreLeads = async () => {
-    behaviorTracker.trackAction('feature_use', 'lead_ai_scoring', {
-      timestamp: new Date().toISOString()
-    });
-
-    await leadScoring.execute(() => 
-      apiClient.scoreLeads()
-    );
-  };
-
-  const handleSuggestionClick = (suggestion: any) => {
-    behaviorTracker.trackAction('feature_use', 'lead_ai_suggestion', {
-      suggestionType: suggestion.type,
-      suggestionId: suggestion.id,
-      action: suggestion.action
-    });
-
-    if (suggestion.type === 'scoring') {
-      handleScoreLeads();
+    } catch (error) {
+      toast({
+        title: "Scoring Failed",
+        description: "Failed to score leads. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsScoring(false);
     }
   };
 
-  const handleQuickAction = async (action: string) => {
-    behaviorTracker.trackAction('feature_use', 'lead_quick_action', {
-      action,
-      timestamp: new Date().toISOString()
-    });
-
-    if (action.includes('Score leads')) {
-      await handleScoreLeads();
-    } else if (action.includes('Find leads')) {
-      await leadEnrichment.execute(() => 
-        apiClient.executeAgentTask('lead_generator', 'find_similar_leads', {
-          criteria: 'best_converters'
-        })
-      );
+  const generateRecommendations = async () => {
+    if (!scoringCriteria.trim()) {
+      toast({
+        title: "Criteria Required",
+        description: "Please specify criteria for lead recommendations.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await apiClient.executeAgentTask('lead_recommendations', JSON.stringify({ 
+        criteria: scoringCriteria 
+      }));
+      if (response.success && response.data) {
+        setInsights(response.data.recommendations || []);
+        toast({
+          title: "Recommendations Ready",
+          description: "AI has generated personalized lead recommendations!",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Recommendations Failed",
+        description: "Failed to generate recommendations. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
   return (
-    <Card className="h-fit">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Bot className="h-5 w-5 text-blue-600" />
-          <span>Lead Intelligence AI</span>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleRefreshInsights}
-            disabled={performanceAnalysis.loading}
-            className="ml-auto"
-          >
-            {performanceAnalysis.loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Learning Status */}
-        <div className="bg-blue-50 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="font-medium text-blue-900">Learning Status</h4>
-            {leadScoring.loading && <LoadingSpinner size="sm" />}
-          </div>
-          <p className="text-sm text-blue-700">
-            Conversion accuracy: <span className="font-semibold">{insights.averageScoreAccuracy}%</span>
-          </p>
-          <p className="text-sm text-blue-700">
-            Best source: <span className="font-semibold">{insights.topSource}</span>
-          </p>
-          <div className="mt-2 text-xs text-blue-600">
-            Status: {insights.learningProgress}
-          </div>
-          
-          {leadScoring.data && (
-            <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
-              Last updated: {new Date().toLocaleTimeString()}
-              {leadScoring.data.leads_scored && (
-                <span className="ml-2">• {leadScoring.data.leads_scored} leads scored</span>
-              )}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-purple-600" />
+            Lead AI Assistant
+          </CardTitle>
+          <CardDescription>
+            Get AI-powered insights, scoring, and recommendations for your leads
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Ask AI about your leads</label>
+              <Textarea
+                placeholder="e.g., 'Which leads are most likely to convert this month?' or 'What patterns do you see in my high-value leads?'"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                rows={3}
+              />
             </div>
-          )}
-        </div>
+            <Button
+              onClick={analyzeLeads}
+              disabled={isAnalyzing}
+              className="w-full"
+            >
+              {isAnalyzing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <TrendingUp className="w-4 h-4 mr-2" />
+              )}
+              Analyze Leads
+            </Button>
+          </div>
 
-        {/* AI Suggestions */}
-        <div>
-          <h4 className="font-medium text-gray-900 mb-3">Smart Insights</h4>
-          <div className="space-y-3">
-            {suggestions.map((suggestion) => {
-              const Icon = suggestion.icon;
-              return (
-                <div
-                  key={suggestion.id}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-start space-x-3">
-                    <Icon className="h-4 w-4 text-gray-600 mt-1" />
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-800">{suggestion.message}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="text-xs text-gray-500">
-                          {suggestion.confidence}% confidence
-                        </div>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          {suggestion.action}
-                        </Button>
-                      </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={scoreLeads}
+              disabled={isScoring}
+              variant="outline"
+              className="flex-1"
+            >
+              {isScoring ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Target className="w-4 h-4 mr-2" />
+              )}
+              Score All Leads
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Recommendation Criteria</label>
+              <Textarea
+                placeholder="e.g., 'Focus on enterprise customers in technology sector' or 'Prioritize leads with recent website activity'"
+                value={scoringCriteria}
+                onChange={(e) => setScoringCriteria(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <Button
+              onClick={generateRecommendations}
+              disabled={isAnalyzing}
+              variant="outline"
+              className="w-full"
+            >
+              {isAnalyzing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Users className="w-4 h-4 mr-2" />
+              )}
+              Generate Recommendations
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Insights */}
+      {insights.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>AI Insights & Recommendations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {insights.map((insight, index) => (
+                <div key={index} className="p-4 border rounded-lg">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-medium">{insight.title}</h4>
+                    <div className="flex gap-2">
+                      <Badge className={getPriorityColor(insight.priority)}>
+                        {insight.priority}
+                      </Badge>
+                      <Badge variant="outline">
+                        {insight.confidence}% confidence
+                      </Badge>
                     </div>
                   </div>
+                  <p className="text-sm text-gray-600">{insight.description}</p>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div>
-          <h4 className="font-medium text-gray-900 mb-3">Quick Actions</h4>
-          <div className="space-y-2">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-left h-auto py-2"
-                onClick={() => handleQuickAction(action.label)}
-                disabled={leadScoring.loading || leadEnrichment.loading}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span className="text-sm">{action.label}</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {action.confidence}%
-                  </Badge>
-                </div>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Performance Summary */}
-        <div className="bg-green-50 rounded-lg p-4">
-          <h4 className="font-medium text-green-900 mb-2">Current Performance</h4>
-          <div className="space-y-1">
-            <p className="text-sm text-green-700">
-              Conversion Rate: <span className="font-semibold">{insights.conversionRate}</span>
-            </p>
-            <p className="text-sm text-green-700">
-              Best Contact Time: <span className="font-semibold">{insights.bestTimeToContact}</span>
-            </p>
-          </div>
-          
-          {performanceAnalysis.data && (
-            <div className="mt-2 text-xs text-green-600">
-              Analysis updated: {new Date().toLocaleTimeString()}
+              ))}
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Error Display */}
-        {(leadScoring.error || leadEnrichment.error || performanceAnalysis.error) && (
-          <div className="bg-red-50 rounded-lg p-3">
-            <p className="text-sm text-red-700">
-              {leadScoring.error || leadEnrichment.error || performanceAnalysis.error}
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Lead Scores */}
+      {leadScores.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Lead Scores</CardTitle>
+            <CardDescription>
+              AI-calculated conversion probability scores
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {leadScores.map((leadScore, index) => (
+                <div key={index} className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">Lead #{leadScore.leadId}</span>
+                    <span className={`text-2xl font-bold ${getScoreColor(leadScore.score)}`}>
+                      {leadScore.score}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{leadScore.recommendation}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {leadScore.factors.map((factor, factorIndex) => (
+                      <Badge key={factorIndex} variant="secondary" className="text-xs">
+                        {factor}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 
