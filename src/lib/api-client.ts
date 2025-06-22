@@ -1,368 +1,302 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { HttpClient, ApiResponse } from './http-client';
+import { LeadsService } from './api/leads-service';
+import { SystemHealthService } from './api/system-health-service';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-
-interface Campaign {
+export interface Campaign {
   id: string;
   name: string;
   type: string;
-  status: string;
   channel: string;
+  status: string;
   description?: string;
   budget_allocated?: number;
   budget_spent?: number;
-  metrics?: any;
-  target_audience?: any;
-  content?: any;
   start_date?: string;
   end_date?: string;
-  created_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-interface CreateCampaignData {
+export interface CreateCampaignData {
   name: string;
   type: string;
   channel: string;
   status: string;
   description?: string;
+  budget_allocated?: number;
+  start_date?: string;
+  end_date?: string;
 }
 
-class ApiClient {
-  private async getAuthHeaders(): Promise<HeadersInit> {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.access_token) {
-      throw new Error('No authentication token available');
-    }
+export class ApiClient {
+  private httpClient: HttpClient;
+  public leads: LeadsService;
+  public systemHealth: SystemHealthService;
 
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
-    };
+  constructor() {
+    this.httpClient = new HttpClient();
+    this.leads = new LeadsService(this.httpClient);
+    this.systemHealth = new SystemHealthService(this.httpClient);
   }
 
+  setToken(token: string) {
+    this.httpClient.setToken(token);
+  }
+
+  // Campaign methods
   async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
-    try {
-      const headers = await this.getAuthHeaders();
-      
-      const response = await fetch(`${API_BASE_URL}/api/campaigns`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching campaigns:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch campaigns'
-      };
-    }
+    return this.httpClient.get<Campaign[]>('/api/campaigns');
   }
 
   async createCampaign(campaignData: CreateCampaignData): Promise<ApiResponse<Campaign>> {
-    try {
-      const headers = await this.getAuthHeaders();
-      
-      const response = await fetch(`${API_BASE_URL}/api/campaigns`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(campaignData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error creating campaign:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create campaign'
-      };
-    }
+    return this.httpClient.post<Campaign>('/api/campaigns', campaignData);
   }
 
-  async deleteCampaign(campaignId: string): Promise<ApiResponse> {
-    try {
-      const headers = await this.getAuthHeaders();
-      
-      const response = await fetch(`${API_BASE_URL}/api/campaigns/${campaignId}`, {
-        method: 'DELETE',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error deleting campaign:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to delete campaign'
-      };
-    }
+  async deleteCampaign(campaignId: string): Promise<ApiResponse<void>> {
+    return this.httpClient.delete<void>(`/api/campaigns/${campaignId}`);
   }
 
   async archiveCampaign(campaignId: string): Promise<ApiResponse<Campaign>> {
-    try {
-      const headers = await this.getAuthHeaders();
-      
-      const response = await fetch(`${API_BASE_URL}/api/campaigns/${campaignId}/archive`, {
-        method: 'PUT',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error archiving campaign:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to archive campaign'
-      };
-    }
+    return this.httpClient.put<Campaign>(`/api/campaigns/${campaignId}/archive`);
   }
 
   async restoreCampaign(campaignId: string): Promise<ApiResponse<Campaign>> {
-    try {
-      const headers = await this.getAuthHeaders();
-      
-      const response = await fetch(`${API_BASE_URL}/api/campaigns/${campaignId}/restore`, {
-        method: 'PUT',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error restoring campaign:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to restore campaign'
-      };
-    }
+    return this.httpClient.put<Campaign>(`/api/campaigns/${campaignId}/restore`);
   }
 
-  async sendDailyFocusQuery(query: string, campaigns: any[], context: any[] = []): Promise<ApiResponse> {
-    try {
-      const headers = await this.getAuthHeaders();
-      
-      const response = await fetch(`${API_BASE_URL}/api/agents/daily-focus`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          query,
-          campaigns,
-          context,
-          date: new Date().toISOString()
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error sending daily focus query:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to send query'
-      };
-    }
+  // Lead methods
+  async getLeads(): Promise<ApiResponse<any[]>> {
+    return this.leads.getLeads();
   }
 
-  async sendGeneralQuery(taskType: string, inputData: any): Promise<ApiResponse> {
-    try {
-      const headers = await this.getAuthHeaders();
-      
-      const response = await fetch(`${API_BASE_URL}/api/agents/campaign`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          task_type: taskType,
-          input_data: inputData
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error sending general query:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to send query'
-      };
-    }
+  async exportLeads(format: 'csv' | 'json' = 'csv'): Promise<ApiResponse<string>> {
+    return this.leads.exportLeads(format);
   }
 
-  // Legacy methods that return empty promises to prevent build errors
-  // These can be implemented later when their backend endpoints are available
-  async callDailyFocusAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse> {
-    return this.sendDailyFocusQuery(query, campaigns, context);
+  async syncLeads(): Promise<ApiResponse<any>> {
+    return this.leads.syncLeads();
   }
 
-  async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse> {
-    return this.sendGeneralQuery('general', { query, campaigns, context });
+  async searchLeads(query: string): Promise<ApiResponse<any[]>> {
+    return this.leads.searchLeads(query);
   }
 
-  // Placeholder methods to prevent build errors - these should be implemented when backend is ready
-  setToken(token: string): void {
-    console.log('setToken called with:', token);
+  async getLeadAnalytics(): Promise<ApiResponse<any>> {
+    return this.leads.getLeadAnalytics();
   }
 
-  createContent(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async createLead(leadData: any): Promise<ApiResponse<any>> {
+    return this.leads.createLead(leadData);
   }
 
-  generateSocialContent(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  // System Health
+  async getSystemHealth(): Promise<ApiResponse<any>> {
+    return this.systemHealth.getSystemHealth();
   }
 
-  generateEmailContent(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  // Content generation methods
+  async generateSocialContent(contentType: string, topic: string, tone: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/content/generate-social', {
+      contentType,
+      topic,
+      tone
+    });
   }
 
-  generateABVariants(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async createContent(contentData: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/content', contentData);
   }
 
-  suggestSendTime(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  // Email methods
+  async generateEmailContent(subject: string, audience: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/email/generate-content', {
+      subject,
+      audience
+    });
   }
 
-  executeAgentTask(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async generateABVariants(content: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/email/generate-ab-variants', content);
   }
 
-  scoreLeads(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async suggestSendTime(campaignId: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/email/suggest-send-time', { campaignId });
   }
 
-  createSocialPost(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async getEmailAnalytics(): Promise<ApiResponse<any>> {
+    return this.httpClient.get('/api/email/analytics');
   }
 
-  scheduleSocialPost(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async getEmailRealTimeMetrics(): Promise<ApiResponse<any>> {
+    return this.httpClient.get('/api/email/real-time-metrics');
   }
 
-  getLeads(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  // Social methods
+  async createSocialPost(postData: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/social/posts', postData);
   }
 
-  getEmailAnalytics(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async scheduleSocialPost(postData: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/social/schedule', postData);
   }
 
-  getSocialAnalytics(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async getSocialAnalytics(): Promise<ApiResponse<any>> {
+    return this.httpClient.get('/api/social/analytics');
   }
 
-  getSystemHealth(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  // Agent methods
+  async executeAgentTask(taskType: string, taskData: any, agentId?: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/agents/execute', {
+      taskType,
+      taskData,
+      agentId
+    });
   }
 
-  getEmailRealTimeMetrics(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async scoreLeads(): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/leads/score');
   }
 
-  exportLeads(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async callDailyFocusAgent(query: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/agents/daily-focus', { query });
   }
 
-  syncLeads(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async callGeneralCampaignAgent(query: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/agents/general-campaign', { query });
   }
 
-  getWorkflows(): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  // Workflow methods
+  async getWorkflows(): Promise<ApiResponse<any[]>> {
+    return this.httpClient.get('/api/workflows');
   }
 
-  createWorkflow(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async createWorkflow(workflowData: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/workflows', workflowData);
   }
 
-  executeWorkflow(data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async executeWorkflow(workflowId: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post(`/api/workflows/${workflowId}/execute`);
   }
 
-  getWorkflowStatus(id: string): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async getWorkflowStatus(workflowId: string): Promise<ApiResponse<any>> {
+    return this.httpClient.get(`/api/workflows/${workflowId}/status`);
   }
 
-  updateWorkflow(id: string, data: any): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async updateWorkflow(workflowId: string, workflowData: any): Promise<ApiResponse<any>> {
+    return this.httpClient.put(`/api/workflows/${workflowId}`, workflowData);
   }
 
-  deleteWorkflow(id: string): Promise<ApiResponse> {
-    return Promise.resolve({ success: false, error: 'Method not implemented' });
+  async deleteWorkflow(workflowId: string): Promise<ApiResponse<void>> {
+    return this.httpClient.delete(`/api/workflows/${workflowId}`);
   }
 
-  // Property placeholders to prevent build errors
-  integrations = {
-    getConnected: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    connect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    disconnect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-  };
-
+  // Analytics methods
   analytics = {
-    getOverview: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    getOverview: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.get('/api/analytics/overview');
+    },
+    getSystemStats: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.get('/api/analytics/system-stats');
+    },
+    exportAnalyticsReport: (format: string, timeRange: string): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/analytics/export', { format, timeRange });
+    }
   };
 
-  realTimeMetrics = {
-    getMetrics: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    getEngagement: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+  // Integrations methods
+  integrations = {
+    getConnected: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.get('/api/integrations/connected');
+    },
+    connect: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/integrations/connect');
+    },
+    disconnect: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/integrations/disconnect');
+    },
+    getConnections: (): Promise<ApiResponse<any[]>> => {
+      return this.httpClient.get('/api/integrations/connections');
+    },
+    createConnection: (connectionData: any): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/integrations/connections', connectionData);
+    },
+    deleteConnection: (connectionId: string): Promise<ApiResponse<void>> => {
+      return this.httpClient.delete(`/api/integrations/connections/${connectionId}`);
+    },
+    getWebhooks: (): Promise<ApiResponse<any[]>> => {
+      return this.httpClient.get('/api/integrations/webhooks');
+    },
+    createWebhook: (webhookData: any): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/integrations/webhooks', webhookData);
+    },
+    deleteWebhook: (webhookId: string): Promise<ApiResponse<void>> => {
+      return this.httpClient.delete(`/api/integrations/webhooks/${webhookId}`);
+    },
+    testWebhook: (webhookId: string): Promise<ApiResponse<any>> => {
+      return this.httpClient.post(`/api/integrations/webhooks/${webhookId}/test`);
+    },
+    connectService: (serviceData: any): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/integrations/services/connect', serviceData);
+    },
+    syncService: (serviceId: string): Promise<ApiResponse<any>> => {
+      return this.httpClient.post(`/api/integrations/services/${serviceId}/sync`);
+    },
+    disconnectService: (serviceId: string): Promise<ApiResponse<void>> => {
+      return this.httpClient.delete(`/api/integrations/services/${serviceId}`);
+    }
   };
 
+  // Social platforms methods
   socialPlatforms = {
-    getConnected: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    connect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    disconnect: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    post: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    getPlatformConnections: (): Promise<ApiResponse<any[]>> => {
+      return this.httpClient.get('/api/social/platforms/connections');
+    },
+    initiatePlatformConnection: (platform: string): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/social/platforms/connect', { platform });
+    },
+    disconnectPlatform: (platform: string): Promise<ApiResponse<void>> => {
+      return this.httpClient.delete(`/api/social/platforms/${platform}`);
+    },
+    testPlatformConnection: (platform: string): Promise<ApiResponse<any>> => {
+      return this.httpClient.post(`/api/social/platforms/${platform}/test`);
+    }
   };
 
+  // Real-time metrics methods
+  realTimeMetrics = {
+    getMetrics: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.get('/api/metrics/real-time');
+    },
+    getSystemMetrics: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.get('/api/metrics/system');
+    }
+  };
+
+  // User preferences methods
   userPreferences = {
-    get: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    update: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
+    getPreferences: (): Promise<ApiResponse<any>> => {
+      return this.httpClient.get('/api/user/preferences');
+    },
+    updatePreferences: (preferences: any): Promise<ApiResponse<any>> => {
+      return this.httpClient.put('/api/user/preferences', preferences);
+    }
   };
 
-  httpClient = {
-    post: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-    get: () => Promise.resolve({ success: false, error: 'Method not implemented' }),
-  };
+  // HTTP client access for direct requests
+  get httpClient() {
+    return {
+      post: (url: string, data?: any): Promise<ApiResponse<any>> => {
+        return this.httpClient.post(url, data);
+      },
+      get: (url: string): Promise<ApiResponse<any>> => {
+        return this.httpClient.get(url);
+      },
+      request: (url: string, options?: any): Promise<ApiResponse<any>> => {
+        return this.httpClient.request(url, options);
+      }
+    };
+  }
 }
 
 export const apiClient = new ApiClient();
-export type { Campaign, CreateCampaignData, ApiResponse };
