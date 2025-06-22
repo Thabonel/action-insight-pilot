@@ -1,244 +1,235 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { apiClient, Campaign } from '@/lib/api-client';
-import CampaignCard from '@/components/CampaignCard';
-import CampaignCreationModal from '@/components/CampaignCreationModal';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { apiClient, Campaign } from '@/lib/api-client';
+import { useToast } from '@/hooks/use-toast';
+import CampaignForm from '@/components/CampaignForm';
+import CampaignCard from '@/components/CampaignCard';
+import EmptyState from '@/components/EmptyState';
+import { AlertCircle, WifiOff } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-interface FilterOption {
-  label: string;
-  value: string;
+interface NewCampaign {
+  name: string;
+  type: string;
+  status: string;
+  description: string;
 }
 
 const Campaigns: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [connectionError, setConnectionError] = useState(false);
+  const [newCampaign, setNewCampaign] = useState<NewCampaign>({
+    name: '',
+    type: 'email',
+    status: 'draft',
+    description: ''
+  });
   const { toast } = useToast();
-
-  const filterOptions: FilterOption[] = [
-    { label: 'All', value: '' },
-    { label: 'Active', value: 'active' },
-    { label: 'Draft', value: 'draft' },
-    { label: 'Archived', value: 'archived' },
-  ];
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadCampaigns();
     behaviorTracker.trackAction('navigation', 'campaigns', { section: 'main' });
+    loadCampaigns();
   }, []);
 
   const loadCampaigns = async () => {
-    setIsLoading(true);
+    const actionId = behaviorTracker.trackFeatureStart('campaigns_load');
     try {
-      const response = await apiClient.getCampaigns();
-      if (response.success) {
-        setCampaigns(response.data);
+      setConnectionError(false);
+      console.log('Loading campaigns...');
+      const result = await apiClient.getCampaigns();
+      
+      if (result.success && result.data) {
+        const campaignsData = Array.isArray(result.data) ? result.data : [];
+        setCampaigns(campaignsData);
+        behaviorTracker.trackFeatureComplete('campaigns_load', actionId, true);
+        console.log('Campaigns loaded successfully:', campaignsData);
       } else {
-        throw new Error(response.error || 'Failed to load campaigns');
+        console.error('Failed to load campaigns:', result.error);
+        setConnectionError(true);
+        behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
+        toast({
+          title: "Failed to load campaigns",
+          description: result.error || "Unknown error occurred",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Error loading campaigns:', error);
+      setConnectionError(true);
+      behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load campaigns",
-        variant: "destructive"
+        title: "Connection Error",
+        description: "Unable to connect to the server. Please check your internet connection.",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleCreateCampaign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newCampaign.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Campaign name is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleFilterChange = (value: string) => {
-    setFilter(value);
-  };
-
-  const filteredCampaigns = campaigns.filter(campaign => {
-    const searchRegex = new RegExp(searchTerm, 'i');
-    const matchesSearch = searchRegex.test(campaign.name) || searchRegex.test(campaign.description);
-    const matchesFilter = filter ? campaign.status === filter : true;
-    return matchesSearch && matchesFilter;
-  });
-
-  const handleCreateCampaign = async (campaignData: any) => {
+    const actionId = behaviorTracker.trackFeatureStart('campaign_create');
+    setCreating(true);
+    
     try {
-      const response = await apiClient.createCampaign(campaignData);
-      if (response.success) {
+      console.log('Creating campaign with data:', newCampaign);
+      const result = await apiClient.createCampaign(newCampaign);
+      
+      if (result.success && result.data) {
+        const createdCampaign = result.data as Campaign;
+        console.log('Campaign created successfully:', createdCampaign);
+        
+        setCampaigns(prev => [createdCampaign, ...prev]);
+        setNewCampaign({ name: '', type: 'email', status: 'draft', description: '' });
+        setShowCreateForm(false);
+        setConnectionError(false);
+        
+        behaviorTracker.trackFeatureComplete('campaign_create', actionId, true);
+        
         toast({
-          title: "Campaign Created",
-          description: `Campaign "${campaignData.name}" created successfully.`
+          title: "Success!",
+          description: `Campaign "${createdCampaign.name}" created successfully`,
         });
-        setIsModalOpen(false);
-        await loadCampaigns();
+        
+        if (createdCampaign.id) {
+          navigate(`/campaigns/${createdCampaign.id}`);
+        }
+        
       } else {
-        throw new Error(response.error || 'Failed to create campaign');
+        console.error('Failed to create campaign:', result.error);
+        behaviorTracker.trackFeatureComplete('campaign_create', actionId, false);
+        toast({
+          title: "Failed to create campaign",
+          description: result.error || "Unknown error occurred",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Error creating campaign:', error);
+      setConnectionError(true);
+      behaviorTracker.trackFeatureComplete('campaign_create', actionId, false);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create campaign",
-        variant: "destructive"
+        title: "Connection Error",
+        description: "Unable to connect to the server. The campaign could not be created.",
+        variant: "destructive",
       });
+    } finally {
+      setCreating(false);
     }
   };
 
-  const handleCampaignUpdate = async (updatedCampaign: Campaign) => {
-    try {
-      const response = await apiClient.updateCampaign(updatedCampaign.id, updatedCampaign);
-      if (response.success) {
-        toast({
-          title: "Campaign Updated",
-          description: `Campaign "${updatedCampaign.name}" updated successfully.`
-        });
-        await loadCampaigns();
-      } else {
-        throw new Error(response.error || 'Failed to update campaign');
-      }
-    } catch (error) {
-      console.error('Error updating campaign:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update campaign",
-        variant: "destructive"
-      });
-    }
+  const handleCampaignUpdate = (updatedCampaign: Campaign) => {
+    setCampaigns(prev => 
+      prev.map(campaign => 
+        campaign.id === updatedCampaign.id ? updatedCampaign : campaign
+      )
+    );
   };
 
-  const handleCampaignDelete = async (campaignId: string) => {
-    try {
-      const response = await apiClient.deleteCampaign(campaignId);
-      if (response.success) {
-        toast({
-          title: "Campaign Deleted",
-          description: "Campaign deleted successfully."
-        });
-        await loadCampaigns();
-      } else {
-        throw new Error(response.error || 'Failed to delete campaign');
-      }
-    } catch (error) {
-      console.error('Error deleting campaign:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete campaign",
-        variant: "destructive"
-      });
-    }
+  const handleCampaignDelete = (campaignId: string) => {
+    setCampaigns(prev => prev.filter(campaign => campaign.id !== campaignId));
   };
 
-  const handleCampaignAction = async (campaignId: string, action: 'delete' | 'archive' | 'restore') => {
-    try {
-      let response;
-      let successMessage = '';
-      
-      switch (action) {
-        case 'delete':
-          response = await apiClient.deleteCampaign(campaignId);
-          successMessage = 'Campaign deleted successfully';
-          break;
-        case 'archive':
-          response = await apiClient.archiveCampaign(campaignId);
-          successMessage = 'Campaign archived successfully';
-          break;
-        case 'restore':
-          response = await apiClient.restoreCampaign(campaignId);
-          successMessage = 'Campaign restored successfully';
-          break;
-      }
-
-      if (response?.success) {
-        toast({
-          title: "Success",
-          description: successMessage
-        });
-        await loadCampaigns();
-      } else {
-        throw new Error(response?.error || `Failed to ${action} campaign`);
-      }
-    } catch (error) {
-      console.error(`Error ${action}ing campaign:`, error);
-      behaviorTracker.trackFeatureComplete('campaign_management', Date.now().toString(), false);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : `Failed to ${action} campaign`,
-        variant: "destructive"
-      });
-    }
+  const handleShowCreateForm = () => {
+    setShowCreateForm(true);
+    behaviorTracker.trackAction('planning', 'campaigns', { action: 'show_create_form' });
   };
+
+  const handleRetryConnection = () => {
+    setLoading(true);
+    loadCampaigns();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading campaigns...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Campaigns</h1>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Campaign
-        </Button>
+    <div className="px-4 py-6 sm:px-0">
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Campaign Management</h1>
+          <p className="mt-2 text-slate-600">Create and manage your marketing campaigns</p>
+        </div>
+        <button
+          onClick={handleShowCreateForm}
+          disabled={creating}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+        >
+          {creating && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+          <span>{creating ? 'Creating...' : 'Create Campaign'}</span>
+        </button>
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Input
-            type="text"
-            placeholder="Search campaigns..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="mr-4"
-          />
-          <Select value={filter} onValueChange={handleFilterChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button variant="outline">
-          <Filter className="mr-2 h-4 w-4" />
-          Filters
-        </Button>
-      </div>
+      {connectionError && (
+        <Alert className="mb-6 border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <WifiOff className="h-4 w-4" />
+                <span>Unable to connect to the server. Some features may not work properly.</span>
+              </div>
+              <button
+                onClick={handleRetryConnection}
+                className="ml-4 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
-      {isLoading ? (
-        <div className="flex items-center justify-center min-h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredCampaigns.map(campaign => (
-            <CampaignCard
-              key={campaign.id}
+      {showCreateForm && (
+        <CampaignForm
+          newCampaign={newCampaign}
+          setNewCampaign={setNewCampaign}
+          onSubmit={handleCreateCampaign}
+          onCancel={() => setShowCreateForm(false)}
+          loading={creating}
+        />
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {campaigns.length === 0 ? (
+          <div className="col-span-full">
+            <EmptyState onCreateCampaign={handleShowCreateForm} />
+          </div>
+        ) : (
+          campaigns.map((campaign) => (
+            <CampaignCard 
+              key={campaign.id || `campaign-${Math.random()}`} 
               campaign={campaign}
               onCampaignUpdate={handleCampaignUpdate}
               onCampaignDelete={handleCampaignDelete}
-              onAction={handleCampaignAction}
             />
-          ))}
-        </div>
-      )}
-
-      <CampaignCreationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateCampaign}
-      />
+          ))
+        )}
+      </div>
     </div>
   );
 };
