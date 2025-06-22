@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -64,8 +63,8 @@ async def get_user_campaigns(user_id: str) -> List[Dict[str, Any]]:
                 'type': campaign.get('type'),
                 'status': campaign.get('status'),
                 'channel': campaign.get('channel'),
-                'budget_allocated': float(campaign.get('budget_allocated', 0)),
-                'budget_spent': float(campaign.get('budget_spent', 0)),
+                'budget_allocated': float(campaign.get('budget_allocated') or 0),
+                'budget_spent': float(campaign.get('budget_spent') or 0),
                 'metrics': campaign.get('metrics', {}),
                 'target_audience': campaign.get('target_audience', {}),
                 'content': campaign.get('content', {}),
