@@ -1,478 +1,232 @@
 
-import { HttpClient } from './http-client';
 import { supabase } from '@/integrations/supabase/client';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+interface Campaign {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  channel: string;
+  description?: string;
+  budget_allocated?: number;
+  budget_spent?: number;
+  metrics?: any;
+  target_audience?: any;
+  content?: any;
+  start_date?: string;
+  end_date?: string;
+  created_at?: string;
+}
+
+interface CreateCampaignData {
+  name: string;
+  type: string;
+  channel: string;
+  status: string;
+  description?: string;
+}
+
 class ApiClient {
-  public httpClient: HttpClient; // Make public for direct access
-
-  constructor() {
-    // Use local backend URL instead of external orchestrator
-    const baseURL = import.meta.env.DEV 
-      ? 'https://wheels-wins-orchestrator.onrender.com' 
-      : 'https://wheels-wins-orchestrator.onrender.com';
+  private async getAuthHeaders(): Promise<HeadersInit> {
+    const { data: { session } } = await supabase.auth.getSession();
     
-    this.httpClient = new HttpClient(baseURL);
+    if (!session?.access_token) {
+      throw new Error('No authentication token available');
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    };
   }
 
-  setToken(token: string) {
-    this.httpClient.setToken(token);
-    console.log('HTTP Client token updated:', token ? 'Token provided' : 'No token');
-  }
-
-  // Campaign methods
-  async getCampaigns() {
+  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
+      const headers = await this.getAuthHeaders();
       
-      if (!authToken) {
-        throw new Error('Authentication required');
+      const response = await fetch(`${API_BASE_URL}/api/campaigns`, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const response = await this.httpClient.get('/api/campaigns', {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
+      const data = await response.json();
+      return data;
     } catch (error) {
-      console.error('Failed to get campaigns:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to get campaigns' };
+      console.error('Error fetching campaigns:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch campaigns'
+      };
     }
   }
 
-  async getCampaignById(id: string) {
+  async createCampaign(campaignData: CreateCampaignData): Promise<ApiResponse<Campaign>> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
+      const headers = await this.getAuthHeaders();
       
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.get(`/api/campaigns/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to get campaign:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to get campaign' };
-    }
-  }
-
-  async createCampaign(campaignData: any) {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.post('/api/campaigns', campaignData, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to create campaign:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to create campaign' };
-    }
-  }
-
-  async updateCampaign(id: string, campaignData: any) {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.put(`/api/campaigns/${id}`, campaignData, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to update campaign:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to update campaign' };
-    }
-  }
-
-  // Lead methods
-  async getLeads() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.get('/api/leads', {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to get leads:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to get leads' };
-    }
-  }
-
-  async scoreLeads() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.post('/api/leads/score', {}, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to score leads:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to score leads' };
-    }
-  }
-
-  async exportLeads(format: string = 'csv') {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.get(`/api/leads/export?format=${format}`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to export leads:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to export leads' };
-    }
-  }
-
-  async syncLeads() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.post('/api/leads/sync', {}, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to sync leads:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to sync leads' };
-    }
-  }
-
-  // System health
-  async getSystemHealth() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.get('/api/health', {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to get system health:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to get system health' };
-    }
-  }
-
-  // Agent methods
-  async executeAgentTask(agentType: string, taskType: string, inputData: any) {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await this.httpClient.request('/api/agents/execute', {
+      const response = await fetch(`${API_BASE_URL}/api/campaigns`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          agent_type: agentType,
-          task_type: taskType,
-          input_data: inputData
-        })
+        headers,
+        body: JSON.stringify(campaignData),
       });
 
-      return response;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
-      console.error(`Failed to execute ${agentType} task:`, error);
-      return { success: false, error: error instanceof Error ? error.message : 'Failed to execute agent task' };
+      console.error('Error creating campaign:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create campaign'
+      };
     }
   }
 
-  async callDailyFocusAgent(query: string, campaigns: any[], context: any[]) {
+  async deleteCampaign(campaignId: string): Promise<ApiResponse> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
+      const headers = await this.getAuthHeaders();
       
-      if (!authToken) {
-        throw new Error('Authentication required');
+      const response = await fetch(`${API_BASE_URL}/api/campaigns/${campaignId}`, {
+        method: 'DELETE',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const response = await this.httpClient.request('/api/agents/daily-focus', {
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete campaign'
+      };
+    }
+  }
+
+  async archiveCampaign(campaignId: string): Promise<ApiResponse<Campaign>> {
+    try {
+      const headers = await this.getAuthHeaders();
+      
+      const response = await fetch(`${API_BASE_URL}/api/campaigns/${campaignId}/archive`, {
+        method: 'PUT',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error archiving campaign:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to archive campaign'
+      };
+    }
+  }
+
+  async restoreCampaign(campaignId: string): Promise<ApiResponse<Campaign>> {
+    try {
+      const headers = await this.getAuthHeaders();
+      
+      const response = await fetch(`${API_BASE_URL}/api/campaigns/${campaignId}/restore`, {
+        method: 'PUT',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error restoring campaign:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to restore campaign'
+      };
+    }
+  }
+
+  async sendDailyFocusQuery(query: string, campaigns: any[], context: any[] = []): Promise<ApiResponse> {
+    try {
+      const headers = await this.getAuthHeaders();
+      
+      const response = await fetch(`${API_BASE_URL}/api/agents/daily-focus`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
           query,
           campaigns,
           context,
-          date: new Date().toISOString().split('T')[0]
-        })
+          date: new Date().toISOString()
+        }),
       });
 
-      return response;
-    } catch (error) {
-      console.error('Daily focus agent failed:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Daily focus agent failed' };
-    }
-  }
-
-  async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[]) {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token;
-      
-      if (!authToken) {
-        throw new Error('Authentication required');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const response = await this.httpClient.request('/api/agents/campaign', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          task_type: 'general_query',
-          input_data: {
-            query,
-            campaigns,
-            context
-          }
-        })
-      });
-
-      return response;
+      const data = await response.json();
+      return data;
     } catch (error) {
-      console.error('Campaign agent failed:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Campaign agent failed' };
+      console.error('Error sending daily focus query:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send query'
+      };
     }
   }
 
-  // Content methods
-  async createContent(contentData: any) {
-    return { success: true, data: contentData, error: undefined };
+  async sendGeneralQuery(taskType: string, inputData: any): Promise<ApiResponse> {
+    try {
+      const headers = await this.getAuthHeaders();
+      
+      const response = await fetch(`${API_BASE_URL}/api/agents/campaign`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          task_type: taskType,
+          input_data: inputData
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error sending general query:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send query'
+      };
+    }
   }
-
-  async generateSocialContent(platform: string, topic: string, brandVoice: string) {
-    return {
-      success: true,
-      data: {
-        content: `Generated ${brandVoice} content for ${platform} about ${topic}. This is AI-generated content that would normally come from your AI service.`
-      },
-      error: undefined
-    };
-  }
-
-  // Email methods
-  async generateEmailContent(campaignType: string, options: any) {
-    return {
-      success: true,
-      data: {
-        content: `Generated email content for ${campaignType} campaign targeting ${options.audience}. This content would be AI-generated based on your template and audience preferences.`,
-        subject_lines: [
-          { text: `Your ${campaignType} Update`, score: 85 },
-          { text: `Important ${campaignType} Information`, score: 78 },
-          { text: `Don't Miss This ${campaignType}`, score: 82 }
-        ]
-      },
-      error: undefined
-    };
-  }
-
-  async generateABVariants(subject: string) {
-    return {
-      success: true,
-      data: {
-        variants: [
-          { text: subject + " - Variant A", score: 87 },
-          { text: subject + " - Variant B", score: 84 },
-          { text: subject + " - Variant C", score: 89 }
-        ]
-      },
-      error: undefined
-    };
-  }
-
-  async suggestSendTime(options: any) {
-    return {
-      success: true,
-      data: {
-        optimal_time: "Tuesday 10:30 AM",
-        improvement: "15"
-      },
-      error: undefined
-    };
-  }
-
-  async getEmailAnalytics() {
-    return { success: true, data: [], error: undefined };
-  }
-
-  async getSocialAnalytics() {
-    return { success: true, data: [], error: undefined };
-  }
-
-  async getEmailRealTimeMetrics() {
-    return { success: true, data: [], error: undefined };
-  }
-
-  // Social methods
-  async createSocialPost(postData: any) {
-    return { success: true, data: postData, error: undefined };
-  }
-
-  async scheduleSocialPost(postData: any) {
-    return { success: true, data: postData, error: undefined };
-  }
-
-  // Workflow methods
-  async getWorkflows() {
-    return { success: true, data: [], error: undefined };
-  }
-
-  async createWorkflow(workflowData: any) {
-    return { success: true, data: workflowData, error: undefined };
-  }
-
-  async executeWorkflow(workflowId: string) {
-    return { success: true, data: { id: workflowId, status: 'executed' }, error: undefined };
-  }
-
-  async getWorkflowStatus(workflowId: string) {
-    return { 
-      success: true, 
-      data: { 
-        workflow_id: workflowId, 
-        status: 'running',
-        current_step: 1,
-        total_steps: 5,
-        started_at: new Date().toISOString(),
-        estimated_completion: new Date(Date.now() + 3600000).toISOString()
-      },
-      error: undefined
-    };
-  }
-
-  async updateWorkflow(workflowId: string, workflowData: any) {
-    return { success: true, data: { id: workflowId, ...workflowData }, error: undefined };
-  }
-
-  async deleteWorkflow(workflowId: string) {
-    return { success: true, data: { id: workflowId, deleted: true }, error: undefined };
-  }
-
-  // Enhanced placeholder properties for compatibility - now properly including error property
-  analytics = {
-    getMetrics: () => ({ success: true, data: [], error: undefined }),
-    getReports: () => ({ success: true, data: [], error: undefined }),
-    getSystemStats: () => ({ success: true, data: { uptime: 99.9, performance: 95, errors: 0, engagement: 0 }, error: undefined }),
-    exportAnalyticsReport: (format: string, timeRange: string) => ({ success: true, data: {}, error: undefined }),
-    getAnalyticsOverview: () => ({ success: true, data: { uptime: 99.9, performance: 95, errors: 0, engagement: 0 }, error: undefined })
-  };
-
-  integrations = {
-    getConnections: () => ({ success: true, data: [], error: undefined }),
-    connect: () => ({ success: true, data: {}, error: undefined }),
-    disconnect: () => ({ success: true, data: {}, error: undefined }),
-    getWebhooks: () => ({ success: true, data: [], error: undefined }),
-    createWebhook: (data: any) => ({ success: true, data, error: undefined }),
-    deleteWebhook: (id: string) => ({ success: true, data: {}, error: undefined }),
-    testWebhook: (id: string) => ({ success: true, data: {}, error: undefined }),
-    connectService: (service: string, apiKey: string) => ({ success: true, data: {}, error: undefined }),
-    syncService: (service: string) => ({ success: true, data: {}, error: undefined }),
-    disconnectService: (service: string) => ({ success: true, data: {}, error: undefined }),
-    createConnection: (data: any) => ({ success: true, data, error: undefined }),
-    deleteConnection: (id: string) => ({ success: true, data: {}, error: undefined })
-  };
-
-  realTimeMetrics = {
-    getMetrics: () => ({ success: true, data: [], error: undefined }),
-    subscribe: () => ({ success: true, data: {}, error: undefined }),
-    getEntityMetrics: (entityType: string, entityId: string) => ({ success: true, data: [], error: undefined }),
-    getDashboardMetrics: () => ({ success: true, data: {}, error: undefined })
-  };
-
-  socialPlatforms = {
-    getConnected: () => ({ success: true, data: [], error: undefined }),
-    connect: () => ({ success: true, data: {}, error: undefined }),
-    disconnect: () => ({ success: true, data: {}, error: undefined }),
-    getMetrics: () => ({ success: true, data: [], error: undefined }),
-    getPlatformConnections: () => ({ success: true, data: [], error: undefined }),
-    initiatePlatformConnection: (platform: string) => ({ success: true, data: { authorization_url: `https://oauth.example.com/${platform}` }, error: undefined }),
-    disconnectPlatform: (platform: string) => ({ success: true, data: {}, error: undefined }),
-    testPlatformConnection: (platform: string) => ({ success: true, data: { message: 'Connection test successful' }, error: undefined })
-  };
-
-  userPreferences = {
-    get: () => ({ success: true, data: [], error: undefined }),
-    update: () => ({ success: true, data: {}, error: undefined }),
-    getUserPreferences: (category: string) => ({ success: true, data: [], error: undefined }),
-    updateUserPreferences: (category: string, data: any) => ({ success: true, data: [], error: undefined })
-  };
 }
 
 export const apiClient = new ApiClient();
+export type { Campaign, CreateCampaignData, ApiResponse };

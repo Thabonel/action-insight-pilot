@@ -2,21 +2,23 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { apiClient } from '@/lib/api-client';
+import { apiClient, Campaign } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import CampaignForm from '@/components/CampaignForm';
 import CampaignCard from '@/components/CampaignCard';
 import EmptyState from '@/components/EmptyState';
 import { AlertCircle, WifiOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface Campaign {
-  id: string;
+interface NewCampaign {
   name: string;
   type: string;
   status: string;
-  description?: string;
+  description: string;
 }
+
+type CampaignFilter = 'all' | 'active' | 'archived';
 
 const Campaigns: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -24,7 +26,8 @@ const Campaigns: React.FC = () => {
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
-  const [newCampaign, setNewCampaign] = useState({
+  const [activeFilter, setActiveFilter] = useState<CampaignFilter>('active');
+  const [newCampaign, setNewCampaign] = useState<NewCampaign>({
     name: '',
     type: 'email',
     status: 'draft',
@@ -97,6 +100,9 @@ const Campaigns: React.FC = () => {
         const createdCampaign = result.data as Campaign;
         console.log('Campaign created successfully:', createdCampaign);
         
+        // Add to campaigns list optimistically
+        setCampaigns(prev => [createdCampaign, ...prev]);
+        
         // Reset form and hide create form
         setNewCampaign({ name: '', type: 'email', status: 'draft', description: '' });
         setShowCreateForm(false);
@@ -108,9 +114,6 @@ const Campaigns: React.FC = () => {
           title: "Success!",
           description: `Campaign "${createdCampaign.name}" created successfully`,
         });
-        
-        // Reload the campaigns list to show the new campaign
-        await loadCampaigns();
         
         // Navigate to campaign details if we have a valid ID
         if (createdCampaign.id) {
@@ -140,6 +143,18 @@ const Campaigns: React.FC = () => {
     }
   };
 
+  const handleCampaignUpdate = (updatedCampaign: Campaign) => {
+    setCampaigns(prev => 
+      prev.map(campaign => 
+        campaign.id === updatedCampaign.id ? updatedCampaign : campaign
+      )
+    );
+  };
+
+  const handleCampaignDelete = (campaignId: string) => {
+    setCampaigns(prev => prev.filter(campaign => campaign.id !== campaignId));
+  };
+
   const handleShowCreateForm = () => {
     setShowCreateForm(true);
     behaviorTracker.trackAction('planning', 'campaigns', { action: 'show_create_form' });
@@ -149,6 +164,27 @@ const Campaigns: React.FC = () => {
     setLoading(true);
     loadCampaigns();
   };
+
+  const handleFilterChange = (filter: CampaignFilter) => {
+    setActiveFilter(filter);
+    behaviorTracker.trackAction('filter', 'campaigns', { filter });
+  };
+
+  const getFilteredCampaigns = () => {
+    switch (activeFilter) {
+      case 'active':
+        return campaigns.filter(campaign => campaign.status !== 'archived');
+      case 'archived':
+        return campaigns.filter(campaign => campaign.status === 'archived');
+      case 'all':
+      default:
+        return campaigns;
+    }
+  };
+
+  const filteredCampaigns = getFilteredCampaigns();
+  const activeCount = campaigns.filter(c => c.status !== 'archived').length;
+  const archivedCount = campaigns.filter(c => c.status === 'archived').length;
 
   if (loading) {
     return (
@@ -208,20 +244,51 @@ const Campaigns: React.FC = () => {
         />
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {campaigns.length === 0 ? (
-          <div className="col-span-full">
-            <EmptyState onCreateCampaign={handleShowCreateForm} />
+      <Tabs value={activeFilter} onValueChange={(value) => handleFilterChange(value as CampaignFilter)}>
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="active">
+            Active ({activeCount})
+          </TabsTrigger>
+          <TabsTrigger value="archived">
+            Archived ({archivedCount})
+          </TabsTrigger>
+          <TabsTrigger value="all">
+            All ({campaigns.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={activeFilter}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCampaigns.length === 0 ? (
+              <div className="col-span-full">
+                {activeFilter === 'active' && campaigns.length === 0 ? (
+                  <EmptyState onCreateCampaign={handleShowCreateForm} />
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 text-lg">
+                      No {activeFilter === 'all' ? '' : activeFilter} campaigns found.
+                    </p>
+                    {activeFilter === 'active' && archivedCount > 0 && (
+                      <p className="text-gray-400 text-sm mt-2">
+                        You have {archivedCount} archived campaign{archivedCount !== 1 ? 's' : ''}.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              filteredCampaigns.map((campaign) => (
+                <CampaignCard 
+                  key={campaign.id || `campaign-${Math.random()}`} 
+                  campaign={campaign}
+                  onCampaignUpdate={handleCampaignUpdate}
+                  onCampaignDelete={handleCampaignDelete}
+                />
+              ))
+            )}
           </div>
-        ) : (
-          campaigns.map((campaign) => (
-            <CampaignCard 
-              key={campaign.id || `campaign-${Math.random()}`} 
-              campaign={campaign} 
-            />
-          ))
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

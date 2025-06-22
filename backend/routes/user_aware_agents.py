@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -23,6 +24,13 @@ class DailyFocusRequest(BaseModel):
 class GeneralQueryRequest(BaseModel):
     task_type: str
     input_data: Dict[str, Any]
+
+class CampaignCreateRequest(BaseModel):
+    name: str
+    type: str = "content"
+    channel: str = "email"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Extract user ID from JWT token"""
@@ -71,6 +79,30 @@ async def get_user_campaigns(user_id: str) -> List[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"❌ Failed to get campaigns for user {user_id}: {e}")
         return []
+
+async def verify_campaign_ownership(campaign_id: str, user_id: str):
+    """Verify that the campaign belongs to the authenticated user"""
+    try:
+        supabase = get_supabase()
+        result = supabase.table('campaigns')\
+            .select('id, created_by')\
+            .eq('id', campaign_id)\
+            .execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        
+        campaign = result.data[0]
+        if campaign.get('created_by') != user_id:
+            raise HTTPException(status_code=403, detail="Access denied: Campaign belongs to another user")
+        
+        return campaign
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to verify campaign ownership: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/api/agents/daily-focus")
 async def daily_focus_agent(
@@ -182,21 +214,6 @@ async def get_campaigns(user_id: str = Depends(get_current_user)):
         logger.error(f"Failed to retrieve campaigns for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# Health check endpoint
-@router.get("/healthcheck")
-async def health_check():
-    """
-    Endpoint to check the health of the agent service.
-    """
-    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
-
-class CampaignCreateRequest(BaseModel):
-    name: str
-    type: str = "content"
-    channel: str = "email"
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-
 @router.post("/api/campaigns")
 async def create_campaign(
     request: CampaignCreateRequest,
@@ -238,3 +255,104 @@ async def create_campaign(
     except Exception as e:
         logger.error(f"❌ Failed to create campaign for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/api/campaigns/{campaign_id}")
+async def delete_campaign(
+    campaign_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Permanently delete a campaign for the authenticated user.
+    """
+    try:
+        # Verify campaign ownership
+        await verify_campaign_ownership(campaign_id, user_id)
+        
+        supabase = get_supabase()
+        
+        # Delete the campaign
+        result = supabase.table('campaigns')\
+            .delete()\
+            .eq('id', campaign_id)\
+            .execute()
+        
+        logger.info(f"✅ Deleted campaign {campaign_id} for user {user_id}")
+        return {"success": True, "message": "Campaign deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to delete campaign {campaign_id} for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/api/campaigns/{campaign_id}/archive")
+async def archive_campaign(
+    campaign_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Archive a campaign for the authenticated user.
+    """
+    try:
+        # Verify campaign ownership
+        await verify_campaign_ownership(campaign_id, user_id)
+        
+        supabase = get_supabase()
+        
+        # Update campaign status to archived
+        result = supabase.table('campaigns')\
+            .update({"status": "archived", "updated_at": datetime.utcnow().isoformat()})\
+            .eq('id', campaign_id)\
+            .execute()
+        
+        if result.data:
+            logger.info(f"✅ Archived campaign {campaign_id} for user {user_id}")
+            return {"success": True, "data": result.data[0]}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to archive campaign")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to archive campaign {campaign_id} for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/api/campaigns/{campaign_id}/restore")
+async def restore_campaign(
+    campaign_id: str,
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Restore an archived campaign for the authenticated user.
+    """
+    try:
+        # Verify campaign ownership
+        await verify_campaign_ownership(campaign_id, user_id)
+        
+        supabase = get_supabase()
+        
+        # Update campaign status to active
+        result = supabase.table('campaigns')\
+            .update({"status": "active", "updated_at": datetime.utcnow().isoformat()})\
+            .eq('id', campaign_id)\
+            .execute()
+        
+        if result.data:
+            logger.info(f"✅ Restored campaign {campaign_id} for user {user_id}")
+            return {"success": True, "data": result.data[0]}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to restore campaign")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to restore campaign {campaign_id} for user {user_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Health check endpoint
+@router.get("/healthcheck")
+async def health_check():
+    """
+    Endpoint to check the health of the agent service.
+    """
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
