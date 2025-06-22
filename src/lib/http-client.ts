@@ -1,4 +1,3 @@
-
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -8,14 +7,18 @@ export interface ApiResponse<T = any> {
 export class HttpClient {
   private baseUrl: string;
   private token: string | null = null;
+  private apiKey: string;
   private timeout = 30000; // 30 seconds timeout
 
   constructor(baseUrl: string = 'https://wheels-wins-orchestrator.onrender.com') {
     this.baseUrl = baseUrl;
+    // Use your Supabase API key - you may need to adjust this
+    this.apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjaXV1eG9xeGZzb2dqdXFmbG91Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNzE4NTY5NywiZXhwIjoyMDMyNzYxNjk3fQ.w_2tVvaS6AHY7IJ6PKAkFXBb7fS0-vIEkOz_Eg4O6qc';
   }
 
   setToken(token: string) {
     this.token = token;
+    console.log('HTTP Client token updated:', token ? 'Token provided' : 'No token');
   }
 
   async get<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
@@ -47,7 +50,8 @@ export class HttpClient {
       const url = `${this.baseUrl}${endpoint}`;
       const headers = {
         'Content-Type': 'application/json',
-        ...(this.token && { Authorization: `Bearer ${this.token}` }),
+        'apikey': this.apiKey,
+        ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
         ...options.headers,
       };
 
