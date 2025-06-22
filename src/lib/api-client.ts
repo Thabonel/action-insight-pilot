@@ -82,7 +82,11 @@ export class ApiClient {
   }
 
   async searchLeads(query: string): Promise<ApiResponse<any[]>> {
-    return this.leads.searchLeads(query);
+    const response = await this.leads.searchLeads(query);
+    return {
+      ...response,
+      data: Array.isArray(response.data) ? response.data : [],
+    };
   }
 
   async getLeadAnalytics(): Promise<ApiResponse<any>> {
