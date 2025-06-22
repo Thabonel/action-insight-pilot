@@ -53,18 +53,10 @@ export class ApiClient {
 
   public integrations = {
     getWebhooks: async (): Promise<ApiResponse<any[]>> => {
-      const response = await this.httpClient.get('/api/integrations/webhooks');
-      return {
-        ...response,
-        data: Array.isArray(response.data) ? response.data : []
-      };
+      return this.httpClient.get<any[]>('/api/integrations/webhooks');
     },
     getConnections: async (): Promise<ApiResponse<any[]>> => {
-      const response = await this.httpClient.get('/api/integrations/connections');
-      return {
-        ...response,
-        data: Array.isArray(response.data) ? response.data : []
-      };
+      return this.httpClient.get<any[]>('/api/integrations/connections');
     },
     createConnection: async (connectionData: any): Promise<ApiResponse<any>> => {
       return this.httpClient.post('/api/integrations/connections', connectionData);
@@ -106,18 +98,10 @@ export class ApiClient {
 
   public socialPlatforms = {
     getPlatformConnections: async (): Promise<ApiResponse<any[]>> => {
-      const response = await this.httpClient.get('/api/social/platforms');
-      return {
-        ...response,
-        data: Array.isArray(response.data) ? response.data : []
-      };
+      return this.httpClient.get<any[]>('/api/social/platforms');
     },
     getConnected: async (): Promise<ApiResponse<any[]>> => {
-      const response = await this.httpClient.get('/api/social/platforms');
-      return {
-        ...response,
-        data: Array.isArray(response.data) ? response.data : []
-      };
+      return this.httpClient.get<any[]>('/api/social/platforms');
     },
     initiatePlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
       return this.httpClient.post(`/api/social/platforms/${platform}/connect`);
@@ -249,7 +233,7 @@ export class ApiClient {
 
   // Workflow methods
   async getWorkflows(): Promise<ApiResponse<any[]>> {
-    return this.httpClient.get('/api/workflows');
+    return this.httpClient.get<any[]>('/api/workflows');
   }
 
   async createWorkflow(workflowData: any): Promise<ApiResponse<any>> {
