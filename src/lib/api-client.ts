@@ -193,7 +193,7 @@ export class ApiClient {
     return this.httpClient.get('/api/email/analytics');
   }
 
-  async getEmailRealTimeMetrics(): Promise<ApiResponse<any>> => {
+  async getEmailRealTimeMetrics(): Promise<ApiResponse<any>> {
     return this.httpClient.get('/api/email/metrics/realtime');
   }
 
