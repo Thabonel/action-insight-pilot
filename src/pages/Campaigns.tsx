@@ -1,237 +1,117 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, DollarSign, BarChart3 } from 'lucide-react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { apiClient, Campaign } from '@/lib/api-client';
-import { useToast } from '@/hooks/use-toast';
-import CampaignForm from '@/components/CampaignForm';
-import CampaignCard from '@/components/CampaignCard';
-import EmptyState from '@/components/EmptyState';
-import { AlertCircle, WifiOff } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import CampaignActionMenu from './CampaignActionMenu';
+import { Campaign } from '@/lib/api-client';
 
-interface NewCampaign {
-  name: string;
-  type: string;
-  status: string;
-  description: string;
+interface CampaignCardProps {
+  campaign: Campaign;
+  onCampaignUpdate: (updatedCampaign: Campaign) => void;
+  onCampaignDelete: (campaignId: string) => void;
 }
 
-const Campaigns: React.FC = () => {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [connectionError, setConnectionError] = useState(false);
-  const [newCampaign, setNewCampaign] = useState<NewCampaign>({
-    name: '',
-    type: 'email',
-    status: 'draft',
-    description: ''
-  });
-  const { toast } = useToast();
+const CampaignCard: React.FC<CampaignCardProps> = ({ 
+  campaign, 
+  onCampaignUpdate, 
+  onCampaignDelete 
+}) => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    behaviorTracker.trackAction('navigation', 'campaigns', { section: 'main' });
-    loadCampaigns();
-  }, []);
-
-  const loadCampaigns = async () => {
-    const actionId = behaviorTracker.trackFeatureStart('campaigns_load');
-    try {
-      setConnectionError(false);
-      console.log('Loading campaigns...');
-      const result = await apiClient.getCampaigns();
-      
-      if (result.success && result.data) {
-        const campaignsData = Array.isArray(result.data) ? result.data : [];
-        setCampaigns(campaignsData);
-        behaviorTracker.trackFeatureComplete('campaigns_load', actionId, true);
-        console.log('Campaigns loaded successfully:', campaignsData);
-      } else {
-        console.error('Failed to load campaigns:', result.error);
-        setConnectionError(true);
-        behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
-        toast({
-          title: "Failed to load campaigns",
-          description: result.error || "Unknown error occurred",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error loading campaigns:', error);
-      setConnectionError(true);
-      behaviorTracker.trackFeatureComplete('campaigns_load', actionId, false);
-      toast({
-        title: "Connection Error",
-        description: "Unable to connect to the server. Please check your internet connection.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateCampaign = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newCampaign.name.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Campaign name is required",
-        variant: "destructive",
-      });
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on the action menu
+    if ((e.target as HTMLElement).closest('[role="button"]')) {
       return;
     }
-
-    const actionId = behaviorTracker.trackFeatureStart('campaign_create');
-    setCreating(true);
     
-    try {
-      console.log('Creating campaign with data:', newCampaign);
-      const result = await apiClient.createCampaign(newCampaign);
-      
-      if (result.success && result.data) {
-        const createdCampaign = result.data as Campaign;
-        console.log('Campaign created successfully:', createdCampaign);
-        
-        setCampaigns(prev => [createdCampaign, ...prev]);
-        setNewCampaign({ name: '', type: 'email', status: 'draft', description: '' });
-        setShowCreateForm(false);
-        setConnectionError(false);
-        
-        behaviorTracker.trackFeatureComplete('campaign_create', actionId, true);
-        
-        toast({
-          title: "Success!",
-          description: `Campaign "${createdCampaign.name}" created successfully`,
-        });
-        
-        if (createdCampaign.id) {
-          navigate(`/campaigns/${createdCampaign.id}`);
-        }
-        
-      } else {
-        console.error('Failed to create campaign:', result.error);
-        behaviorTracker.trackFeatureComplete('campaign_create', actionId, false);
-        toast({
-          title: "Failed to create campaign",
-          description: result.error || "Unknown error occurred",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error creating campaign:', error);
-      setConnectionError(true);
-      behaviorTracker.trackFeatureComplete('campaign_create', actionId, false);
-      toast({
-        title: "Connection Error",
-        description: "Unable to connect to the server. The campaign could not be created.",
-        variant: "destructive",
-      });
-    } finally {
-      setCreating(false);
+    behaviorTracker.trackAction('navigation', 'campaign_details', {
+      campaignId: campaign.id,
+      campaignName: campaign.name
+    });
+    navigate(`/campaigns/${campaign.id}`);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'paused': return 'bg-yellow-100 text-yellow-800';
+      case 'completed': return 'bg-blue-100 text-blue-800';
+      case 'archived': return 'bg-slate-100 text-slate-600';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const handleCampaignUpdate = (updatedCampaign: Campaign) => {
-    setCampaigns(prev => 
-      prev.map(campaign => 
-        campaign.id === updatedCampaign.id ? updatedCampaign : campaign
-      )
-    );
-  };
-
-  const handleCampaignDelete = (campaignId: string) => {
-    setCampaigns(prev => prev.filter(campaign => campaign.id !== campaignId));
-  };
-
-  const handleShowCreateForm = () => {
-    setShowCreateForm(true);
-    behaviorTracker.trackAction('planning', 'campaigns', { action: 'show_create_form' });
-  };
-
-  const handleRetryConnection = () => {
-    setLoading(true);
-    loadCampaigns();
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campaigns...</p>
-        </div>
-      </div>
-    );
-  }
+  // Safely handle potentially empty values
+  const safeStatus = campaign.status || 'draft';
+  const safeType = campaign.type || 'email';
+  const safeChannel = campaign.channel || 'unknown';
+  
+  const isArchived = safeStatus === 'archived';
 
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Campaign Management</h1>
-          <p className="mt-2 text-slate-600">Create and manage your marketing campaigns</p>
+    <Card 
+      className={`cursor-pointer hover:shadow-md transition-shadow ${
+        isArchived ? 'opacity-60 bg-slate-50' : ''
+      }`}
+      onClick={handleCardClick}
+    >
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className={`text-sm font-medium ${isArchived ? 'text-slate-600' : ''}`}>
+          {campaign.name || 'Untitled Campaign'}
+        </CardTitle>
+        <div className="flex items-center space-x-2">
+          <Badge className={getStatusColor(safeStatus)}>
+            {safeStatus}
+          </Badge>
+          <CampaignActionMenu
+            campaign={campaign}
+            onCampaignUpdate={onCampaignUpdate}
+            onCampaignDelete={onCampaignDelete}
+          />
         </div>
-        <button
-          onClick={handleShowCreateForm}
-          disabled={creating}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-        >
-          {creating && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
-          <span>{creating ? 'Creating...' : 'Create Campaign'}</span>
-        </button>
-      </div>
-
-      {connectionError && (
-        <Alert className="mb-6 border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <WifiOff className="h-4 w-4" />
-                <span>Unable to connect to the server. Some features may not work properly.</span>
-              </div>
-              <button
-                onClick={handleRetryConnection}
-                className="ml-4 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
-              >
-                Retry
-              </button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {showCreateForm && (
-        <CampaignForm
-          newCampaign={newCampaign}
-          setNewCampaign={setNewCampaign}
-          onSubmit={handleCreateCampaign}
-          onCancel={() => setShowCreateForm(false)}
-          loading={creating}
-        />
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {campaigns.length === 0 ? (
-          <div className="col-span-full">
-            <EmptyState onCreateCampaign={handleShowCreateForm} />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <BarChart3 className="mr-2 h-4 w-4" />
+            <span className="capitalize">{safeType}</span>
+            <span className="mx-2">•</span>
+            <span className="capitalize">{safeChannel}</span>
           </div>
-        ) : (
-          campaigns.map((campaign) => (
-            <CampaignCard 
-              key={campaign.id || `campaign-${Math.random()}`} 
-              campaign={campaign}
-              onCampaignUpdate={handleCampaignUpdate}
-              onCampaignDelete={handleCampaignDelete}
-            />
-          ))
-        )}
-      </div>
-    </div>
+          
+          {campaign.budget_allocated && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <DollarSign className="mr-2 h-4 w-4" />
+              <span>Budget: ${campaign.budget_allocated.toLocaleString()}</span>
+              {campaign.budget_spent && (
+                <span className="ml-2 text-xs">
+                  (${campaign.budget_spent.toLocaleString()} spent)
+                </span>
+              )}
+            </div>
+          )}
+          
+          {campaign.start_date && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="mr-2 h-4 w-4" />
+              <span>
+                Starts: {new Date(campaign.start_date).toLocaleDateString()}
+              </span>
+            </div>
+          )}
+
+          {campaign.description && (
+            <p className={`text-sm mt-2 ${isArchived ? 'text-slate-500' : 'text-gray-600'}`}>
+              {campaign.description}
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
-export default Campaigns;
+export default CampaignCard;
