@@ -1,5 +1,5 @@
 
-import { HttpClient } from '../http-client';
+import { HttpClient, ApiResponse } from '../http-client';
 
 export class LeadsService {
   constructor(private httpClient: HttpClient) {}
