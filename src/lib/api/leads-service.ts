@@ -23,8 +23,8 @@ export class LeadsService {
     });
   }
 
-  async exportLeads(format: 'csv' | 'json' = 'csv') {
-    return this.httpClient.request(`/api/leads/export?format=${format}`, {
+  async exportLeads(format: 'csv' | 'json' = 'csv'): Promise<ApiResponse<string>> {
+    return this.httpClient.request<string>(`/api/leads/export?format=${format}`, {
       method: 'GET',
     });
   }
