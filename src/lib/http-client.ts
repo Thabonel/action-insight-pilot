@@ -12,10 +12,17 @@ export class HttpClient {
 
   constructor(baseUrl: string = 'https://wheels-wins-orchestrator.onrender.com') {
     this.baseUrl = baseUrl;
-    // Get the API key from environment variables
-    this.apiKey = import.meta.env.VITE_SUPABASE_KEY || '';
+    // Try multiple possible environment variable names
+    this.apiKey = import.meta.env.VITE_SUPABASE_KEY || 
+                 import.meta.env.SUPABASE_KEY || 
+                 import.meta.env.VITE_SUPABASE_ANON_KEY || 
+                 '';
+    
     if (!this.apiKey) {
-      console.warn('VITE_SUPABASE_KEY not found in environment variables');
+      console.warn('No Supabase API key found in environment variables');
+      console.log('Available env vars:', Object.keys(import.meta.env));
+    } else {
+      console.log('✅ Supabase API key found');
     }
   }
 
@@ -61,7 +68,8 @@ export class HttpClient {
       console.log('Making request with headers:', { 
         hasApiKey: !!this.apiKey, 
         hasToken: !!this.token,
-        url 
+        url,
+        apiKeyLength: this.apiKey ? this.apiKey.length : 0
       });
 
       // Add timeout to fetch
@@ -128,31 +136,4 @@ export class HttpClient {
     } catch (error) {
       console.error('API Request failed:', error);
       
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          return {
-            success: false,
-            error: 'Request timeout. Please try again.',
-          };
-        }
-        
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-          return {
-            success: false,
-            error: 'Unable to connect to server. Please check your internet connection.',
-          };
-        }
-        
-        return {
-          success: false,
-          error: `Network error: ${error.message}`,
-        };
-      }
-      
-      return {
-        success: false,
-        error: 'Unknown network error occurred',
-      };
-    }
-  }
-}
+      if (error instanceof Er
