@@ -10,14 +10,16 @@ import { Campaign } from '@/lib/api-client';
 
 interface CampaignCardProps {
   campaign: Campaign;
-  onCampaignUpdate: (updatedCampaign: Campaign) => void;
-  onCampaignDelete: (campaignId: string) => void;
+  onCampaignUpdate?: (updatedCampaign: Campaign) => void;
+  onCampaignDelete?: (campaignId: string) => void;
+  onAction?: (campaignId: string, action: 'delete' | 'archive' | 'restore') => void;
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({ 
   campaign, 
   onCampaignUpdate, 
-  onCampaignDelete 
+  onCampaignDelete,
+  onAction
 }) => {
   const navigate = useNavigate();
 
@@ -45,7 +47,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
     }
   };
 
-  const isArchived = campaign.status === 'archived';
+  const isArchived = campaign.status === 'archived' || campaign.is_archived;
 
   return (
     <Card 
@@ -62,11 +64,14 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
           <Badge className={getStatusColor(campaign.status)}>
             {campaign.status}
           </Badge>
-          <CampaignActionMenu
-            campaign={campaign}
-            onCampaignUpdate={onCampaignUpdate}
-            onCampaignDelete={onCampaignDelete}
-          />
+          {(onCampaignUpdate || onCampaignDelete || onAction) && (
+            <CampaignActionMenu
+              campaign={campaign}
+              onCampaignUpdate={onCampaignUpdate}
+              onCampaignDelete={onCampaignDelete}
+              onAction={onAction}
+            />
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -78,10 +83,10 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
             <span className="capitalize">{campaign.channel}</span>
           </div>
           
-          {campaign.budget_allocated && (
+          {(campaign.budget_allocated || campaign.budget) && (
             <div className="flex items-center text-sm text-muted-foreground">
               <DollarSign className="mr-2 h-4 w-4" />
-              <span>Budget: ${campaign.budget_allocated.toLocaleString()}</span>
+              <span>Budget: {campaign.budget_allocated ? `$${campaign.budget_allocated.toLocaleString()}` : campaign.budget}</span>
               {campaign.budget_spent && (
                 <span className="ml-2 text-xs">
                   (${campaign.budget_spent.toLocaleString()} spent)

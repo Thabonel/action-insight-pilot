@@ -26,6 +26,9 @@ export interface Campaign {
   created_at: string;
   updated_at: string;
   is_archived?: boolean;
+  budget_allocated?: number;
+  budget_spent?: number;
+  start_date?: string;
 }
 
 export class ApiClient {
@@ -54,6 +57,12 @@ export class ApiClient {
     },
     getConnections: async (): Promise<ApiResponse<any[]>> => {
       return this.httpClient.get('/api/integrations/connections');
+    },
+    createConnection: async (connectionData: any): Promise<ApiResponse<any>> => {
+      return this.httpClient.post('/api/integrations/connections', connectionData);
+    },
+    deleteConnection: async (connectionId: string): Promise<ApiResponse<any>> => {
+      return this.httpClient.delete(`/api/integrations/connections/${connectionId}`);
     },
     createWebhook: async (webhookData: any): Promise<ApiResponse<any>> => {
       return this.httpClient.post('/api/integrations/webhooks', webhookData);
@@ -184,20 +193,20 @@ export class ApiClient {
     return this.httpClient.get('/api/email/analytics');
   }
 
-  async getEmailRealTimeMetrics(): Promise<ApiResponse<any>> {
+  async getEmailRealTimeMetrics(): Promise<ApiResponse<any>> => {
     return this.httpClient.get('/api/email/metrics/realtime');
   }
 
-  async generateEmailContent(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post('/api/email/generate', data);
+  async generateEmailContent(data: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/email/generate', { data });
   }
 
-  async generateABVariants(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post('/api/email/ab-variants', data);
+  async generateABVariants(data: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/email/ab-variants', { data });
   }
 
-  async suggestSendTime(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post('/api/email/send-time', data);
+  async suggestSendTime(data: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/email/send-time', { data });
   }
 
   // Social methods
@@ -213,8 +222,8 @@ export class ApiClient {
     return this.httpClient.post('/api/social/schedule', scheduleData);
   }
 
-  async generateSocialContent(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post('/api/social/generate', data);
+  async generateSocialContent(contentType: string, audience: string, platform: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/social/generate', { contentType, audience, platform });
   }
 
   // Content methods
@@ -253,12 +262,12 @@ export class ApiClient {
   }
 
   // Agent methods
-  async executeAgentTask(taskType: string, inputData: any): Promise<ApiResponse<any>> {
+  async executeAgentTask(taskType: string, inputData: string): Promise<ApiResponse<any>> {
     return this.httpClient.post('/api/agents/execute', { taskType, inputData });
   }
 
-  async scoreLeads(criteria: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post('/api/leads/score', criteria);
+  async scoreLeads(criteria: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post('/api/leads/score', { criteria });
   }
 
   async callDailyFocusAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse<any>> {
