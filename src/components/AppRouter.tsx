@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,6 +42,7 @@ const AppRouter: React.FC = () => {
         <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="chat" element={<ConversationalDashboard />} />
+        <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
         <Route path="campaigns" element={<Campaigns />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
         <Route path="campaign-management" element={<CampaignManagement />} />
