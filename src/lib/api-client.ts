@@ -234,8 +234,11 @@ export class ApiClient {
   // Workflow methods
   async getWorkflows(): Promise<ApiResponse<any[]>> {
     const response = await this.httpClient.get<any[]>('/api/workflows');
-    // Ensure response is an object and data is always an array
-    if (response && typeof response === 'object') {
+    if (
+      response &&
+      typeof response === 'object' &&
+      typeof response.success === 'boolean'
+    ) {
       return {
         ...response,
         data: Array.isArray(response.data) ? response.data : [],
@@ -243,8 +246,7 @@ export class ApiClient {
     } else {
       return {
         data: [],
-        status: 200,
-        message: '',
+        success: false,
       };
     }
   }
