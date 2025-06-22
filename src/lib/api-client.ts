@@ -53,10 +53,18 @@ export class ApiClient {
 
   public integrations = {
     getWebhooks: async (): Promise<ApiResponse<any[]>> => {
-      return this.httpClient.get('/api/integrations/webhooks');
+      const response = await this.httpClient.get('/api/integrations/webhooks');
+      return {
+        ...response,
+        data: Array.isArray(response.data) ? response.data : []
+      };
     },
     getConnections: async (): Promise<ApiResponse<any[]>> => {
-      return this.httpClient.get('/api/integrations/connections');
+      const response = await this.httpClient.get('/api/integrations/connections');
+      return {
+        ...response,
+        data: Array.isArray(response.data) ? response.data : []
+      };
     },
     createConnection: async (connectionData: any): Promise<ApiResponse<any>> => {
       return this.httpClient.post('/api/integrations/connections', connectionData);
@@ -98,10 +106,18 @@ export class ApiClient {
 
   public socialPlatforms = {
     getPlatformConnections: async (): Promise<ApiResponse<any[]>> => {
-      return this.httpClient.get('/api/social/platforms');
+      const response = await this.httpClient.get('/api/social/platforms');
+      return {
+        ...response,
+        data: Array.isArray(response.data) ? response.data : []
+      };
     },
     getConnected: async (): Promise<ApiResponse<any[]>> => {
-      return this.httpClient.get('/api/social/platforms');
+      const response = await this.httpClient.get('/api/social/platforms');
+      return {
+        ...response,
+        data: Array.isArray(response.data) ? response.data : []
+      };
     },
     initiatePlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
       return this.httpClient.post(`/api/social/platforms/${platform}/connect`);

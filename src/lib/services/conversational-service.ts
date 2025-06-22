@@ -100,6 +100,48 @@ export class ConversationalService {
       };
     }
   }
+
+  // Static methods that were missing
+  static async getAuthToken(): Promise<string | null> {
+    // For now, return null as we don't have a proper auth token system
+    // This would typically integrate with your authentication system
+    return null;
+  }
+
+  static async fetchCampaignData(authToken?: string | null): Promise<any[]> {
+    try {
+      const response = await apiClient.getCampaigns();
+      if (response.success && Array.isArray(response.data)) {
+        return response.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch campaign data:', error);
+      return [];
+    }
+  }
+
+  static async callDailyFocusAgent(
+    query: string,
+    campaignData: any[],
+    context: any[],
+    authToken?: string | null
+  ): Promise<any> {
+    return await apiClient.callDailyFocusAgent(query, campaignData, context);
+  }
+
+  static async callGeneralCampaignAgent(
+    query: string,
+    campaignData: any[],
+    context: any[],
+    authToken?: string | null
+  ): Promise<any> {
+    return await apiClient.callGeneralCampaignAgent('general_query', {
+      query,
+      campaigns: campaignData,
+      context
+    });
+  }
 }
 
 export const conversationalService = new ConversationalService();
