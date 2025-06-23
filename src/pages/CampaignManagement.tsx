@@ -10,6 +10,12 @@ import BlogCreator from '@/components/campaigns/BlogCreator';
 const CampaignManagement: React.FC = () => {
   const [activeView, setActiveView] = useState<'overview' | 'create' | 'templates' | 'brand-ambassador' | 'blog-creator'>('overview');
 
+  const handleTemplateSelect = (templateId: string) => {
+    console.log('Template selected:', templateId);
+    // Switch to create tab when a template is selected
+    setActiveView('create');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -35,7 +41,7 @@ const CampaignManagement: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
-          <CampaignTemplates />
+          <CampaignTemplates onTemplateSelect={handleTemplateSelect} />
         </TabsContent>
 
         <TabsContent value="brand-ambassador" className="space-y-4">
