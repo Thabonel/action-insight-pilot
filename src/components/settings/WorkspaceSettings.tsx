@@ -1,215 +1,201 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Building2, 
-  Users, 
-  Globe, 
-  Palette, 
-  Save,
-  Crown,
-  Upload
-} from 'lucide-react';
-import { useUserPreferences } from '@/hooks/useUserPreferences';
-
-interface WorkspaceData {
-  name: string;
-  domain: string;
-  industry: string;
-  teamSize: string;
-  branding: {
-    primaryColor: string;
-    logo: File | null;
-    favicon: File | null;
-    whiteLabel: boolean;
-  };
-  features: {
-    multiTenant: boolean;
-    customDomain: boolean;
-    advancedAnalytics: boolean;
-    prioritySupport: boolean;
-  };
-}
-
-const defaultWorkspaceData: WorkspaceData = {
-  name: 'MarketingAI Pro',
-  domain: 'marketingai.company.com',
-  industry: 'Software & Technology',
-  teamSize: '25-50',
-  branding: {
-    primaryColor: '#3B82F6',
-    logo: null,
-    favicon: null,
-    whiteLabel: true
-  },
-  features: {
-    multiTenant: true,
-    customDomain: true,
-    advancedAnalytics: true,
-    prioritySupport: true
-  }
-};
+import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
+import { UserPreferences } from '@/lib/api-client-interface';
+import { Building2, Palette, Settings, Save } from 'lucide-react';
 
 const WorkspaceSettings: React.FC = () => {
-  const { 
-    preferences: workspaceData, 
-    updatePreferences, 
-    isLoading 
-  } = useUserPreferences<WorkspaceData>('workspace', defaultWorkspaceData);
+  const [preferences, setPreferences] = useState<UserPreferences>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const [isSaving, setIsSaving] = useState(false);
+  useEffect(() => {
+    loadPreferences();
+  }, []);
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    await updatePreferences(workspaceData);
-    setIsSaving(false);
-  };
-
-  const handleInputChange = (field: string, value: any) => {
-    updatePreferences({ [field]: value });
-  };
-
-  const handleBrandingChange = (field: string, value: any) => {
-    updatePreferences({
-      branding: {
-        ...workspaceData.branding,
-        [field]: value
+  const loadPreferences = async () => {
+    try {
+      const result = await apiClient.getUserPreferences();
+      if (result.success && result.data) {
+        setPreferences(result.data);
       }
-    });
-  };
-
-  const handleFileUpload = (type: 'logo' | 'favicon') => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleBrandingChange(type, file);
+    } catch (error) {
+      console.error('Failed to load preferences:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (isLoading) {
-    return <div className="text-black">Loading workspace settings...</div>;
+  const savePreferences = async () => {
+    setSaving(true);
+    try {
+      const result = await apiClient.updateUserPreferences(preferences);
+      if (result.success) {
+        toast({
+          title: "Settings saved",
+          description: "Your workspace settings have been updated successfully.",
+        });
+      } else {
+        throw new Error(result.error || 'Failed to save settings');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save settings",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updatePreference = (key: keyof UserPreferences, value: any) => {
+    setPreferences(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateNestedPreference = (key: keyof UserPreferences, nestedKey: string, value: any) => {
+    setPreferences(prev => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] as any),
+        [nestedKey]: value
+      }
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      {/* Workspace Overview */}
-      <Card className="bg-white border-gray-200">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Workspace Settings</h2>
+          <p className="text-gray-600">Customize your workspace preferences and branding</p>
+        </div>
+        <Button onClick={savePreferences} disabled={saving}>
+          <Save className="h-4 w-4 mr-2" />
+          {saving ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </div>
+
+      {/* Basic Information */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-black">
+          <CardTitle className="flex items-center space-x-2">
             <Building2 className="h-5 w-5" />
-            <span>Workspace Information</span>
-            <Badge className="bg-green-100 text-green-800">Enterprise</Badge>
+            <span>Basic Information</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="workspace-name" className="text-black">Workspace Name</Label>
-              <Input
-                id="workspace-name"
-                value={workspaceData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className="mt-1 bg-white border-gray-300 text-black"
-              />
-            </div>
-            <div>
-              <Label htmlFor="custom-domain" className="text-black">Custom Domain</Label>
-              <Input
-                id="custom-domain"
-                value={workspaceData.domain}
-                onChange={(e) => handleInputChange('domain', e.target.value)}
-                className="mt-1 bg-white border-gray-300 text-black"
-                placeholder="your-company.com"
-              />
-            </div>
-            <div>
-              <Label htmlFor="industry" className="text-black">Industry</Label>
-              <Input
-                id="industry"
-                value={workspaceData.industry}
-                onChange={(e) => handleInputChange('industry', e.target.value)}
-                className="mt-1 bg-white border-gray-300 text-black"
-              />
-            </div>
-            <div>
-              <Label htmlFor="team-size" className="text-black">Team Size</Label>
-              <Input
-                id="team-size"
-                value={workspaceData.teamSize}
-                onChange={(e) => handleInputChange('teamSize', e.target.value)}
-                className="mt-1 bg-white border-gray-300 text-black"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* White-Label Branding */}
-      <Card className="bg-white border-gray-200">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-black">
-            <Palette className="h-5 w-5" />
-            <span>White-Label Branding</span>
-            <Crown className="h-4 w-4 text-yellow-500" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-black">Enable White-Label Mode</h4>
-              <p className="text-sm text-gray-600">Hide MarketingAI branding and use your own</p>
-            </div>
-            <Switch
-              checked={workspaceData.branding.whiteLabel}
-              onCheckedChange={(checked) => handleBrandingChange('whiteLabel', checked)}
+          <div>
+            <Label htmlFor="workspace-name">Workspace Name</Label>
+            <Input
+              id="workspace-name"
+              value={preferences.name || ''}
+              onChange={(e) => updatePreference('name', e.target.value)}
+              placeholder="Enter workspace name"
             />
           </div>
+          
+          <div>
+            <Label htmlFor="domain">Domain</Label>
+            <Input
+              id="domain"
+              value={preferences.domain || ''}
+              onChange={(e) => updatePreference('domain', e.target.value)}
+              placeholder="yourdomain.com"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="industry">Industry</Label>
+            <Input
+              id="industry"
+              value={preferences.industry || ''}
+              onChange={(e) => updatePreference('industry', e.target.value)}
+              placeholder="e.g., Technology, Healthcare, Retail"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="team-size">Team Size</Label>
+            <Input
+              id="team-size"
+              value={preferences.teamSize || ''}
+              onChange={(e) => updatePreference('teamSize', e.target.value)}
+              placeholder="e.g., 1-10, 11-50, 51-200"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Branding */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Palette className="h-5 w-5" />
+            <span>Branding</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="logo-url">Logo URL</Label>
+            <Input
+              id="logo-url"
+              value={preferences.branding?.logo || ''}
+              onChange={(e) => updateNestedPreference('branding', 'logo', e.target.value)}
+              placeholder="https://example.com/logo.png"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-black">Company Logo</Label>
-              <div className="mt-2 flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                  {workspaceData.branding.logo ? (
-                    <img src={URL.createObjectURL(workspaceData.branding.logo)} alt="Logo" className="w-full h-full object-contain rounded-lg" />
-                  ) : (
-                    <Building2 className="h-8 w-8 text-gray-400" />
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload('logo')}
-                    className="hidden"
-                    id="logo-upload"
-                  />
-                  <Button variant="outline" size="sm" asChild className="border-gray-300 text-black hover:bg-gray-50">
-                    <label htmlFor="logo-upload" className="cursor-pointer">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Logo
-                    </label>
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-black">Primary Color</Label>
-              <div className="mt-2 flex items-center space-x-4">
-                <div 
-                  className="w-16 h-16 rounded-lg border-2 border-gray-200"
-                  style={{ backgroundColor: workspaceData.branding.primaryColor }}
+              <Label htmlFor="primary-color">Primary Color</Label>
+              <div className="flex space-x-2">
+                <Input
+                  id="primary-color"
+                  type="color"
+                  value={preferences.branding?.primaryColor || '#3B82F6'}
+                  onChange={(e) => updateNestedPreference('branding', 'primaryColor', e.target.value)}
+                  className="w-16 h-10"
                 />
                 <Input
+                  value={preferences.branding?.primaryColor || '#3B82F6'}
+                  onChange={(e) => updateNestedPreference('branding', 'primaryColor', e.target.value)}
+                  placeholder="#3B82F6"
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="secondary-color">Secondary Color</Label>
+              <div className="flex space-x-2">
+                <Input
+                  id="secondary-color"
                   type="color"
-                  value={workspaceData.branding.primaryColor}
-                  onChange={(e) => handleBrandingChange('primaryColor', e.target.value)}
-                  className="w-20 h-10 bg-white border-gray-300"
+                  value={preferences.branding?.secondaryColor || '#6B7280'}
+                  onChange={(e) => updateNestedPreference('branding', 'secondaryColor', e.target.value)}
+                  className="w-16 h-10"
+                />
+                <Input
+                  value={preferences.branding?.secondaryColor || '#6B7280'}
+                  onChange={(e) => updateNestedPreference('branding', 'secondaryColor', e.target.value)}
+                  placeholder="#6B7280"
+                  className="flex-1"
                 />
               </div>
             </div>
@@ -217,77 +203,37 @@ const WorkspaceSettings: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Enterprise Features */}
-      <Card className="bg-white border-gray-200">
+      {/* Feature Toggles */}
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-black">
-            <Crown className="h-5 w-5 text-yellow-500" />
-            <span>Enterprise Features</span>
+          <CardTitle className="flex items-center space-x-2">
+            <Settings className="h-5 w-5" />
+            <span>Feature Settings</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(workspaceData.features).map(([feature, enabled]) => (
-              <div key={feature} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="space-y-4">
+            {[
+              { key: 'emailMarketing', label: 'Email Marketing', description: 'Enable email campaign features' },
+              { key: 'socialMedia', label: 'Social Media', description: 'Enable social media management' },
+              { key: 'analytics', label: 'Advanced Analytics', description: 'Enable detailed analytics and reporting' },
+              { key: 'automation', label: 'Marketing Automation', description: 'Enable automated workflows' },
+              { key: 'aiAssistant', label: 'AI Assistant', description: 'Enable AI-powered assistance' },
+            ].map((feature) => (
+              <div key={feature.key} className="flex items-center justify-between py-2">
                 <div>
-                  <h4 className="font-medium capitalize text-black">{feature.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                  <p className="text-sm text-gray-600">
-                    {feature === 'multiTenant' && 'Isolate data between workspaces'}
-                    {feature === 'customDomain' && 'Use your own domain name'}
-                    {feature === 'advancedAnalytics' && 'Detailed performance insights'}
-                    {feature === 'prioritySupport' && '24/7 priority customer support'}
-                  </p>
+                  <div className="font-medium">{feature.label}</div>
+                  <div className="text-sm text-gray-500">{feature.description}</div>
                 </div>
-                <Badge variant={enabled ? 'default' : 'secondary'}>
-                  {enabled ? 'Enabled' : 'Disabled'}
-                </Badge>
+                <Switch
+                  checked={preferences.features?.[feature.key] || false}
+                  onCheckedChange={(checked) => updateNestedPreference('features', feature.key, checked)}
+                />
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
-
-      {/* Usage Stats */}
-      <Card className="bg-white border-gray-200">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-black">
-            <Users className="h-5 w-5" />
-            <span>Workspace Usage</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">42</div>
-              <div className="text-sm text-gray-600">Active Users</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">1,247</div>
-              <div className="text-sm text-gray-600">Campaigns Created</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">89%</div>
-              <div className="text-sm text-gray-600">AI Optimization Rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">$24.5K</div>
-              <div className="text-sm text-gray-600">Revenue Generated</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button 
-          onClick={handleSave} 
-          disabled={isSaving}
-          className="flex items-center space-x-2 bg-blue-600 text-white hover:bg-blue-700"
-        >
-          <Save className="h-4 w-4" />
-          <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
-        </Button>
-      </div>
     </div>
   );
 };

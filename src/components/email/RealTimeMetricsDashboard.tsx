@@ -1,207 +1,188 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEmailMetrics } from '@/hooks/useEmailMetrics';
-import { RefreshCw, TrendingUp, Mail, MousePointer, AlertCircle, Users } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useRealTimeMetrics } from '@/hooks/useRealTimeMetrics';
+import { 
+  BarChart3, 
+  TrendingUp, 
+  Mail, 
+  MousePointer, 
+  Eye,
+  RefreshCw,
+  AlertCircle,
+  Clock
+} from 'lucide-react';
 
-interface RealTimeMetricsDashboardProps {
-  campaignId: string;
-}
+const RealTimeMetricsDashboard: React.FC = () => {
+  const { metrics, loading, error, refetch } = useRealTimeMetrics();
 
-const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ campaignId }) => {
-  const [timeRange, setTimeRange] = useState('24h');
-  const { metrics, loading, error, refreshMetrics } = useEmailMetrics(campaignId, timeRange);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
+        <span className="ml-2 text-gray-600">Loading real-time metrics...</span>
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <Card>
-        <CardContent className="text-center py-6">
-          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-          <p className="text-red-600">Failed to load metrics: {error}</p>
-          <Button onClick={refreshMetrics} className="mt-2">
-            Try Again
-          </Button>
+      <Card className="border-red-200 bg-red-50">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-2 text-red-600">
+            <AlertCircle className="h-5 w-5" />
+            <span>Failed to load metrics: {error}</span>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
-  const formatNumber = (num: number | undefined) => {
-    if (num === undefined || num === null || isNaN(num)) return '0';
-    return new Intl.NumberFormat().format(num);
-  };
+  if (!metrics) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-gray-500">
+            No metrics data available
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const formatPercentage = (num: number | undefined) => {
-    if (num === undefined || num === null || isNaN(num)) return '0.0%';
-    return `${num.toFixed(1)}%`;
-  };
-
-  const getInsightColor = (type: string) => {
-    switch (type) {
-      case 'success': return 'text-green-600 bg-green-50';
-      case 'warning': return 'text-yellow-600 bg-yellow-50';
-      case 'error': return 'text-red-600 bg-red-50';
-      default: return 'text-blue-600 bg-blue-50';
-    }
-  };
+  const formatPercentage = (value: number) => `${(value * 100).toFixed(1)}%`;
+  const formatNumber = (value: number) => value.toLocaleString();
 
   return (
     <div className="space-y-6">
-      {/* Header Controls */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Real-Time Campaign Metrics</h3>
-        <div className="flex items-center space-x-2">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1h">Last Hour</SelectItem>
-              <SelectItem value="24h">Last 24h</SelectItem>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refreshMetrics}
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Real-Time Email Metrics</h2>
+          <p className="text-gray-600">Live performance data from your email campaigns</p>
         </div>
+        <button
+          onClick={refetch}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <RefreshCw className="h-4 w-4" />
+          <span>Refresh</span>
+        </button>
       </div>
 
-      {loading && !metrics ? (
-        <div className="text-center py-8">
-          <RefreshCw className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-2" />
-          <p>Loading real-time metrics...</p>
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Total Sent */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Sent</CardTitle>
+            <Mail className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatNumber(metrics.total_sent || metrics.totalSent || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Delivery Rate: {formatPercentage(metrics.delivery_rate || 0)}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Total Opened */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Opened</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatNumber(metrics.total_opened || metrics.totalOpened || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Open Rate: {formatPercentage(metrics.open_rate || 0)}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Total Clicked */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Clicked</CardTitle>
+            <MousePointer className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatNumber(metrics.total_clicked || metrics.totalClicks || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Click Rate: {formatPercentage(metrics.click_rate || 0)}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Engagement Score */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Engagement Score</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{(metrics.engagement_score || 0).toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground">
+              Overall performance metric
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Trends Section */}
+      {metrics.trends && metrics.trends.sent && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5" />
+              <span>Performance Trends</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              {metrics.trends.sent.map((value, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-lg font-semibold">{formatNumber(value)}</div>
+                  <div className="text-sm text-gray-500">Period {index + 1}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Insights Section */}
+      {metrics.insights && metrics.insights.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Performance Insights</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {metrics.insights.map((insight, index) => (
+                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50">
+                  <Badge 
+                    variant={insight.impact === 'positive' ? 'default' : 
+                            insight.impact === 'negative' ? 'destructive' : 'secondary'}
+                  >
+                    {insight.type}
+                  </Badge>
+                  <p className="text-sm text-gray-700 flex-1">{insight.message}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Last Updated */}
+      {metrics.last_updated && (
+        <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+          <Clock className="h-4 w-4" />
+          <span>Last updated: {new Date(metrics.last_updated).toLocaleString()}</span>
         </div>
-      ) : metrics ? (
-        <>
-          {/* Key Metrics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm text-gray-600">Sent</span>
-                </div>
-                <div className="text-2xl font-bold">{formatNumber(metrics.total_sent)}</div>
-                <div className="text-sm text-gray-500">
-                  {formatPercentage(metrics.delivery_rate)} delivered
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                  <span className="text-sm text-gray-600">Opened</span>
-                </div>
-                <div className="text-2xl font-bold">{formatNumber(metrics.total_opened)}</div>
-                <div className="text-sm text-gray-500">
-                  {formatPercentage(metrics.open_rate)} open rate
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <MousePointer className="h-4 w-4 text-purple-500" />
-                  <span className="text-sm text-gray-600">Clicked</span>
-                </div>
-                <div className="text-2xl font-bold">{formatNumber(metrics.total_clicked)}</div>
-                <div className="text-sm text-gray-500">
-                  {formatPercentage(metrics.click_rate)} click rate
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-orange-500" />
-                  <span className="text-sm text-gray-600">Engagement</span>
-                </div>
-                <div className="text-2xl font-bold">{formatNumber(metrics.engagement_score)}</div>
-                <div className="text-sm text-gray-500">Overall score</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Engagement Trends Chart */}
-          {metrics.trends && metrics.trends.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Engagement Trends</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={metrics.trends}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="timestamp" 
-                      tickFormatter={(value) => new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    />
-                    <YAxis />
-                    <Tooltip 
-                      labelFormatter={(value) => new Date(value).toLocaleString()}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="opens" 
-                      stroke="#3b82f6" 
-                      strokeWidth={2}
-                      name="Opens"
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="clicks" 
-                      stroke="#8b5cf6" 
-                      strokeWidth={2}
-                      name="Clicks"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* AI Insights */}
-          {metrics.insights && metrics.insights.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>AI-Powered Insights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {metrics.insights.map((insight, index) => (
-                  <div key={index} className={`p-3 rounded-lg ${getInsightColor(insight.type)}`}>
-                    <div className="flex items-start space-x-2">
-                      <Badge variant="outline" className="text-xs">
-                        {insight.metric}
-                      </Badge>
-                    </div>
-                    <p className="font-medium mt-2">{insight.message}</p>
-                    <p className="text-sm mt-1 opacity-75">{insight.recommendation}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Last Updated */}
-          <div className="text-center text-sm text-gray-500">
-            Last updated: {metrics.last_updated ? new Date(metrics.last_updated).toLocaleString() : 'Never'}
-          </div>
-        </>
-      ) : null}
+      )}
     </div>
   );
 };
