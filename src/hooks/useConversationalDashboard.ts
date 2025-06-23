@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { conversationalService } from '@/lib/services/conversational-service';
 
@@ -42,7 +41,7 @@ export const useConversationalDashboard = () => {
   const fetchInsights = async () => {
     setLoading(true);
     try {
-      const result = await conversationalService.getDashboardInsights('user-1');
+      const result = await conversationalService.getDashboardInsights();
       if (result.success && result.data) {
         setInsights(result.data);
       }
@@ -71,7 +70,7 @@ export const useConversationalDashboard = () => {
         const assistantMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: result.data.message,
+          content: result.data.response,
           timestamp: new Date()
         };
         

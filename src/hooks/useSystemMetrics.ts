@@ -33,31 +33,32 @@ export const useSystemMetrics = () => {
       setError(null);
 
       // Fetch email analytics
-      const emailResult = await apiClient.getEmailAnalytics() as ApiResponse<any>;
+      const emailResult = await apiClient.getEmailMetrics() as ApiResponse<any>;
       
       // Fetch general analytics
       const analyticsResult = await apiClient.getAnalytics() as ApiResponse<any>;
 
       if (emailResult.success && analyticsResult.success) {
-        // Transform blog analytics data to email metrics format
-        const blogData = emailResult.data || {};
+        // Transform email data to metrics format
+        const emailData = emailResult.data || {};
+        const analyticsData = analyticsResult.data || {};
         
         setMetrics({
           emailMetrics: {
-            totalSent: blogData.views || 0,
-            delivered: Math.floor((blogData.views || 0) * 0.95),
-            opened: Math.floor((blogData.views || 0) * 0.25),
-            clicked: Math.floor((blogData.views || 0) * 0.05),
-            bounced: Math.floor((blogData.views || 0) * 0.02),
-            unsubscribed: Math.floor((blogData.views || 0) * 0.01),
-            openRate: 0.25,
-            clickRate: 0.05,
-            bounceRate: 0.02
+            totalSent: emailData.totalSent || 0,
+            delivered: emailData.delivered || Math.floor((emailData.totalSent || 0) * 0.95),
+            opened: emailData.opened || Math.floor((emailData.totalSent || 0) * 0.25),
+            clicked: emailData.clicked || Math.floor((emailData.totalSent || 0) * 0.05),
+            bounced: emailData.bounced || Math.floor((emailData.totalSent || 0) * 0.02),
+            unsubscribed: emailData.unsubscribed || Math.floor((emailData.totalSent || 0) * 0.01),
+            openRate: emailData.openRate || 0.25,
+            clickRate: emailData.clickRate || 0.05,
+            bounceRate: emailData.bounceRate || 0.02
           },
           analyticsOverview: {
-            totalCampaigns: blogData.shares || 0,
-            activeLeads: blogData.leads || 0,
-            conversionRate: blogData.conversionRate || 0
+            totalCampaigns: analyticsData.totalCampaigns || 0,
+            activeLeads: analyticsData.activeLeads || 0,
+            conversionRate: analyticsData.conversionRate || 0
           }
         });
       } else {

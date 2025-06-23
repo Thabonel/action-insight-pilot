@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
@@ -129,4 +128,3 @@ export const useLeadActions = () => {
     isSyncing
   };
 };
-
