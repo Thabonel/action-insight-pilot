@@ -1,7 +1,11 @@
 import { HttpClient } from './http-client';
-import { ApiResponse, UserPreferences, Webhook, SocialPlatformConnection, EmailMetrics, Campaign, SocialPost, IntegrationConnection, OAuthResponse } from './api-client-interface';
-import { SystemHealthService } from './api/system-health-service';
-import { AnalyticsService } from './api/analytics-service';
+
+// Remove conflicting imports and use local definitions
+export interface ApiResponse<T = any> {
+  data?: T;
+  error?: string;
+  success: boolean;
+}
 
 export interface UserPreferences {
   name?: string;
@@ -24,7 +28,7 @@ export interface Webhook {
   url: string;
   events: string[];
   is_active: boolean;
-  active?: boolean; // Alternative property name for backward compatibility
+  active?: boolean;
   last_triggered_at?: string;
   last_response_code?: number;
   secret?: string;
@@ -49,12 +53,6 @@ export interface SocialPlatformConnection {
   updated_at?: string;
 }
 
-export interface ApiResponse<T = any> {
-  data?: T;
-  error?: string;
-  success: boolean;
-}
-
 export interface EmailMetrics {
   totalSent: number;
   delivered: number;
@@ -65,13 +63,11 @@ export interface EmailMetrics {
   openRate: number;
   clickRate: number;
   bounceRate: number;
-  // Alternative property names for backward compatibility
   total_sent?: number;
   total_opened?: number;
   total_clicked?: number;
   totalOpened?: number;
   totalClicks?: number;
-  // Additional properties for dashboard
   insights?: Array<{
     type: string;
     message: string;
@@ -104,7 +100,7 @@ export interface SocialPost {
   content: string;
   platform: string;
   scheduledTime: string;
-  scheduled_time?: string; // Alternative property name
+  scheduled_time?: string;
   status: 'draft' | 'scheduled' | 'published' | 'failed';
   campaignId?: string;
   created_at: string;
@@ -133,308 +129,340 @@ export interface BlogPost {
   id: string;
   title: string;
   content: string;
-  keyword: string;
-  wordCount: number;
-  createdAt: string;
-  updatedAt: string;
+  status: 'draft' | 'published' | 'archived';
+  author: string;
+  created_at: string;
+  updated_at: string;
+  tone: string;
+  includeCTA: boolean;
+}
+
+export interface ContentBrief {
+  type: string;
+  topic: string;
+  audience: string;
+  tone: string;
+  length: string;
+  keywords?: string[];
+  objectives?: string[];
 }
 
 export interface Workflow {
   id: string;
   name: string;
   description: string;
-  status: 'active' | 'inactive' | 'draft';
+  status: string;
   steps: any[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Lead {
   id: string;
-  name: string;
   email: string;
-  score?: number;
-  source: string;
+  firstName?: string;
+  lastName?: string;
+  company?: string;
   status: string;
-  createdAt: string;
+  score: number;
+  source: string;
+  created_at: string;
 }
 
 export class ApiClient {
   private httpClient: HttpClient;
-  public systemHealth: SystemHealthService;
-  public analytics: AnalyticsService;
-  public userPreferences: {
-    getUserPreferences: (category: string) => Promise<ApiResponse<any[]>>;
-    updateUserPreferences: (category: string, preferences: any) => Promise<ApiResponse<any>>;
-    get: (category: string) => Promise<ApiResponse<any>>;
-  };
-  public integrations: {
-    getWebhooks: () => Promise<ApiResponse<Webhook[]>>;
-    createWebhook: (data: Partial<Webhook>) => Promise<ApiResponse<Webhook>>;
-    deleteWebhook: (id: string) => Promise<ApiResponse<void>>;
-    testWebhook: (id: string) => Promise<ApiResponse<any>>;
-    getConnections: () => Promise<ApiResponse<IntegrationConnection[]>>;
-    createConnection: (data: any) => Promise<ApiResponse<IntegrationConnection>>;
-    deleteConnection: (id: string) => Promise<ApiResponse<void>>;
-    connectService: (service: string, apiKey: string) => Promise<ApiResponse<any>>;
-    syncService: (service: string) => Promise<ApiResponse<any>>;
-    disconnectService: (service: string) => Promise<ApiResponse<any>>;
-  };
-  public socialPlatforms: {
-    getAll: () => Promise<ApiResponse<SocialPlatformConnection[]>>;
-    connect: (platform: string, config: any) => Promise<ApiResponse<SocialPlatformConnection>>;
-    disconnect: (id: string) => Promise<ApiResponse<void>>;
-    getStatus: (platform: string) => Promise<ApiResponse<any>>;
-    getPlatformConnections: () => Promise<ApiResponse<SocialPlatformConnection[]>>;
-    initiatePlatformConnection: (platform: string) => Promise<ApiResponse<OAuthResponse>>;
-    disconnectPlatform: (platform: string) => Promise<ApiResponse<void>>;
-    syncPlatformData: (platform: string) => Promise<ApiResponse<any>>;
-    testPlatformConnection: (platform: string) => Promise<ApiResponse<any>>;
-  };
 
-  constructor(baseURL?: string) {
-    this.httpClient = new HttpClient(baseURL);
-    this.systemHealth = new SystemHealthService(this.httpClient);
-    this.analytics = new AnalyticsService(this.httpClient);
-
-    // Initialize userPreferences service
-    this.userPreferences = {
-      getUserPreferences: async (category: string) => {
-        return {
-          success: true,
-          data: [{ preference_data: {} }]
-        };
-      },
-      updateUserPreferences: async (category: string, preferences: any) => {
-        return {
-          success: true,
-          data: preferences
-        };
-      },
-      get: async (category: string) => {
-        return {
-          success: true,
-          data: {}
-        };
-      }
-    };
-
-    // Initialize integrations service
-    this.integrations = {
-      getWebhooks: async () => {
-        return {
-          success: true,
-          data: []
-        };
-      },
-      createWebhook: async (data: Partial<Webhook>) => {
-        const webhook: Webhook = {
-          id: Date.now().toString(),
-          name: data.name || '',
-          url: data.url || '',
-          events: data.events || [],
-          is_active: data.is_active || true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        return {
-          success: true,
-          data: webhook
-        };
-      },
-      deleteWebhook: async (id: string) => {
-        return {
-          success: true
-        };
-      },
-      testWebhook: async (id: string) => {
-        return {
-          success: true,
-          data: { status: 'success' }
-        };
-      },
-      getConnections: async () => {
-        return {
-          success: true,
-          data: []
-        };
-      },
-      createConnection: async (data: any) => {
-        const connection: IntegrationConnection = {
-          id: Date.now().toString(),
-          name: data.name || '',
-          type: data.type || '',
-          status: 'connected',
-          service_name: data.service_name || '',
-          connection_status: 'connected',
-          sync_status: 'idle'
-        };
-        return {
-          success: true,
-          data: connection
-        };
-      },
-      deleteConnection: async (id: string) => {
-        return {
-          success: true
-        };
-      },
-      connectService: async (service: string, apiKey: string) => {
-        return {
-          success: true,
-          data: { service, connected: true }
-        };
-      },
-      syncService: async (service: string) => {
-        return {
-          success: true,
-          data: { service, synced: true }
-        };
-      },
-      disconnectService: async (service: string) => {
-        return {
-          success: true,
-          data: { service, disconnected: true }
-        };
-      }
-    };
-
-    // Initialize socialPlatforms service
-    this.socialPlatforms = {
-      getAll: async () => {
-        return {
-          success: true,
-          data: []
-        };
-      },
-      connect: async (platform: string, config: any) => {
-        const connection: SocialPlatformConnection = {
-          id: Date.now().toString(),
-          platform,
-          platform_name: platform,
-          status: 'connected',
-          connection_status: 'connected'
-        };
-        return {
-          success: true,
-          data: connection
-        };
-      },
-      disconnect: async (id: string) => {
-        return {
-          success: true
-        };
-      },
-      getStatus: async (platform: string) => {
-        return {
-          success: true,
-          data: { platform, status: 'connected' }
-        };
-      },
-      getPlatformConnections: async () => {
-        return {
-          success: true,
-          data: []
-        };
-      },
-      initiatePlatformConnection: async (platform: string) => {
-        return {
-          success: true,
-          data: {
-            authorization_url: `https://auth.${platform}.com/oauth`,
-            state: 'mock-state'
-          }
-        };
-      },
-      disconnectPlatform: async (platform: string) => {
-        return {
-          success: true
-        };
-      },
-      syncPlatformData: async (platform: string) => {
-        return {
-          success: true,
-          data: { platform, synced: true }
-        };
-      },
-      testPlatformConnection: async (platform: string) => {
-        return {
-          success: true,
-          data: { platform, test: 'success' }
-        };
-      }
-    };
+  constructor() {
+    this.httpClient = new HttpClient();
   }
 
-  setToken(token: string) {
-    this.httpClient.setToken(token);
-  }
-
-  // Campaign methods
+  // Core API methods
   async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
-    return {
-      success: true,
-      data: []
-    };
+    try {
+      const data = await this.httpClient.request<Campaign[]>('/api/campaigns');
+      return {
+        success: true,
+        data: data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        error: error instanceof Error ? error.message : 'Failed to get campaigns',
+      };
+    }
   }
 
-  async getCampaignById(id: string): Promise<ApiResponse<Campaign>> {
-    const campaign: Campaign = {
-      id,
-      name: 'Sample Campaign',
-      type: 'email',
-      status: 'active',
-      startDate: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    return {
-      success: true,
-      data: campaign
-    };
+  async getLeads(): Promise<ApiResponse<Lead[]>> {
+    try {
+      const data = await this.httpClient.request<Lead[]>('/api/leads');
+      return {
+        success: true,
+        data: data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        error: error instanceof Error ? error.message : 'Failed to get leads',
+      };
+    }
   }
 
-  async createCampaign(campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    const campaign: Campaign = {
-      id: Date.now().toString(),
-      name: campaignData.name || '',
-      type: campaignData.type || 'email',
-      status: campaignData.status || 'draft',
-      startDate: campaignData.startDate || new Date().toISOString(),
-      endDate: campaignData.endDate,
-      budget: campaignData.budget,
-      target_audience: campaignData.target_audience,
-      description: campaignData.description,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    return {
-      success: true,
-      data: campaign
-    };
+  async getEmailAnalytics(): Promise<ApiResponse<EmailMetrics>> {
+    try {
+      const data = await this.httpClient.request<EmailMetrics>('/api/email/analytics');
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get email analytics',
+      };
+    }
   }
 
-  async updateCampaign(id: string, campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    const campaign: Campaign = {
-      id,
-      name: campaignData.name || '',
-      type: campaignData.type || 'email',
-      status: campaignData.status || 'draft',
-      startDate: campaignData.startDate || new Date().toISOString(),
-      endDate: campaignData.endDate,
-      budget: campaignData.budget,
-      target_audience: campaignData.target_audience,
-      description: campaignData.description,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    return {
-      success: true,
-      data: campaign
-    };
+  async getAnalytics(): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request<any>('/api/analytics');
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get analytics',
+      };
+    }
   }
 
-  // Blog post methods
+  async getInsights(): Promise<ApiResponse<any[]>> {
+    try {
+      const data = await this.httpClient.request<any[]>('/api/insights');
+      return {
+        success: true,
+        data: data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        error: error instanceof Error ? error.message : 'Failed to get insights',
+      };
+    }
+  }
+
+  async getWebhooks(): Promise<ApiResponse<Webhook[]>> {
+    try {
+      const data = await this.httpClient.request<Webhook[]>('/api/webhooks');
+      return {
+        success: true,
+        data: data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        error: error instanceof Error ? error.message : 'Failed to get webhooks',
+      };
+    }
+  }
+
+  async createWebhook(webhook: Partial<Webhook>): Promise<ApiResponse<Webhook>> {
+    try {
+      const data = await this.httpClient.request<Webhook>('/api/webhooks', {
+        method: 'POST',
+        body: JSON.stringify(webhook),
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create webhook',
+      };
+    }
+  }
+
+  async deleteWebhook(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.httpClient.request(`/api/webhooks/${id}`, {
+        method: 'DELETE',
+      });
+      return {
+        success: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete webhook',
+      };
+    }
+  }
+
+  async testWebhook(id: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request(`/api/webhooks/${id}/test`, {
+        method: 'POST',
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to test webhook',
+      };
+    }
+  }
+
+  async connectService(service: string, apiKey: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request('/api/integrations/connect', {
+        method: 'POST',
+        body: JSON.stringify({ service, apiKey }),
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to connect service',
+      };
+    }
+  }
+
+  async syncService(service: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request(`/api/integrations/${service}/sync`, {
+        method: 'POST',
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to sync service',
+      };
+    }
+  }
+
+  async disconnectService(service: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request(`/api/integrations/${service}/disconnect`, {
+        method: 'POST',
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to disconnect service',
+      };
+    }
+  }
+
+  async getUserPreferences(category: string): Promise<ApiResponse<any[]>> {
+    try {
+      const data = await this.httpClient.request<any[]>(`/api/user-preferences/${category}`);
+      return {
+        success: true,
+        data: data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        error: error instanceof Error ? error.message : 'Failed to get user preferences',
+      };
+    }
+  }
+
+  async updateUserPreferences(category: string, preferences: any): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request(`/api/user-preferences/${category}`, {
+        method: 'PUT',
+        body: JSON.stringify(preferences),
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update user preferences',
+      };
+    }
+  }
+
+  async queryAgent(query: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request('/api/agent/query', {
+        method: 'POST',
+        body: JSON.stringify({ query }),
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to query agent',
+      };
+    }
+  }
+
+  async callDailyFocusAgent(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request('/api/agent/daily-focus', {
+        method: 'POST',
+        body: JSON.stringify({ query, campaigns }),
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to call daily focus agent',
+      };
+    }
+  }
+
+  async callGeneralCampaignAgent(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.request('/api/agent/campaign', {
+        method: 'POST',
+        body: JSON.stringify({ query, campaigns }),
+      });
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to call campaign agent',
+      };
+    }
+  }
+
+  // Blog methods
   async getBlogPosts(): Promise<ApiResponse<BlogPost[]>> {
     return {
       success: true,
@@ -442,321 +470,305 @@ export class ApiClient {
     };
   }
 
-  async generateBlogPost(prompt: string, keyword: string, wordCount: number): Promise<ApiResponse<BlogPost>> {
-    const blogPost: BlogPost = {
-      id: Date.now().toString(),
-      title: `Generated Blog Post about ${keyword}`,
-      content: `This is a generated blog post about ${keyword}...`,
-      keyword,
-      wordCount,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  async generateBlogPost(topic: string, tone: string, includeCTA: boolean): Promise<ApiResponse<BlogPost>> {
     return {
       success: true,
-      data: blogPost
+      data: {
+        id: '1',
+        title: `Generated Blog Post: ${topic}`,
+        content: `Blog content about ${topic} with ${tone} tone`,
+        status: 'draft',
+        author: 'AI',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        tone,
+        includeCTA
+      }
     };
   }
 
   async deleteBlogPost(id: string): Promise<ApiResponse<void>> {
+    return { success: true };
+  }
+
+  // Campaign methods
+  async createCampaign(campaign: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
     return {
-      success: true
+      success: true,
+      data: {
+        id: '1',
+        name: campaign.name || '',
+        type: campaign.type || '',
+        status: 'draft',
+        startDate: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...campaign
+      }
+    };
+  }
+
+  async updateCampaign(id: string, updates: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
+    return {
+      success: true,
+      data: {
+        id,
+        name: 'Updated Campaign',
+        type: 'email',
+        status: 'active',
+        startDate: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...updates
+      }
     };
   }
 
   // Content methods
-  async generateContent(prompt: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { content: `Generated content for: ${prompt}` }
-    };
+  async createContent(content: any): Promise<ApiResponse<any>> {
+    return { success: true, data: content };
   }
 
-  async createContent(contentData: any): Promise<ApiResponse<any>> {
+  async generateContent(brief: ContentBrief): Promise<ApiResponse<any>> {
     return {
       success: true,
-      data: { id: Date.now().toString(), ...contentData }
+      data: {
+        content: `Generated content for ${brief.topic} with ${brief.tone} tone`,
+        brief
+      }
     };
   }
 
   // Email methods
-  async generateEmailContent(prompt: string): Promise<ApiResponse<any>> {
+  async generateEmailContent(brief: any): Promise<ApiResponse<any>> {
     return {
       success: true,
-      data: { 
-        subject: `Generated Email Subject`,
-        content: `Generated email content for: ${prompt}`
+      data: {
+        subject: 'Generated Email Subject',
+        content: 'Generated email content',
+        brief
       }
     };
   }
 
-  async getEmailAnalytics(): Promise<ApiResponse<EmailMetrics>> {
-    const metrics: EmailMetrics = {
-      totalSent: 1000,
-      delivered: 950,
-      opened: 300,
-      clicked: 50,
-      bounced: 25,
-      unsubscribed: 5,
-      openRate: 30,
-      clickRate: 5,
-      bounceRate: 2.5
-    };
+  async getRealTimeMetrics(): Promise<ApiResponse<EmailMetrics>> {
     return {
       success: true,
-      data: metrics
-    };
-  }
-
-  // Social methods
-  async getSocialPosts(): Promise<ApiResponse<SocialPost[]>> {
-    return {
-      success: true,
-      data: []
-    };
-  }
-
-  async generateSocialContent(prompt: string, platform: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { content: `Generated ${platform} content for: ${prompt}` }
-    };
-  }
-
-  async scheduleSocialPost(postData: any): Promise<ApiResponse<SocialPost>> {
-    const post: SocialPost = {
-      id: Date.now().toString(),
-      content: postData.content || '',
-      platform: postData.platform || '',
-      scheduledTime: postData.scheduledTime || new Date().toISOString(),
-      status: 'scheduled',
-      created_at: new Date().toISOString()
-    };
-    return {
-      success: true,
-      data: post
-    };
-  }
-
-  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
-    return {
-      success: true,
-      data: []
-    };
-  }
-
-  async connectSocialPlatform(platform: string, credentials: any): Promise<ApiResponse<SocialPlatformConnection>> {
-    const connection: SocialPlatformConnection = {
-      id: Date.now().toString(),
-      platform,
-      platform_name: platform,
-      status: 'connected',
-      connection_status: 'connected'
-    };
-    return {
-      success: true,
-      data: connection
+      data: {
+        totalSent: 100,
+        delivered: 95,
+        opened: 45,
+        clicked: 12,
+        bounced: 3,
+        unsubscribed: 2,
+        openRate: 47.4,
+        clickRate: 26.7,
+        bounceRate: 3.2,
+        last_updated: new Date().toISOString()
+      }
     };
   }
 
   // Lead methods
-  async getLeads(): Promise<ApiResponse<Lead[]>> {
-    return {
-      success: true,
-      data: []
-    };
-  }
-
-  async scoreLeads(leads: Lead[]): Promise<ApiResponse<Lead[]>> {
-    const scoredLeads = leads.map(lead => ({
-      ...lead,
-      score: Math.floor(Math.random() * 100)
-    }));
-    return {
-      success: true,
-      data: scoredLeads
-    };
+  async scoreLeads(criteria?: any): Promise<ApiResponse<any>> {
+    return { success: true, data: { scored: true } };
   }
 
   async exportLeads(format: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { format, exported: true }
-    };
+    return { success: true, data: { exported: true, format } };
   }
 
   async syncLeads(): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { synced: true }
-    };
+    return { success: true, data: { synced: true } };
   }
 
-  // Metrics methods
-  async getRealTimeMetrics(): Promise<ApiResponse<any>> {
+  // Social methods
+  async getSocialPosts(): Promise<ApiResponse<SocialPost[]>> {
+    return { success: true, data: [] };
+  }
+
+  async generateSocialContent(brief: ContentBrief): Promise<ApiResponse<any>> {
     return {
       success: true,
       data: {
-        visitors: 100,
-        conversions: 5,
-        revenue: 1000
+        content: `Generated social content for ${brief.topic}`,
+        brief
       }
     };
   }
 
+  async scheduleSocialPost(post: any): Promise<ApiResponse<SocialPost>> {
+    return {
+      success: true,
+      data: {
+        id: '1',
+        content: post.content,
+        platform: post.platform,
+        scheduledTime: post.scheduledTime,
+        status: 'scheduled',
+        created_at: new Date().toISOString()
+      }
+    };
+  }
+
+  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
+    return { success: true, data: [] };
+  }
+
+  async connectSocialPlatform(platform: string, config: any): Promise<ApiResponse<SocialPlatformConnection>> {
+    return {
+      success: true,
+      data: {
+        id: '1',
+        platform,
+        platform_name: platform,
+        status: 'connected',
+        connection_status: 'connected',
+        created_at: new Date().toISOString()
+      }
+    };
+  }
+
+  // System methods
   async getSystemHealth(): Promise<ApiResponse<any>> {
     return {
       success: true,
       data: {
         status: 'healthy',
         uptime: 99.9,
-        lastCheck: new Date().toISOString()
+        services: { database: 'up', api: 'up' }
       }
     };
   }
 
   // Workflow methods
   async getWorkflows(): Promise<ApiResponse<Workflow[]>> {
-    return {
-      success: true,
-      data: []
-    };
+    return { success: true, data: [] };
   }
 
-  async createWorkflow(workflowData: Partial<Workflow>): Promise<ApiResponse<Workflow>> {
-    const workflow: Workflow = {
-      id: Date.now().toString(),
-      name: workflowData.name || '',
-      description: workflowData.description || '',
-      status: workflowData.status || 'draft',
-      steps: workflowData.steps || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    return {
-      success: true,
-      data: workflow
-    };
-  }
-
-  async executeWorkflow(id: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { id, executed: true }
-    };
-  }
-
-  async getWorkflowStatus(id: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { id, status: 'running' }
-    };
-  }
-
-  async updateWorkflow(id: string, workflowData: Partial<Workflow>): Promise<ApiResponse<Workflow>> {
-    const workflow: Workflow = {
-      id,
-      name: workflowData.name || '',
-      description: workflowData.description || '',
-      status: workflowData.status || 'draft',
-      steps: workflowData.steps || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    return {
-      success: true,
-      data: workflow
-    };
-  }
-
-  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
-    return {
-      success: true
-    };
-  }
-
-  // Analytics methods
-  async getAnalytics(): Promise<ApiResponse<any>> {
+  async createWorkflow(workflow: any): Promise<ApiResponse<Workflow>> {
     return {
       success: true,
       data: {
-        metrics: {
-          campaigns: 5,
-          leads: 100,
-          conversion_rate: 2.5,
-          revenue: 10000,
-          traffic: 5000,
-          engagement: 15
-        }
+        id: '1',
+        name: workflow.name,
+        description: workflow.description,
+        status: 'draft',
+        steps: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
     };
   }
 
-  // Agent methods
-  async queryAgent(query: string): Promise<ApiResponse<any>> {
+  async executeWorkflow(id: string): Promise<ApiResponse<any>> {
+    return { success: true, data: { executed: true, id } };
+  }
+
+  async getWorkflowStatus(id: string): Promise<ApiResponse<any>> {
+    return { success: true, data: { id, status: 'running' } };
+  }
+
+  async updateWorkflow(id: string, updates: any): Promise<ApiResponse<Workflow>> {
     return {
       success: true,
-      data: { response: `AI response to: ${query}` }
+      data: {
+        id,
+        name: 'Updated Workflow',
+        description: 'Updated description',
+        status: 'active',
+        steps: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...updates
+      }
     };
   }
 
-  async callDailyFocusAgent(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { focus: `Daily focus based on: ${query}` }
-    };
+  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
+    return { success: true };
   }
 
-  async callGeneralCampaignAgent(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { analysis: `Campaign analysis for: ${query}` }
-    };
-  }
+  // Service objects
+  integrations = {
+    getWebhooks: () => this.getWebhooks(),
+    getConnections: () => this.getConnections(),
+    createWebhook: (webhook: any) => this.createWebhook(webhook),
+    deleteWebhook: (id: string) => this.deleteWebhook(id),
+    testWebhook: (id: string) => this.testWebhook(id),
+    connectService: (service: string, apiKey: string) => this.connectService(service, apiKey),
+    syncService: (service: string) => this.syncService(service),
+    disconnectService: (service: string) => this.disconnectService(service),
+    createConnection: (data: any) => this.createConnection(data),
+    deleteConnection: (id: string) => this.deleteConnection(id)
+  };
 
-  // Connection methods
+  analytics = {
+    getAnalytics: () => this.getAnalytics(),
+    getInsights: () => this.getInsights(),
+    getAnalyticsOverview: () => this.getAnalytics()
+  };
+
+  userPreferences = {
+    getUserPreferences: (category: string) => this.getUserPreferences(category),
+    updateUserPreferences: (category: string, prefs: any) => this.updateUserPreferences(category, prefs),
+    get: (category: string) => this.getUserPreferences(category)
+  };
+
+  socialPlatforms = {
+    getAll: () => this.getSocialPlatforms(),
+    connect: (platform: string, config: any) => this.connectSocialPlatform(platform, config),
+    disconnect: (id: string) => this.disconnectSocialPlatform(id),
+    getStatus: (platform: string) => this.getSocialPlatformStatus(platform),
+    getPlatformConnections: () => this.getSocialPlatforms(),
+    initiatePlatformConnection: (platform: string) => this.initiateSocialPlatformConnection(platform),
+    disconnectPlatform: (platform: string) => this.disconnectSocialPlatform(platform),
+    syncPlatformData: (platform: string) => this.syncSocialPlatformData(platform),
+    testPlatformConnection: (platform: string) => this.testSocialPlatformConnection(platform)
+  };
+
+  // Additional methods for completeness
   async getConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
-    return {
-      success: true,
-      data: []
-    };
+    return { success: true, data: [] };
   }
 
-  async createConnection(connectionData: any): Promise<ApiResponse<IntegrationConnection>> {
-    const connection: IntegrationConnection = {
-      id: Date.now().toString(),
-      name: connectionData.name || '',
-      type: connectionData.type || '',
-      status: 'connected',
-      service_name: connectionData.service_name || '',
-      connection_status: 'connected',
-      sync_status: 'idle'
-    };
+  async createConnection(data: any): Promise<ApiResponse<IntegrationConnection>> {
     return {
       success: true,
-      data: connection
+      data: {
+        id: '1',
+        name: data.name,
+        type: data.type,
+        status: 'connected',
+        service_name: data.service_name,
+        connection_status: 'connected',
+        sync_status: 'idle'
+      }
     };
   }
 
   async deleteConnection(id: string): Promise<ApiResponse<void>> {
-    return {
-      success: true
-    };
+    return { success: true };
   }
 
-  // User preferences methods
-  async getUserPreferences(): Promise<ApiResponse<UserPreferences>> {
-    return {
-      success: true,
-      data: {}
-    };
+  async disconnectSocialPlatform(platform: string): Promise<ApiResponse<void>> {
+    return { success: true };
   }
 
-  async updateUserPreferences(preferences: UserPreferences): Promise<ApiResponse<UserPreferences>> {
-    return {
-      success: true,
-      data: preferences
-    };
+  async getSocialPlatformStatus(platform: string): Promise<ApiResponse<any>> {
+    return { success: true, data: { platform, status: 'connected' } };
+  }
+
+  async initiateSocialPlatformConnection(platform: string): Promise<ApiResponse<any>> {
+    return { success: true, data: { platform, initiated: true } };
+  }
+
+  async syncSocialPlatformData(platform: string): Promise<ApiResponse<any>> {
+    return { success: true, data: { platform, synced: true } };
+  }
+
+  async testSocialPlatformConnection(platform: string): Promise<ApiResponse<any>> {
+    return { success: true, data: { platform, test: 'passed' } };
   }
 }
 
