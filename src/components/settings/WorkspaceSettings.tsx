@@ -33,8 +33,7 @@ const WorkspaceSettings: React.FC = () => {
 
   const updateSettings = async () => {
     try {
-      const userPrefs = await apiClient.userPreferences();
-      const response = await userPrefs.updateUserPreferences('workspace', settings) as ApiResponse<any>;
+      const response = await apiClient.userPreferences.updateUserPreferences('workspace', settings) as ApiResponse<any>;
       
       if (response.success) {
         toast({
@@ -57,8 +56,7 @@ const WorkspaceSettings: React.FC = () => {
   const loadPreferences = async () => {
     try {
       setIsLoading(true);
-      const userPrefs = await apiClient.userPreferences();
-      const response = await userPrefs.getUserPreferences('workspace') as ApiResponse<any>;
+      const response = await apiClient.userPreferences.getUserPreferences('workspace') as ApiResponse<any>;
       
       if (response.success && response.data && response.data.length > 0) {
         const prefs = response.data[0].preference_data;

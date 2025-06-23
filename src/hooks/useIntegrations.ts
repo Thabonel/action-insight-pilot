@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse, IntegrationConnection, Webhook } from '@/lib/api-client-interface';
@@ -162,6 +163,12 @@ export const useIntegrations = () => {
     }
   };
 
+  // Add the missing refreshIntegrations method
+  const refreshIntegrations = async () => {
+    await fetchConnections();
+    await fetchWebhooks();
+  };
+
   useEffect(() => {
     fetchConnections();
     fetchWebhooks();
@@ -178,6 +185,7 @@ export const useIntegrations = () => {
     createWebhook,
     deleteWebhook,
     testWebhook,
+    refreshIntegrations, // Add this method
     refetch: () => {
       fetchConnections();
       fetchWebhooks();
