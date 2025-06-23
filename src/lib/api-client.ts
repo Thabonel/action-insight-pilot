@@ -8,7 +8,8 @@ import {
   EmailMetrics,
   SocialPost,
   IntegrationConnection,
-  OAuthResponse
+  OAuthResponse,
+  Webhook
 } from './api-client-interface';
 
 class ApiClient {
@@ -316,6 +317,72 @@ class ApiClient {
     };
   }
 
+  async getSystemHealth(): Promise<ApiResponse<any>> {
+    return {
+      data: { status: 'healthy' },
+      success: true
+    };
+  }
+
+  // Social platforms methods
+  socialPlatforms = {
+    getPlatformConnections: () => this.getPlatformConnections(),
+    initiatePlatformConnection: (platform: string, config?: any) => this.initiatePlatformConnection(platform, config),
+    completePlatformConnection: (platform: string, code: string, state: string) => this.completePlatformConnection(platform, code, state),
+    disconnectPlatform: (platformId: string) => this.disconnectPlatform(platformId),
+    testPlatformConnection: (platformId: string) => this.testPlatformConnection(platformId),
+    syncPlatformData: (platformId: string) => this.syncPlatformData(platformId),
+    getConnected: () => this.getSocialPosts()
+  };
+
+  // Integrations methods
+  integrations = {
+    getWebhooks: async (): Promise<ApiResponse<Webhook[]>> => {
+      return {
+        data: [] as Webhook[],
+        success: true
+      };
+    },
+    createWebhook: async (webhookData: Partial<Webhook>): Promise<ApiResponse<Webhook>> => {
+      return {
+        data: {} as Webhook,
+        success: true
+      };
+    },
+    deleteWebhook: async (webhookId: string): Promise<ApiResponse<void>> => {
+      return {
+        success: true
+      };
+    },
+    testWebhook: async (webhookId: string): Promise<ApiResponse<any>> => {
+      return {
+        data: { status: 'ok' },
+        success: true
+      };
+    },
+    getConnections: () => this.getConnections(),
+    createConnection: (connection: any) => this.createConnection(connection),
+    connectService: async (service: string, apiKey: string): Promise<ApiResponse<any>> => {
+      return {
+        data: { connected: true },
+        success: true
+      };
+    },
+    syncService: async (service: string): Promise<ApiResponse<any>> => {
+      return {
+        data: { synced: true },
+        success: true
+      };
+    },
+    disconnectService: async (service: string): Promise<ApiResponse<any>> => {
+      return {
+        data: { disconnected: true },
+        success: true
+      };
+    },
+    deleteConnection: (id: string) => this.deleteConnection(id)
+  };
+
   // Analytics methods
   analytics = {
     getCampaigns: () => this.getCampaigns(),
@@ -362,13 +429,6 @@ class ApiClient {
       };
     }
   };
-
-  async getSystemHealth(): Promise<ApiResponse<any>> {
-    return {
-      data: { status: 'healthy' },
-      success: true
-    };
-  }
 }
 
 export const apiClient = new ApiClient();

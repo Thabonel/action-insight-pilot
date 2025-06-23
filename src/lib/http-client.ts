@@ -1,4 +1,10 @@
 
+export interface ApiResponse<T = any> {
+  data?: T;
+  error?: string;
+  success: boolean;
+}
+
 export class HttpClient {
   private baseURL: string;
   private token: string | null = null;

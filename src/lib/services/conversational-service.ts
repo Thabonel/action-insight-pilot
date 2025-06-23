@@ -1,51 +1,64 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
+
+export interface ConversationRequest {
+  query: string;
+  context?: any;
+}
+
+export interface ConversationResponse {
+  message: string;
+  suggestions?: string[];
+  metadata?: any;
+}
 
 export class ConversationalService {
-  static async fetchCampaignData(authToken: string) {
+  static async processQuery(request: ConversationRequest): Promise<ApiResponse<ConversationResponse>> {
     try {
-      const response = await apiClient.getCampaigns();
-      
-      if (!response.success) {
-        throw new Error('Failed to fetch campaign data');
-      }
-      
-      return Array.isArray(response.data) ? response.data : [];
+      const response = await apiClient.queryAgent(request.query);
+      return {
+        success: response.success,
+        data: response.data,
+        error: response.error
+      };
     } catch (error) {
-      console.error('Campaign fetch failed:', error);
-      return [];
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to process query'
+      };
     }
   }
 
-  static async callDailyFocusAgent(query: string, campaigns: any[], context: any[], authToken: string) {
+  static async getDailyFocus(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
     try {
-      const response = await apiClient.callDailyFocusAgent(query, campaigns, context);
-      return response;
+      const response = await apiClient.callDailyFocusAgent(query, campaigns);
+      return {
+        success: response.success,
+        data: response.data,
+        error: response.error
+      };
     } catch (error) {
-      console.error('Daily focus agent failed:', error);
-      throw error;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get daily focus'
+      };
     }
   }
 
-  static async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[], authToken: string) {
+  static async getCampaignAnalysis(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
     try {
-      const response = await apiClient.callGeneralCampaignAgent(query, campaigns, context);
-      return response;
+      const response = await apiClient.callGeneralCampaignAgent(query, campaigns);
+      return {
+        success: response.success,
+        data: response.data,
+        error: response.error
+      };
     } catch (error) {
-      console.error('General campaign agent failed:', error);
-      throw error;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get campaign analysis'
+      };
     }
-  }
-
-  static async getAuthToken() {
-    const { data: { session } } = await supabase.auth.getSession();
-    const authToken = session?.access_token;
-    
-    if (!authToken) {
-      throw new Error('Authentication token not available');
-    }
-    
-    return authToken;
   }
 }
