@@ -1,72 +1,64 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { Upload, FileText, MessageCircle, Send, AlertCircle, CheckCircle, Loader2, X, Tag } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Send, File, Trash2, MessageCircle, FileCheck, Clock, AlertCircle, Eye, Tag } from 'lucide-react';
-import { apiClient } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client-interface';
 
 interface Document {
   id: string;
   name: string;
-  size: number;
-  type: string;
-  uploadedAt: Date;
   status: 'processing' | 'ready' | 'error';
-  errorMessage?: string;
   summary?: string;
   category?: string;
-  tags?: string[];
+  uploadedAt: string;
 }
 
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'brand';
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
   timestamp: Date;
 }
 
-const BrandAmbassador: React.FC = () => {
+const BrandAmbassador = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadDocuments();
   }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const loadDocuments = async () => {
     try {
-      const docs = await apiClient.getBrandDocuments();
-      setDocuments(docs.map(doc => ({
-        ...doc,
-        uploadedAt: new Date(doc.uploadedAt),
-        status: doc.status || 'ready' // Default to ready if no status
-      })));
+      setIsLoadingDocuments(true);
+      const response = await apiClient.getBrandDocuments();
+      
+      if (response.success && response.data) {
+        setDocuments(response.data.map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          status: doc.status || 'ready',
+          summary: doc.summary,
+          category: doc.category,
+          uploadedAt: doc.uploadedAt || new Date().toISOString()
+        })));
+      }
     } catch (error) {
-      console.error('Failed to load documents:', error);
       toast({
-        title: "Error",
-        description: "Failed to load documents. Please try again.",
+        title: "Error loading documents",
+        description: "Failed to load brand documents",
         variant: "destructive",
       });
+    } finally {
+      setIsLoadingDocuments(false);
     }
   };
 
@@ -74,395 +66,330 @@ const BrandAmbassador: React.FC = () => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    setIsUploading(true);
+    const file = files[0];
     
-    for (const file of files) {
-      try {
-        const uploadedDoc = await apiClient.uploadBrandDocument(file);
-        
-        // Add document with processing status
+    try {
+      setIsUploading(true);
+      const response = await apiClient.uploadBrandDocument(file);
+      
+      if (response.success && response.data) {
         const newDoc: Document = {
-          id: uploadedDoc.id,
+          id: response.data.id,
           name: file.name,
-          size: file.size,
-          type: file.type,
-          uploadedAt: new Date(),
           status: 'processing',
-          category: getDocumentCategory(file.type),
-          tags: []
+          uploadedAt: new Date().toISOString()
         };
         
         setDocuments(prev => [...prev, newDoc]);
         
-        // Simulate processing completion (in real app, this would be handled by webhooks/polling)
+        toast({
+          title: "Upload successful",
+          description: `${file.name} has been uploaded and is being processed`,
+        });
+
+        // Refresh documents to get updated status
         setTimeout(() => {
-          setDocuments(prev => prev.map(doc => 
-            doc.id === newDoc.id 
-              ? { ...doc, status: 'ready', summary: `Summary of ${file.name}` }
-              : doc
-          ));
-        }, Math.random() * 3000 + 1000); // Random delay 1-4 seconds
-        
-        toast({
-          title: "Upload Started",
-          description: `${file.name} is being processed...`,
-        });
-      } catch (error) {
-        console.error('Upload failed:', error);
-        toast({
-          title: "Upload Failed",
-          description: `Failed to upload ${file.name}. Please try again.`,
-          variant: "destructive",
-        });
+          loadDocuments();
+        }, 2000);
       }
-    }
-    
-    setIsUploading(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: `Failed to upload ${file.name}`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      event.target.value = '';
     }
   };
 
-  const getDocumentCategory = (type: string): string => {
-    if (type.includes('pdf')) return 'PDF';
-    if (type.includes('image')) return 'Image';
-    if (type.includes('text')) return 'Text';
-    if (type.includes('word') || type.includes('document')) return 'Document';
-    if (type.includes('spreadsheet') || type.includes('excel')) return 'Spreadsheet';
-    return 'Other';
+  const handleDeleteDocument = async (docId: string) => {
+    try {
+      const response = await apiClient.deleteBrandDocument(docId);
+      
+      if (response.success) {
+        setDocuments(prev => prev.filter(doc => doc.id !== docId));
+        toast({
+          title: "Document deleted",
+          description: "Document has been removed successfully",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: "Failed to delete document",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusIcon = (status: Document['status']) => {
     switch (status) {
       case 'processing':
-        return <Clock className="h-4 w-4 text-yellow-500 animate-spin" />;
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-600" />;
       case 'ready':
-        return <FileCheck className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-600" />;
       default:
-        return <File className="h-4 w-4 text-gray-500" />;
+        return <FileText className="h-4 w-4" />;
     }
   };
 
   const getStatusBadge = (status: Document['status']) => {
     const variants = {
-      processing: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      ready: 'bg-green-100 text-green-800 border-green-300',
-      error: 'bg-red-100 text-red-800 border-red-300'
+      processing: 'default',
+      ready: 'default',
+      error: 'destructive'
+    } as const;
+
+    const colors = {
+      processing: 'bg-blue-100 text-blue-800',
+      ready: 'bg-green-100 text-green-800',
+      error: 'bg-red-100 text-red-800'
     };
 
     return (
-      <Badge className={`${variants[status]} border`}>
+      <Badge variant={variants[status]} className={colors[status]}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
     );
   };
 
-  const handleDeleteDocument = async (docId: string) => {
-    try {
-      await apiClient.deleteBrandDocument(docId);
-      setDocuments(prev => prev.filter(doc => doc.id !== docId));
-      toast({
-        title: "Document Deleted",
-        description: "Document has been removed successfully.",
-      });
-    } catch (error) {
-      console.error('Delete failed:', error);
-      toast({
-        title: "Delete Failed",
-        description: "Failed to delete document. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  const canChat = documents.some(doc => doc.status === 'ready');
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
-    
-    const readyDocuments = documents.filter(doc => doc.status === 'ready');
-    if (readyDocuments.length === 0) {
-      toast({
-        title: "No Documents Ready",
-        description: "Please wait for at least one document to finish processing before chatting.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!newMessage.trim() || !canChat) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputMessage,
-      sender: 'user',
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: newMessage,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsSending(true);
-    setIsTyping(true);
+    setNewMessage('');
+    setIsChatLoading(true);
 
     try {
-      const response = await apiClient.chatWithBrand({
-        message: inputMessage,
+      // Prepare context for the API call
+      const readyDocuments = documents.filter(doc => doc.status === 'ready');
+      const conversationHistory = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      const response = await apiClient.chatWithBrand(newMessage, {
         documents: readyDocuments.map(doc => ({
           id: doc.id,
           name: doc.name,
-          summary: doc.summary
+          summary: doc.summary || ''
         })),
-        conversationHistory: messages.map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'assistant',
-          content: msg.text
-        }))
+        conversationHistory
       });
-
-      const brandMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: response.message,
-        sender: 'brand',
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, brandMessage]);
+      
+      if (response.success && response.data) {
+        const assistantMessage: ChatMessage = {
+          role: 'assistant',
+          content: response.data.message || response.data,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+      }
     } catch (error) {
-      console.error('Chat failed:', error);
       toast({
-        title: "Chat Error",
-        description: "Failed to get response. Please try again.",
+        title: "Chat error",
+        description: "Failed to get response from brand ambassador",
         variant: "destructive",
       });
     } finally {
-      setIsSending(false);
-      setIsTyping(false);
+      setIsChatLoading(false);
     }
   };
-
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const canChat = documents.some(doc => doc.status === 'ready');
-  const readyCount = documents.filter(doc => doc.status === 'ready').length;
-  const processingCount = documents.filter(doc => doc.status === 'processing').length;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Brand Ambassador</h1>
-        <p className="text-gray-600">Upload your brand documents and chat with your AI brand ambassador</p>
-        {documents.length > 0 && (
-          <div className="flex justify-center gap-4 text-sm text-gray-500">
-            <span>{readyCount} Ready</span>
-            {processingCount > 0 && <span>{processingCount} Processing</span>}
-          </div>
-        )}
-      </div>
-
+    <div className="container mx-auto p-6 max-w-6xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Document Management */}
-        <Card>
+        {/* Document Management Panel */}
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <File className="h-5 w-5" />
+              <FileText className="h-5 w-5" />
               Brand Documents
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                multiple
-                accept=".pdf,.doc,.docx,.txt,.md"
-                className="hidden"
-              />
-              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600 mb-2">
-                Upload brand documents, guidelines, or other materials
-              </p>
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="flex items-center gap-2"
-              >
-                {isUploading ? (
-                  <>
-                    <LoadingSpinner size="sm" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4" />
-                    Choose Files
-                  </>
-                )}
-              </Button>
-            </div>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Upload Section */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  accept=".pdf,.doc,.docx,.txt,.md"
+                  disabled={isUploading}
+                />
+                <label
+                  htmlFor="file-upload"
+                  className={`cursor-pointer flex flex-col items-center justify-center ${
+                    isUploading ? 'opacity-50' : ''
+                  }`}
+                >
+                  {isUploading ? (
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
+                  ) : (
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                  )}
+                  <span className="text-sm text-gray-600">
+                    {isUploading ? 'Uploading...' : 'Click to upload brand documents'}
+                  </span>
+                  <span className="text-xs text-gray-400 mt-1">
+                    PDF, DOC, DOCX, TXT, MD files supported
+                  </span>
+                </label>
+              </div>
 
-            {documents.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-medium text-gray-900">Uploaded Documents</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {documents.map((doc) => (
+              {/* Documents List */}
+              <div className="space-y-2">
+                {isLoadingDocuments ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span className="ml-2">Loading documents...</span>
+                  </div>
+                ) : documents.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">
+                    No documents uploaded yet
+                  </p>
+                ) : (
+                  documents.map((doc) => (
                     <div
                       key={doc.id}
-                      className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border"
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                     >
-                      <div className="flex items-start gap-3 flex-1">
+                      <div className="flex items-center gap-3 flex-1">
                         {getStatusIcon(doc.status)}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {doc.name}
-                            </p>
-                            {getStatusBadge(doc.status)}
-                          </div>
-                          <div className="flex items-center gap-2 mb-1">
-                            {doc.category && (
-                              <Badge variant="outline" className="text-xs">
-                                <Tag className="h-3 w-3 mr-1" />
-                                {doc.category}
-                              </Badge>
-                            )}
-                            <span className="text-xs text-gray-500">
-                              {(doc.size / 1024).toFixed(1)} KB
-                            </span>
-                          </div>
-                          {doc.status === 'ready' && doc.summary && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Eye className="h-3 w-3 text-gray-400" />
-                              <p className="text-xs text-gray-600 truncate">
-                                {doc.summary}
-                              </p>
-                            </div>
-                          )}
-                          {doc.status === 'error' && doc.errorMessage && (
-                            <p className="text-xs text-red-600 mt-1">
-                              {doc.errorMessage}
+                          <p className="text-sm font-medium truncate">{doc.name}</p>
+                          {doc.summary && (
+                            <p className="text-xs text-gray-500 truncate">
+                              {doc.summary}
                             </p>
                           )}
                         </div>
+                        <div className="flex items-center gap-2">
+                          {doc.category && (
+                            <Badge variant="outline" className="text-xs">
+                              <Tag className="h-3 w-3 mr-1" />
+                              {doc.category}
+                            </Badge>
+                          )}
+                          {getStatusBadge(doc.status)}
+                        </div>
                       </div>
                       <Button
-                        variant="ghost"
+                        variant="destructive"
                         size="sm"
                         onClick={() => handleDeleteDocument(doc.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="ml-2"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
-                  ))}
-                </div>
+                  ))
+                )}
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
         {/* Chat Interface */}
-        <Card>
+        <Card className="flex flex-col h-[600px]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
-              Chat with Brand Ambassador
+              Brand Ambassador Chat
               {!canChat && (
-                <Badge variant="outline" className="text-xs ml-auto">
-                  Waiting for documents
+                <Badge variant="secondary" className="ml-2">
+                  Upload documents to start
                 </Badge>
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="h-80 border rounded-lg p-4 overflow-y-auto bg-gray-50">
+          <CardContent className="flex-1 flex flex-col">
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
               {messages.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
-                  {canChat ? (
-                    <>
-                      <MessageCircle className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p>Start a conversation with your brand ambassador</p>
-                      <p className="text-sm mt-1">Ask about your brand, products, or guidelines</p>
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                      <p>Upload and process documents to start chatting</p>
-                      <p className="text-sm mt-1">Your brand ambassador needs context to help you</p>
-                    </>
-                  )}
+                <div className="text-center text-gray-500">
+                  {canChat 
+                    ? "Start a conversation about your brand!" 
+                    : "Upload and process documents to begin chatting"
+                  }
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {messages.map((message) => (
+                messages.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`flex ${
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
                     <div
-                      key={message.id}
-                      className={`flex ${
-                        message.sender === 'user' ? 'justify-end' : 'justify-start'
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        message.role === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white border'
                       }`}
                     >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.sender === 'user'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-white border border-gray-200 text-gray-900'
-                        }`}
-                      >
-                        <p className="text-sm">{message.text}</p>
-                        <p className={`text-xs mt-1 ${
-                          message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
-                        }`}>
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
-                      </div>
+                      <p className="text-sm">{message.content}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
                     </div>
-                  ))}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
-                        <div className="flex items-center gap-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
-                      </div>
+                  </div>
+                ))
+              )}
+              {isChatLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white border p-3 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Thinking...</span>
                     </div>
-                  )}
-                  <div ref={messagesEndRef} />
+                  </div>
                 </div>
               )}
             </div>
 
+            {/* Input Area */}
             <div className="flex gap-2">
-              <Textarea
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={canChat ? "Ask about your brand..." : "Upload documents first..."}
-                disabled={!canChat || isSending}
-                className="flex-1 resize-none"
-                rows={2}
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder={canChat ? "Ask about your brand..." : "Upload documents first"}
+                disabled={!canChat || isChatLoading}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                className="flex-1"
               />
               <Button
                 onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || !canChat || isSending}
-                className="px-3"
+                disabled={!newMessage.trim() || !canChat || isChatLoading}
+                className="px-4"
               >
-                {isSending ? (
-                  <LoadingSpinner size="sm" />
+                {isChatLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Send className="h-4 w-4" />
                 )}
               </Button>
             </div>
-            
-            {!canChat && documents.length > 0 && (
-              <p className="text-xs text-amber-600 text-center">
-                Chat will be available once at least one document finishes processing
-              </p>
-            )}
           </CardContent>
         </Card>
       </div>
