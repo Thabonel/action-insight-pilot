@@ -1,68 +1,82 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { Upload, FileText, X, Send, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import {
+  Upload,
+  FileText,
+  Trash2,
+  Send,
+  MessageCircle,
+  Bot,
+  User,
+  Loader2
+} from 'lucide-react';
 
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
-
-interface BrandDocument {
+interface Document {
   id: string;
   name: string;
   size: number;
   type: string;
-  uploadedAt: string;
+  uploadDate: string;
+  status: 'uploading' | 'uploaded' | 'error';
+}
+
+interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'assistant';
+  timestamp: Date;
 }
 
 const BrandAmbassador: React.FC = () => {
-  const [documents, setDocuments] = useState<BrandDocument[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load existing documents on component mount
   useEffect(() => {
     loadDocuments();
   }, []);
 
-  // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    scrollToBottom();
+  }, [chatMessages, isTyping]);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const loadDocuments = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const result = await apiClient.getBrandDocuments();
-      
-      if (result.success && result.data) {
-        setDocuments(result.data);
-      } else {
-        toast({
-          title: "Failed to load documents",
-          description: result.error || "Unknown error occurred",
-          variant: "destructive",
-        });
+      const response = await apiClient.getBrandDocuments();
+      if (response.success && response.data) {
+        const formattedDocs: Document[] = response.data.map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          size: doc.size || 0,
+          type: doc.type || 'application/octet-stream',
+          uploadDate: doc.created_at || new Date().toISOString(),
+          status: 'uploaded' as const
+        }));
+        setDocuments(formattedDocs);
       }
     } catch (error) {
-      console.error('Error loading documents:', error);
       toast({
         title: "Error",
-        description: "Failed to load documents. Please try again.",
+        description: "Failed to load documents",
         variant: "destructive",
       });
     } finally {
@@ -70,122 +84,159 @@ const BrandAmbassador: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (files: FileList) => {
-    if (!files.length) return;
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     for (const file of Array.from(files)) {
-      try {
-        setIsUploading(true);
-        
-        const result = await apiClient.uploadBrandDocument(file, {
-          uploadedAt: new Date().toISOString(),
-        });
+      const tempId = `temp-${Date.now()}-${Math.random()}`;
+      const tempDoc: Document = {
+        id: tempId,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploadDate: new Date().toISOString(),
+        status: 'uploading'
+      };
 
-        if (result.success && result.data) {
-          setDocuments(prev => [...prev, result.data]);
+      setDocuments(prev => [...prev, tempDoc]);
+      setUploadProgress(prev => ({ ...prev, [tempId]: 0 }));
+
+      try {
+        // Simulate upload progress
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => ({
+            ...prev,
+            [tempId]: Math.min((prev[tempId] || 0) + Math.random() * 30, 90)
+          }));
+        }, 200);
+
+        const response = await apiClient.uploadBrandDocument(file);
+
+        clearInterval(progressInterval);
+        setUploadProgress(prev => ({ ...prev, [tempId]: 100 }));
+
+        if (response.success) {
+          setDocuments(prev => prev.map(doc => 
+            doc.id === tempId 
+              ? { ...doc, id: response.data.id, status: 'uploaded' as const }
+              : doc
+          ));
+          
           toast({
-            title: "Upload successful",
-            description: `${file.name} has been uploaded successfully`,
+            title: "Success",
+            description: `${file.name} uploaded successfully`,
           });
         } else {
-          toast({
-            title: "Upload failed",
-            description: result.error || `Failed to upload ${file.name}`,
-            variant: "destructive",
-          });
+          throw new Error(response.error || 'Upload failed');
         }
       } catch (error) {
-        console.error('Error uploading file:', error);
+        setDocuments(prev => prev.map(doc => 
+          doc.id === tempId ? { ...doc, status: 'error' as const } : doc
+        ));
+        
         toast({
-          title: "Upload error",
-          description: `Failed to upload ${file.name}. Please try again.`,
+          title: "Upload Error",
+          description: `Failed to upload ${file.name}`,
           variant: "destructive",
         });
+      } finally {
+        setTimeout(() => {
+          setUploadProgress(prev => {
+            const newProgress = { ...prev };
+            delete newProgress[tempId];
+            return newProgress;
+          });
+        }, 1000);
       }
     }
-    
-    setIsUploading(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  const handleDeleteDocument = async (documentId: string) => {
+  const handleDeleteDocument = async (id: string) => {
     try {
-      const result = await apiClient.deleteBrandDocument(documentId);
+      const response = await apiClient.deleteBrandDocument(id);
       
-      if (result.success) {
-        setDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      if (response.success) {
+        setDocuments(prev => prev.filter(doc => doc.id !== id));
         toast({
-          title: "Document deleted",
-          description: "Document has been removed successfully",
+          title: "Success",
+          description: "Document deleted successfully",
         });
       } else {
-        toast({
-          title: "Delete failed",
-          description: result.error || "Failed to delete document",
-          variant: "destructive",
-        });
+        throw new Error(response.error || 'Delete failed');
       }
     } catch (error) {
-      console.error('Error deleting document:', error);
       toast({
-        title: "Delete error",
-        description: "Failed to delete document. Please try again.",
+        title: "Error",
+        description: "Failed to delete document",
         variant: "destructive",
       });
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handleFileUpload(files);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      handleFileUpload(files);
-    }
-  };
-
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!chatInput.trim() || isChatLoading) return;
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputMessage.trim(),
+      id: `user-${Date.now()}`,
+      content: chatInput.trim(),
+      sender: 'user',
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsChatLoading(true);
     setIsTyping(true);
 
-    // Mock assistant response for now
-    setTimeout(() => {
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `I received your message: "${userMessage.content}". This is a mock response. Integration with real brand analysis will be implemented soon.`,
+    try {
+      // Create context from uploaded documents
+      const context = {
+        documents: documents.filter(doc => doc.status === 'uploaded').map(doc => ({
+          id: doc.id,
+          name: doc.name,
+          type: doc.type
+        })),
+        conversationHistory: chatMessages.slice(-5) // Include last 5 messages for context
+      };
+
+      const response = await apiClient.chatWithBrand(userMessage.content, context);
+
+      if (response.success && response.data) {
+        const assistantMessage: ChatMessage = {
+          id: `assistant-${Date.now()}`,
+          content: response.data.message || response.data.response || 'I received your message but couldn\'t generate a proper response.',
+          sender: 'assistant',
+          timestamp: new Date()
+        };
+
+        setChatMessages(prev => [...prev, assistantMessage]);
+      } else {
+        throw new Error(response.error || 'Failed to get response');
+      }
+    } catch (error) {
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        content: 'I\'m sorry, I\'m having trouble responding right now. Please try again in a moment.',
+        sender: 'assistant',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, assistantMessage]);
+
+      setChatMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "Chat Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChatLoading(false);
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -195,7 +246,7 @@ const BrandAmbassador: React.FC = () => {
     }
   };
 
-  const formatFileSize = (bytes: number) => {
+  const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -205,175 +256,182 @@ const BrandAmbassador: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Brand Documents Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Upload className="h-5 w-5" />
+            <FileText className="h-5 w-5" />
             <span>Brand Documents</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {/* Upload Area */}
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              isDragOver 
-                ? 'border-blue-500 bg-blue-50' 
-                : isUploading
-                ? 'border-yellow-500 bg-yellow-50'
-                : 'border-gray-300 hover:border-gray-400'
-            }`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-          >
-            <Upload className={`mx-auto h-12 w-12 mb-4 ${
-              isUploading ? 'text-yellow-500 animate-pulse' : 'text-gray-400'
-            }`} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {isUploading ? 'Uploading...' : 'Upload Brand Documents'}
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Drag and drop files here, or click to select files
-            </p>
-            <Button 
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <Button
               onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              variant="outline"
+              disabled={isLoading}
+              className="flex items-center space-x-2"
             >
-              {isUploading ? 'Uploading...' : 'Choose Files'}
+              <Upload className="h-4 w-4" />
+              <span>Upload Documents</span>
             </Button>
             <input
               ref={fileInputRef}
               type="file"
               multiple
               className="hidden"
-              onChange={handleFileSelect}
+              onChange={handleFileUpload}
               accept=".pdf,.doc,.docx,.txt,.md"
             />
           </div>
 
-          {/* Document List */}
-          <div className="mt-6">
-            <h4 className="text-sm font-medium text-gray-900 mb-3">
-              Uploaded Documents ({documents.length})
-            </h4>
-            
-            {isLoading ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-500 mt-2">Loading documents...</p>
-              </div>
-            ) : documents.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">
-                No documents uploaded yet
-              </p>
-            ) : (
+          {documents.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm text-gray-700">Uploaded Documents</h4>
               <div className="space-y-2">
                 {documents.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
-                  >
+                  <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <FileText className="h-5 w-5 text-gray-500" />
+                      <FileText className="h-4 w-4 text-blue-600" />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{doc.name}</p>
+                        <p className="font-medium text-sm">{doc.name}</p>
                         <p className="text-xs text-gray-500">
-                          {formatFileSize(doc.size)} • {new Date(doc.uploadedAt).toLocaleDateString()}
+                          {formatFileSize(doc.size)} • {new Date(doc.uploadDate).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteDocument(doc.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      {doc.status === 'uploading' && (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${uploadProgress[doc.id] || 0}%` }}
+                            />
+                          </div>
+                          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                        </div>
+                      )}
+                      {doc.status === 'uploaded' && (
+                        <Badge variant="outline" className="text-green-600 border-green-600">
+                          Uploaded
+                        </Badge>
+                      )}
+                      {doc.status === 'error' && (
+                        <Badge variant="destructive">
+                          Error
+                        </Badge>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteDocument(doc.id)}
+                        disabled={doc.status === 'uploading'}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Chat Interface */}
+      {/* Brand Chat Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <MessageCircle className="h-5 w-5" />
-            <span>Brand Ambassador Chat</span>
+            <span>Brand Assistant</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {/* Messages Container */}
-          <div className="h-96 overflow-y-auto border rounded-lg p-4 mb-4 bg-gray-50">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-500 mt-8">
-                <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>Start a conversation about your brand</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.role === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white border text-gray-900'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      <p className={`text-xs mt-1 ${
-                        message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
-                      }`}>
-                        {message.timestamp.toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
-                      </p>
-                    </div>
+        <CardContent className="space-y-4">
+          <ScrollArea className="h-96 w-full border rounded-lg p-4">
+            <div className="space-y-4">
+              {chatMessages.length === 0 && (
+                <div className="text-center text-gray-500 py-8">
+                  <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p>Start a conversation about your brand!</p>
+                  <p className="text-sm mt-2">Upload documents first to get more contextual responses.</p>
+                </div>
+              )}
+              
+              {chatMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex items-start space-x-3 ${
+                    message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                  }`}
+                >
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                    message.sender === 'user' ? 'bg-blue-600' : 'bg-purple-600'
+                  }`}>
+                    {message.sender === 'user' ? (
+                      <User className="h-4 w-4 text-white" />
+                    ) : (
+                      <Bot className="h-4 w-4 text-white" />
+                    )}
                   </div>
-                ))}
-                
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border rounded-lg px-4 py-2">
+                  <div className={`flex-1 max-w-xs lg:max-w-md ${
+                    message.sender === 'user' ? 'text-right' : ''
+                  }`}>
+                    <div className={`p-3 rounded-lg ${
+                      message.sender === 'user' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-900'
+                    }`}>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {message.timestamp.toLocaleTimeString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {isTyping && (
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="bg-gray-100 p-3 rounded-lg">
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                       </div>
                     </div>
                   </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+              
+              <div ref={chatEndRef} />
+            </div>
+          </ScrollArea>
 
-          {/* Message Input */}
+          <Separator />
+
           <div className="flex space-x-2">
-            <textarea
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
+            <Input
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask about your brand guidelines, tone of voice, or campaign ideas..."
-              className="flex-1 resize-none border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={2}
+              placeholder="Ask me about your brand, content ideas, or strategy..."
+              disabled={isChatLoading}
+              className="flex-1"
             />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isTyping}
-              className="self-end"
+            <Button 
+              onClick={handleSendMessage} 
+              disabled={!chatInput.trim() || isChatLoading}
+              className="px-3"
             >
-              <Send className="h-4 w-4" />
+              {isChatLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </CardContent>
