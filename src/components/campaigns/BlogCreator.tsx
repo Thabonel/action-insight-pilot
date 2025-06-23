@@ -1,42 +1,46 @@
 
 import React, { useState } from 'react';
-import { FileText, Target, ToggleLeft, Copy, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { FileText, Target, ToggleLeft, Copy, Download, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
 
 interface BlogFormData {
   title: string;
   keyword: string;
-  wordCount: string;
+  wordCount: number;
   tone: string;
   includeCTA: boolean;
 }
 
 interface GeneratedBlog {
   title: string;
-  metaDescription: string;
   content: string;
+  metaDescription: string;
   wordCount: number;
 }
 
 const BlogCreator: React.FC = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<BlogFormData>({
     title: '',
     keyword: '',
-    wordCount: '',
-    tone: '',
+    wordCount: 800,
+    tone: 'Professional',
     includeCTA: false
   });
 
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{title?: string; keyword?: string}>({});
   const [generatedBlog, setGeneratedBlog] = useState<GeneratedBlog | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const validateForm = (): boolean => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: {title?: string; keyword?: string} = {};
     
     if (!formData.title.trim()) {
       newErrors.title = 'Blog title is required';
@@ -50,163 +54,138 @@ const BlogCreator: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (field: keyof BlogFormData, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+  const handleGenerate = async () => {
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
     }
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    setIsGenerating(true);
     
-    if (validateForm()) {
-      console.log('Generating blog post with data:', formData);
-      
-      // Generate placeholder content
-      const placeholderBlog: GeneratedBlog = {
+    try {
+      const response = await apiClient.generateBlogPost({
         title: formData.title,
-        metaDescription: `Learn about ${formData.keyword} in this comprehensive guide. Discover key insights and practical tips to help you succeed.`,
-        content: `
-# ${formData.title}
+        keyword: formData.keyword,
+        wordCount: formData.wordCount,
+        tone: formData.tone,
+        includeCTA: formData.includeCTA
+      });
 
-## Introduction
-
-Welcome to this comprehensive guide about ${formData.keyword}. In this post, we'll explore the key concepts and provide you with actionable insights.
-
-## What is ${formData.keyword}?
-
-${formData.keyword} is an important topic that affects many aspects of modern business. Understanding its fundamentals is crucial for success.
-
-## Key Benefits
-
-- **Improved Efficiency**: Learn how ${formData.keyword} can streamline your processes
-- **Better Results**: Discover the impact on your bottom line
-- **Strategic Advantage**: Gain competitive edge through proper implementation
-
-## Best Practices
-
-When working with ${formData.keyword}, consider these proven strategies:
-
-1. Start with clear objectives
-2. Measure your progress regularly
-3. Adapt based on results
-4. Stay updated with latest trends
-
-## Implementation Steps
-
-### Step 1: Planning
-Begin by assessing your current situation and defining clear goals for your ${formData.keyword} initiative.
-
-### Step 2: Execution
-Put your plan into action with careful monitoring and regular adjustments.
-
-### Step 3: Optimization
-Continuously improve your approach based on data and feedback.
-
-## Conclusion
-
-${formData.keyword} represents a significant opportunity for growth and improvement. By following the strategies outlined in this guide, you'll be well-positioned to achieve your goals.
-
-${formData.includeCTA ? `\n## Ready to Get Started?\n\nTake the next step in your ${formData.keyword} journey. Contact our team today to learn how we can help you implement these strategies successfully.` : ''}
-        `,
-        wordCount: parseInt(formData.wordCount) || 800
-      };
-      
-      setGeneratedBlog(placeholderBlog);
+      if (response.success && response.data) {
+        setGeneratedBlog(response.data);
+        toast({
+          title: "Blog Generated Successfully",
+          description: "Your blog post has been created!"
+        });
+      } else {
+        throw new Error(response.error || 'Failed to generate blog post');
+      }
+    } catch (error) {
+      console.error('Error generating blog:', error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate blog post. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const handleCopyToClipboard = () => {
-    if (generatedBlog) {
-      navigator.clipboard.writeText(generatedBlog.content);
-      console.log('Blog content copied to clipboard');
+  const handleCopyToClipboard = async () => {
+    if (!generatedBlog) return;
+    
+    const content = `# ${generatedBlog.title}\n\n${generatedBlog.content}`;
+    
+    try {
+      await navigator.clipboard.writeText(content);
+      toast({
+        title: "Copied to Clipboard",
+        description: "Blog post content has been copied!"
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy content to clipboard",
+        variant: "destructive"
+      });
     }
   };
 
   const handleDownloadMarkdown = () => {
-    if (generatedBlog) {
-      const blob = new Blob([generatedBlog.content], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${generatedBlog.title.toLowerCase().replace(/\s+/g, '-')}.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
+    if (!generatedBlog) return;
+    
+    const content = `# ${generatedBlog.title}\n\n${generatedBlog.content}`;
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${generatedBlog.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Download Started",
+      description: "Blog post markdown file is downloading!"
+    });
   };
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">AI Blog Post Creator</h2>
-        <p className="text-slate-600">Generate SEO-optimized blog posts with your brand voice</p>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">AI Blog Creator</h2>
+        <p className="text-slate-600">Generate SEO-optimized blog posts with AI assistance</p>
       </div>
 
-      <Card className="max-w-2xl mx-auto">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <FileText className="w-5 h-5 text-blue-600" />
-            <span>Create New Blog Post</span>
+            <FileText className="h-5 w-5" />
+            <span>Blog Post Details</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Blog Title */}
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">
-                Blog Title *
-              </Label>
+              <Label htmlFor="blog-title">Blog Title *</Label>
               <Input
-                id="title"
-                type="text"
-                placeholder="Enter your blog post title"
+                id="blog-title"
+                placeholder="Enter your blog title"
                 value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 className={errors.title ? 'border-red-500' : ''}
               />
-              {errors.title && (
-                <p className="text-sm text-red-500">{errors.title}</p>
-              )}
+              {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
             </div>
-
-            {/* Target Keyword */}
+            
             <div className="space-y-2">
-              <Label htmlFor="keyword" className="text-sm font-medium flex items-center space-x-1">
-                <Target className="w-4 h-4" />
-                <span>Target Keyword *</span>
-              </Label>
-              <Input
-                id="keyword"
-                type="text"
-                placeholder="Enter your target SEO keyword"
-                value={formData.keyword}
-                onChange={(e) => handleInputChange('keyword', e.target.value)}
-                className={errors.keyword ? 'border-red-500' : ''}
-              />
-              {errors.keyword && (
-                <p className="text-sm text-red-500">{errors.keyword}</p>
-              )}
+              <Label htmlFor="target-keyword">Target Keyword *</Label>
+              <div className="relative">
+                <Target className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="target-keyword"
+                  placeholder="Enter target keyword"
+                  value={formData.keyword}
+                  onChange={(e) => setFormData(prev => ({ ...prev, keyword: e.target.value }))}
+                  className={`pl-10 ${errors.keyword ? 'border-red-500' : ''}`}
+                />
+              </div>
+              {errors.keyword && <p className="text-sm text-red-500">{errors.keyword}</p>}
             </div>
+          </div>
 
-            {/* Word Count */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="wordCount" className="text-sm font-medium">
-                Word Count
-              </Label>
-              <Select value={formData.wordCount} onValueChange={(value) => handleInputChange('wordCount', value)}>
+              <Label htmlFor="word-count">Word Count</Label>
+              <Select value={formData.wordCount.toString()} onValueChange={(value) => setFormData(prev => ({ ...prev, wordCount: parseInt(value) }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select word count" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="500">500 words</SelectItem>
@@ -217,71 +196,67 @@ ${formData.includeCTA ? `\n## Ready to Get Started?\n\nTake the next step in you
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Tone */}
+            
             <div className="space-y-2">
-              <Label htmlFor="tone" className="text-sm font-medium">
-                Tone
-              </Label>
-              <Select value={formData.tone} onValueChange={(value) => handleInputChange('tone', value)}>
+              <Label htmlFor="tone">Tone</Label>
+              <Select value={formData.tone} onValueChange={(value) => setFormData(prev => ({ ...prev, tone: value }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select writing tone" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="professional">Professional</SelectItem>
-                  <SelectItem value="casual">Casual</SelectItem>
-                  <SelectItem value="friendly">Friendly</SelectItem>
-                  <SelectItem value="authoritative">Authoritative</SelectItem>
-                  <SelectItem value="conversational">Conversational</SelectItem>
+                  <SelectItem value="Professional">Professional</SelectItem>
+                  <SelectItem value="Casual">Casual</SelectItem>
+                  <SelectItem value="Friendly">Friendly</SelectItem>
+                  <SelectItem value="Authoritative">Authoritative</SelectItem>
+                  <SelectItem value="Conversational">Conversational</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            {/* Include CTA Toggle */}
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="includeCTA"
-                checked={formData.includeCTA}
-                onCheckedChange={(checked) => handleInputChange('includeCTA', checked as boolean)}
-              />
-              <Label htmlFor="includeCTA" className="text-sm font-medium flex items-center space-x-2 cursor-pointer">
-                <ToggleLeft className="w-4 h-4" />
-                <span>Include call-to-action</span>
-              </Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="include-cta"
+              checked={formData.includeCTA}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, includeCTA: Boolean(checked) }))}
+            />
+            <Label htmlFor="include-cta" className="flex items-center space-x-2 cursor-pointer">
+              <ToggleLeft className="h-4 w-4" />
+              <span>Include call-to-action</span>
+            </Label>
+          </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full">
-              Generate Blog Post
-            </Button>
-          </form>
+          <Button 
+            onClick={handleGenerate} 
+            className="w-full" 
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating Blog Post...
+              </>
+            ) : (
+              'Generate Blog Post'
+            )}
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Blog Preview Section */}
-      <Card className="max-w-4xl mx-auto">
+      {/* Blog Post Preview */}
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Generated Blog Post</CardTitle>
             {generatedBlog && (
               <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyToClipboard}
-                  className="flex items-center space-x-1"
-                >
-                  <Copy className="w-4 h-4" />
-                  <span>Copy</span>
+                <Button variant="outline" size="sm" onClick={handleCopyToClipboard}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownloadMarkdown}
-                  className="flex items-center space-x-1"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download</span>
+                <Button variant="outline" size="sm" onClick={handleDownloadMarkdown}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
                 </Button>
               </div>
             )}
@@ -289,44 +264,29 @@ ${formData.includeCTA ? `\n## Ready to Get Started?\n\nTake the next step in you
         </CardHeader>
         <CardContent>
           {!generatedBlog ? (
-            <div className="text-center py-12">
-              <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-              <p className="text-slate-500 text-lg">Click Generate to create your blog post</p>
+            <div className="text-center py-12 text-gray-500">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Click Generate to create your blog post</p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Meta Information */}
-              <div className="bg-slate-50 p-4 rounded-lg border">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-700">Meta Description</p>
-                    <p className="text-sm text-slate-600 mt-1">{generatedBlog.metaDescription}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-700">Word Count</p>
-                    <p className="text-sm text-slate-600 mt-1">{generatedBlog.wordCount} words</p>
-                  </div>
+              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                  <span>Word Count: {generatedBlog.wordCount}</span>
+                  <span>•</span>
+                  <span>Meta Description: {generatedBlog.metaDescription}</span>
                 </div>
               </div>
 
               {/* Blog Content */}
-              <div className="prose prose-slate max-w-none">
+              <article className="prose prose-lg max-w-none">
+                <h1 className="text-3xl font-bold text-gray-900 mb-6">{generatedBlog.title}</h1>
                 <div 
-                  className="blog-content space-y-4"
-                  dangerouslySetInnerHTML={{
-                    __html: generatedBlog.content
-                      .replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold text-slate-900 mb-6">$1</h1>')
-                      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-semibold text-slate-800 mt-8 mb-4">$1</h2>')
-                      .replace(/^### (.+)$/gm, '<h3 class="text-xl font-medium text-slate-700 mt-6 mb-3">$1</h3>')
-                      .replace(/^\*\*(.+)\*\*:/gm, '<strong class="font-semibold text-slate-900">$1:</strong>')
-                      .replace(/^\- (.+)$/gm, '<li class="ml-4">$1</li>')
-                      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal">$2</li>')
-                      .replace(/\n\n/g, '</p><p class="text-slate-700 leading-relaxed mb-4">')
-                      .replace(/^(?!<[h|l])/gm, '<p class="text-slate-700 leading-relaxed mb-4">')
-                      .replace(/(?<!>)$/gm, '</p>')
-                  }}
+                  className="text-gray-700 leading-relaxed space-y-4"
+                  dangerouslySetInnerHTML={{ __html: generatedBlog.content }}
                 />
-              </div>
+              </article>
             </div>
           )}
         </CardContent>
