@@ -31,31 +31,31 @@ export interface BrandDocument {
 
 export class BrandMethods extends BaseApiClient {
   async analyzeBrandVoice(content: string, brandId?: string): Promise<ApiResponse<BrandVoiceAnalysis>> {
-    return this.httpClient.request<ApiResponse<BrandVoiceAnalysis>>('/api/brand/voice-analysis', {
+    return this.httpClient.request('/api/brand/voice-analysis', {
       method: 'POST',
       body: JSON.stringify({ content, brandId }),
     });
   }
 
   async getBrandDocuments(): Promise<ApiResponse<BrandDocument[]>> {
-    return this.httpClient.request<ApiResponse<BrandDocument[]>>('/api/brand/documents');
+    return this.httpClient.request('/api/brand/documents');
   }
 
   async getBrandTerminology(brandId?: string): Promise<ApiResponse<{ terms: string[], phrases: string[] }>> {
-    return this.httpClient.request<ApiResponse<{ terms: string[], phrases: string[] }>>('/api/brand/terminology', {
+    return this.httpClient.request('/api/brand/terminology', {
       method: 'GET',
     });
   }
 
   async suggestBrandAlternatives(text: string, brandId?: string): Promise<ApiResponse<{ alternatives: string[] }>> {
-    return this.httpClient.request<ApiResponse<{ alternatives: string[] }>>('/api/brand/alternatives', {
+    return this.httpClient.request('/api/brand/alternatives', {
       method: 'POST',
       body: JSON.stringify({ text, brandId }),
     });
   }
 
   async enhanceBrandVoice(content: string, targetVoice: string, brandId?: string): Promise<ApiResponse<{ enhanced_content: string }>> {
-    return this.httpClient.request<ApiResponse<{ enhanced_content: string }>>('/api/brand/enhance', {
+    return this.httpClient.request('/api/brand/enhance', {
       method: 'POST',
       body: JSON.stringify({ content, targetVoice, brandId }),
     });

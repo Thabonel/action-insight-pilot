@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,10 @@ const Dashboard: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState('');
 
-  const handleQuerySubmit = async (query: string) => {
+  const handleQuerySubmit = async (formEvent: React.FormEvent) => {
+    formEvent.preventDefault();
+    if (!query.trim()) return;
+    
     setIsProcessing(true);
     try {
       // Add user message
@@ -56,6 +60,7 @@ const Dashboard: React.FC = () => {
         
         setChatHistory(prev => [...prev, aiMessage]);
         setIsProcessing(false);
+        setQuery('');
       }, 1000);
     } catch (error) {
       setIsProcessing(false);
