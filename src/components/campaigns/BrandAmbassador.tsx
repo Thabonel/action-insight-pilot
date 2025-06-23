@@ -1,111 +1,87 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, MessageCircle, Send, Loader2, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { Upload, FileText, MessageSquare, CheckCircle, Clock, AlertCircle, Send, Loader2 } from 'lucide-react';
 import { HttpClient } from '@/lib/http-client';
+import ChatResponse from '@/components/dashboard/ChatResponse';
 
-// Document interface and component types
+const httpClient = new HttpClient();
+
 interface Document {
   id: string;
   name: string;
   status: 'processing' | 'ready' | 'error';
   summary?: string;
   category?: string;
-  error?: string;
+  uploadedAt: string;
 }
 
-interface Message {
-  id: string;
+interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
-  timestamp: Date;
+}
+
+interface ChatApiResponse {
+  message?: string;
+  response?: string;
 }
 
 const BrandAmbassador: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-  
-  // Create HttpClient instance
-  const httpClient = new HttpClient();
+
+  const loadDocuments = async () => {
+    try {
+      const response = await httpClient.get('/api/brand-documents');
+      if (response.success && response.data) {
+        setDocuments(response.data as Document[]);
+      }
+    } catch (error) {
+      console.error('Failed to load documents:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    loadDocuments();
+  }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
     
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
+      for (const file of files) {
         const formData = new FormData();
         formData.append('file', file);
         
-        // Add document with processing status
-        const newDoc: Document = {
-          id: Math.random().toString(36).substr(2, 9),
-          name: file.name,
-          status: 'processing'
-        };
+        const response = await httpClient.post('/api/brand-documents/upload', formData);
         
-        setDocuments(prev => [...prev, newDoc]);
-        
-        try {
-          const response = await httpClient.post('/api/documents/upload', formData);
-          
-          if (response.success && response.data) {
-            // Update document with ready status and metadata
-            setDocuments(prev => prev.map(doc => 
-              doc.id === newDoc.id 
-                ? {
-                    ...doc,
-                    status: 'ready' as const,
-                    summary: response.data.summary || 'Document processed successfully',
-                    category: response.data.category || 'General'
-                  }
-                : doc
-            ));
-            
-            toast({
-              title: "Document uploaded",
-              description: `${file.name} has been processed and is ready for chat.`,
-            });
-          } else {
-            throw new Error(response.error || 'Upload failed');
-          }
-        } catch (error) {
-          // Update document with error status
-          setDocuments(prev => prev.map(doc => 
-            doc.id === newDoc.id 
-              ? {
-                  ...doc,
-                  status: 'error' as const,
-                  error: error instanceof Error ? error.message : 'Upload failed'
-                }
-              : doc
-          ));
-          
-          toast({
-            title: "Upload failed",
-            description: `Failed to upload ${file.name}. ${error instanceof Error ? error.message : 'Please try again.'}`,
-            variant: "destructive",
-          });
+        if (response.success && response.data) {
+          const uploadedDoc = response.data as Document;
+          setDocuments(prev => [...prev, {
+            id: uploadedDoc.id,
+            name: file.name,
+            status: 'processing',
+            uploadedAt: new Date().toISOString()
+          }]);
         }
-      });
+      }
       
-      await Promise.all(uploadPromises);
+      // Refresh documents after upload
+      setTimeout(() => {
+        loadDocuments();
+      }, 1000);
+      
     } catch (error) {
-      toast({
-        title: "Upload error",
-        description: "An unexpected error occurred during upload.",
-        variant: "destructive",
-      });
+      console.error('Failed to upload documents:', error);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -116,266 +92,209 @@ const BrandAmbassador: React.FC = () => {
 
   const getStatusIcon = (status: Document['status']) => {
     switch (status) {
-      case 'processing':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'ready':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'processing':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'error':
         return <AlertCircle className="h-4 w-4 text-red-500" />;
     }
   };
 
-  const getStatusBadge = (status: Document['status']) => {
+  const getStatusColor = (status: Document['status']) => {
     switch (status) {
-      case 'processing':
-        return <Badge variant="secondary">Processing</Badge>;
       case 'ready':
-        return <Badge variant="default">Ready</Badge>;
+        return 'bg-green-100 text-green-800';
+      case 'processing':
+        return 'bg-yellow-100 text-yellow-800';
       case 'error':
-        return <Badge variant="destructive">Error</Badge>;
+        return 'bg-red-100 text-red-800';
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
-    
-    const readyDocuments = documents.filter(doc => doc.status === 'ready');
-    if (readyDocuments.length === 0) {
-      toast({
-        title: "No documents ready",
-        description: "Please wait for documents to finish processing before chatting.",
-        variant: "destructive",
-      });
-      return;
+  const getStatusText = (status: Document['status']) => {
+    switch (status) {
+      case 'ready':
+        return 'Ready';
+      case 'processing':
+        return 'Processing';
+      case 'error':
+        return 'Error';
     }
+  };
 
-    const userMessage: Message = {
-      id: Math.random().toString(36).substr(2, 9),
-      role: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    };
+  const hasReadyDocuments = documents.some(doc => doc.status === 'ready');
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsSending(true);
-    setIsTyping(true);
+  const handleSendMessage = async () => {
+    if (!currentMessage.trim() || isLoading || !hasReadyDocuments) return;
+
+    const userMessage = currentMessage;
+    setCurrentMessage('');
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsLoading(true);
 
     try {
-      const chatData = {
-        message: inputMessage,
-        documents: readyDocuments.map(doc => ({
+      const readyDocs = documents
+        .filter(doc => doc.status === 'ready')
+        .map(doc => ({
           id: doc.id,
           name: doc.name,
           summary: doc.summary || ''
-        })),
-        conversationHistory: messages.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        }))
-      };
+        }));
 
-      const response = await httpClient.post('/api/chat/brand', chatData);
-      
+      const response = await httpClient.post('/api/brand-ambassador/chat', {
+        message: userMessage,
+        documents: readyDocs,
+        conversationHistory: chatMessages
+      });
+
       if (response.success && response.data) {
-        const assistantMessage: Message = {
-          id: Math.random().toString(36).substr(2, 9),
-          role: 'assistant',
-          content: response.data.message || response.data.response || 'I received your message but had trouble generating a response.',
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        throw new Error(response.error || 'Failed to get response');
+        const chatResponse = response.data as ChatApiResponse;
+        const assistantMessage = chatResponse.message || chatResponse.response || 'No response received';
+        setChatMessages(prev => [...prev, { role: 'assistant', content: assistantMessage }]);
       }
     } catch (error) {
-      toast({
-        title: "Chat error",
-        description: error instanceof Error ? error.message : "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
-      
-      const errorMessage: Message = {
-        id: Math.random().toString(36).substr(2, 9),
-        role: 'assistant',
-        content: 'Sorry, I encountered an error processing your message. Please try again.',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      console.error('Failed to send message:', error);
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Sorry, I encountered an error. Please try again.' 
+      }]);
     } finally {
-      setIsSending(false);
-      setIsTyping(false);
+      setIsLoading(false);
     }
   };
 
-  const canChat = documents.some(doc => doc.status === 'ready');
-
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">Brand Ambassador Assistant</h1>
-        <p className="text-gray-600">Upload your brand documents and chat to get personalized marketing insights</p>
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Brand Knowledge Base
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="flex items-center gap-2"
+              >
+                {isUploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                Upload Documents
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.txt,.md"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <span className="text-sm text-gray-500">
+                Upload brand guidelines, product docs, marketing materials
+              </span>
+            </div>
 
-      {/* Document Upload Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Brand Documents
-        </h2>
-        
-        <div className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600 mb-2">
-              Upload your brand guidelines, marketing materials, or other relevant documents
-            </p>
-            <Button 
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              variant="outline"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                'Choose Files'
-              )}
-            </Button>
-          </div>
-
-          {/* Document List */}
-          {documents.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="font-medium text-gray-900">Uploaded Documents</h3>
-              <div className="space-y-2">
-                {documents.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(doc.status)}
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{doc.name}</p>
-                        {doc.summary && (
-                          <p className="text-sm text-gray-600">{doc.summary}</p>
+            {documents.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-medium">Uploaded Documents</h3>
+                <div className="grid gap-3">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <div className="font-medium">{doc.name}</div>
+                          {doc.summary && (
+                            <div className="text-sm text-gray-600">{doc.summary}</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {doc.category && (
+                          <Badge variant="outline">{doc.category}</Badge>
                         )}
-                        {doc.error && (
-                          <p className="text-sm text-red-600">{doc.error}</p>
-                        )}
+                        <Badge className={getStatusColor(doc.status)}>
+                          <div className="flex items-center gap-1">
+                            {getStatusIcon(doc.status)}
+                            {getStatusText(doc.status)}
+                          </div>
+                        </Badge>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {doc.category && (
-                        <Badge variant="outline">{doc.category}</Badge>
-                      )}
-                      {getStatusBadge(doc.status)}
-                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            Brand Ambassador Chat
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {!hasReadyDocuments && (
+              <div className="text-center p-8 text-gray-500">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Upload and process documents to start chatting with your brand ambassador</p>
+              </div>
+            )}
+
+            {chatMessages.length > 0 && (
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {chatMessages.map((message, index) => (
+                  <div key={index} className="space-y-2">
+                    {message.role === 'user' ? (
+                      <div className="flex justify-end">
+                        <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs lg:max-w-md">
+                          {message.content}
+                        </div>
+                      </div>
+                    ) : (
+                      <ChatResponse response={message.content} />
+                    )}
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            )}
 
-      {/* Chat Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <MessageCircle className="h-5 w-5" />
-          Chat with Your Brand Assistant
-        </h2>
-
-        <div className="space-y-4">
-          {/* Chat Messages */}
-          <div className="h-96 overflow-y-auto border rounded-lg p-4 space-y-4 bg-gray-50">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-500 mt-8">
-                {!canChat ? (
-                  <p>Upload and process documents to start chatting</p>
-                ) : (
-                  <p>Start a conversation about your brand and marketing strategy</p>
-                )}
-              </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            {hasReadyDocuments && (
+              <div className="flex gap-2">
+                <Input
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  placeholder="Ask about your brand, products, or marketing strategy..."
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  disabled={isLoading}
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !currentMessage.trim()}
+                  size="icon"
                 >
-                  <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      message.role === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white text-gray-800 border'
-                    }`}
-                  >
-                    <p className="text-sm">{message.content}</p>
-                    <p className={`text-xs mt-1 ${
-                      message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
-                    }`}>
-                      {message.timestamp.toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-            
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-white text-gray-800 border px-4 py-2 rounded-lg">
-                  <div className="flex items-center gap-1">
-                    <div className="flex space-x-1">
-                      <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="h-2 w-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                    <span className="text-xs text-gray-500 ml-2">Assistant is typing...</span>
-                  </div>
-                </div>
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             )}
           </div>
-
-          {/* Chat Input */}
-          <div className="flex gap-2">
-            <Input
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder={canChat ? "Ask me about your brand strategy..." : "Upload documents first to start chatting"}
-              disabled={!canChat || isSending}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              className="flex-1"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!canChat || !inputMessage.trim() || isSending}
-            >
-              {isSending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-          
-          {!canChat && documents.length > 0 && (
-            <p className="text-sm text-gray-500 text-center">
-              Waiting for documents to finish processing...
-            </p>
-          )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
