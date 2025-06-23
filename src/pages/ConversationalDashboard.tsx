@@ -6,7 +6,6 @@ import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
-import { RealInsights } from '@/types/insights';
 
 const ConversationalDashboard: React.FC = () => {
   const {
@@ -20,8 +19,8 @@ const ConversationalDashboard: React.FC = () => {
     handleSuggestionClick
   } = useConversationalDashboard();
 
-  // Convert insights array to RealInsights format
-  const insights: RealInsights = React.useMemo(() => {
+  // Convert insights array to proper format
+  const insights = React.useMemo(() => {
     if (Array.isArray(rawInsights)) {
       return {
         totalActions: rawInsights.length,
@@ -39,9 +38,9 @@ const ConversationalDashboard: React.FC = () => {
       };
     }
     
-    // If rawInsights is already a RealInsights object, return it as is
+    // If rawInsights is already an object, return it as is
     if (rawInsights && typeof rawInsights === 'object' && 'totalActions' in rawInsights) {
-      return rawInsights as RealInsights;
+      return rawInsights;
     }
     
     // Default fallback
