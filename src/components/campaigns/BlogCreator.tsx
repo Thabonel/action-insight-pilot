@@ -12,8 +12,9 @@ import { BrandVoiceChecker } from '@/components/brand/BrandVoiceChecker';
 import { PublishingWorkflow } from '@/components/blog/PublishingWorkflow';
 import { ContentLibrary } from '@/components/content/ContentLibrary';
 import { AIOptimizationCoach } from '@/components/content/AIOptimizationCoach';
+import { BlogPerformanceDashboard } from '@/components/blog/BlogPerformanceDashboard';
 import IntegrationHub from '@/components/blog/IntegrationHub';
-import { Edit, Save, Sparkles, CheckCircle, Library, Share2, Brain } from 'lucide-react';
+import { Edit, Save, Sparkles, CheckCircle, Library, Share2, Brain, BarChart3 } from 'lucide-react';
 
 const BlogCreator: React.FC = () => {
   const [blogPost, setBlogPost] = useState({
@@ -25,7 +26,7 @@ const BlogCreator: React.FC = () => {
     status: 'draft' as 'draft' | 'published' | 'scheduled'
   });
   
-  const [activeTab, setActiveTab] = useState('editor');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showOptimizationCoach, setShowOptimizationCoach] = useState(true);
   const { toast } = useToast();
@@ -66,6 +67,59 @@ const BlogCreator: React.FC = () => {
     // Load selected post data
   };
 
+  // Dashboard action handlers
+  const handleCreateNew = () => {
+    setActiveTab('editor');
+    setBlogPost({
+      title: '',
+      content: '',
+      excerpt: '',
+      tags: [],
+      category: '',
+      status: 'draft'
+    });
+  };
+
+  const handleContinueDraft = (draftId: string) => {
+    console.log('Continuing draft:', draftId);
+    setActiveTab('editor');
+    // Load draft data
+    toast({
+      title: "Draft loaded",
+      description: "Continue working on your draft."
+    });
+  };
+
+  const handleDuplicatePost = (postId: string) => {
+    console.log('Duplicating post:', postId);
+    setActiveTab('editor');
+    // Load post structure
+    toast({
+      title: "Post duplicated",
+      description: "Created a new post based on your best performer."
+    });
+  };
+
+  const handleUpdatePost = (postId: string) => {
+    console.log('Updating post:', postId);
+    setActiveTab('editor');
+    // Load post for editing
+    toast({
+      title: "Post loaded for update",
+      description: "Make your improvements and republish."
+    });
+  };
+
+  const handleCreateSeries = (postId: string) => {
+    console.log('Creating series from post:', postId);
+    setActiveTab('editor');
+    // Initialize series creation
+    toast({
+      title: "Series creation started",
+      description: "Building content series from successful post."
+    });
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -96,7 +150,11 @@ const BlogCreator: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+            <BarChart3 className="h-4 w-4" />
+            <span>Dashboard</span>
+          </TabsTrigger>
           <TabsTrigger value="editor" className="flex items-center space-x-2">
             <Edit className="h-4 w-4" />
             <span>Editor</span>
@@ -118,6 +176,16 @@ const BlogCreator: React.FC = () => {
             <span>Library</span>
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard">
+          <BlogPerformanceDashboard
+            onCreateNew={handleCreateNew}
+            onContinueDraft={handleContinueDraft}
+            onDuplicatePost={handleDuplicatePost}
+            onUpdatePost={handleUpdatePost}
+            onCreateSeries={handleCreateSeries}
+          />
+        </TabsContent>
 
         <TabsContent value="editor" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
