@@ -1,52 +1,101 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import type { Webhook, IntegrationConnection } from '@/lib/api-client-interface';
+import { ApiResponse, IntegrationConnection, Webhook } from '@/lib/api-client-interface';
 
-export function useIntegrations() {
-  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+export const useIntegrations = () => {
   const [connections, setConnections] = useState<IntegrationConnection[]>([]);
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
-  useEffect(() => {
-    loadIntegrations();
-  }, []);
-
-  const loadIntegrations = async () => {
+  const fetchConnections = async () => {
     try {
       setLoading(true);
-      const [webhooksResponse, connectionsResponse] = await Promise.all([
-        apiClient.integrations.getWebhooks(),
-        apiClient.integrations.getConnections()
-      ]);
-
-      console.log('Webhooks response:', webhooksResponse);
-      console.log('Connections response:', connectionsResponse);
-
-      if (webhooksResponse.success && Array.isArray(webhooksResponse.data)) {
-        setWebhooks(webhooksResponse.data);
+      const result = await apiClient.integrations.getConnections();
+      if (result.success && result.data) {
+        setConnections(result.data);
       } else {
-        console.warn('Webhooks response data is not an array:', webhooksResponse.data);
-        setWebhooks([]);
+        setError(result.error || 'Failed to fetch connections');
       }
-
-      if (connectionsResponse.success && Array.isArray(connectionsResponse.data)) {
-        setConnections(connectionsResponse.data);
-      } else {
-        console.warn('Connections response data is not an array:', connectionsResponse.data);
-        setConnections([]);
-      }
-
-      setError(null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load integrations';
-      setError(errorMessage);
-      console.error('Error loading integrations:', err);
-      setWebhooks([]);
-      setConnections([]);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchWebhooks = async () => {
+    try {
+      const result = await apiClient.integrations.getWebhooks();
+      if (result.success && result.data) {
+        setWebhooks(result.data);
+      } else {
+        setError(result.error || 'Failed to fetch webhooks');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    }
+  };
+
+  const connectService = async (service: string, apiKey: string) => {
+    try {
+      setLoading(true);
+      const result = await apiClient.integrations.connectService(service, apiKey);
+      if (result.success) {
+        await fetchConnections();
+        return { success: true };
+      } else {
+        const errorMsg = result.error || 'Failed to connect service';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const syncService = async (service: string) => {
+    try {
+      setLoading(true);
+      const result = await apiClient.integrations.syncService(service);
+      if (result.success) {
+        await fetchConnections();
+        return { success: true };
+      } else {
+        const errorMsg = result.error || 'Failed to sync service';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const disconnectService = async (service: string) => {
+    try {
+      setLoading(true);
+      const result = await apiClient.integrations.disconnectService(service);
+      if (result.success) {
+        await fetchConnections();
+        return { success: true };
+      } else {
+        const errorMsg = result.error || 'Failed to disconnect service';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
       setLoading(false);
     }
@@ -54,157 +103,64 @@ export function useIntegrations() {
 
   const createWebhook = async (webhookData: Partial<Webhook>) => {
     try {
-      const response = await apiClient.integrations.createWebhook(webhookData);
-      if (response.success && response.data) {
-        setWebhooks(prev => [...prev, response.data!]);
-        toast({
-          title: "Webhook Created",
-          description: "Webhook has been successfully created",
-        });
-        return response.data;
+      setLoading(true);
+      const result = await apiClient.integrations.createWebhook(webhookData);
+      if (result.success) {
+        await fetchWebhooks();
+        return { success: true, data: result.data };
       } else {
-        throw new Error(response.error || 'Failed to create webhook');
+        const errorMsg = result.error || 'Failed to create webhook';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create webhook';
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      throw err;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setLoading(false);
     }
   };
 
-  const deleteWebhook = async (webhookId: string) => {
+  const deleteWebhook = async (id: string) => {
     try {
-      const response = await apiClient.integrations.deleteWebhook(webhookId);
-      if (response.success) {
-        setWebhooks(prev => prev.filter(webhook => webhook.id !== webhookId));
-        toast({
-          title: "Webhook Deleted",
-          description: "Webhook has been successfully deleted",
-        });
+      setLoading(true);
+      const result = await apiClient.integrations.deleteWebhook(id);
+      if (result.success) {
+        await fetchWebhooks();
+        return { success: true };
       } else {
-        throw new Error(response.error || 'Failed to delete webhook');
+        const errorMsg = result.error || 'Failed to delete webhook';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete webhook';
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      throw err;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setLoading(false);
     }
   };
 
-  const testWebhook = async (webhookId: string) => {
-    try {
-      const response = await apiClient.integrations.testWebhook(webhookId);
-      if (response.success) {
-        toast({
-          title: "Webhook Test Successful",
-          description: "Webhook responded successfully",
-        });
-        return response.data;
-      } else {
-        throw new Error(response.error || 'Webhook test failed');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Webhook test failed';
-      toast({
-        title: "Webhook Test Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      throw err;
-    }
-  };
-
-  const connectService = async (service: string, apiKey: string) => {
-    try {
-      const response = await apiClient.integrations.connectService(service, apiKey);
-      if (response.success) {
-        await loadIntegrations();
-        toast({
-          title: "Service Connected",
-          description: `Successfully connected to ${service}`,
-        });
-        return response.data;
-      } else {
-        throw new Error(response.error || 'Failed to connect service');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to connect service';
-      toast({
-        title: "Connection Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      throw err;
-    }
-  };
-
-  const syncService = async (service: string) => {
-    try {
-      const response = await apiClient.integrations.syncService(service);
-      if (response.success) {
-        await loadIntegrations();
-        toast({
-          title: "Sync Complete",
-          description: `Successfully synced data from ${service}`,
-        });
-        return response.data;
-      } else {
-        throw new Error(response.error || 'Failed to sync service');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sync service';
-      toast({
-        title: "Sync Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      throw err;
-    }
-  };
-
-  const disconnectService = async (service: string) => {
-    try {
-      const response = await apiClient.integrations.disconnectService(service);
-      if (response.success) {
-        await loadIntegrations();
-        toast({
-          title: "Service Disconnected",
-          description: `Successfully disconnected from ${service}`,
-        });
-        return response.data;
-      } else {
-        throw new Error(response.error || 'Failed to disconnect service');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to disconnect service';
-      toast({
-        title: "Disconnection Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      throw err;
-    }
-  };
+  useEffect(() => {
+    fetchConnections();
+    fetchWebhooks();
+  }, []);
 
   return {
-    webhooks,
     connections,
+    webhooks,
     loading,
     error,
-    createWebhook,
-    deleteWebhook,
-    testWebhook,
     connectService,
     syncService,
     disconnectService,
-    refreshIntegrations: loadIntegrations
+    createWebhook,
+    deleteWebhook,
+    refetch: () => {
+      fetchConnections();
+      fetchWebhooks();
+    }
   };
-}
+};
