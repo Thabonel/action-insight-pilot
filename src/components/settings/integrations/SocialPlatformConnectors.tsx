@@ -1,288 +1,323 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Share2, Settings, ExternalLink, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { useSocialPlatforms } from '@/hooks/useSocialPlatforms';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, ExternalLink, CheckCircle, AlertCircle, RefreshCw, Unlink2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
+import { SocialPlatformConnection, OAuthResponse } from '@/lib/api-client-interface';
 
-interface SocialPlatform {
-  id: string;
+interface SocialPlatformConfig {
   name: string;
+  icon: React.ReactNode;
   description: string;
-  icon: string;
-  authMethod: 'oauth';
-  docsUrl: string;
+  isConnected: boolean;
+  connectHandler: () => void;
+  disconnectHandler: () => void;
+  syncHandler: () => void;
+  testHandler: () => void;
+  connecting: boolean;
+  syncing: boolean;
+  testing: boolean;
 }
 
 const SocialPlatformConnectors: React.FC = () => {
-  const [connecting, setConnecting] = useState<Set<string>>(new Set());
+  const [connections, setConnections] = useState<SocialPlatformConnection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
+  const [disconnectingPlatform, setDisconnectingPlatform] = useState<string | null>(null);
+  const [syncingPlatform, setSyncingPlatform] = useState<string | null>(null);
+  const [testingPlatform, setTestingPlatform] = useState<string | null>(null);
   const { toast } = useToast();
-  const { connections, isLoading, connectPlatform, disconnectPlatform, getPlatformStatus, reload } = useSocialPlatforms();
-
-  const platforms: SocialPlatform[] = [
-    {
-      id: 'buffer',
-      name: 'Buffer',
-      description: 'Schedule and publish content across social platforms',
-      icon: '📊',
-      authMethod: 'oauth',
-      docsUrl: 'https://buffer.com/developers/api'
-    },
-    {
-      id: 'hootsuite',
-      name: 'Hootsuite',
-      description: 'Enterprise social media management',
-      icon: '🦉',
-      authMethod: 'oauth',
-      docsUrl: 'https://developer.hootsuite.com/'
-    },
-    {
-      id: 'later',
-      name: 'Later',
-      description: 'Visual content calendar and publishing',
-      icon: '📅',
-      authMethod: 'oauth',
-      docsUrl: 'https://developers.later.com/'
-    },
-    {
-      id: 'sprout_social',
-      name: 'Sprout Social',
-      description: 'Complete social media management platform',
-      icon: '🌱',
-      authMethod: 'oauth',
-      docsUrl: 'https://developers.sproutsocial.com/'
-    }
-  ];
 
   useEffect(() => {
-    // Listen for OAuth completion messages from popup windows
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'oauth_success') {
-        toast({
-          title: "Platform Connected!",
-          description: `Successfully connected to ${event.data.platform}.`,
-        });
-        reload();
-        setConnecting(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(event.data.platform);
-          return newSet;
-        });
-      } else if (event.data.type === 'oauth_error') {
-        toast({
-          title: "Connection Failed",
-          description: event.data.error,
-          variant: "destructive",
-        });
-        setConnecting(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(event.data.platform);
-          return newSet;
-        });
-      }
-    };
+    fetchConnections();
+  }, []);
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [toast, reload]);
-
-  const handleConnect = async (platform: SocialPlatform) => {
-    setConnecting(prev => new Set(prev).add(platform.id));
-    
+  const fetchConnections = async () => {
     try {
-      const response = await connectPlatform(platform.id);
+      setLoading(true);
+      const response = await apiClient.socialPlatforms.getPlatformConnections();
+      setConnections(response);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to fetch connections');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const initiatePlatformConnection = async (platform: string) => {
+    setConnectingPlatform(platform);
+    try {
+      const response = await apiClient.socialPlatforms.initiatePlatformConnection(platform);
       
-      if (response && response.authorization_url) {
-        // Open OAuth popup
+      if (response.success && response.data?.authorization_url) {
         const popup = window.open(
-          response.authorization_url,
-          `oauth_${platform.id}`,
+          response.data.authorization_url,
+          'social-auth',
           'width=600,height=600,scrollbars=yes,resizable=yes'
         );
 
-        // Check if popup was blocked
-        if (!popup) {
-          throw new Error('Popup blocked. Please allow popups for this site.');
-        }
-
-        // Monitor popup closure without oauth completion
-        const checkClosed = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(checkClosed);
-            setConnecting(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(platform.id);
-              return newSet;
-            });
+        const handlePopupMessage = async (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+          if (event.data.platform === platform && event.data.code && event.data.state) {
+            try {
+              const completeResponse = await apiClient.socialPlatforms.completePlatformConnection(
+                platform,
+                event.data.code,
+                event.data.state
+              );
+              if (completeResponse.success) {
+                toast({
+                  title: "Platform Connected",
+                  description: `${platform} has been successfully connected!`,
+                });
+                fetchConnections();
+              } else {
+                throw new Error(completeResponse.error || 'Failed to complete connection');
+              }
+            } catch (err) {
+              const errorMessage = err instanceof Error ? err.message : 'Failed to complete connection';
+              toast({
+                title: "Connection Failed",
+                description: errorMessage,
+                variant: "destructive",
+              });
+            } finally {
+              setConnectingPlatform(null);
+              popup?.close();
+              window.removeEventListener('message', handlePopupMessage);
+            }
           }
-        }, 1000);
+        };
+
+        window.addEventListener('message', handlePopupMessage);
+      } else {
+        throw new Error(response.error || 'Failed to get authorization URL');
       }
     } catch (error) {
-      console.error(`Failed to connect to ${platform.name}:`, error);
-      setConnecting(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(platform.id);
-        return newSet;
-      });
+      console.error('Failed to initiate platform connection:', error);
       toast({
         title: "Connection Failed",
-        description: error instanceof Error ? error.message : `Failed to connect to ${platform.name}`,
+        description: error instanceof Error ? error.message : "Failed to initiate platform connection",
         variant: "destructive",
       });
+      setConnectingPlatform(null);
     }
   };
 
-  const handleDisconnect = async (platform: SocialPlatform) => {
+  const disconnectPlatform = async (platform: string) => {
+    setDisconnectingPlatform(platform);
     try {
-      await disconnectPlatform(platform.id);
+      await apiClient.socialPlatforms.disconnectPlatform(platform);
       toast({
         title: "Platform Disconnected",
-        description: `Successfully disconnected from ${platform.name}.`,
+        description: `${platform} has been successfully disconnected.`,
       });
+      fetchConnections();
     } catch (error) {
-      console.error(`Failed to disconnect from ${platform.name}:`, error);
+      console.error('Failed to disconnect platform:', error);
       toast({
         title: "Disconnection Failed",
-        description: `Failed to disconnect from ${platform.name}. Please try again.`,
+        description: error instanceof Error ? error.message : "Failed to disconnect platform",
         variant: "destructive",
       });
+    } finally {
+      setDisconnectingPlatform(null);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'connected': return 'green';
-      case 'disconnected': return 'gray';
-      case 'error': return 'red';
-      default: return 'gray';
+  const testPlatformConnection = async (platform: string) => {
+    setTestingPlatform(platform);
+    try {
+      const result = await apiClient.socialPlatforms.testPlatformConnection(platform);
+      if (result.success) {
+        toast({
+          title: "Connection Tested",
+          description: `${platform} connection is healthy.`,
+        });
+      } else {
+        throw new Error(result.error || 'Connection test failed');
+      }
+    } catch (error) {
+      console.error('Failed to test platform connection:', error);
+      toast({
+        title: "Test Failed",
+        description: error instanceof Error ? error.message : "Failed to test platform connection",
+        variant: "destructive",
+      });
+    } finally {
+      setTestingPlatform(null);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'connected': return CheckCircle;
-      case 'error': return AlertCircle;
-      default: return null;
+  const syncPlatformData = async (platform: string) => {
+    setSyncingPlatform(platform);
+    try {
+      const result = await apiClient.socialPlatforms.syncPlatformData(platform);
+      if (result.success) {
+        toast({
+          title: "Platform Synced",
+          description: `${platform} data has been synced.`,
+        });
+      } else {
+        throw new Error(result.error || 'Sync failed');
+      }
+    } catch (error) {
+      console.error('Failed to sync platform data:', error);
+      toast({
+        title: "Sync Failed",
+        description: error instanceof Error ? error.message : "Failed to sync platform data",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingPlatform(null);
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Share2 className="h-5 w-5" />
-            <span>Social Media Platform Connectors</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getPlatformStatus = (platform: string) => {
+    const connection = connections.find(c => c.platform_name === platform);
+    return connection?.connection_status || 'disconnected';
+  };
+
+  const socialPlatforms = [
+    {
+      name: 'Facebook',
+      icon: <svg viewBox="0 0 32 32" fill="currentColor" height="1em" width="1em"><path d="M32 16c0-8.837-7.163-16-16-16C7.163 0 0 7.163 0 16c0 7.937 5.813 14.531 13.5 15.75V20.406h-3.938v-4.406h3.938v-3.438c0-3.906 2.387-6.062 5.875-6.062 1.688 0 3.125.125 3.562.188v4.062h-2.438c-1.906 0-2.531.938-2.531 2.281v2.969h4.906l-.656 4.406h-4.25v11.344C26.187 30.531 32 23.937 32 16z"/></svg>,
+      description: 'Connect to Facebook to manage your social presence.',
+      isConnected: getPlatformStatus('facebook') === 'connected',
+      connectHandler: () => initiatePlatformConnection('facebook'),
+      disconnectHandler: () => disconnectPlatform('facebook'),
+      syncHandler: () => syncPlatformData('facebook'),
+      testHandler: () => testPlatformConnection('facebook'),
+      connecting: connectingPlatform === 'facebook',
+      syncing: syncingPlatform === 'facebook',
+      testing: testingPlatform === 'facebook',
+    },
+    {
+      name: 'Twitter',
+      icon: <svg viewBox="0 0 512 512" fill="currentColor" height="1em" width="1em"><path d="M512 97.248c-19.04 8.352-41.056 13.968-64.512 16.608 22.032-13.2 41.296-34.272 56.528-58.976-20.176 12.096-42.688 20.64-66.56 25.408-18.944-20.48-45.616-33.12-74.752-33.12-52.096 0-94.352 42.256-94.352 94.352 0 7.424.848 14.784 2.448 21.888-78.8-3.984-148.928-41.936-195.072-99.84 0 16.32 8.256 30.72 20.992 39.488-18.032-.576-35.088-5.472-49.424-13.568v1.152c0 22.528 16.032 41.296 37.312 45.568-7.728 2.08-15.984 3.216-24.384 3.216-3.072 0-6.128-.192-9.136-.576 6.128 18.528 23.904 32.016 44.8 32.384-15.744 12.336-35.472 19.792-56.896 19.792-3.728 0-7.376-.224-10.912-.64 19.2 12.288 41.664 19.584 65.344 19.584 78.432 0 121.6-64.736 121.6-121.6 0-1.856-.032-3.696-.08-5.52 8.352-6.048 15.504-13.472 21.216-22.08 4.608-8.944 7.04-19.152 7.04-30.368 0-6.112-.208-12.128-.624-18.096 12.96 9.392 28.32 14.912 44.8 14.912 53.76 0 82.944-44.768 82.944-82.944 0-1.296-.016-2.592-.048-3.888 4.768 3.408 9.92 6.4 15.472 8.96z"/></svg>,
+      description: 'Connect to Twitter to automate your tweets and engage with your audience.',
+      isConnected: getPlatformStatus('twitter') === 'connected',
+      connectHandler: () => initiatePlatformConnection('twitter'),
+      disconnectHandler: () => disconnectPlatform('twitter'),
+      syncHandler: () => syncPlatformData('twitter'),
+      testHandler: () => testPlatformConnection('twitter'),
+      connecting: connectingPlatform === 'twitter',
+      syncing: syncingPlatform === 'twitter',
+      testing: testingPlatform === 'twitter',
+    },
+    {
+      name: 'Instagram',
+      icon: <svg viewBox="0 0 448 512" fill="currentColor" height="1em" width="1em"><path d="M224,304a80,80,0,1,0-80-80A80,80,0,0,0,224,304Zm0-128a48,48,0,1,1-48,48A48,48,0,0,1,224,176ZM336,80H112A48,48,0,0,0,64,128V384a48,48,0,0,0,48,48H336a48,48,0,0,0,48-48V128A48,48,0,0,0,336,80ZM384,128a16,16,0,1,1-16-16A16,16,0,0,1,384,128Z"/><path d="M400,32H48A48,48,0,0,0,0,80V432a48,48,0,0,0,48,48H400a48,48,0,0,0,48-48V80A48,48,0,0,0,400,32ZM373.33,400H74.67a32,32,0,0,1-32-32V144a32,32,0,0,1,32-32H373.33a32,32,0,0,1,32,32V368A32,32,0,0,1,373.33,400Z"/></svg>,
+      description: 'Connect to Instagram to schedule posts and analyze your audience engagement.',
+      isConnected: getPlatformStatus('instagram') === 'connected',
+      connectHandler: () => initiatePlatformConnection('instagram'),
+      disconnectHandler: () => disconnectPlatform('instagram'),
+      syncHandler: () => syncPlatformData('instagram'),
+      testHandler: () => testPlatformConnection('instagram'),
+      connecting: connectingPlatform === 'instagram',
+      syncing: syncingPlatform === 'instagram',
+      testing: testingPlatform === 'instagram',
+    },
+    {
+      name: 'LinkedIn',
+      icon: <svg viewBox="0 0 448 512" fill="currentColor" height="1em" width="1em"><path d="M100.28,448H8.22V148.96h92.06ZM53.79,108.13a54.11,54.11,0,1,1,54.08-54.11A54.08,54.08,0,0,1,53.79,108.13ZM440,448H348V302.42c0-34.63-12.35-62.34-43.46-62.34a49.11,49.11,0,0,0-40.81,21.67h-.27V148.96h92.8v224c0,41.34,30.67,70.3,72.06,70.3Z"/></svg>,
+      description: 'Connect to LinkedIn to reach professionals and grow your network.',
+      isConnected: getPlatformStatus('linkedin') === 'connected',
+      connectHandler: () => initiatePlatformConnection('linkedin'),
+      disconnectHandler: () => disconnectPlatform('linkedin'),
+      syncHandler: () => syncPlatformData('linkedin'),
+      testHandler: () => testPlatformConnection('linkedin'),
+      connecting: connectingPlatform === 'linkedin',
+      syncing: syncingPlatform === 'linkedin',
+      testing: testingPlatform === 'linkedin',
+    },
+  ];
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Share2 className="h-5 w-5" />
-          <span>Social Media Platform Connectors</span>
-        </CardTitle>
+        <CardTitle>Social Platform Connectors</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {platforms.map(platform => {
-            const status = getPlatformStatus(platform.id);
-            const StatusIcon = getStatusIcon(status);
-            const isConnecting = connecting.has(platform.id);
-            
-            return (
-              <div key={platform.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-2xl">{platform.icon}</span>
-                    <div>
-                      <h3 className="font-medium">{platform.name}</h3>
-                      <div className="flex items-center space-x-1">
-                        {StatusIcon && <StatusIcon className={`h-3 w-3 text-${getStatusColor(status)}-600`} />}
-                        <Badge 
-                          variant="outline" 
-                          className={`text-${getStatusColor(status)}-600 border-${getStatusColor(status)}-300`}
-                        >
-                          {status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-sm text-gray-600 mb-4">{platform.description}</p>
-                
-                {status === 'connected' ? (
-                  <div className="flex space-x-2">
-                    <Button variant="outline" className="flex-1" size="sm">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Settings
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDisconnect(platform)}
-                    >
-                      Disconnect
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Button 
-                      className="w-full" 
-                      onClick={() => handleConnect(platform)}
-                      disabled={isConnecting}
-                    >
-                      {isConnecting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Connecting...
-                        </>
-                      ) : (
-                        `Connect ${platform.name}`
-                      )}
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full" asChild>
-                      <a 
-                        href={platform.docsUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="h-3 w-3 mr-2" />
-                        API Documentation
-                      </a>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-start space-x-3">
-            <div className="text-blue-600 text-xl">🔐</div>
-            <div>
-              <h4 className="font-semibold text-blue-900 mb-1">Secure OAuth Integration</h4>
-              <p className="text-sm text-blue-800">
-                Connections use industry-standard OAuth 2.0 authentication. Your credentials are encrypted and stored securely. 
-                You can revoke access at any time through the platform's settings or by disconnecting here.
-              </p>
-            </div>
+        {loading ? (
+          <div className="flex items-center justify-center p-4">
+            <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-        </div>
+        ) : error ? (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {socialPlatforms.map((platform) => (
+              <Card key={platform.name} className="bg-white shadow-sm">
+                <CardContent className="flex flex-col space-y-4 p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{platform.icon}</div>
+                    <h3 className="text-lg font-semibold">{platform.name}</h3>
+                    {platform.isConnected && (
+                      <Badge variant="secondary">Connected</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500">{platform.description}</p>
+                  <div className="flex justify-end space-x-2">
+                    {!platform.isConnected ? (
+                      <Button
+                        variant="outline"
+                        onClick={platform.connectHandler}
+                        disabled={platform.connecting}
+                      >
+                        {platform.connecting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Connecting...
+                          </>
+                        ) : (
+                          <>
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Connect
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          onClick={platform.testHandler}
+                          disabled={platform.testing}
+                        >
+                          {platform.testing ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                          )}
+                          Test
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={platform.disconnectHandler}
+                          disabled={platform.disconnecting}
+                        >
+                          {platform.disconnecting ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Unlink2 className="mr-2 h-4 w-4" />
+                          )}
+                          Disconnect
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
