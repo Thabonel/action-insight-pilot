@@ -32,7 +32,7 @@ export const useSocialPlatforms = () => {
 
   const connectPlatform = async (platform: string, config: any = {}) => {
     try {
-      const result = await apiClient.connectSocialPlatform(platform, config);
+      const result = await apiClient.connectSocialPlatform({ platform, ...config });
       
       if (result.success) {
         await fetchPlatforms(); // Refresh the list

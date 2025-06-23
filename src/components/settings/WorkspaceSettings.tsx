@@ -35,7 +35,7 @@ const WorkspaceSettings: React.FC = () => {
   const savePreferences = async () => {
     setSaving(true);
     try {
-      const result = await apiClient.updateUserPreferences(preferences);
+      const result = await apiClient.updateUserPreferences('workspace', preferences);
       if (result.success) {
         toast({
           title: "Settings saved",

@@ -1,9 +1,8 @@
-
 import { HttpClient } from './http-client';
 import { ApiResponse } from './api-response';
 
 export class ApiClient {
-  private httpClient: HttpClient;
+  public httpClient: HttpClient;
   private token: string | null = null;
 
   constructor() {
@@ -90,7 +89,7 @@ export class ApiClient {
   }
 
   // Email methods
-  async generateEmailContent(campaignType: any, audience: any, options?: any): Promise<ApiResponse<any>> {
+  async generateEmailContent(campaignType: any, audience?: any, options?: any): Promise<ApiResponse<any>> {
     return this.httpClient.request('/api/email/generate', {
       method: 'POST',
       body: JSON.stringify({ campaignType, audience, options })
@@ -186,6 +185,49 @@ export class ApiClient {
     });
   }
 
+  // Webhook methods
+  async getWebhooks(): Promise<ApiResponse<any[]>> {
+    return this.httpClient.request('/api/integrations/webhooks');
+  }
+
+  async createWebhook(webhookData: any): Promise<ApiResponse<any>> {
+    return this.httpClient.request('/api/integrations/webhooks', {
+      method: 'POST',
+      body: JSON.stringify(webhookData)
+    });
+  }
+
+  async deleteWebhook(webhookId: string): Promise<ApiResponse<any>> {
+    return this.httpClient.request(`/api/integrations/webhooks/${webhookId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async testWebhook(webhookId: string): Promise<ApiResponse<any>> {
+    return this.httpClient.request(`/api/integrations/webhooks/${webhookId}/test`, {
+      method: 'POST'
+    });
+  }
+
+  async connectService(service: string, apiKey: string): Promise<ApiResponse<any>> {
+    return this.httpClient.request(`/api/integrations/${service}/connect`, {
+      method: 'POST',
+      body: JSON.stringify({ api_key: apiKey })
+    });
+  }
+
+  async syncService(service: string): Promise<ApiResponse<any>> {
+    return this.httpClient.request(`/api/integrations/${service}/sync`, {
+      method: 'POST'
+    });
+  }
+
+  async disconnectService(service: string): Promise<ApiResponse<any>> {
+    return this.httpClient.request(`/api/integrations/${service}/disconnect`, {
+      method: 'DELETE'
+    });
+  }
+
   // Workflow methods
   async getWorkflows(): Promise<ApiResponse<any[]>> {
     return this.httpClient.request('/api/workflows');
@@ -247,7 +289,14 @@ export class ApiClient {
     return {
       getConnections: () => this.getConnections(),
       createConnection: (data: any) => this.createConnection(data),
-      deleteConnection: (id: string) => this.deleteConnection(id)
+      deleteConnection: (id: string) => this.deleteConnection(id),
+      getWebhooks: () => this.getWebhooks(),
+      createWebhook: (data: any) => this.createWebhook(data),
+      deleteWebhook: (id: string) => this.deleteWebhook(id),
+      testWebhook: (id: string) => this.testWebhook(id),
+      connectService: (service: string, apiKey: string) => this.connectService(service, apiKey),
+      syncService: (service: string) => this.syncService(service),
+      disconnectService: (service: string) => this.disconnectService(service)
     };
   }
 
