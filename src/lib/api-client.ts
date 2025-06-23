@@ -83,8 +83,8 @@ export class ApiClient {
     return this.httpClient.post<any>('/api/agents/execute', { taskType, data });
   }
 
-  async scoreLeads(criteria: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/leads/score', criteria);
+  async scoreLeads(): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/leads/score');
   }
 
   // Analytics methods
@@ -133,14 +133,18 @@ export class ApiClient {
     return this.httpClient.post<any>('/api/social/schedule', data);
   }
 
-  // User Preferences methods
-  async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences[]>> {
-    const url = category ? `/api/user/preferences?category=${category}` : '/api/user/preferences';
-    return this.httpClient.get<UserPreferences[]>(url);
+  async createSocialPost(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/social/posts', data);
   }
 
-  async updateUserPreferences(category: string, preferences: any): Promise<ApiResponse<UserPreferences[]>> {
-    return this.httpClient.put<UserPreferences[]>(`/api/user/preferences/${category}`, preferences);
+  // User Preferences methods
+  async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences>> {
+    const url = category ? `/api/user/preferences?category=${category}` : '/api/user/preferences';
+    return this.httpClient.get<UserPreferences>(url);
+  }
+
+  async updateUserPreferences(preferences: UserPreferences): Promise<ApiResponse<UserPreferences>> {
+    return this.httpClient.put<UserPreferences>('/api/user/preferences', preferences);
   }
 
   // Integration methods
@@ -214,6 +218,11 @@ export class ApiClient {
   async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse<any>> {
     return this.httpClient.post<any>('/api/agents/general-campaign', { query, campaigns, context });
   }
+
+  // Connection methods for MCP
+  getConnections = () => this.getIntegrationConnections();
+  createConnection = (data: any) => this.createIntegrationConnection(data);
+  deleteConnection = (id: string) => this.deleteIntegrationConnection(id);
 }
 
 export const apiClient = new ApiClient();

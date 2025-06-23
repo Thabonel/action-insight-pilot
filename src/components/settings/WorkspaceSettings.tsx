@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,6 +79,7 @@ const WorkspaceSettings: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Workspace Settings</h2>
@@ -91,7 +91,8 @@ const WorkspaceSettings: React.FC = () => {
         </Button>
       </div>
 
-      {/* Basic Information */}
+      
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -142,7 +143,7 @@ const WorkspaceSettings: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Branding */}
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -203,7 +204,7 @@ const WorkspaceSettings: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Feature Toggles */}
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

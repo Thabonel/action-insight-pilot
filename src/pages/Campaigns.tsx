@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { behaviorTracker } from '@/lib/behavior-tracker';
@@ -9,14 +8,7 @@ import CampaignCard from '@/components/CampaignCard';
 import EmptyState from '@/components/EmptyState';
 import { AlertCircle, WifiOff } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
-interface Campaign {
-  id: string;
-  name: string;
-  type: string;
-  status: string;
-  description?: string;
-}
+import { Campaign } from '@/lib/api-client-interface';
 
 const Campaigns: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -27,7 +19,7 @@ const Campaigns: React.FC = () => {
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     type: 'email',
-    status: 'draft',
+    status: 'draft' as Campaign['status'],
     description: ''
   });
   const { toast } = useToast();

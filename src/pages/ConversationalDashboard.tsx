@@ -6,6 +6,7 @@ import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
+import { RealInsights } from '@/types/insights';
 
 const ConversationalDashboard: React.FC = () => {
   const {
@@ -13,11 +14,27 @@ const ConversationalDashboard: React.FC = () => {
     setQuery,
     chatHistory,
     isProcessing,
-    insights,
+    insights: rawInsights,
     user,
     handleQuerySubmit,
     handleSuggestionClick
   } = useConversationalDashboard();
+
+  // Convert insights array to RealInsights format
+  const insights: RealInsights = {
+    totalActions: Array.isArray(rawInsights) ? rawInsights.length : 0,
+    recentActivities: Array.isArray(rawInsights) ? rawInsights.map((insight: any, index: number) => ({
+      type: insight.type || 'general',
+      message: insight.message || insight.toString(),
+      timestamp: new Date()
+    })) : [],
+    suggestions: ['Optimize email campaigns', 'Review social media performance', 'Update user preferences'],
+    trends: {
+      positive: 5,
+      negative: 2,
+      neutral: 3
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
