@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,11 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { FileText, Wand2, Save, Eye } from 'lucide-react';
+import { FileText, Wand2, Save, Eye, RefreshCw } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AIWritingAssistant from '@/components/ai/AIWritingAssistant';
 import BlogAnalyticsDashboard from '@/components/analytics/BlogAnalyticsDashboard';
 import BlogWorkflowAutomation from '@/components/blog/BlogWorkflowAutomation';
+import ContentRepurposingEngine from '@/components/content/ContentRepurposingEngine';
 
 const BlogCreator: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -61,8 +63,9 @@ const BlogCreator: React.FC = () => {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="create">Create Content</TabsTrigger>
+              <TabsTrigger value="repurpose">Repurpose Content</TabsTrigger>
               <TabsTrigger value="analytics">Analytics Dashboard</TabsTrigger>
               <TabsTrigger value="automation">Smart Automation</TabsTrigger>
             </TabsList>
@@ -162,6 +165,39 @@ const BlogCreator: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="repurpose" className="space-y-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <RefreshCw className="h-6 w-6 text-primary" />
+                <div>
+                  <h2 className="text-2xl font-bold">Content Repurposing Engine</h2>
+                  <p className="text-muted-foreground">
+                    Transform your blog content into multiple formats for different platforms
+                  </p>
+                </div>
+              </div>
+
+              {content || title ? (
+                <ContentRepurposingEngine
+                  originalContent={content || "This is a sample blog post content that will be repurposed into different formats for various social media platforms and content types."}
+                  originalTitle={title || "Sample Blog Post Title"}
+                  contentId={generatedPost?.id || 'demo-content'}
+                />
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No Content to Repurpose</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Create some content in the "Create Content" tab first, then come back here to repurpose it.
+                    </p>
+                    <Button onClick={() => setActiveTab('create')}>
+                      Go to Content Creation
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
