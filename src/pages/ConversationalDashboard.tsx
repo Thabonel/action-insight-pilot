@@ -21,20 +21,41 @@ const ConversationalDashboard: React.FC = () => {
   } = useConversationalDashboard();
 
   // Convert insights array to RealInsights format
-  const insights: RealInsights = {
-    totalActions: Array.isArray(rawInsights) ? rawInsights.length : 0,
-    recentActivities: Array.isArray(rawInsights) ? rawInsights.map((insight: any, index: number) => ({
-      type: insight.type || 'general',
-      message: insight.message || insight.toString(),
-      timestamp: new Date()
-    })) : [],
-    suggestions: ['Optimize email campaigns', 'Review social media performance', 'Update user preferences'],
-    trends: {
-      positive: 5,
-      negative: 2,
-      neutral: 3
+  const insights: RealInsights = React.useMemo(() => {
+    if (Array.isArray(rawInsights)) {
+      return {
+        totalActions: rawInsights.length,
+        recentActivities: rawInsights.map((insight: any, index: number) => ({
+          type: insight.type || 'general',
+          message: insight.message || insight.toString(),
+          timestamp: new Date()
+        })),
+        suggestions: ['Optimize email campaigns', 'Review social media performance', 'Update user preferences'],
+        trends: {
+          positive: 5,
+          negative: 2,
+          neutral: 3
+        }
+      };
     }
-  };
+    
+    // If rawInsights is already a RealInsights object, return it as is
+    if (rawInsights && typeof rawInsights === 'object' && 'totalActions' in rawInsights) {
+      return rawInsights as RealInsights;
+    }
+    
+    // Default fallback
+    return {
+      totalActions: 0,
+      recentActivities: [],
+      suggestions: ['Optimize email campaigns', 'Review social media performance', 'Update user preferences'],
+      trends: {
+        positive: 5,
+        negative: 2,
+        neutral: 3
+      }
+    };
+  }, [rawInsights]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
