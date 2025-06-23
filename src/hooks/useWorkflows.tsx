@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { apiClient, Workflow, WorkflowMethods } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
+import type { Workflow, WorkflowMethods } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 
 export const useWorkflows = () => {

@@ -13,11 +13,15 @@ import { Loader2, Sparkles } from 'lucide-react';
 const IntelligentContentGenerator: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [brief, setBrief] = useState<ContentBrief>({
+    topic: '',
+    audience: '',
+    tone: '',
+    platform: 'website',
+    length: 'medium',
     title: '',
     content_type: 'blog_post',
     target_audience: '',
-    key_messages: [],
-    platform: 'website'
+    key_messages: []
   });
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const { toast } = useToast();
@@ -85,7 +89,7 @@ const IntelligentContentGenerator: React.FC = () => {
             <div>
               <label className="block text-sm font-medium mb-1">Title</label>
               <Input
-                value={brief.title}
+                value={brief.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="Enter content title"
               />
@@ -110,7 +114,7 @@ const IntelligentContentGenerator: React.FC = () => {
           <div>
             <label className="block text-sm font-medium mb-1">Target Audience</label>
             <Input
-              value={brief.target_audience}
+              value={brief.target_audience || ''}
               onChange={(e) => handleInputChange('target_audience', e.target.value)}
               placeholder="Describe your target audience"
             />
@@ -120,7 +124,7 @@ const IntelligentContentGenerator: React.FC = () => {
             <label className="block text-sm font-medium mb-1">Key Messages (one per line)</label>
             <Textarea
               rows={4}
-              value={brief.key_messages.join('\n')}
+              value={Array.isArray(brief.key_messages) ? brief.key_messages.join('\n') : ''}
               onChange={(e) => handleKeyMessagesChange(e.target.value)}
               placeholder="Enter key messages, one per line"
             />

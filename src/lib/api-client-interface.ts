@@ -48,7 +48,7 @@ export interface ContentBrief {
   title?: string;
   target_audience?: string;
   content_type?: string;
-  key_messages?: string;
+  key_messages?: string[];
 }
 
 export interface EmailMetrics {
@@ -61,6 +61,13 @@ export interface EmailMetrics {
   openRate: number;
   clickRate: number;
   bounceRate: number;
+  insights?: string[];
+  trends?: {
+    positive: number;
+    negative: number;
+    neutral: number;
+  };
+  last_updated?: string;
 }
 
 export interface IntegrationConnection {
@@ -71,6 +78,9 @@ export interface IntegrationConnection {
   config: any;
   created_at: string;
   updated_at: string;
+  service_name?: string;
+  connection_status?: 'connected' | 'disconnected' | 'error';
+  last_sync_at?: string;
 }
 
 export interface Webhook {
@@ -81,6 +91,8 @@ export interface Webhook {
   active: boolean;
   created_at: string;
   updated_at: string;
+  last_triggered_at?: string;
+  last_response_code?: number;
 }
 
 export interface WorkflowMethods {
@@ -89,4 +101,19 @@ export interface WorkflowMethods {
   update: (id: string, workflow: Partial<Workflow>) => Promise<ApiResponse<Workflow>>;
   delete: (id: string) => Promise<ApiResponse<void>>;
   execute: (id: string, input?: any) => Promise<ApiResponse<any>>;
+}
+
+export interface UserPreferences {
+  theme?: string;
+  notifications?: boolean;
+  language?: string;
+  timezone?: string;
+  [key: string]: any;
+}
+
+export interface UserPreferencesMethods {
+  get: () => Promise<ApiResponse<UserPreferences>>;
+  update: (data: Partial<UserPreferences>) => Promise<ApiResponse<UserPreferences>>;
+  getUserPreferences: (category?: string) => Promise<ApiResponse<UserPreferences>>;
+  updateUserPreferences: (category: string, data: Partial<UserPreferences>) => Promise<ApiResponse<UserPreferences>>;
 }
