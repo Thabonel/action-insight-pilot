@@ -165,12 +165,12 @@ export class ApiClient {
     return this.httpClient.post<any>('/api/content', data);
   }
 
-  async generateSocialContent(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content/social/generate', data);
+  async generateSocialContent(brief: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/content/social/generate', brief);
   }
 
-  async generateEmailContent(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content/email/generate', data);
+  async generateEmailContent(brief: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/content/email/generate', brief);
   }
 
   async generateABVariants(data: any): Promise<ApiResponse<any>> {
