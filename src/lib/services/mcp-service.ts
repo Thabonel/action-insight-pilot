@@ -14,7 +14,7 @@ interface MCPConnector {
 export class MCPService {
   async getConnectors(): Promise<ApiResponse<MCPConnector[]>> {
     try {
-      const integrationMethods = await apiClient.integrations();
+      const integrationMethods = apiClient.integrations;
       const result = await integrationMethods.getConnections();
       
       if (result.success && result.data) {
@@ -45,7 +45,7 @@ export class MCPService {
 
   async createConnector(data: Partial<MCPConnector>): Promise<ApiResponse<MCPConnector>> {
     try {
-      const integrationMethods = await apiClient.integrations();
+      const integrationMethods = apiClient.integrations;
       const result = await integrationMethods.getConnections(); // Using mock for now
       
       const newConnector: MCPConnector = {
@@ -72,7 +72,7 @@ export class MCPService {
 
   async deleteConnector(id: string): Promise<ApiResponse<void>> {
     try {
-      const integrationMethods = await apiClient.integrations();
+      const integrationMethods = apiClient.integrations;
       // Using mock implementation for now
       return {
         success: true,
@@ -108,4 +108,3 @@ export class MCPService {
 }
 
 export const mcpService = new MCPService();
-

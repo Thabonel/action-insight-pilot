@@ -1,183 +1,393 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Play, Settings, Share2, Mail, MessageSquare, Calendar, Target } from 'lucide-react';
-import { useWorkflows } from '@/hooks/useWorkflows';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Play, 
+  Pause, 
+  Plus, 
+  Settings, 
+  Trash2, 
+  ArrowRight,
+  Mail,
+  MessageSquare,
+  Clock,
+  Filter,
+  Zap,
+  Save
+} from 'lucide-react';
+import { Workflow, WorkflowStep } from '@/lib/api-client-interface';
 
-const VisualWorkflowBuilder: React.FC = () => {
-  const { workflows, loading, executeWorkflow } = useWorkflows();
-  const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
-  const [isExecuting, setIsExecuting] = useState(false);
-  
-  // Get the first workflow or create a default one
-  const currentWorkflow = workflows.length > 0 ? workflows[0] : null;
-  const workflowSteps = currentWorkflow?.steps || [];
+interface VisualWorkflowBuilderProps {
+  workflow: Workflow | null;
+  onSave: (workflow: Partial<Workflow>) => void;
+  onExecute: (workflowId: string) => void;
+}
 
-  const iconMap: { [key: string]: any } = {
-    Target,
-    Mail,
-    Calendar,
-    MessageSquare,
-    Share2
+const VisualWorkflowBuilder: React.FC<VisualWorkflowBuilderProps> = ({
+  workflow,
+  onSave,
+  onExecute
+}) => {
+  const [editingWorkflow, setEditingWorkflow] = useState<Partial<Workflow>>(
+    workflow || {
+      name: '',
+      description: '',
+      steps: [],
+      status: 'draft'
+    }
+  );
+  const [showStepDialog, setShowStepDialog] = useState(false);
+  const [editingStep, setEditingStep] = useState<Partial<WorkflowStep> | null>(null);
+  const { toast } = useToast();
+
+  const stepTypes = [
+    { value: 'email', label: 'Send Email', icon: Mail, color: 'bg-blue-500' },
+    { value: 'sms', label: 'Send SMS', icon: MessageSquare, color: 'bg-green-500' },
+    { value: 'wait', label: 'Wait/Delay', icon: Clock, color: 'bg-yellow-500' },
+    { value: 'condition', label: 'Condition', icon: Filter, color: 'bg-purple-500' },
+    { value: 'webhook', label: 'Webhook', icon: Zap, color: 'bg-red-500' }
+  ];
+
+  const getStepIcon = (type: string) => {
+    const stepType = stepTypes.find(st => st.value === type);
+    return stepType?.icon || Settings;
   };
 
-  const getColorClasses = (color: string, status: string) => {
-    const opacity = status === 'active' ? '' : 'opacity-60';
-    const colors = {
-      green: `bg-green-100 border-green-300 text-green-800 ${opacity}`,
-      blue: `bg-blue-100 border-blue-300 text-blue-800 ${opacity}`,
-      orange: `bg-orange-100 border-orange-300 text-orange-800 ${opacity}`,
-      purple: `bg-purple-100 border-purple-300 text-purple-800 ${opacity}`,
-      indigo: `bg-indigo-100 border-indigo-300 text-indigo-800 ${opacity}`
+  const getStepColor = (type: string) => {
+    const stepType = stepTypes.find(st => st.value === type);
+    return stepType?.color || 'bg-gray-500';
+  };
+
+  const addStep = () => {
+    setEditingStep({
+      type: 'email',
+      config: {},
+      order: editingWorkflow.steps?.length || 0
+    });
+    setShowStepDialog(true);
+  };
+
+  const editStep = (step: WorkflowStep) => {
+    setEditingStep(step);
+    setShowStepDialog(true);
+  };
+
+  const saveStep = () => {
+    if (!editingStep) return;
+
+    const steps = [...(editingWorkflow.steps || [])];
+    const existingIndex = steps.findIndex(s => s.id === editingStep.id);
+
+    const stepToSave: WorkflowStep = {
+      id: editingStep.id || `step-${Date.now()}`,
+      type: editingStep.type || 'email',
+      config: editingStep.config || {},
+      order: editingStep.order || steps.length,
+      title: editingStep.title,
+      description: editingStep.description,
+      status: editingStep.status || 'pending'
     };
-    return colors[color as keyof typeof colors] || colors.blue;
+
+    if (existingIndex >= 0) {
+      steps[existingIndex] = stepToSave;
+    } else {
+      steps.push(stepToSave);
+    }
+
+    setEditingWorkflow({
+      ...editingWorkflow,
+      steps: steps.sort((a, b) => a.order - b.order)
+    });
+
+    setShowStepDialog(false);
+    setEditingStep(null);
   };
 
-  const handleExecuteWorkflow = async () => {
-    if (!currentWorkflow) return;
+  const deleteStep = (stepId: string) => {
+    const steps = editingWorkflow.steps?.filter(s => s.id !== stepId) || [];
+    setEditingWorkflow({
+      ...editingWorkflow,
+      steps: steps.map((step, index) => ({ ...step, order: index }))
+    });
+  };
+
+  const moveStep = (stepId: string, direction: 'up' | 'down') => {
+    const steps = [...(editingWorkflow.steps || [])];
+    const stepIndex = steps.findIndex(s => s.id === stepId);
     
-    try {
-      setIsExecuting(true);
-      await executeWorkflow(currentWorkflow.id);
-    } catch (error) {
-      console.error('Failed to execute workflow:', error);
-    } finally {
-      setIsExecuting(false);
+    if (stepIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? stepIndex - 1 : stepIndex + 1;
+    
+    if (newIndex < 0 || newIndex >= steps.length) return;
+    
+    [steps[stepIndex], steps[newIndex]] = [steps[newIndex], steps[stepIndex]];
+    
+    setEditingWorkflow({
+      ...editingWorkflow,
+      steps: steps.map((step, index) => ({ ...step, order: index }))
+    });
+  };
+
+  const getStatusColor = (status: WorkflowStep['status']) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'running': return 'bg-blue-100 text-blue-800';
+      case 'failed': return 'bg-red-100 text-red-800';
+      case 'pending': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Visual Workflow Builder</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-96">
-            <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleSave = () => {
+    if (!editingWorkflow.name?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please provide a workflow name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    onSave(editingWorkflow);
+    toast({
+      title: "Workflow Saved",
+      description: "Your workflow has been saved successfully",
+    });
+  };
+
+  const handleExecute = () => {
+    if (!workflow?.id) return;
+    
+    if (workflow.status === 'active') {
+      onExecute(workflow.id);
+      toast({
+        title: "Workflow Executed",
+        description: "Your workflow is now running",
+      });
+    }
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
-            <span>Visual Workflow Builder</span>
-            {currentWorkflow && (
-              <Badge variant="secondary">{currentWorkflow.name}</Badge>
-            )}
-          </CardTitle>
-          <div className="flex space-x-2">
-            <Button size="sm" variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Configure
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={handleExecuteWorkflow}
-              disabled={!currentWorkflow || isExecuting}
-            >
-              <Play className="h-4 w-4 mr-2" />
-              {isExecuting ? 'Launching...' : 'Launch'}
+    <div className="space-y-6">
+      {/* Workflow Header */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Input
+                value={editingWorkflow.name || ''}
+                onChange={(e) => setEditingWorkflow({
+                  ...editingWorkflow,
+                  name: e.target.value
+                })}
+                placeholder="Workflow Name"
+                className="text-lg font-semibold border-none p-0 h-auto"
+              />
+              <Textarea
+                value={editingWorkflow.description || ''}
+                onChange={(e) => setEditingWorkflow({
+                  ...editingWorkflow,
+                  description: e.target.value
+                })}
+                placeholder="Workflow Description"
+                className="border-none p-0 resize-none"
+                rows={2}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Badge variant={editingWorkflow.status === 'active' ? 'default' : 'secondary'}>
+                {editingWorkflow.status}
+              </Badge>
+              <Button onClick={handleSave}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+              {workflow?.id && editingWorkflow.status === 'active' && (
+                <Button onClick={handleExecute}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Execute
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Workflow Steps */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Workflow Steps</CardTitle>
+            <Button onClick={addStep}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Step
             </Button>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {/* Workflow Canvas */}
-        <div className="bg-gray-50 rounded-lg p-6 min-h-96">
-          {workflowSteps.length > 0 ? (
+        </CardHeader>
+        <CardContent>
+          {editingWorkflow.steps?.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-2">No steps added yet</div>
+              <Button variant="outline" onClick={addStep}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Step
+              </Button>
+            </div>
+          ) : (
             <div className="space-y-4">
-              {workflowSteps.map((step, index) => {
-                const Icon = iconMap[step.icon] || Target;
-                const isLast = index === workflowSteps.length - 1;
+              {editingWorkflow.steps?.map((step, index) => {
+                const StepIcon = getStepIcon(step.type);
                 
                 return (
                   <div key={step.id} className="relative">
-                    {/* Workflow Step */}
-                    <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${getColorClasses(step.color, step.status)}`}
-                      onClick={() => setSelectedWorkflow(step.id.toString())}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Icon className="h-5 w-5" />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <h4 className="font-medium">{step.title}</h4>
-                            <Badge variant={step.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                              {step.type}
+                    <div className="flex items-center space-x-4 p-4 border rounded-lg hover:border-blue-500 transition-colors">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${getStepColor(step.type)}`}>
+                        <StepIcon className="h-5 w-5" />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-medium">
+                            {step.title || stepTypes.find(st => st.value === step.type)?.label}
+                          </h4>
+                          {step.status && (
+                            <Badge className={getStatusColor(step.status)}>
+                              {step.status}
                             </Badge>
-                          </div>
-                          <p className="text-sm opacity-80 mt-1">{step.description}</p>
+                          )}
                         </div>
-                        <div className="text-right">
-                          <Badge variant="outline" className="text-xs">
-                            {step.status}
-                          </Badge>
-                        </div>
+                        {step.description && (
+                          <p className="text-sm text-gray-600 mt-1">{step.description}</p>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveStep(step.id, 'up')}
+                          disabled={index === 0}
+                        >
+                          ↑
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => moveStep(step.id, 'down')}
+                          disabled={index === (editingWorkflow.steps?.length || 1) - 1}
+                        >
+                          ↓
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => editStep(step)}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteStep(step.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-
-                    {/* Connection Arrow */}
-                    {!isLast && (
-                      <div className="flex justify-center my-2">
-                        <div className="w-px h-6 bg-gray-300"></div>
-                        <div className="absolute w-2 h-2 bg-gray-400 rounded-full transform translate-y-2"></div>
+                    
+                    {index < (editingWorkflow.steps?.length || 1) - 1 && (
+                      <div className="flex justify-center py-2">
+                        <ArrowRight className="h-4 w-4 text-gray-400" />
                       </div>
                     )}
                   </div>
                 );
               })}
-
-              {/* Add Step Button */}
-              <div className="flex justify-center pt-4">
-                <Button variant="outline" className="border-dashed border-2 border-gray-300 bg-transparent">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Step
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
-              <Target className="h-12 w-12 mb-4 opacity-50" />
-              <h3 className="text-lg font-medium mb-2">No Workflows Available</h3>
-              <p className="text-sm text-center mb-4">Create your first workflow to get started with automation</p>
-              <Button variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Workflow
-              </Button>
             </div>
           )}
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Workflow Controls */}
-        {currentWorkflow && (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h4 className="font-medium text-blue-900">Performance Prediction</h4>
-              <p className="text-sm text-blue-700 mt-1">Expected 34% conversion rate</p>
-              <p className="text-xs text-blue-600 mt-1">Based on similar workflows</p>
+      {/* Step Configuration Dialog */}
+      <Dialog open={showStepDialog} onOpenChange={setShowStepDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingStep?.id ? 'Edit Step' : 'Add Step'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="step-type">Step Type</Label>
+              <Select
+                value={editingStep?.type || 'email'}
+                onValueChange={(value) => setEditingStep({
+                  ...editingStep,
+                  type: value
+                })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {stepTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="bg-green-50 rounded-lg p-4">
-              <h4 className="font-medium text-green-900">AI Optimization</h4>
-              <p className="text-sm text-green-700 mt-1">Timing optimized for your audience</p>
-              <p className="text-xs text-green-600 mt-1">+23% expected improvement</p>
+            
+            <div>
+              <Label htmlFor="step-title">Title (Optional)</Label>
+              <Input
+                id="step-title"
+                value={editingStep?.title || ''}
+                onChange={(e) => setEditingStep({
+                  ...editingStep,
+                  title: e.target.value
+                })}
+                placeholder="Custom step title"
+              />
             </div>
-            <div className="bg-purple-50 rounded-lg p-4">
-              <h4 className="font-medium text-purple-900">Cross-Channel Sync</h4>
-              <p className="text-sm text-purple-700 mt-1">Coordinating with 3 channels</p>
-              <p className="text-xs text-purple-600 mt-1">Email, Social, Content</p>
+            
+            <div>
+              <Label htmlFor="step-description">Description (Optional)</Label>
+              <Textarea
+                id="step-description"
+                value={editingStep?.description || ''}
+                onChange={(e) => setEditingStep({
+                  ...editingStep,
+                  description: e.target.value
+                })}
+                placeholder="Step description"
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowStepDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={saveStep}>
+                Save Step
+              </Button>
             </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

@@ -1,208 +1,305 @@
 
-import React from 'react';
-import { MessageSquare, Plus, Trash2, Send } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import ChatResponse from '@/components/dashboard/ChatResponse';
-import { useEnhancedChat } from '@/hooks/useEnhancedChat';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Send, 
+  Mic, 
+  Paperclip, 
+  MoreVertical, 
+  MessageSquare,
+  Bot,
+  User,
+  Clock,
+  Trash2,
+  Edit3
+} from 'lucide-react';
+import { ChatSession, ChatMessage } from '@/lib/api-client-interface';
 
-const EnhancedChatInterface: React.FC = () => {
-  const {
-    sessions,
-    currentSession,
-    messages,
-    isProcessing,
-    query,
-    setQuery,
-    handleQuerySubmit,
-    createNewSession,
-    switchSession,
-    deleteSession,
-    user
-  } = useEnhancedChat();
+interface EnhancedChatInterfaceProps {
+  chatHistory: ChatMessage[];
+  isProcessing: boolean;
+  query: string;
+  setQuery: (query: string) => void;
+  handleQuerySubmit: (e: React.FormEvent) => void;
+  handleSuggestionClick: (suggestion: string) => void;
+  user: any;
+  chatSessions?: ChatSession[];
+  onCreateNewSession?: () => void;
+  onSelectSession?: (sessionId: string) => void;
+  onDeleteSession?: (sessionId: string) => void;
+  currentSessionId?: string;
+}
 
-  if (!user) {
-    return (
-      <Card className="shadow-lg border-0 bg-white/90 backdrop-blur">
-        <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center space-x-3">
-            <MessageSquare className="h-6 w-6" />
-            <span>AI Marketing Assistant</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="text-center py-8 bg-amber-50 border border-amber-200 rounded-lg">
-            <MessageSquare className="h-16 w-16 text-amber-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-amber-800 mb-2">Authentication Required</h3>
-            <p className="text-amber-700">Please log in to start chatting with your AI marketing assistant</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
+  chatHistory,
+  isProcessing,
+  query,
+  setQuery,
+  handleQuerySubmit,
+  handleSuggestionClick,
+  user,
+  chatSessions = [],
+  onCreateNewSession,
+  onSelectSession,
+  onDeleteSession,
+  currentSessionId
+}) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [showSessions, setShowSessions] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
+
+  const handleSessionSelect = (session: ChatSession) => {
+    if (onSelectSession) {
+      onSelectSession(session.id);
+    }
+    setShowSessions(false);
+  };
+
+  const formatTimestamp = (timestamp: Date) => {
+    return new Date(timestamp).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const formatSessionDate = (session: ChatSession) => {
+    return new Date(session.createdAt).toLocaleDateString();
+  };
+
+  const suggestions = [
+    "Show me today's campaign performance",
+    "Generate a social media post about our new product",
+    "What are the top performing email subjects?",
+    "Create a workflow for lead nurturing"
+  ];
 
   return (
-    <div className="flex h-[600px] bg-white rounded-lg shadow-lg overflow-hidden">
-      {/* Sessions Sidebar */}
-      <div className="w-1/3 border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-medium">Chat Sessions</h3>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => createNewSession()}
-              className="h-8 w-8 p-0"
-            >
-              <Plus className="h-4 w-4" />
+    <Card className="h-[600px] flex flex-col">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center space-x-2">
+            <MessageSquare className="h-5 w-5" />
+            <span>AI Assistant</span>
+          </CardTitle>
+          <div className="flex items-center space-x-2">
+            {chatSessions.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowSessions(!showSessions)}
+              >
+                Sessions ({chatSessions.length})
+              </Button>
+            )}
+            {onCreateNewSession && (
+              <Button variant="outline" size="sm" onClick={onCreateNewSession}>
+                New Chat
+              </Button>
+            )}
+            <Button variant="ghost" size="sm">
+              <MoreVertical className="h-4 w-4" />
             </Button>
           </div>
         </div>
         
-        <ScrollArea className="flex-1">
-          <div className="p-2 space-y-2">
-            {sessions.map((session) => (
+        {showSessions && (
+          <div className="mt-4 border rounded-lg p-2 bg-gray-50 max-h-40 overflow-y-auto">
+            {chatSessions.map((session) => (
               <div
                 key={session.id}
-                className={`p-3 rounded-lg cursor-pointer transition-colors group ${
-                  currentSession?.id === session.id
-                    ? 'bg-blue-50 border border-blue-200'
-                    : 'hover:bg-gray-50'
+                className={`flex items-center justify-between p-2 rounded cursor-pointer hover:bg-white ${
+                  currentSessionId === session.id ? 'bg-blue-50 border border-blue-200' : ''
                 }`}
-                onClick={() => switchSession(session)}
+                onClick={() => handleSessionSelect(session)}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {session.title}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(session.updated_at).toLocaleDateString()}
-                    </p>
+                <div className="flex-1">
+                  <div className="font-medium text-sm">{session.title}</div>
+                  <div className="text-xs text-gray-500">
+                    {formatSessionDate(session)} • {session.messages.length} messages
                   </div>
+                </div>
+                {onDeleteSession && (
                   <Button
-                    size="sm"
                     variant="ghost"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteSession(session.id);
+                      onDeleteSession(session.id);
                     }}
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-6 w-6 p-0"
                   >
-                    <Trash2 className="h-3 w-3 text-red-500" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
-                </div>
+                )}
               </div>
             ))}
           </div>
-        </ScrollArea>
-      </div>
+        )}
+      </CardHeader>
 
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
-        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <MessageSquare className="h-5 w-5" />
-              <span className="font-medium">
-                {currentSession?.title || 'AI Marketing Assistant'}
-              </span>
-            </div>
-            <div className="flex items-center text-sm bg-white/20 px-2 py-1 rounded">
-              <div className="w-2 h-2 rounded-full mr-2 bg-green-400 animate-pulse"></div>
-              Online
-            </div>
-          </div>
-        </div>
-
-        {/* Messages */}
+      <CardContent className="flex-1 flex flex-col p-0">
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
-            {messages.length === 0 && !isProcessing && (
-              <div className="text-center py-12">
-                <MessageSquare className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+            {chatHistory.length === 0 && (
+              <div className="text-center py-8">
+                <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Ready to optimize your marketing?
+                  Ready to help!
                 </h3>
-                <p className="text-gray-600">
-                  Ask me anything about your campaigns, leads, or performance
+                <p className="text-gray-600 mb-6">
+                  Ask me anything about your marketing campaigns, analytics, or content creation.
                 </p>
+                <div className="grid grid-cols-1 gap-2 max-w-md mx-auto">
+                  {suggestions.map((suggestion, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="text-left justify-start"
+                    >
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {messages.map((message) => (
-              <div key={message.id} className="space-y-4">
-                {/* User Query */}
-                <div className="flex justify-end">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg px-4 py-3 max-w-md">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm">{message.query}</span>
-                      {message.agentType && (
-                        <Badge variant="secondary" className="text-xs ml-2">
-                          {message.agentType}
-                        </Badge>
-                      )}
-                    </div>
+            {chatHistory.map((message) => (
+              <div
+                key={message.id}
+                className={`flex items-start space-x-3 ${
+                  message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+                }`}
+              >
+                <Avatar className="h-8 w-8">
+                  {message.role === 'user' ? (
+                    <>
+                      <AvatarImage src={user?.avatar} />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </>
+                  ) : (
+                    <AvatarFallback className="bg-blue-100">
+                      <Bot className="h-4 w-4 text-blue-600" />
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div className={`flex-1 ${message.role === 'user' ? 'text-right' : ''}`}>
+                  <div
+                    className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                      message.role === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                  </div>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Clock className="h-3 w-3 text-gray-400" />
+                    <span className="text-xs text-gray-500">
+                      {formatTimestamp(message.timestamp)}
+                    </span>
+                    {message.role === 'assistant' && (
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                        <Edit3 className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
                 </div>
-
-                {/* AI Response */}
-                <ChatResponse response={message.response} />
               </div>
             ))}
 
             {isProcessing && (
-              <div className="space-y-4">
-                <div className="flex justify-end">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg px-4 py-3 max-w-md">
-                    {query}
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <MessageSquare className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="bg-gray-100 rounded-lg px-4 py-3 flex-1">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
-                      <span className="text-sm text-gray-600">Processing your request...</span>
+              <div className="flex items-start space-x-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-blue-100">
+                    <Bot className="h-4 w-4 text-blue-600" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="inline-block p-3 rounded-lg bg-gray-100">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
+          <div ref={messagesEndRef} />
         </ScrollArea>
 
-        {/* Query Input */}
-        <div className="p-4 border-t border-gray-200">
-          <form onSubmit={handleQuerySubmit} className="flex space-x-3">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask me about your marketing performance..."
-              disabled={isProcessing}
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-            />
+        <Separator />
+
+        <div className="p-4">
+          <form onSubmit={handleQuerySubmit} className="flex items-center space-x-2">
+            <div className="flex-1 relative">
+              <Input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Ask me anything..."
+                disabled={isProcessing}
+                className="pr-20"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                >
+                  <Paperclip className="h-3 w-3" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 w-6 p-0 ${isRecording ? 'text-red-500' : ''}`}
+                  onClick={() => setIsRecording(!isRecording)}
+                >
+                  <Mic className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
             <Button
               type="submit"
-              disabled={!query.trim() || isProcessing}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+              disabled={isProcessing || !query.trim()}
+              size="sm"
             >
               <Send className="h-4 w-4" />
             </Button>
           </form>
+          
+          {!user && (
+            <div className="mt-2 text-center">
+              <Badge variant="outline" className="text-xs">
+                Please sign in to save your conversation history
+              </Badge>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
