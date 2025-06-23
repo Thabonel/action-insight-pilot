@@ -31,6 +31,11 @@ export interface WorkflowStep {
   type: string;
   config: any;
   order: number;
+  title?: string;
+  description?: string;
+  status?: 'pending' | 'running' | 'completed' | 'failed';
+  icon?: string;
+  color?: string;
 }
 
 export interface ContentBrief {
@@ -40,6 +45,42 @@ export interface ContentBrief {
   platform: string;
   length: string;
   keywords?: string[];
+  title?: string;
+  target_audience?: string;
+  content_type?: string;
+  key_messages?: string;
+}
+
+export interface EmailMetrics {
+  totalSent: number;
+  delivered: number;
+  opened: number;
+  clicked: number;
+  bounced: number;
+  unsubscribed: number;
+  openRate: number;
+  clickRate: number;
+  bounceRate: number;
+}
+
+export interface IntegrationConnection {
+  id: string;
+  name: string;
+  type: string;
+  status: 'connected' | 'disconnected' | 'error';
+  config: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface WorkflowMethods {

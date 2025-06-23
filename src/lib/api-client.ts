@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { SocialMethods, createSocialMethods } from './api/social-methods';
 
-export type { Workflow, WorkflowMethods, ContentBrief } from './api-client-interface';
+export type { Workflow, WorkflowMethods, ContentBrief, EmailMetrics, IntegrationConnection, Webhook } from './api-client-interface';
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -135,6 +135,90 @@ class ApiClient {
     }
   }
 
+  async getRealTimeMetrics(type: string, category: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get(`/analytics/${type}/${category}`);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch real-time metrics:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createCampaign(campaignData: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/campaigns', campaignData);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to create campaign:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async generateContent(brief: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/content/generate', brief);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to generate content:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async generateEmailContent(brief: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/email/generate', brief);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to generate email content:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async scoreLeads(leads: any[]): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/leads/score', { leads });
+      return response;
+    } catch (error: any) {
+      console.error('Failed to score leads:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getConnections(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/integrations/connections');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to get connections:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createConnection(connectionData: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/integrations/connections', connectionData);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to create connection:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteConnection(id: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.delete(`/integrations/connections/${id}`);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to delete connection:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  setToken(token: string): void {
+    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+
   async scheduleSocialPost(postData: any): Promise<ApiResponse<any>> {
     try {
       const response = await this.post('/social/schedule', postData);
@@ -197,6 +281,17 @@ class ApiClient {
       update: async (id: string, workflow: any) => ({ success: true, data: { id, ...workflow } }),
       delete: async (id: string) => ({ success: true, data: undefined }),
       execute: async (id: string, input?: any) => ({ success: true, data: { result: 'executed' } })
+    };
+  }
+
+  integrations() {
+    return {
+      getConnections: () => this.getConnections(),
+      createConnection: (data: any) => this.createConnection(data),
+      deleteConnection: (id: string) => this.deleteConnection(id),
+      getWebhooks: async () => ({ success: true, data: [] }),
+      createWebhook: async (data: any) => ({ success: true, data: { id: '1', ...data } }),
+      deleteWebhook: async (id: string) => ({ success: true, data: undefined }),
     };
   }
 }
