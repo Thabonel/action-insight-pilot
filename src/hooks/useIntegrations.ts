@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import type { Webhook, IntegrationConnection } from '@/lib/api/integrations-service';
+import type { Webhook, IntegrationConnection } from '@/lib/api-client-interface';
 
 export function useIntegrations() {
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
@@ -27,7 +26,12 @@ export function useIntegrations() {
       console.log('Connections response:', connectionsResponse);
 
       if (webhooksResponse.success && Array.isArray(webhooksResponse.data)) {
-        setWebhooks(webhooksResponse.data);
+        // Ensure webhooks have the required is_active property
+        const normalizedWebhooks = webhooksResponse.data.map(webhook => ({
+          ...webhook,
+          is_active: webhook.is_active ?? webhook.active ?? true
+        }));
+        setWebhooks(normalizedWebhooks);
       } else {
         console.warn('Webhooks response data is not an array:', webhooksResponse.data);
         setWebhooks([]);
@@ -57,12 +61,16 @@ export function useIntegrations() {
     try {
       const response = await apiClient.integrations.createWebhook(webhookData);
       if (response.success && response.data) {
-        setWebhooks(prev => [...prev, response.data]);
+        const normalizedWebhook = {
+          ...response.data,
+          is_active: response.data.is_active ?? response.data.active ?? true
+        };
+        setWebhooks(prev => [...prev, normalizedWebhook]);
         toast({
           title: "Webhook Created",
           description: "Webhook has been successfully created",
         });
-        return response.data;
+        return normalizedWebhook;
       } else {
         throw new Error(response.error || 'Failed to create webhook');
       }
