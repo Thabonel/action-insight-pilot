@@ -15,7 +15,40 @@ export interface ConversationalResponse {
 }
 
 export class ConversationalService {
-  // Existing methods
+  // Updated method signatures to match expected usage
+  static async getAuthToken(): Promise<string> {
+    return 'mock-auth-token';
+  }
+
+  static async fetchCampaignData(): Promise<any[]> {
+    const result = await apiClient.getCampaigns();
+    return result.data || [];
+  }
+
+  static async callDailyFocusAgent(
+    userQuery: string, 
+    campaignData?: any[], 
+    context?: any[], 
+    authToken?: string
+  ): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: { response: `Daily focus response to: ${userQuery}` }
+    };
+  }
+
+  static async callGeneralCampaignAgent(
+    userQuery: string, 
+    campaignData?: any[], 
+    context?: any[], 
+    authToken?: string
+  ): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: { response: `Campaign agent response to: ${userQuery}` }
+    };
+  }
+
   async processQuery(queryData: ConversationalQuery): Promise<ApiResponse<ConversationalResponse>> {
     try {
       const result = await apiClient.queryAgent(queryData.query, queryData.context);
@@ -69,38 +102,21 @@ export class ConversationalService {
     });
   }
 
-  // Missing methods that components are trying to use
-  static async getAuthToken(): Promise<string> {
-    return 'mock-auth-token';
-  }
-
-  static async fetchCampaignData(): Promise<any> {
-    const result = await apiClient.getCampaigns();
-    return result.data || [];
-  }
-
-  static async callDailyFocusAgent(query: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { response: `Daily focus response to: ${query}` }
-    };
-  }
-
-  static async callGeneralCampaignAgent(query: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { response: `Campaign agent response to: ${query}` }
-    };
-  }
-
   async getDashboardInsights(): Promise<ApiResponse<any>> {
     return {
       success: true,
       data: {
-        insights: [
-          { type: 'performance', message: 'Campaign performance is trending upward' },
-          { type: 'optimization', message: 'Consider A/B testing your email subject lines' }
-        ]
+        totalActions: 25,
+        recentActivities: [
+          { type: 'campaign', message: 'New campaign created', timestamp: new Date() },
+          { type: 'lead', message: 'Lead scored', timestamp: new Date() }
+        ],
+        suggestions: [
+          'Review campaign performance',
+          'Optimize email subject lines',
+          'Update lead scoring criteria'
+        ],
+        trends: { positive: 60, negative: 20, neutral: 20 }
       }
     };
   }

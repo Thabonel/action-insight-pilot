@@ -1,19 +1,28 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon, DollarSignIcon, TargetIcon, TrendingUpIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import { Campaign } from '@/lib/api-client-interface';
+import { Campaign, ApiResponse } from '@/lib/api-client-interface';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 const CampaignDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    type: 'email',
+    status: 'draft'
+  });
 
   useEffect(() => {
     const fetchCampaign = async () => {
@@ -21,250 +30,186 @@ const CampaignDetails: React.FC = () => {
       
       try {
         setLoading(true);
-        const result = await apiClient.getCampaignById(id);
+        const result = await apiClient.getCampaignById(id) as ApiResponse<Campaign>;
         
         if (result.success && result.data) {
           setCampaign(result.data);
+          setFormData({
+            name: result.data.name,
+            description: result.data.description || '',
+            type: result.data.type,
+            status: result.data.status
+          });
         } else {
-          setError(result.error || 'Failed to fetch campaign');
+          toast({
+            title: "Error",
+            description: "Failed to load campaign details",
+            variant: "destructive",
+          });
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+      } catch (error) {
+        console.error('Error fetching campaign:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load campaign details",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchCampaign();
-  }, [id]);
+  }, [id, toast]);
 
-  const updateCampaignStatus = async (newStatus: Campaign['status']) => {
-    if (!campaign) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
 
     try {
-      const result = await apiClient.updateCampaign(campaign.id, {
-        status: newStatus
-      });
-
-      if (result.success && result.data) {
+      setSaving(true);
+      const result = await apiClient.updateCampaign(id, formData) as ApiResponse<Campaign>;
+      
+      if (result.success) {
         setCampaign(result.data);
+        toast({
+          title: "Success",
+          description: "Campaign updated successfully",
+        });
+      } else {
+        throw new Error('Update failed');
       }
-    } catch (err) {
-      console.error('Failed to update campaign status:', err);
+    } catch (error) {
+      console.error('Error updating campaign:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const getStatusColor = (status: Campaign['status']) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'completed':
-        return 'bg-blue-100 text-blue-800';
-      case 'archived':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
       </div>
     );
   }
 
-  if (error || !campaign) {
+  if (!campaign) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Campaign Not Found</h2>
-          <p className="text-gray-600">{error || 'The campaign you\'re looking for doesn\'t exist.'}</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900">Campaign not found</h2>
+          <p className="text-gray-600 mt-2">The campaign you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/campaigns')} className="mt-4">
+            Back to Campaigns
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{campaign.name}</h1>
-              <p className="text-gray-600 mt-1">{campaign.description}</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Badge className={getStatusColor(campaign.status)}>
-                {campaign.status}
-              </Badge>
-              {campaign.status === 'active' && (
-                <Button
-                  variant="outline"
-                  onClick={() => updateCampaignStatus('paused')}
-                >
-                  Pause Campaign
-                </Button>
-              )}
-              {campaign.status === 'paused' && (
-                <Button
-                  onClick={() => updateCampaignStatus('active')}
-                >
-                  Resume Campaign
-                </Button>
-              )}
-              {(campaign.status === 'completed' || campaign.status === 'paused') && (
-                <Button
-                  variant="outline"
-                  onClick={() => updateCampaignStatus('archived')}
-                >
-                  Archive
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="flex items-center space-x-3">
-              <CalendarIcon className="h-8 w-8 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">Created</p>
-                <p className="font-semibold">{new Date(campaign.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <DollarSignIcon className="h-8 w-8 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Budget</p>
-                <p className="font-semibold">$0</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <TargetIcon className="h-8 w-8 text-purple-600" />
-              <div>
-                <p className="text-sm text-gray-600">Type</p>
-                <p className="font-semibold">{campaign.type}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <TrendingUpIcon className="h-8 w-8 text-orange-600" />
-              <div>
-                <p className="text-sm text-gray-600">Performance</p>
-                <p className="font-semibold">Good</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-white p-1 rounded-lg shadow">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Campaign Name</label>
-                      <p className="mt-1 text-gray-900">{campaign.name}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Description</label>
-                      <p className="mt-1 text-gray-900">{campaign.description || 'No description provided'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Type</label>
-                      <p className="mt-1 text-gray-900">{campaign.type}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Status</label>
-                      <Badge className={`mt-1 ${getStatusColor(campaign.status)}`}>
-                        {campaign.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign Metrics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Reach</span>
-                      <span className="font-semibold">0</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Engagement Rate</span>
-                      <span className="font-semibold">0%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Conversion Rate</span>
-                      <span className="font-semibold">0%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">ROI</span>
-                      <span className="font-semibold">0%</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="performance">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Performance data will be displayed here once the campaign is active.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="content">
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Content</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Campaign content and assets will be managed here.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Campaign configuration and settings will be available here.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/campaigns')}
+          className="mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Campaigns
+        </Button>
+        <h1 className="text-3xl font-bold text-gray-900">Campaign Details</h1>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit Campaign</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Campaign Name</label>
+              <Input
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Enter campaign name"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Enter campaign description"
+                rows={4}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => handleInputChange('type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="email">Email</option>
+                  <option value="social">Social Media</option>
+                  <option value="content">Content</option>
+                  <option value="lead_generation">Lead Generation</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="paused">Paused</option>
+                  <option value="completed">Completed</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex space-x-4 pt-4">
+              <Button type="submit" disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => navigate('/campaigns')}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 export default CampaignDetails;
-
