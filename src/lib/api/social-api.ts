@@ -1,37 +1,51 @@
 
-import { ClientCore } from './client-core';
-import { SocialMethods } from './social-methods';
+import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 
-export class SocialApi extends ClientCore {
-  private socialMethods: SocialMethods;
-
-  constructor() {
-    super();
-    this.socialMethods = new SocialMethods();
+export class SocialApi {
+  async getPosts() {
+    try {
+      const socialMethods = await apiClient.socialPlatforms();
+      const result = await socialMethods.getSocialMediaPosts();
+      return result;
+    } catch (error) {
+      console.error('Error fetching social posts:', error);
+      return { success: false, error: 'Failed to fetch posts' };
+    }
   }
 
-  setToken(token: string) {
-    super.setToken(token);
-    this.socialMethods.setToken(token);
+  async createPost(postData: any) {
+    try {
+      const socialMethods = await apiClient.socialPlatforms();
+      const result = await socialMethods.createSocialPost(postData);
+      return result;
+    } catch (error) {
+      console.error('Error creating social post:', error);
+      return { success: false, error: 'Failed to create post' };
+    }
   }
 
-  async getSocialMediaPosts() {
-    return this.socialMethods.getSocialMediaPosts();
+  async getAnalytics() {
+    try {
+      const socialMethods = await apiClient.socialPlatforms();
+      const result = await socialMethods.getSocialAnalytics();
+      return result;
+    } catch (error) {
+      console.error('Error fetching social analytics:', error);
+      return { success: false, error: 'Failed to fetch analytics' };
+    }
   }
 
-  async createSocialPost(postData: any) {
-    return this.socialMethods.createSocialPost(postData);
-  }
-
-  async getSocialAnalytics() {
-    return this.socialMethods.getSocialAnalytics();
-  }
-
-  async scheduleSocialPost(postData: any) {
-    return this.socialMethods.scheduleSocialPost(postData);
-  }
-
-  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string) {
-    return this.socialMethods.generateSocialContent(platform, contentTheme, brandVoice);
+  async generateContent(brief: any) {
+    try {
+      const socialMethods = await apiClient.socialPlatforms();
+      const result = await socialMethods.generateSocialContent(brief);
+      return result;
+    } catch (error) {
+      console.error('Error generating social content:', error);
+      return { success: false, error: 'Failed to generate content' };
+    }
   }
 }
+
+export const socialApi = new SocialApi();

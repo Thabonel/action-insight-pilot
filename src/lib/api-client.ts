@@ -1,275 +1,202 @@
-import { BaseApiClient } from './api/base-api-client';
-import { CampaignMethods } from './api/campaign-methods';
-import { ContentMethods } from './api/content-methods';
-import { LeadMethods } from './api/lead-methods';
-import { AnalyticsMethods } from './api/analytics-methods';
-import { IntegrationMethods } from './api/integration-methods';
-import { WorkflowMethods } from './api/workflow-methods';
-import { EmailMethods } from './api/email-methods';
-import { SocialMethods } from './api/social-methods';
-import { BrandMethods } from './api/brand-methods';
-export type { ApiResponse } from './api-client-interface';
-export type { Campaign, ContentBrief } from './api-client-interface';
+import axios from 'axios';
+import { SocialMethods, createSocialMethods } from './api/social-methods';
 
-export class ApiClient extends BaseApiClient {
-  public campaigns: CampaignMethods;
-  public content: ContentMethods;
-  public leads: LeadMethods;
-  public analytics: AnalyticsMethods;
-  public integrations: IntegrationMethods;
-  public workflows: WorkflowMethods;
-  public email: EmailMethods;
-  public social: SocialMethods;
-  public brand: BrandMethods;
+export type { Workflow, WorkflowMethods, ContentBrief } from './api-client-interface';
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+interface ApiConfig {
+  baseURL: string;
+  timeout: number;
+  headers: {
+    'Content-Type': string;
+  };
+}
+
+class ApiClient {
+  private client;
+  private socialMethods: SocialMethods;
 
   constructor() {
-    super();
-    this.campaigns = new CampaignMethods();
-    this.content = new ContentMethods();
-    this.leads = new LeadMethods();
-    this.analytics = new AnalyticsMethods();
-    this.integrations = new IntegrationMethods();
-    this.workflows = new WorkflowMethods();
-    this.email = new EmailMethods();
-    this.social = new SocialMethods();
-    this.brand = new BrandMethods();
-  }
-
-  // Content management methods
-  async createContent(data: any) {
-    return this.content.createContent(data);
-  }
-
-  async generateContent(data: any) {
-    return this.content.generateContent(data);
-  }
-
-  async repurposeContent(data: any) {
-    // Mock implementation for content repurposing
-    return {
-      success: true,
-      data: {
-        variants: [
-          {
-            format: data.targetFormat,
-            content: `Repurposed content for ${data.targetFormat}`,
-            platform: data.platform
-          }
-        ]
-      }
+    const config: ApiConfig = {
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+      timeout: 30000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
+
+    this.client = axios.create(config);
+    this.socialMethods = createSocialMethods();
   }
 
-  async getContentVariants(contentId: string) {
-    // Mock implementation for content variants
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          contentId,
-          format: 'social',
-          content: 'Social media version',
-          platform: 'twitter'
-        }
-      ]
-    };
+  async get<T>(url: string, params?: any): Promise<ApiResponse<T>> {
+    try {
+      const response = await this.client.get(url, { params });
+      return response.data;
+    } catch (error: any) {
+      console.error('GET request failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 
-  async saveContentVariant(data: any) {
-    // Mock implementation for saving content variant
-    return {
-      success: true,
-      data: { id: 'variant-1', ...data }
-    };
+  async post<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    try {
+      const response = await this.client.post(url, data);
+      return response.data;
+    } catch (error: any) {
+      console.error('POST request failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 
-  // Campaign methods
-  async createCampaign(data: any) {
-    return this.campaigns.createCampaign(data);
+  async put<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    try {
+      const response = await this.client.put(url, data);
+      return response.data;
+    } catch (error: any) {
+      console.error('PUT request failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 
-  async generateEmailContent(data: any) {
-    return this.email.generateEmailContent(data);
+  async delete<T>(url: string): Promise<ApiResponse<T>> {
+    try {
+      const response = await this.client.delete(url);
+      return response.data;
+    } catch (error: any) {
+      console.error('DELETE request failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 
-  async scoreLeads(leadIds?: string[]) {
-    // Mock implementation for lead scoring
-    return {
-      success: true,
-      data: (leadIds || ['1', '2', '3']).map(id => ({
-        id,
-        score: Math.floor(Math.random() * 100),
-        factors: ['engagement', 'company_size', 'intent']
-      }))
-    };
+  async queryAgent(query: string, context?: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/agent/query', { query, context });
+      return response;
+    } catch (error: any) {
+      console.error('Agent query failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 
-  // User preferences
+  async callGeneralCampaignAgent(message: string, campaigns: any[]): Promise<ApiResponse<any>> {
+     try {
+       const response = await this.post('/agent/campaign', { message, campaigns });
+       return response;
+     } catch (error: any) {
+       console.error('Campaign agent call failed:', error);
+       return { success: false, error: error.message };
+     }
+  }
+
+  async getBlogAnalytics(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/analytics/blog');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch blog analytics:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getEmailAnalytics(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/analytics/email');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch email analytics:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAnalytics(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/analytics');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch analytics:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getLeads(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/leads');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch leads:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async scheduleSocialPost(postData: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/social/schedule', postData);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to schedule social post:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  socialPlatforms(): SocialMethods {
+    return this.socialMethods;
+  }
+
+  async getSocialPlatforms(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/social/platforms');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch social platforms:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async connectSocialPlatform(config: { platform: string }): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/social/connect', config);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to connect social platform:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createContent(contentData: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/content/create', contentData);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to create content:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   async userPreferences() {
+    console.log('Getting user preferences methods');
     return {
       get: async () => ({ success: true, data: {} }),
       update: async (data: any) => ({ success: true, data }),
-      getUserPreferences: async (category?: string) => ({ 
-        success: true, 
-        data: category ? [{ preference_data: {} }] : {} 
-      }),
+      getUserPreferences: async (category?: string) => ({ success: true, data: {} }),
       updateUserPreferences: async (category: string, data: any) => ({ success: true, data })
     };
   }
 
-  // Integration methods
-  async getConnections() {
-    return this.integrations.getConnections();
-  }
-
-  async createConnection(data: any) {
-    return this.integrations.createConnection(data);
-  }
-
-  async deleteConnection(id: string) {
-    return this.integrations.deleteConnection(id);
-  }
-
-  // Legacy method compatibility
-  async getCampaigns() {
-    return this.campaigns.getCampaigns();
-  }
-
-  async getCampaignById(id: string) {
-    return this.campaigns.getCampaignById(id);
-  }
-
-  async updateCampaign(id: string, data: any) {
-    return this.campaigns.updateCampaign(id, data);
-  }
-
-  async getBlogAnalytics() {
-    // Mock implementation for analytics
+  async workflows(): Promise<WorkflowMethods> {
+    console.log('Getting workflow methods');
     return {
-      success: true,
-      data: {
-        views: 1250,
-        uniqueViews: 980,
-        engagement: 4.2,
-        shares: 23,
-        timeOnPage: 180,
-        bounceRate: 0.35,
-        conversionRate: 0.08,
-        leads: 12,
-        revenue: 2400
-      }
-    };
-  }
-
-  async getWorkflows() {
-    // Mock implementation for workflows
-    return {
-      success: true,
-      data: []
-    };
-  }
-
-  async createWorkflow(data: any) {
-    return { success: true, data: { id: 'workflow-1', ...data } };
-  }
-
-  async updateWorkflow(id: string, data: any) {
-    return { success: true, data: { id, ...data } };
-  }
-
-  async deleteWorkflow(id: string) {
-    return { success: true, data: { id, deleted: true } };
-  }
-
-  async executeWorkflow(id: string) {
-    return { success: true, data: { id, status: 'executed' } };
-  }
-
-  async getSocialPlatforms() {
-    // Mock implementation for social platforms
-    return {
-      success: true,
-      data: [
-        {
-          id: 'twitter',
-          platform: 'twitter',
-          account_name: '@example',
-          status: 'connected',
-          connection_status: 'connected',
-          last_sync: new Date().toISOString(),
-          follower_count: 1000
-        }
-      ]
-    };
-  }
-
-  async connectSocialPlatform(data: any) {
-    // Mock implementation for connecting social platform
-    return {
-      success: true,
-      data: {
-        platform: data.platform,
-        status: 'connected',
-        connected_at: new Date().toISOString()
-      }
-    };
-  }
-
-  async scheduleSocialPost(data: any) {
-    return this.social.scheduleSocialPost(data);
-  }
-
-  async getSocialPosts() {
-    // Mock implementation for social posts
-    return {
-      success: true,
-      data: []
-    };
-  }
-
-  async getRealTimeMetrics(entityType?: string, entityId?: string) {
-    return this.analytics.getRealTimeMetrics(entityType || 'campaign', entityId || '1');
-  }
-
-  async queryAgent(query: string, context?: any) {
-    return this.content.generateContent({
-      prompt: query,
-      context: context || {}
-    });
-  }
-
-  async callDailyFocusAgent(query: string, campaigns?: any[]) {
-    return this.queryAgent('Daily focus analysis: ' + query, { campaigns });
-  }
-
-  async callGeneralCampaignAgent(query: string, campaigns?: any[]) {
-    return this.queryAgent('Campaign analysis: ' + query, { campaigns });
-  }
-
-  async getAnalytics() {
-    return this.getBlogAnalytics();
-  }
-
-  async getEmailAnalytics() {
-    return this.getBlogAnalytics();
-  }
-
-  async getLeads() {
-    // Mock implementation for leads
-    return {
-      success: true,
-      data: []
-    };
-  }
-
-  async socialPlatforms() {
-    return {
-      getPlatformConnections: async () => this.getSocialPlatforms(),
-      initiatePlatformConnection: async (platform: string) => this.connectSocialPlatform({ platform }),
-      disconnectPlatform: async (platform: string) => ({ success: true, data: { platform, disconnected: true } }),
-      syncPlatformData: async (platform: string) => ({ success: true, data: { platform, synced: true } }),
-      testPlatformConnection: async (platform: string) => ({ success: true, data: { platform, connected: true } })
+      getAll: async () => ({ success: true, data: [] }),
+      create: async (workflow: any) => ({ success: true, data: { id: '1', ...workflow } }),
+      update: async (id: string, workflow: any) => ({ success: true, data: { id, ...workflow } }),
+      delete: async (id: string) => ({ success: true, data: undefined }),
+      execute: async (id: string, input?: any) => ({ success: true, data: { result: 'executed' } })
     };
   }
 }
