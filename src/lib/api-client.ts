@@ -36,8 +36,8 @@ export class ApiClient {
 
     this.userPreferences = {
       get: () => this.getUserPreferences(),
-      getUserPreferences: (category: string) => this.getUserPreferences(category),
-      updateUserPreferences: (category: string, preferences: any) => this.updateUserPreferences(category, preferences)
+      getUserPreferences: (category?: string) => this.getUserPreferences(category),
+      updateUserPreferences: (preferences: UserPreferences) => this.updateUserPreferences(preferences)
     };
 
     this.socialPlatforms = {
