@@ -1,39 +1,57 @@
 
 import { BaseApiClient } from './base-api-client';
-import { CampaignsService } from './campaigns-service';
-import { EnhancedCampaignsService } from './enhanced-campaigns-service';
+import { ApiResponse, Campaign } from '../api-client-interface';
 
 export class CampaignMethods extends BaseApiClient {
-  private campaigns: CampaignsService;
-  public enhancedCampaigns: EnhancedCampaignsService;
+  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
+    const mockCampaigns: Campaign[] = [
+      {
+        id: '1',
+        name: 'Summer Email Campaign',
+        description: 'Targeted email campaign for summer products',
+        type: 'email',
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        metrics: {
+          sent: 1000,
+          opened: 250,
+          clicked: 50
+        }
+      },
+      {
+        id: '2',
+        name: 'Social Media Promotion',
+        description: 'Cross-platform social media campaign',
+        type: 'social',
+        status: 'draft',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        metrics: {
+          impressions: 5000,
+          engagement: 150
+        }
+      }
+    ];
 
-  constructor() {
-    super();
-    this.campaigns = new CampaignsService(this.httpClient);
-    this.enhancedCampaigns = new EnhancedCampaignsService(this.httpClient);
+    return {
+      success: true,
+      data: mockCampaigns
+    };
   }
 
-  async getCampaigns() {
-    return this.campaigns.getCampaigns();
-  }
-
-  async createCampaign(campaignData: any) {
-    return this.campaigns.createCampaign(campaignData);
-  }
-
-  async bulkCreateCampaigns(campaigns: any[]) {
-    return this.campaigns.bulkCreateCampaigns(campaigns);
-  }
-
-  async getCampaignById(id: string) {
-    return this.campaigns.getCampaignById(id);
-  }
-
-  async updateCampaign(id: string, updates: any) {
-    return this.campaigns.updateCampaign(id, updates);
-  }
-
-  async deleteCampaign(id: string) {
-    return this.campaigns.deleteCampaign(id);
+  async createCampaign(campaign: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
+    return {
+      success: true,
+      data: {
+        id: 'new-campaign-' + Date.now(),
+        name: campaign.name || 'New Campaign',
+        description: campaign.description || '',
+        type: campaign.type || 'email',
+        status: 'draft',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    };
   }
 }

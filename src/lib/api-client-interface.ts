@@ -1,4 +1,3 @@
-
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -92,6 +91,7 @@ export interface IntegrationConnection {
   service_name?: string;
   connection_status?: 'connected' | 'disconnected' | 'error';
   last_sync_at?: string;
+  description?: string; // Added missing description property
 }
 
 export interface Webhook {
@@ -168,4 +168,3 @@ export interface ChatMessage {
   query?: string;
   response?: string;
 }
-
