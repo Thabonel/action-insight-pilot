@@ -1,572 +1,315 @@
+import axios, { AxiosInstance } from 'axios';
+import { getCookie } from 'cookies-next';
 
-import { BaseApiClient } from './api/base-api-client';
-import { ApiResponse } from './api/api-client-interface';
+import {
+  type User,
+  type Campaign,
+  type Workflow,
+  type Content,
+  type SocialPlatformConnection,
+  type AnalyticsOverview,
+  type EmailMetrics,
+  type UserPreferences
+} from './api-client-interface';
+import { UserPreferencesService } from './api/user-preferences-service';
+import { SocialPlatformsService } from './api/social-platforms-service';
+import { HeadlinesService } from './api/headlines-service';
+import { LeadApi } from './api/lead-api';
 
-// Unified type definitions to match the codebase
-export interface ContentBrief {
-  title: string;
-  content_type: string;
-  target_audience: string;
-  key_messages: string[];
-  platform: string;
-  tone?: string;
-  length?: string;
-  keywords?: string[];
-  cta?: string;
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
 }
 
-export interface BlogPost {
-  id: string;
-  title: string;
-  keyword: string;
-  wordCount: number;
-  tone: string;
-  includeCTA: boolean;
-  content: string;
-  metaDescription?: string;
-  createdAt: string;
-}
+const getToken = (): string | undefined => {
+  return getCookie('accessToken')?.toString();
+};
 
-export interface BlogPostParams {
-  title: string;
-  keyword: string;
-  wordCount: number;
-  tone: string;
-  includeCTA: boolean;
-}
+class HttpClient {
+  private axiosInstance: AxiosInstance;
 
-export interface Campaign {
-  id: string;
-  name: string;
-  type: string;
-  status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
-  startDate: string;
-  endDate?: string;
-  budget?: number;
-  target_audience?: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
+  constructor(baseURL: string) {
+    this.axiosInstance = axios.create({
+      baseURL,
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-export interface Lead {
-  id: string;
-  name: string;
-  email: string;
-  company?: string;
-  status: string;
-  source: string;
-  score: number;
-  created_at: string;
-}
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        const token = getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
 
-export interface Workflow {
-  id: string;
-  name: string;
-  description?: string;
-  status: string;
-  steps: WorkflowStep[];
-  created_at: string;
-  updated_at?: string;
-}
-
-export interface WorkflowStep {
-  id: string;
-  name: string;
-  type: string;
-  config: any;
-  order: number;
-  title?: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-  status?: string;
-}
-
-export interface UserPreferences {
-  name?: string;
-  domain?: string;
-  industry?: string;
-  teamSize?: string;
-  branding?: {
-    logo?: string;
-    primaryColor?: string;
-    secondaryColor?: string;
-  };
-  features?: {
-    [key: string]: boolean;
-  };
-}
-
-export interface UserPreference {
-  id: string;
-  user_id: string;
-  preference_type: string;
-  preference_data: any;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface IntegrationConnection {
-  id: string;
-  name: string;
-  type: string;
-  status: 'connected' | 'disconnected' | 'error' | 'pending';
-  service_name: string;
-  connection_status: 'connected' | 'disconnected' | 'error' | 'pending';
-  last_sync_at?: string;
-  sync_status: 'idle' | 'syncing' | 'error' | 'success';
-  configuration?: Record<string, any>;
-  error_message?: string;
-  lastSync?: string;
-}
-
-export interface SocialPlatformConnection {
-  id: string;
-  platform: string;
-  platform_name: string;
-  status: 'connected' | 'disconnected' | 'error';
-  connection_status: 'connected' | 'disconnected' | 'error';
-  username?: string;
-  platform_username?: string;
-  platform_user_id?: string;
-  lastSync?: string;
-  last_sync_at?: string;
-  token_expires_at?: string;
-  connection_metadata?: Record<string, any>;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface Webhook {
-  id: string;
-  name: string;
-  url: string;
-  events: string[];
-  is_active: boolean;
-  active?: boolean;
-  last_triggered_at?: string;
-  last_response_code?: number;
-  secret?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-class ApiClient extends BaseApiClient {
-  setToken(token: string) {
-    this.httpClient.setToken(token);
+    this.axiosInstance.interceptors.response.use(
+      (response) => {
+        return response.data;
+      },
+      (error) => {
+        console.error('API Error:', error);
+        return Promise.reject(error);
+      }
+    );
   }
 
-  // User Preferences
-  userPreferences = {
-    getUserPreferences: async (type?: string): Promise<ApiResponse<UserPreference[]>> => {
-      return {
-        success: true,
-        data: []
-      };
-    },
-    updateUserPreferences: async (type: string, data: any): Promise<ApiResponse<UserPreference>> => {
-      return {
-        success: true,
-        data: {
-          id: '1',
-          user_id: 'user1',
-          preference_type: type,
-          preference_data: data,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      };
-    },
-    get: async (): Promise<ApiResponse<UserPreferences>> => {
-      return { success: true, data: {} };
-    },
-    update: async (data: UserPreferences): Promise<ApiResponse<UserPreferences>> => {
+  async get<T>(url: string, config: any = {}): Promise<T> {
+    return this.axiosInstance.get(url, config);
+  }
+
+  async post<T>(url: string, data: any, config: any = {}): Promise<T> {
+    return this.axiosInstance.post(url, data, config);
+  }
+
+  async put<T>(url: string, data: any, config: any = {}): Promise<T> {
+    return this.axiosInstance.put(url, data, config);
+  }
+
+  async delete<T>(url: string, config: any = {}): Promise<T> {
+    return this.axiosInstance.delete(url, config);
+  }
+
+  async request<T>(url: string, config: any = {}): Promise<T> {
+    try {
+      const response = await this.axiosInstance.request<T>({ url, ...config });
+      return response;
+    } catch (error: any) {
+      console.error('Request failed:', error);
+      throw error;
+    }
+  }
+}
+
+const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+export class ApiClient {
+  public httpClient: HttpClient;
+  public userPreferences: UserPreferencesService;
+  public socialPlatforms: SocialPlatformsService;
+  public headlines: HeadlinesService;
+  public leads: LeadApi;
+
+  constructor() {
+    this.httpClient = new HttpClient(baseURL);
+    this.userPreferences = new UserPreferencesService(this.httpClient);
+    this.socialPlatforms = new SocialPlatformsService(this.httpClient);
+    this.headlines = new HeadlinesService(this.httpClient);
+    this.leads = new LeadApi();
+  }
+
+  setToken(token: string) {
+    localStorage.setItem('accessToken', token);
+  }
+
+  async getUser(): Promise<ApiResponse<User>> {
+    try {
+      const data = await this.httpClient.get<User>('/api/users/me');
       return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to get user' };
     }
-  };
+  }
 
-  // Social Platform methods
-  socialPlatforms = {
-    getAll: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
-      return { success: true, data: [] };
-    },
-    connect: async (platform: string, config?: any): Promise<ApiResponse<SocialPlatformConnection>> => {
-      return { 
-        success: true, 
-        data: { 
-          id: '1', 
-          platform, 
-          platform_name: platform,
-          status: 'connected',
-          connection_status: 'connected',
-          created_at: new Date().toISOString()
-        } 
-      };
-    },
-    disconnect: async (platformId: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
-    },
-    getPlatformConnections: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
-      return { success: true, data: [] };
-    },
-    initiatePlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
-      return { success: true, data: { authorization_url: '#' } };
-    },
-    disconnectPlatform: async (platformId: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
-    },
-    syncPlatformData: async (platformId: string): Promise<ApiResponse<any>> => {
-      return { success: true, data: {} };
-    },
-    testPlatformConnection: async (platformId: string): Promise<ApiResponse<any>> => {
-      return { success: true, data: { status: 'connected' } };
-    },
-    get: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
-      return { success: true, data: [] };
-    },
-    update: async (data: any): Promise<ApiResponse<any>> => {
+  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
+    try {
+      const data = await this.httpClient.get<Campaign[]>('/api/campaigns');
       return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to get campaigns' };
     }
-  };
+  }
 
-  // Integration methods
-  integrations = {
-    getWebhooks: async (): Promise<ApiResponse<Webhook[]>> => {
-      return { success: true, data: [] };
-    },
-    createWebhook: async (webhookData: Partial<Webhook>): Promise<ApiResponse<Webhook>> => {
-      return { 
-        success: true, 
-        data: { 
-          id: '1', 
-          name: webhookData.name || 'Webhook',
-          url: webhookData.url || '',
-          events: webhookData.events || [],
-          is_active: true,
-          active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } 
-      };
-    },
-    updateWebhook: async (id: string, webhookData: Partial<Webhook>): Promise<ApiResponse<Webhook>> => {
-      return { 
-        success: true, 
-        data: { 
-          id, 
-          name: webhookData.name || 'Webhook',
-          url: webhookData.url || '',
-          events: webhookData.events || [],
-          is_active: webhookData.is_active || true,
-          active: webhookData.active || true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } 
-      };
-    },
-    deleteWebhook: async (id: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
-    },
-    testWebhook: async (id: string): Promise<ApiResponse<any>> => {
-      return { success: true, data: { status: 'success' } };
-    },
-    getConnections: async (): Promise<ApiResponse<IntegrationConnection[]>> => {
-      return { success: true, data: [] };
-    },
-    connectService: async (service: string, apiKey?: string): Promise<ApiResponse<IntegrationConnection>> => {
-      return { 
-        success: true, 
-        data: { 
-          id: '1', 
-          name: service,
-          type: 'oauth',
-          status: 'connected',
-          service_name: service,
-          connection_status: 'connected',
-          sync_status: 'idle'
-        } 
-      };
-    },
-    disconnectService: async (service: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
-    },
-    syncService: async (serviceId: string): Promise<ApiResponse<any>> => {
-      return { success: true, data: {} };
-    },
-    createConnection: async (connectionData: any): Promise<ApiResponse<IntegrationConnection>> => {
-      return { 
-        success: true, 
-        data: { 
-          id: '1', 
-          name: connectionData.name,
-          type: connectionData.type,
-          status: 'connected',
-          service_name: connectionData.service_name,
-          connection_status: 'connected',
-          sync_status: 'idle'
-        } 
-      };
-    },
-    deleteConnection: async (id: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
+  async createCampaign(name: string, description?: string): Promise<ApiResponse<Campaign>> {
+    try {
+      const data = await this.httpClient.post<Campaign>('/api/campaigns', { name, description });
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to create campaign' };
     }
-  };
+  }
 
-  // Conversational Agent methods
-  queryAgent = async (message: string, context?: any): Promise<ApiResponse<any>> => {
-    return { success: true, data: { response: 'Mock response', context: {} } };
-  };
+  async updateCampaign(id: string, data: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
+    try {
+      const response = await this.httpClient.put<Campaign>(`/api/campaigns/${id}`, data);
+      return { success: true, data: response };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to update campaign' };
+    }
+  }
 
-  callDailyFocusAgent = async (query: string, campaigns?: any[]): Promise<ApiResponse<any>> => {
-    return { success: true, data: { focus_summary: 'Daily focus insights' } };
-  };
+  async deleteCampaign(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.httpClient.delete(`/api/campaigns/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to delete campaign' };
+    }
+  }
 
-  callGeneralCampaignAgent = async (query: string, campaigns?: any[]): Promise<ApiResponse<any>> => {
-    return { success: true, data: { explanation: 'Campaign insights' } };
-  };
+  async getWorkflows(): Promise<ApiResponse<Workflow[]>> {
+    try {
+      const data = await this.httpClient.get<Workflow[]>('/api/workflows');
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to get workflows' };
+    }
+  }
 
-  // Content methods
-  createContent = async (contentData: any): Promise<ApiResponse<any>> => {
-    return { success: true, data: { id: '1', ...contentData } };
-  };
-
-  generateContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
-    return { success: true, data: { content: 'Generated content...' } };
-  };
-
-  generateSocialContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
-    return { success: true, data: { content: 'Generated social content...' } };
-  };
-
-  generateEmailContent = async (brief: string): Promise<ApiResponse<{ content: string }>> => {
-    return { success: true, data: { content: 'Generated email content...' } };
-  };
-
-  getSocialPosts = async (): Promise<ApiResponse<any[]>> => {
-    return { success: true, data: [] };
-  };
-
-  // Blog methods
-  generateBlogPost = async (params: BlogPostParams): Promise<ApiResponse<BlogPost>> => {
+  async workflows(): Promise<any> {
     return {
-      success: true,
-      data: {
-        id: '1',
-        title: params.title,
-        keyword: params.keyword,
-        wordCount: params.wordCount,
-        tone: params.tone,
-        includeCTA: params.includeCTA,
-        content: 'Generated blog content...',
-        metaDescription: 'Generated meta description',
-        createdAt: new Date().toISOString()
-      }
+      getAll: async (): Promise<ApiResponse<Workflow[]>> => {
+        try {
+          const data = await this.httpClient.get<Workflow[]>('/api/workflows');
+          return { success: true, data };
+        } catch (error: any) {
+          return { success: false, error: error.message || 'Failed to get workflows' };
+        }
+      },
+      create: async (name: string, description?: string): Promise<ApiResponse<Workflow>> => {
+        try {
+          const data = await this.httpClient.post<Workflow>('/api/workflows', { name, description });
+          return { success: true, data };
+        } catch (error: any) {
+          return { success: false, error: error.message || 'Failed to create workflow' };
+        }
+      },
+      update: async (id: string, data: Partial<Workflow>): Promise<ApiResponse<Workflow>> => {
+        try {
+          const response = await this.httpClient.put<Workflow>(`/api/workflows/${id}`, data);
+          return { success: true, data: response };
+        } catch (error: any) {
+          return { success: false, error: error.message || 'Failed to update workflow' };
+        }
+      },
+      delete: async (id: string): Promise<ApiResponse<void>> => {
+        try {
+          await this.httpClient.delete(`/api/workflows/${id}`);
+          return { success: true };
+        } catch (error: any) {
+          return { success: false, error: error.message || 'Failed to delete workflow' };
+        }
+      },
+      execute: async (id: string): Promise<ApiResponse<void>> => {
+        try {
+          await this.httpClient.post(`/api/workflows/${id}/execute`, {});
+          return { success: true };
+        } catch (error: any) {
+          return { success: false, error: error.message || 'Failed to execute workflow' };
+        }
+      },
     };
-  };
+  }
 
-  getBlogPosts = async (): Promise<ApiResponse<BlogPost[]>> => {
-    return { success: true, data: [] };
-  };
-
-  // Social methods
-  scheduleSocialPost = async (data: any): Promise<ApiResponse<any>> => {
-    return { success: true, data: { id: '1', status: 'scheduled' } };
-  };
-
-  // Workflow methods
-  workflows = {
-    getAll: async (): Promise<ApiResponse<Workflow[]>> => {
-      return { 
-        success: true, 
-        data: [{
-          id: '1',
-          name: 'Sample Workflow',
-          description: 'A sample workflow',
-          status: 'active',
-          steps: [
-            {
-              id: '1',
-              name: 'Lead Generation',
-              type: 'lead_gen',
-              config: {},
-              order: 1,
-              title: 'Generate Leads',
-              description: 'Find potential customers',
-              icon: 'Target',
-              color: 'blue',
-              status: 'active'
-            },
-            {
-              id: '2',
-              name: 'Email Campaign',
-              type: 'email',
-              config: {},
-              order: 2,
-              title: 'Send Welcome Email',
-              description: 'Send personalized welcome emails',
-              icon: 'Mail',
-              color: 'green',
-              status: 'pending'
-            }
-          ],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }]
-      };
-    },
-    create: async (name: string, description?: string): Promise<ApiResponse<Workflow>> => {
-      return { 
-        success: true, 
-        data: { 
-          id: '1', 
-          name, 
-          description,
-          status: 'active',
-          steps: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } 
-      };
-    },
-    update: async (id: string, data: Partial<Workflow>): Promise<ApiResponse<Workflow>> => {
-      return { 
-        success: true, 
-        data: { 
-          id, 
-          name: data.name || 'Workflow',
-          status: data.status || 'active',
-          steps: data.steps || [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } 
-      };
-    },
-    delete: async (id: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
-    },
-    execute: async (id: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
+  async generateContent(contentBrief: any): Promise<ApiResponse<Content>> {
+    try {
+      const data = await this.httpClient.post<Content>('/api/content/generate', contentBrief);
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to generate content' };
     }
-  };
+  }
 
-  // Metrics methods
-  getRealTimeMetrics = async (): Promise<ApiResponse<any>> => {
-    return { 
-      success: true, 
-      data: {
-        totalSent: 1000,
-        delivered: 950,
-        opened: 380,
-        clicked: 76,
-        bounced: 25,
-        unsubscribed: 5,
-        openRate: 40,
-        clickRate: 8,
-        bounceRate: 2.6
-      }
+  async generateEmailContent(briefText: string): Promise<ApiResponse<Content>> {
+    try {
+      const data = await this.httpClient.post<Content>('/api/content/generate-email', { brief: briefText });
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to generate email content' };
+    }
+  }
+
+  async queryAgent(query: string): Promise<ApiResponse<any>> {
+    try {
+      const data = await this.httpClient.post<any>('/api/agents/query', { query });
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to query agent' };
+    }
+  }
+
+  async getEmailAnalytics(): Promise<ApiResponse<EmailMetrics>> {
+    try {
+      const data = await this.httpClient.get<EmailMetrics>('/api/analytics/email');
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Failed to get email analytics' };
+    }
+  }
+
+  async getAnalytics(): Promise<any> {
+    return {
+      getAnalyticsOverview: async (): Promise<ApiResponse<AnalyticsOverview>> => {
+        try {
+          const data = await this.httpClient.get<AnalyticsOverview>('/api/analytics/overview');
+          return { success: true, data };
+        } catch (error: any) {
+          return { success: false, error: error.message || 'Failed to get analytics overview' };
+        }
+      },
     };
-  };
+  }
 
-  getAnalytics = async (): Promise<ApiResponse<any>> => {
-    const analytics = {
-      getAnalyticsOverview: async (): Promise<any> => {
-        return { totalCampaigns: 0, activeLeads: 0, conversionRate: 0 };
-      }
-    };
-    return { success: true, data: analytics };
-  };
+    // Social Platform methods
+  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
+    try {
+      const response = await this.httpClient.request<SocialPlatformConnection[]>('/api/social-platforms');
+      return {
+        success: true,
+        data: response || []
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        error: error instanceof Error ? error.message : 'Failed to fetch social platforms'
+      };
+    }
+  }
 
-  getEmailAnalytics = async (): Promise<ApiResponse<any>> => {
-    return { success: true, data: { sent: 0, opened: 0, clicked: 0 } };
-  };
+  async connectSocialPlatform(platformData: any): Promise<ApiResponse<SocialPlatformConnection>> {
+    try {
+      const response = await this.httpClient.request<SocialPlatformConnection>('/api/social-platforms/connect', {
+        method: 'POST',
+        body: JSON.stringify(platformData)
+      });
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to connect platform'
+      };
+    }
+  }
 
-  // Lead methods
-  scoreLeads = async (): Promise<any[]> => {
-    return [];
-  };
-
-  getLeads = async (): Promise<ApiResponse<Lead[]>> => {
-    return { success: true, data: [] };
-  };
-
-  // Campaign methods
-  createCampaign = async (campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> => {
-    return { 
-      success: true, 
-      data: { 
-        id: '1', 
-        name: campaignData.name || 'New Campaign',
-        type: campaignData.type || 'email',
-        status: 'draft',
-        startDate: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } 
-    };
-  };
-
-  updateCampaign = async (id: string, campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> => {
-    return { 
-      success: true, 
-      data: { 
-        id, 
-        name: campaignData.name || 'Campaign',
-        type: campaignData.type || 'email',
-        status: campaignData.status || 'draft',
-        startDate: campaignData.startDate || new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } 
-    };
-  };
-
-  getCampaignById = async (id: string): Promise<ApiResponse<Campaign>> => {
-    return { 
-      success: true, 
-      data: { 
-        id, 
-        name: 'Campaign',
-        type: 'email',
-        status: 'active',
-        startDate: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } 
-    };
-  };
-
-  getCampaign = async (id: string): Promise<ApiResponse<Campaign>> => {
-    return this.getCampaignById(id);
-  };
-
-  getCampaigns = async (): Promise<ApiResponse<Campaign[]>> => {
-    return { success: true, data: [] };
-  };
-
-  // MCP Connection methods
-  getConnections = async (): Promise<ApiResponse<IntegrationConnection[]>> => {
-    return { success: true, data: [] };
-  };
-
-  createConnection = async (connectionData: any): Promise<ApiResponse<IntegrationConnection>> => {
-    return { 
-      success: true, 
-      data: { 
-        id: '1', 
-        name: connectionData.name,
-        type: connectionData.type,
-        status: 'connected',
-        service_name: connectionData.service_name,
-        connection_status: 'connected',
-        sync_status: 'idle'
-      } 
-    };
-  };
-
-  deleteConnection = async (id: string): Promise<ApiResponse<boolean>> => {
-    return { success: true, data: true };
-  };
+  // Lead scoring method fix
+  async scoreLeads(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.httpClient.request('/api/leads/score', {
+        method: 'POST'
+      });
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to score leads'
+      };
+    }
+  }
 }
 
 export const apiClient = new ApiClient();
