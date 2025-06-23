@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 
 interface ContentBrief {
   title: string;
@@ -39,16 +40,11 @@ export function useContentGeneration() {
     setError(null);
     
     try {
-      const response = await apiClient.httpClient.request('/api/content/generate', {
-        method: 'POST',
-        body: JSON.stringify(brief),
-      });
+      const response = await apiClient.generateContent(brief) as ApiResponse<any>;
 
       if (response.success && response.data) {
-        // Type assertion to properly access the response data properties
         const responseData = response.data as any;
         
-        // Ensure the response data matches our GeneratedContent interface
         const generatedContent: GeneratedContent = {
           id: responseData.id || '',
           title: responseData.title || '',

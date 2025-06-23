@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,7 +57,7 @@ const IntelligentCampaignBuilder: React.FC = () => {
     setLoading(true);
     try {
       console.log('Building campaign with brief:', brief);
-      const result = await apiClient.generateEmailContent(brief);
+      const result = await apiClient.generateEmailContent(brief, 'campaign');
       
       if (result.success && result.data) {
         setCampaignSuggestions(result.data);
@@ -95,6 +94,7 @@ const IntelligentCampaignBuilder: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Campaign Name</label>

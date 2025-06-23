@@ -1,8 +1,10 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { ApiResponse } from '@/lib/api-client-interface';
 
 interface ChatMessage {
   id: string;
@@ -33,17 +35,7 @@ export const useChatLogic = ({ onChatUpdate }: UseChatLogicProps = {}) => {
   };
 
   const callDailyFocusAgent = async (query: string, campaigns: any[]) => {
-    const requestData = {
-      query,
-      campaigns,
-      context: [],
-      date: new Date().toISOString().split('T')[0]
-    };
-
-    const response = await apiClient.httpClient.request('/api/agents/daily-focus', {
-      method: 'POST',
-      body: JSON.stringify(requestData)
-    });
+    const response = await apiClient.callDailyFocusAgent(query, campaigns);
     
     if (!response.success) {
       throw new Error(`Daily focus agent failed: ${response.error}`);
@@ -53,19 +45,7 @@ export const useChatLogic = ({ onChatUpdate }: UseChatLogicProps = {}) => {
   };
 
   const callGeneralCampaignAgent = async (query: string, campaigns: any[]) => {
-    const requestData = {
-      task_type: 'general_query',
-      input_data: {
-        query,
-        campaigns,
-        context: []
-      }
-    };
-
-    const response = await apiClient.httpClient.request('/api/agents/campaign', {
-      method: 'POST',
-      body: JSON.stringify(requestData)
-    });
+    const response = await apiClient.callGeneralCampaignAgent(query, campaigns);
     
     if (!response.success) {
       throw new Error(`Campaign agent failed: ${response.error}`);
@@ -75,17 +55,11 @@ export const useChatLogic = ({ onChatUpdate }: UseChatLogicProps = {}) => {
   };
 
   const formatAgentResponse = (agentResponse: any, queryType: string) => {
-    if (!agentResponse.success) {
-      throw new Error(agentResponse.error || 'AI agent returned an error');
-    }
-    
-    const responseData = agentResponse.data;
-    
     if (queryType === 'daily_focus') {
-      return responseData.focus_summary || responseData.explanation || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.';
+      return agentResponse.focus_summary || agentResponse.explanation || 'Based on your current campaigns and performance data, here\'s what deserves your attention today.';
     }
     
-    return responseData.explanation || responseData.focus_summary || 'Here are insights based on your marketing data.';
+    return agentResponse.explanation || agentResponse.focus_summary || 'Here are insights based on your marketing data.';
   };
 
   const handleChatSubmit = async (e: React.FormEvent) => {
