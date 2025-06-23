@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 import { Loader2, Sparkles, Target } from 'lucide-react';
 
 const IntelligentCampaignCreator: React.FC = () => {
@@ -49,7 +50,7 @@ const IntelligentCampaignCreator: React.FC = () => {
         timeline: formData.timeline
       };
       
-      const result = await apiClient.createCampaign(campaignData);
+      const result = await apiClient.createCampaign(campaignData) as ApiResponse<any>;
       
       if (result.success && result.data) {
         toast({

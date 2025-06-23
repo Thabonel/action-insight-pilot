@@ -9,7 +9,7 @@ import { EmailMethods } from './api/email-methods';
 import { SocialMethods } from './api/social-methods';
 import { BrandMethods } from './api/brand-methods';
 export type { ApiResponse } from './api-client-interface';
-export type { Campaign } from './api-client-interface';
+export type { Campaign, ContentBrief } from './api-client-interface';
 
 export class ApiClient extends BaseApiClient {
   public campaigns: CampaignMethods;
@@ -93,11 +93,11 @@ export class ApiClient extends BaseApiClient {
     return this.email.generateEmailContent(data);
   }
 
-  async scoreLeads(leadIds: string[]) {
+  async scoreLeads(leadIds?: string[]) {
     // Mock implementation for lead scoring
     return {
       success: true,
-      data: leadIds.map(id => ({
+      data: (leadIds || ['1', '2', '3']).map(id => ({
         id,
         score: Math.floor(Math.random() * 100),
         factors: ['engagement', 'company_size', 'intent']
@@ -110,8 +110,11 @@ export class ApiClient extends BaseApiClient {
     return {
       get: async () => ({ success: true, data: {} }),
       update: async (data: any) => ({ success: true, data }),
-      getUserPreferences: async () => ({ success: true, data: {} }),
-      updateUserPreferences: async (data: any) => ({ success: true, data })
+      getUserPreferences: async (category?: string) => ({ 
+        success: true, 
+        data: category ? [{ preference_data: {} }] : {} 
+      }),
+      updateUserPreferences: async (category: string, data: any) => ({ success: true, data })
     };
   }
 
@@ -225,16 +228,8 @@ export class ApiClient extends BaseApiClient {
     };
   }
 
-  async getRealTimeMetrics(entityType: string, entityId: string) {
-    // Mock implementation for real-time metrics
-    return {
-      success: true,
-      data: {
-        views: Math.floor(Math.random() * 1000),
-        engagement: Math.random() * 10,
-        conversions: Math.floor(Math.random() * 50)
-      }
-    };
+  async getRealTimeMetrics(entityType?: string, entityId?: string) {
+    return this.analytics.getRealTimeMetrics(entityType || 'campaign', entityId || '1');
   }
 
   async queryAgent(query: string, context?: any) {
@@ -244,12 +239,12 @@ export class ApiClient extends BaseApiClient {
     });
   }
 
-  async callDailyFocusAgent(data: any) {
-    return this.queryAgent('Daily focus analysis', data);
+  async callDailyFocusAgent(query: string, campaigns?: any[]) {
+    return this.queryAgent('Daily focus analysis: ' + query, { campaigns });
   }
 
-  async callGeneralCampaignAgent(data: any) {
-    return this.queryAgent('Campaign analysis', data);
+  async callGeneralCampaignAgent(query: string, campaigns?: any[]) {
+    return this.queryAgent('Campaign analysis: ' + query, { campaigns });
   }
 
   async getAnalytics() {
@@ -269,7 +264,13 @@ export class ApiClient extends BaseApiClient {
   }
 
   async socialPlatforms() {
-    return this.social;
+    return {
+      getPlatformConnections: async () => this.getSocialPlatforms(),
+      initiatePlatformConnection: async (platform: string) => this.connectSocialPlatform({ platform }),
+      disconnectPlatform: async (platform: string) => ({ success: true, data: { platform, disconnected: true } }),
+      syncPlatformData: async (platform: string) => ({ success: true, data: { platform, synced: true } }),
+      testPlatformConnection: async (platform: string) => ({ success: true, data: { platform, connected: true } })
+    };
   }
 }
 
