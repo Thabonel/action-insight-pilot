@@ -36,6 +36,61 @@ export class ApiClient extends BaseApiClient {
     this.brand = new BrandMethods();
   }
 
+  // Content management methods
+  async createContent(data: any) {
+    return this.content.createContent(data);
+  }
+
+  async generateContent(data: any) {
+    return this.content.generateContent(data);
+  }
+
+  async repurposeContent(data: any) {
+    return this.content.repurposeContent(data);
+  }
+
+  async getContentVariants(contentId: string) {
+    return this.content.getContentVariants(contentId);
+  }
+
+  async saveContentVariant(data: any) {
+    return this.content.saveContentVariant(data);
+  }
+
+  // Campaign methods
+  async createCampaign(data: any) {
+    return this.campaigns.createCampaign(data);
+  }
+
+  async generateEmailContent(data: any) {
+    return this.email.generateEmailContent(data);
+  }
+
+  async scoreLeads(leadIds: string[]) {
+    return this.leads.scoreLeads(leadIds);
+  }
+
+  // User preferences
+  async userPreferences() {
+    return {
+      get: async () => ({ success: true, data: {} }),
+      update: async (data: any) => ({ success: true, data })
+    };
+  }
+
+  // Integration methods
+  async getConnections() {
+    return this.integrations.getConnections();
+  }
+
+  async createConnection(data: any) {
+    return this.integrations.createConnection(data);
+  }
+
+  async deleteConnection(id: string) {
+    return this.integrations.deleteConnection(id);
+  }
+
   // Legacy method compatibility
   async getCampaigns() {
     return this.campaigns.getCampaigns();

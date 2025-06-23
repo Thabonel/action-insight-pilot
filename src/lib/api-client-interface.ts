@@ -1,3 +1,4 @@
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -72,7 +73,7 @@ export interface Content {
   updated_at: string;
   user_id: string;
   platform?: string;
-  scheduled_for?: string; // Add this field
+  scheduled_for?: string;
 }
 
 export interface BlogPost {
@@ -323,4 +324,45 @@ export interface OptimizationOptions {
   ctaType?: string;
   platform?: string;
   tone?: string;
+}
+
+// Publishing Workflow Interfaces
+export interface ContentQualityScore {
+  overall_score: number;
+  seo_score: number;
+  readability_score: number;
+  accessibility_score: number;
+  legal_compliance_score: number;
+  improvement_items: string[];
+}
+
+export interface PublishingChecklist {
+  content_quality: boolean;
+  seo_optimization: boolean;
+  accessibility_compliance: boolean;
+  legal_compliance: boolean;
+  featured_image: boolean;
+  internal_links: boolean;
+  call_to_action: boolean;
+  social_promotion: boolean;
+}
+
+export interface PublishingQueue {
+  id: string;
+  content_id: string;
+  platforms: string[];
+  scheduled_time: string;
+  status: 'queued' | 'publishing' | 'published' | 'failed';
+  optimization_applied: boolean;
+  created_at: string;
+}
+
+export interface PerformanceAlert {
+  id: string;
+  content_id: string;
+  alert_type: 'low_performance' | 'high_engagement' | 'technical_issue';
+  message: string;
+  severity: 'low' | 'medium' | 'high';
+  created_at: string;
+  resolved: boolean;
 }
