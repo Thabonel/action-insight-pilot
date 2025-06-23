@@ -1,77 +1,61 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
-import { useToast } from '@/hooks/use-toast';
 
 interface AnalyticsData {
-  campaigns: any[];
-  leads: any[];
-  emailMetrics: any;
-  socialMetrics: any;
-  systemHealth: any;
+  totalUsers: number;
+  activeFeatures: string[];
+  recentActions: Array<{
+    action: string;
+    timestamp: Date;
+    feature: string;
+  }>;
+  systemHealth: {
+    status: 'healthy' | 'warning' | 'error';
+    uptime: number;
+    lastCheck: Date;
+  };
+  leads?: any[];
 }
 
 export const useAnalytics = () => {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
-    campaigns: [],
-    leads: [],
-    emailMetrics: {},
-    socialMetrics: {},
-    systemHealth: {}
-  });
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [campaignsRes, leadsRes, emailRes, socialRes, healthRes] = await Promise.all([
-        apiClient.getCampaigns(),
-        apiClient.getLeads(),
-        apiClient.getEmailAnalytics(),
-        apiClient.getSocialAnalytics(),
-        apiClient.analytics.getSystemStats()
+      // Fetch both analytics and leads data
+      const [analyticsResult, leadsResult] = await Promise.all([
+        apiClient.getAnalytics(),
+        apiClient.getLeads()
       ]);
 
-      setAnalyticsData({
-        campaigns: campaignsRes.success ? (Array.isArray(campaignsRes.data) ? campaignsRes.data : []) : [],
-        leads: leadsRes.success ? (Array.isArray(leadsRes.data) ? leadsRes.data : []) : [],
-        emailMetrics: emailRes.success ? emailRes.data : {},
-        socialMetrics: socialRes.success ? socialRes.data : {},
-        systemHealth: healthRes.success ? healthRes.data : {}
-      });
+      if (analyticsResult.success) {
+        const analyticsData = analyticsResult.data || {};
+        const leadsData = leadsResult.success ? leadsResult.data : [];
 
+        setAnalytics({
+          totalUsers: analyticsData.totalUsers || 0,
+          activeFeatures: analyticsData.activeFeatures || [],
+          recentActions: analyticsData.recentActions || [],
+          systemHealth: analyticsData.systemHealth || {
+            status: 'healthy',
+            uptime: 99.9,
+            lastCheck: new Date()
+          },
+          leads: leadsData
+        });
+      } else {
+        setError(analyticsResult.error || 'Failed to fetch analytics');
+      }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch analytics data';
-      setError(errorMessage);
-      console.error('Analytics fetch error:', err);
-      
-      toast({
-        title: "Analytics Error",
-        description: "Unable to fetch latest analytics data. Showing cached data.",
-        variant: "destructive",
-      });
+      setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const exportReport = async (format: 'pdf' | 'csv' | 'excel', timeRange: string = '30d') => {
-    try {
-      await apiClient.analytics.exportAnalyticsReport(format, timeRange);
-      toast({
-        title: "Export Successful",
-        description: `Analytics report exported as ${format.toUpperCase()}`,
-      });
-    } catch (error) {
-      toast({
-        title: "Export Failed",
-        description: "Unable to export analytics report. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -80,10 +64,9 @@ export const useAnalytics = () => {
   }, []);
 
   return {
-    analyticsData,
+    analytics,
     loading,
     error,
-    refetch: fetchAnalytics,
-    exportReport
+    refetch: fetchAnalytics
   };
 };

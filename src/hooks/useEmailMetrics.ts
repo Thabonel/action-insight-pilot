@@ -1,172 +1,40 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
+import { EmailMetrics } from '@/lib/api-client-interface';
 
-export interface EmailMetricsData {
-  total_sent: number;
-  total_delivered: number;
-  total_opened: number;
-  total_clicked: number;
-  total_bounced: number;
-  total_unsubscribed: number;
-  delivery_rate: number;
-  open_rate: number;
-  click_rate: number;
-  bounce_rate: number;
-  unsubscribe_rate: number;
-  engagement_score: number;
-  trends: Array<{
-    timestamp: string;
-    opens: number;
-    clicks: number;
-  }>;
-  insights: Array<{
-    type: string;
-    metric: string;
-    message: string;
-    recommendation: string;
-  }>;
-  last_updated: string;
-}
-
-const getDefaultMetrics = (): EmailMetricsData => ({
-  total_sent: 0,
-  total_delivered: 0,
-  total_opened: 0,
-  total_clicked: 0,
-  total_bounced: 0,
-  total_unsubscribed: 0,
-  delivery_rate: 0,
-  open_rate: 0,
-  click_rate: 0,
-  bounce_rate: 0,
-  unsubscribe_rate: 0,
-  engagement_score: 0,
-  trends: [],
-  insights: [],
-  last_updated: new Date().toISOString()
-});
-
-export function useEmailMetrics(campaignId: string, timeRange: string = '24h') {
-  const [metrics, setMetrics] = useState<EmailMetricsData | null>(null);
+export const useEmailMetrics = () => {
+  const [metrics, setMetrics] = useState<EmailMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { toast } = useToast();
 
-  useEffect(() => {
-    if (campaignId) {
-      loadMetrics();
-      startPolling();
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [campaignId, timeRange]);
-
-  const loadMetrics = async () => {
-    if (!campaignId) return;
-    
+  const fetchMetrics = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.getEmailRealTimeMetrics();
+      setError(null);
       
-      if (response.success && response.data) {
-        const apiData = response.data as Partial<EmailMetricsData>;
-        const safeMetrics: EmailMetricsData = {
-          total_sent: apiData.total_sent ?? 0,
-          total_delivered: apiData.total_delivered ?? 0,
-          total_opened: apiData.total_opened ?? 0,
-          total_clicked: apiData.total_clicked ?? 0,
-          total_bounced: apiData.total_bounced ?? 0,
-          total_unsubscribed: apiData.total_unsubscribed ?? 0,
-          delivery_rate: apiData.delivery_rate ?? 0,
-          open_rate: apiData.open_rate ?? 0,
-          click_rate: apiData.click_rate ?? 0,
-          bounce_rate: apiData.bounce_rate ?? 0,
-          unsubscribe_rate: apiData.unsubscribe_rate ?? 0,
-          engagement_score: apiData.engagement_score ?? 0,
-          trends: apiData.trends ?? [],
-          insights: apiData.insights ?? [],
-          last_updated: apiData.last_updated ?? new Date().toISOString()
-        };
-        
-        setMetrics(safeMetrics);
-        setError(null);
+      const result = await apiClient.getRealTimeMetrics();
+      
+      if (result.success && result.data) {
+        setMetrics(result.data);
       } else {
-        // Use fallback mock data if API fails
-        console.warn('API failed, using mock data');
-        setMetrics({
-          total_sent: 1250,
-          total_delivered: 1200,
-          total_opened: 480,
-          total_clicked: 96,
-          total_bounced: 50,
-          total_unsubscribed: 12,
-          delivery_rate: 96.0,
-          open_rate: 40.0,
-          click_rate: 8.0,
-          bounce_rate: 4.0,
-          unsubscribe_rate: 1.0,
-          engagement_score: 85,
-          trends: [
-            { timestamp: new Date(Date.now() - 3600000).toISOString(), opens: 120, clicks: 24 },
-            { timestamp: new Date(Date.now() - 1800000).toISOString(), opens: 180, clicks: 36 },
-            { timestamp: new Date().toISOString(), opens: 180, clicks: 36 }
-          ],
-          insights: [
-            {
-              type: 'success',
-              metric: 'open_rate',
-              message: 'Open rate is performing above average',
-              recommendation: 'Continue with current subject line strategy'
-            },
-            {
-              type: 'warning',
-              metric: 'click_rate',
-              message: 'Click-through rate could be improved',
-              recommendation: 'Consider A/B testing your call-to-action buttons'
-            }
-          ],
-          last_updated: new Date().toISOString()
-        });
-        setError(response.error || 'Failed to load metrics from API');
+        setError(result.error || 'Failed to fetch metrics');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load email metrics';
-      setError(errorMessage);
-      console.error('Error loading email metrics:', err);
-      
-      // Provide default metrics on error to prevent crashes
-      setMetrics(getDefaultMetrics());
+      setError(err instanceof Error ? err.message : 'Unknown error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const startPolling = () => {
-    // Poll for updates every 30 seconds
-    intervalRef.current = setInterval(() => {
-      loadMetrics();
-    }, 30000);
-  };
-
-  const refreshMetrics = () => {
-    loadMetrics();
-    toast({
-      title: "Metrics Refreshed",
-      description: "Email campaign metrics have been updated",
-    });
-  };
+  useEffect(() => {
+    fetchMetrics();
+  }, []);
 
   return {
     metrics,
     loading,
     error,
-    refreshMetrics
+    refetch: fetchMetrics
   };
-}
+};

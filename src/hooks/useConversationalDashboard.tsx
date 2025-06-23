@@ -1,217 +1,52 @@
+
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { behaviorTracker } from '@/lib/behavior-tracker';
-import { useQueryProcessor } from '@/hooks/useQueryProcessor';
 import { apiClient } from '@/lib/api-client';
-import { ApiResponse } from '@/lib/http-client';
 
-interface ChatMessage {
-  id: string;
-  query: string;
-  response: any;
-  timestamp: Date;
-}
-
-interface RealInsights {
-  totalUsers: number;
-  activeFeatures: string[];
-  recentActions: Array<{
-    action: string;
-    timestamp: Date;
-    feature: string;
-  }>;
-  systemHealth: {
-    status: 'healthy' | 'warning' | 'error';
-    uptime: number;
-    lastCheck: Date;
-  };
+interface ConversationalData {
+  campaigns: any[];
+  leads: any[];
+  insights: any[];
+  metrics: any;
 }
 
 export const useConversationalDashboard = () => {
-  const [query, setQuery] = useState('');
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [insights, setInsights] = useState<RealInsights>({
-    totalUsers: 0,
-    activeFeatures: [],
-    recentActions: [],
-    systemHealth: {
-      status: 'healthy',
-      uptime: 0,
-      lastCheck: new Date()
-    }
-  });
-  const [conversationContext, setConversationContext] = useState<any[]>([]);
-  const [isLoadingInsights, setIsLoadingInsights] = useState(true);
-  const { toast } = useToast();
-  const { user } = useAuth();
-  
-  const { processQueryWithRealAI } = useQueryProcessor();
+  const [data, setData] = useState<ConversationalData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    behaviorTracker.trackAction('navigation', 'conversational_dashboard', { section: 'main' });
-    loadRealInsights();
-    
-    const interval = setInterval(() => {
-      loadRealInsights();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadRealInsights = async () => {
-    if (!user) {
-      setIsLoadingInsights(false);
-      return;
-    }
-
+  const fetchData = async () => {
     try {
-      setIsLoadingInsights(true);
-      
-      // Get real system health and analytics
-      const [systemHealthResponse, campaignsResponse, leadsResponse] = await Promise.all([
-        apiClient.getSystemHealth().catch(() => ({ success: false, data: { status: 'unknown', uptime: 0 } })),
-        apiClient.getCampaigns().catch(() => ({ success: false, data: [] })),
-        apiClient.getLeads().catch(() => ({ success: false, data: [] }))
+      setLoading(true);
+      setError(null);
+
+      // Fetch all necessary data for the conversational dashboard
+      const [campaignsResult, leadsResult, analyticsResult] = await Promise.all([
+        apiClient.getCampaigns(),
+        apiClient.getLeads(),
+        apiClient.getAnalytics()
       ]);
 
-      // Extract data from API responses
-      const systemHealthData = (systemHealthResponse as ApiResponse<any>).success ? (systemHealthResponse as ApiResponse<any>).data : { status: 'unknown', uptime: 0 };
-      const campaigns = (campaignsResponse as ApiResponse<any[]>).success ? (campaignsResponse as ApiResponse<any[]>).data || [] : [];
-      const leads = (leadsResponse as ApiResponse<any[]>).success ? (leadsResponse as ApiResponse<any[]>).data || [] : [];
-
-      // Get behavior insights
-      const behaviorInsights = behaviorTracker.getInsights();
-      const recentActions = behaviorInsights.topFeatures?.slice(0, 5).map((feature, index) => ({
-        action: `Used ${feature}`,
-        timestamp: new Date(Date.now() - index * 60000), // Stagger timestamps
-        feature: feature
-      })) || [];
-
-      const realInsights: RealInsights = {
-        totalUsers: 1, // Current user count - could be expanded
-        activeFeatures: [
-          ...(campaigns.length > 0 ? ['Campaigns'] : []),
-          ...(leads.length > 0 ? ['Lead Management'] : []),
-          'AI Assistant'
-        ],
-        recentActions,
-        systemHealth: {
-          status: systemHealthData.status === 'operational' || systemHealthData.status === 'healthy' ? 'healthy' : 
-                  systemHealthData.status === 'degraded' || systemHealthData.status === 'warning' ? 'warning' : 'error',
-          uptime: systemHealthData.uptime || 0,
-          lastCheck: new Date()
-        }
-      };
-
-      setInsights(realInsights);
-    } catch (error) {
-      console.error('Failed to load real insights:', error);
-      // Set minimal fallback data on error
-      setInsights({
-        totalUsers: 0,
-        activeFeatures: ['AI Assistant'],
-        recentActions: [],
-        systemHealth: {
-          status: 'error',
-          uptime: 0,
-          lastCheck: new Date()
-        }
+      setData({
+        campaigns: campaignsResult.success ? campaignsResult.data || [] : [],
+        leads: leadsResult.success ? leadsResult.data || [] : [],
+        insights: analyticsResult.success ? analyticsResult.data?.insights || [] : [],
+        metrics: analyticsResult.success ? analyticsResult.data?.metrics || {} : {}
       });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
     } finally {
-      setIsLoadingInsights(false);
+      setLoading(false);
     }
   };
 
-  const handleQuerySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to use the AI assistant.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const actionId = behaviorTracker.trackFeatureStart('conversational_query');
-    setIsProcessing(true);
-
-    try {
-      const response = await processQueryWithRealAI(query, conversationContext);
-      
-      const newChat = {
-        id: Date.now().toString(),
-        query,
-        response,
-        timestamp: new Date(),
-      };
-
-      setChatHistory(prev => [...prev, newChat]);
-      
-      setConversationContext(prev => [...prev, 
-        { role: 'user', content: query },
-        { role: 'assistant', content: response }
-      ].slice(-10));
-      
-      setQuery('');
-      behaviorTracker.trackFeatureComplete('conversational_query', actionId, true);
-      
-      toast({
-        title: "AI Response Generated",
-        description: "Your marketing assistant has analyzed your request.",
-      });
-
-      // Refresh insights after successful query
-      loadRealInsights();
-    } catch (error) {
-      console.error('Query processing failed:', error);
-      behaviorTracker.trackFeatureComplete('conversational_query', actionId, false);
-      
-      const errorResponse = {
-        type: 'error',
-        title: 'AI Assistant Temporarily Unavailable',
-        explanation: error instanceof Error ? error.message : 'I\'m having trouble processing your request right now. Please try again in a moment.',
-        businessImpact: 'Your marketing data is safe and campaigns are still running.',
-        nextActions: ['Try rephrasing your question', 'Check back in a few minutes', 'Contact support if issue persists']
-      };
-      
-      const newChat = {
-        id: Date.now().toString(),
-        query,
-        response: errorResponse,
-        timestamp: new Date(),
-      };
-      
-      setChatHistory(prev => [...prev, newChat]);
-      
-      toast({
-        title: "Connection Error",
-        description: "Unable to connect to AI assistant. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return {
-    query,
-    setQuery,
-    chatHistory,
-    isProcessing,
-    insights: isLoadingInsights ? null : insights,
-    isLoadingInsights,
-    user,
-    handleQuerySubmit,
-    handleSuggestionClick,
-    refreshInsights: loadRealInsights
+    data,
+    loading,
+    error,
+    refetch: fetchData
   };
 };

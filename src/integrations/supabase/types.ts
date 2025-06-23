@@ -401,6 +401,7 @@ export type Database = {
           id: string
           metrics: Json | null
           name: string
+          new_column_name: string | null
           settings: Json | null
           start_date: string | null
           status: Database["public"]["Enums"]["campaign_status"] | null
@@ -420,6 +421,7 @@ export type Database = {
           id?: string
           metrics?: Json | null
           name: string
+          new_column_name?: string | null
           settings?: Json | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["campaign_status"] | null
@@ -439,6 +441,7 @@ export type Database = {
           id?: string
           metrics?: Json | null
           name?: string
+          new_column_name?: string | null
           settings?: Json | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["campaign_status"] | null
@@ -2665,6 +2668,7 @@ export type Database = {
         | "paused"
         | "completed"
         | "cancelled"
+        | "archived"
       campaign_type: "email" | "social" | "content" | "paid_ads" | "partnership"
       company_size: "1-10" | "11-50" | "51-200" | "201-1000" | "1000+"
       confidence_level: "low" | "medium" | "high"
@@ -2837,6 +2841,7 @@ export const Constants = {
         "paused",
         "completed",
         "cancelled",
+        "archived",
       ],
       campaign_type: ["email", "social", "content", "paid_ads", "partnership"],
       company_size: ["1-10", "11-50", "51-200", "201-1000", "1000+"],
