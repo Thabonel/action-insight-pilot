@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -92,7 +93,7 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
             <div>
               <p className="text-sm text-gray-600">Emails Sent</p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatNumber(metrics.total_sent || metrics.totalSent || 0)}
+                {formatNumber(metrics.totalSent || 0)}
               </p>
             </div>
           </div>
@@ -105,12 +106,12 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
             <div>
               <p className="text-sm text-gray-600">Opens</p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatNumber(metrics.total_opened || metrics.totalOpened || 0)}
+                {formatNumber(metrics.opened || 0)}
               </p>
               <p className="text-sm text-green-600">
                 {calculateRate(
-                  metrics.total_opened || metrics.totalOpened || 0,
-                  metrics.total_sent || metrics.totalSent || 0
+                  metrics.opened || 0,
+                  metrics.totalSent || 0
                 )}% open rate
               </p>
             </div>
@@ -124,12 +125,12 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
             <div>
               <p className="text-sm text-gray-600">Clicks</p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatNumber(metrics.total_clicked || metrics.totalClicks || 0)}
+                {formatNumber(metrics.clicked || 0)}
               </p>
               <p className="text-sm text-purple-600">
                 {calculateRate(
-                  metrics.total_clicked || metrics.totalClicks || 0,
-                  metrics.total_sent || metrics.totalSent || 0
+                  metrics.clicked || 0,
+                  metrics.totalSent || 0
                 )}% click rate
               </p>
             </div>

@@ -1,337 +1,397 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar, Clock, Target, Zap, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { useToast } from '@/hooks/use-toast';
 import { SocialPost } from '@/lib/api-client-interface';
-import { 
-  Calendar, 
-  Clock, 
-  Send, 
-  Image,
-  Hash,
-  Users,
-  TrendingUp,
-  Plus,
-  X
-} from 'lucide-react';
 
-const IntelligentPostScheduler: React.FC = () => {
-  const [post, setPost] = useState<Partial<SocialPost>>({
+interface IntelligentPostSchedulerProps {
+  onPostScheduled?: (post: SocialPost) => void;
+}
+
+const IntelligentPostScheduler: React.FC<IntelligentPostSchedulerProps> = ({ onPostScheduled }) => {
+  const [postData, setPostData] = useState<Partial<SocialPost>>({
     content: '',
-    platform: 'twitter',
-    scheduled_time: '',
-    status: 'draft'
+    platform: '',
+    scheduledTime: '',
+    status: 'draft',
   });
-  const [customTags, setCustomTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [optimalTimes, setOptimalTimes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [schedulingPost, setSchedulingPost] = useState(false);
+  const [generatingContent, setGeneratingContent] = useState(false);
   const { toast } = useToast();
 
   const platforms = [
-    { id: 'twitter', name: 'Twitter', icon: '🐦', color: 'bg-blue-500' },
-    { id: 'facebook', name: 'Facebook', icon: '📘', color: 'bg-blue-600' },
-    { id: 'instagram', name: 'Instagram', icon: '📷', color: 'bg-pink-500' },
-    { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: 'bg-blue-700' },
+    { id: 'twitter', name: 'Twitter', icon: '🐦' },
+    { id: 'facebook', name: 'Facebook', icon: '📘' },
+    { id: 'instagram', name: 'Instagram', icon: '📸' },
+    { id: 'linkedin', name: 'LinkedIn', icon: '💼' },
+    { id: 'tiktok', name: 'TikTok', icon: '🎵' },
   ];
 
-  const suggestedTags = [
-    'marketing', 'socialmedia', 'business', 'entrepreneur', 
-    'digitalmarketing', 'branding', 'startup', 'innovation'
-  ];
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!post.content?.trim()) {
-      toast({
-        title: "Content required",
-        description: "Please enter content for your post",
-        variant: "destructive",
-      });
-      return;
+  useEffect(() => {
+    if (postData.platform) {
+      fetchOptimalTimes();
     }
+  }, [postData.platform]);
 
-    setLoading(true);
+  const fetchOptimalTimes = async () => {
     try {
-      const result = await apiClient.createSocialPost({
-        ...post,
-        tags: customTags
-      });
-
-      if (result.success) {
-        toast({
-          title: "Post scheduled",
-          description: "Your social media post has been scheduled successfully",
-        });
-        
-        // Reset form
-        setPost({
-          content: '',
-          platform: 'twitter',
-          scheduled_time: '',
-          status: 'draft'
-        });
-        setCustomTags([]);
-      } else {
-        throw new Error(result.error || 'Failed to schedule post');
-      }
+      setLoading(true);
+      // Mock optimal times - in real app, this would come from analytics
+      const mockOptimalTimes = [
+        '2024-01-15T10:00:00Z',
+        '2024-01-15T14:30:00Z',
+        '2024-01-15T18:00:00Z',
+        '2024-01-16T09:00:00Z',
+        '2024-01-16T12:00:00Z',
+      ];
+      setOptimalTimes(mockOptimalTimes);
     } catch (error) {
-      toast({
-        title: "Scheduling failed",
-        description: error instanceof Error ? error.message : "Failed to schedule post",
-        variant: "destructive",
-      });
+      console.error('Failed to fetch optimal times:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const addTag = (tag: string) => {
-    if (tag && !customTags.includes(tag)) {
-      setCustomTags([...customTags, tag]);
+  const generateAIContent = async () => {
+    if (!postData.platform) {
+      toast({
+        title: "Platform Required",
+        description: "Please select a platform first",
+        variant: "destructive",
+      });
+      return;
     }
-    setNewTag('');
-  };
 
-  const removeTag = (tag: string) => {
-    setCustomTags(customTags.filter(t => t !== tag));
-  };
+    try {
+      setGeneratingContent(true);
+      const response = await apiClient.generateSocialContent(
+        postData.platform,
+        'engaging content',
+        'professional'
+      );
 
-  const getCharacterCount = () => {
-    return post.content?.length || 0;
-  };
+      if (response.success && response.data) {
+        const suggestions = Array.isArray(response.data) ? response.data : [response.data.content];
+        setAiSuggestions(suggestions);
+        
+        // Set the first suggestion as the content
+        if (suggestions.length > 0) {
+          setPostData(prev => ({ ...prev, content: suggestions[0] }));
+        }
 
-  const getCharacterLimit = () => {
-    switch (post.platform) {
-      case 'twitter': return 280;
-      case 'facebook': return 63206;
-      case 'instagram': return 2200;
-      case 'linkedin': return 3000;
-      default: return 280;
+        toast({
+          title: "Content Generated",
+          description: "AI has generated content suggestions for your post",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to generate content:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate AI content",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingContent(false);
     }
   };
 
-  const isOverLimit = () => {
-    return getCharacterCount() > getCharacterLimit();
+  const schedulePost = async () => {
+    if (!postData.content || !postData.platform || !postData.scheduledTime) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSchedulingPost(true);
+      const response = await apiClient.createSocialPost({
+        ...postData,
+        status: 'scheduled',
+      });
+
+      if (response.success && response.data) {
+        toast({
+          title: "Post Scheduled",
+          description: `Your post has been scheduled for ${new Date(postData.scheduledTime).toLocaleString()}`,
+        });
+
+        if (onPostScheduled) {
+          onPostScheduled(response.data);
+        }
+
+        // Reset form
+        setPostData({
+          content: '',
+          platform: '',
+          scheduledTime: '',
+          status: 'draft',
+        });
+        setAiSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Failed to schedule post:', error);
+      toast({
+        title: "Scheduling Failed",
+        description: "Failed to schedule your post",
+        variant: "destructive",
+      });
+    } finally {
+      setSchedulingPost(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof SocialPost, value: string) => {
+    setPostData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const selectOptimalTime = (time: string) => {
+    setPostData(prev => ({ ...prev, scheduledTime: time }));
+  };
+
+  const applySuggestion = (suggestion: string) => {
+    setPostData(prev => ({ ...prev, content: suggestion }));
+  };
+
+  const formatDateTime = (dateTimeString: string) => {
+    if (!dateTimeString) return '';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString();
+  };
+
+  const handleScheduledTimeChange = (value: string) => {
+    setPostData(prev => ({ ...prev, scheduledTime: value }));
+  };
+
+  const handleDateTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value) {
+      // Convert local datetime to ISO string
+      const date = new Date(value);
+      setPostData(prev => ({ ...prev, scheduledTime: date.toISOString() }));
+    }
+  };
+
+  const getLocalDateTimeValue = () => {
+    if (!postData.scheduledTime) return '';
+    const date = new Date(postData.scheduledTime);
+    return date.toISOString().slice(0, 16); // Format for datetime-local input
+  };
+
+  const publishNow = async () => {
+    if (!postData.content || !postData.platform) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in content and select a platform",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSchedulingPost(true);
+      const response = await apiClient.createSocialPost({
+        ...postData,
+        scheduledTime: new Date().toISOString(),
+        status: 'published',
+      });
+
+      if (response.success && response.data) {
+        toast({
+          title: "Post Published",
+          description: "Your post has been published successfully",
+        });
+
+        if (onPostScheduled) {
+          onPostScheduled(response.data);
+        }
+
+        // Reset form
+        setPostData({
+          content: '',
+          platform: '',
+          scheduledTime: '',
+          status: 'draft',
+        });
+        setAiSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Failed to publish post:', error);
+      toast({
+        title: "Publishing Failed",
+        description: "Failed to publish your post",
+        variant: "destructive",
+      });
+    } finally {
+      setSchedulingPost(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Intelligent Post Scheduler</h2>
-        <p className="text-gray-600">Create and schedule social media posts across platforms</p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5" />
-            <span>Create New Post</span>
+            <Target className="h-5 w-5" />
+            <span>Intelligent Post Scheduler</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Platform Selection */}
-            <div>
-              <Label>Select Platform</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
+        <CardContent className="space-y-4">
+          {/* Platform Selection */}
+          <div>
+            <Label htmlFor="platform">Platform</Label>
+            <Select value={postData.platform} onValueChange={(value) => handleInputChange('platform', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a platform" />
+              </SelectTrigger>
+              <SelectContent>
                 {platforms.map((platform) => (
-                  <button
-                    key={platform.id}
-                    type="button"
-                    onClick={() => setPost({ ...post, platform: platform.id })}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
-                      post.platform === platform.id
-                        ? `${platform.color} text-white`
-                        : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                    }`}
-                  >
-                    <span>{platform.icon}</span>
-                    <span>{platform.name}</span>
-                  </button>
+                  <SelectItem key={platform.id} value={platform.id}>
+                    <div className="flex items-center space-x-2">
+                      <span>{platform.icon}</span>
+                      <span>{platform.name}</span>
+                    </div>
+                  </SelectItem>
                 ))}
-              </div>
-            </div>
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Content Input */}
-            <div>
-              <Label htmlFor="content">Post Content</Label>
-              <Textarea
-                id="content"
-                value={post.content || ''}
-                onChange={(e) => setPost({ ...post, content: e.target.value })}
-                placeholder="What's on your mind?"
-                className="mt-2 min-h-32"
-                rows={4}
-              />
-              <div className="flex justify-between items-center mt-1">
-                <div className="text-sm text-gray-500">
-                  {getCharacterCount()} / {getCharacterLimit()} characters
-                </div>
-                {isOverLimit() && (
-                  <Badge variant="destructive">Character limit exceeded</Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Tags Section */}
-            <div>
-              <Label>Tags</Label>
-              <div className="space-y-3 mt-2">
-                {/* Current Tags */}
-                {customTags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {customTags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="flex items-center space-x-1">
-                        <Hash className="h-3 w-3" />
-                        <span>{tag}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 hover:text-red-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add Custom Tag */}
-                <div className="flex space-x-2">
-                  <Input
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    placeholder="Add custom tag"
-                    className="flex-1"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addTag(newTag);
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => addTag(newTag)}
-                    disabled={!newTag.trim()}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Suggested Tags */}
-                <div>
-                  <Label className="text-sm">Suggested Tags</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {suggestedTags
-                      .filter(tag => !customTags.includes(tag))
-                      .map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => addTag(tag)}
-                          className="text-sm px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-                        >
-                          #{tag}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Schedule Time */}
-            <div>
-              <Label htmlFor="scheduled_time">Schedule Time (Optional)</Label>
-              <Input
-                id="scheduled_time"
-                type="datetime-local"
-                value={post.scheduled_time || ''}
-                onChange={(e) => setPost({ ...post, scheduled_time: e.target.value })}
-                className="mt-2"
-              />
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex space-x-3">
+          {/* Content Input */}
+          <div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="content">Content</Label>
               <Button
-                type="submit"
-                disabled={loading || !post.content?.trim() || isOverLimit()}
-                className="flex-1"
+                variant="outline"
+                size="sm"
+                onClick={generateAIContent}
+                disabled={generatingContent || !postData.platform}
               >
-                {loading ? (
-                  'Scheduling...'
-                ) : post.scheduled_time ? (
+                {generatingContent ? (
                   <>
-                    <Clock className="h-4 w-4 mr-2" />
-                    Schedule Post
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
                   </>
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Post Now
+                    <Zap className="h-4 w-4 mr-2" />
+                    AI Generate
                   </>
                 )}
               </Button>
-              
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setPost({ ...post, status: 'draft' })}
-              >
-                Save Draft
-              </Button>
             </div>
-          </form>
+            <Textarea
+              id="content"
+              value={postData.content}
+              onChange={(e) => handleInputChange('content', e.target.value)}
+              placeholder="Write your post content here..."
+              className="min-h-[100px]"
+            />
+          </div>
+
+          {/* AI Suggestions */}
+          {aiSuggestions.length > 0 && (
+            <div>
+              <Label>AI Content Suggestions</Label>
+              <div className="space-y-2 mt-2">
+                {aiSuggestions.map((suggestion, index) => (
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-700 mb-2">{suggestion}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applySuggestion(suggestion)}
+                    >
+                      Use This
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Scheduling */}
+          <div>
+            <Label htmlFor="scheduled-time">Schedule Time</Label>
+            <Input
+              id="scheduled-time"
+              type="datetime-local"
+              value={getLocalDateTimeValue()}
+              onChange={handleDateTimeInputChange}
+              className="mt-1"
+            />
+          </div>
+
+          {/* Optimal Times */}
+          {optimalTimes.length > 0 && (
+            <div>
+              <Label>Optimal Posting Times</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {optimalTimes.map((time, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => selectOptimalTime(time)}
+                    className="text-sm"
+                  >
+                    <Clock className="h-4 w-4 mr-1" />
+                    {formatDateTime(time)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex space-x-2">
+            <Button
+              onClick={schedulePost}
+              disabled={schedulingPost || !postData.content || !postData.platform || !postData.scheduledTime}
+              className="flex-1"
+            >
+              {schedulingPost ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule Post
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={publishNow}
+              disabled={schedulingPost || !postData.content || !postData.platform}
+            >
+              {schedulingPost ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                'Publish Now'
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <Users className="h-8 w-8 text-blue-600" />
-              <div>
-                <div className="text-2xl font-bold">12.5K</div>
-                <div className="text-sm text-gray-600">Total Followers</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <TrendingUp className="h-8 w-8 text-green-600" />
-              <div>
-                <div className="text-2xl font-bold">3.2%</div>
-                <div className="text-sm text-gray-600">Engagement Rate</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <Calendar className="h-8 w-8 text-purple-600" />
-              <div>
-                <div className="text-2xl font-bold">8</div>
-                <div className="text-sm text-gray-600">Scheduled Posts</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
