@@ -2,127 +2,71 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 
-interface ConversationContext {
-  userId: string;
-  sessionId: string;
-  previousMessages: Array<{ role: string; content: string }>;
-  userPreferences?: any;
+export interface ConversationalQuery {
+  query: string;
+  context?: any;
+  sessionId?: string;
+}
+
+export interface ConversationalResponse {
+  response: string;
+  suggestions?: string[];
+  followUp?: string[];
+  metadata?: any;
 }
 
 export class ConversationalService {
-  async processConversation(
-    message: string,
-    context: ConversationContext
-  ): Promise<ApiResponse<{ response: string; suggestions?: string[] }>> {
+  async processQuery(queryData: ConversationalQuery): Promise<ApiResponse<ConversationalResponse>> {
     try {
-      console.log('Processing conversation:', { message, context });
+      const result = await apiClient.queryAgent(queryData.query, queryData.context);
       
-      const result = await apiClient.queryAgent(message, context) as ApiResponse<any>;
-      
-      if (result.success) {
+      if (result.success && result.data) {
         return {
           success: true,
           data: {
-            response: result.data?.message || 'I understand your message.',
-            suggestions: result.data?.suggestions || [
+            response: result.data.response,
+            suggestions: [
               'Tell me more about this',
-              'What are the next steps?',
-              'Can you provide examples?'
+              'Show me related metrics',
+              'What are the next steps?'
+            ],
+            followUp: [
+              'Would you like to see detailed analytics?',
+              'Should I create a report for this?'
             ]
           }
         };
-      } else {
-        return {
-          success: false,
-          error: 'Failed to process conversation'
-        };
       }
-    } catch (error) {
-      console.error('Error processing conversation:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to process conversation'
-      };
-    }
-  }
-
-  async getDashboardInsights(userId: string): Promise<ApiResponse<any>> {
-    try {
-      console.log('Getting dashboard insights for user:', userId);
       
-      const mockInsights = {
-        totalActions: 15,
-        recentActivities: [
-          { type: 'email_sent', message: 'Campaign email sent successfully', timestamp: new Date() },
-          { type: 'lead_scored', message: 'New lead scored 85 points', timestamp: new Date() }
-        ],
-        suggestions: [
-          'Review your email campaign performance',
-          'Update lead scoring criteria',
-          'Schedule social media posts'
-        ],
-        trends: {
-          positive: 8,
-          negative: 2,
-          neutral: 5
-        }
-      };
-
-      return {
-        success: true,
-        data: mockInsights
-      };
+      return result as ApiResponse<ConversationalResponse>;
     } catch (error) {
-      console.error('Error getting dashboard insights:', error);
+      console.error('Error processing conversational query:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to get insights'
+        error: error instanceof Error ? error.message : 'Failed to process query'
       };
     }
   }
 
-  async generateResponse(query: string, context?: any): Promise<ApiResponse<{ message: string }>> {
-    try {
-      console.log('Generating response for query:', query);
-      
-      // Mock response generation
-      const responses = [
-        'Based on your data, I recommend focusing on email engagement.',
-        'Your lead scoring appears to be working well. Consider expanding criteria.',
-        'Social media performance shows room for improvement in posting frequency.',
-        'Campaign metrics suggest your audience prefers morning send times.'
-      ];
-
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-
-      return {
-        success: true,
-        data: { message: randomResponse }
-      };
-    } catch (error) {
-      console.error('Error generating response:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to generate response'
-      };
-    }
+  async generateSuggestions(context: any): Promise<string[]> {
+    return [
+      'How can I improve my campaign performance?',
+      'What are my best performing content pieces?',
+      'Show me lead conversion trends',
+      'Help me optimize my email campaigns'
+    ];
   }
 
-  // Static methods for backward compatibility
-  static async getAuthToken(): Promise<string> {
-    return 'mock-auth-token';
-  }
-
-  static async fetchCampaignData(authToken: string): Promise<any[]> {
-    return [];
-  }
-
-  static async callDailyFocusAgent(query: string, campaignData: any[], context: any[], authToken: string): Promise<any> {
-    return { message: 'Daily focus response' };
-  }
-
-  static async callGeneralCampaignAgent(query: string, campaignData: any[], context: any[], authToken: string): Promise<any> {
-    return { message: 'General campaign response' };
+  async processFollowUp(previousQuery: string, followUpQuery: string): Promise<ApiResponse<ConversationalResponse>> {
+    const context = {
+      previousQuery,
+      isFollowUp: true
+    };
+    
+    return this.processQuery({
+      query: followUpQuery,
+      context
+    });
   }
 }
 

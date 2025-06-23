@@ -5,7 +5,7 @@ import { ApiResponse } from '@/lib/api-client-interface';
 export class SocialApi {
   async getPosts() {
     try {
-      const socialMethods = await apiClient.socialPlatforms();
+      const socialMethods = apiClient.socialPlatforms;
       const result = await socialMethods.getSocialMediaPosts();
       return result;
     } catch (error) {
@@ -16,7 +16,7 @@ export class SocialApi {
 
   async createPost(postData: any) {
     try {
-      const socialMethods = await apiClient.socialPlatforms();
+      const socialMethods = apiClient.socialPlatforms;
       const result = await socialMethods.createSocialPost(postData);
       return result;
     } catch (error) {
@@ -27,7 +27,7 @@ export class SocialApi {
 
   async getAnalytics() {
     try {
-      const socialMethods = await apiClient.socialPlatforms();
+      const socialMethods = apiClient.socialPlatforms;
       const result = await socialMethods.getSocialAnalytics();
       return result;
     } catch (error) {
@@ -38,7 +38,7 @@ export class SocialApi {
 
   async generateContent(brief: any) {
     try {
-      const socialMethods = await apiClient.socialPlatforms();
+      const socialMethods = apiClient.socialPlatforms;
       const result = await socialMethods.generateSocialContent(brief);
       return result;
     } catch (error) {

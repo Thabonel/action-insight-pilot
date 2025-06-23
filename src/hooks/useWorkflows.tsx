@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
-import type { Workflow, WorkflowMethods } from '@/lib/api-client';
-import { ApiResponse } from '@/lib/api-client-interface';
+import type { Workflow, ApiResponse } from '@/lib/api-client-interface';
 
 export const useWorkflows = () => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
@@ -12,7 +11,7 @@ export const useWorkflows = () => {
   const fetchWorkflows = async () => {
     try {
       setLoading(true);
-      const workflowMethods = await apiClient.workflows();
+      const workflowMethods = apiClient.workflows;
       const result = await workflowMethods.getAll() as ApiResponse<Workflow[]>;
       
       if (result.success && result.data) {
@@ -30,7 +29,7 @@ export const useWorkflows = () => {
   const createWorkflow = async (workflow: Partial<Workflow>) => {
     try {
       setLoading(true);
-      const workflowMethods = await apiClient.workflows();
+      const workflowMethods = apiClient.workflows;
       const result = await workflowMethods.create(workflow) as ApiResponse<Workflow>;
       
       if (result.success && result.data) {
@@ -51,7 +50,7 @@ export const useWorkflows = () => {
   const updateWorkflow = async (id: string, workflow: Partial<Workflow>) => {
     try {
       setLoading(true);
-      const workflowMethods = await apiClient.workflows();
+      const workflowMethods = apiClient.workflows;
       const result = await workflowMethods.update(id, workflow) as ApiResponse<Workflow>;
       
       if (result.success && result.data) {
@@ -72,7 +71,7 @@ export const useWorkflows = () => {
   const deleteWorkflow = async (id: string) => {
     try {
       setLoading(true);
-      const workflowMethods = await apiClient.workflows();
+      const workflowMethods = apiClient.workflows;
       const result = await workflowMethods.delete(id) as ApiResponse<void>;
       
       if (result.success) {
@@ -93,7 +92,7 @@ export const useWorkflows = () => {
   const executeWorkflow = async (id: string, input?: any) => {
     try {
       setLoading(true);
-      const workflowMethods = await apiClient.workflows();
+      const workflowMethods = apiClient.workflows;
       const result = await workflowMethods.execute(id, input) as ApiResponse<any>;
       
       if (result.success) {
