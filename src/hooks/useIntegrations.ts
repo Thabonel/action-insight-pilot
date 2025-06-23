@@ -15,8 +15,9 @@ export const useIntegrations = () => {
       const result = await apiClient.integrations.getConnections();
       if (result.success && result.data) {
         setConnections(result.data);
+        setError(null);
       } else {
-        setError(result.error || 'Failed to fetch connections');
+        setError('Failed to fetch connections');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -31,7 +32,7 @@ export const useIntegrations = () => {
       if (result.success && result.data) {
         setWebhooks(result.data);
       } else {
-        setError(result.error || 'Failed to fetch webhooks');
+        setError('Failed to fetch webhooks');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -46,7 +47,7 @@ export const useIntegrations = () => {
         await fetchConnections();
         return { success: true };
       } else {
-        const errorMsg = result.error || 'Failed to connect service';
+        const errorMsg = 'Failed to connect service';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
@@ -67,7 +68,7 @@ export const useIntegrations = () => {
         await fetchConnections();
         return { success: true };
       } else {
-        const errorMsg = result.error || 'Failed to sync service';
+        const errorMsg = 'Failed to sync service';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
@@ -88,7 +89,7 @@ export const useIntegrations = () => {
         await fetchConnections();
         return { success: true };
       } else {
-        const errorMsg = result.error || 'Failed to disconnect service';
+        const errorMsg = 'Failed to disconnect service';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
@@ -109,7 +110,7 @@ export const useIntegrations = () => {
         await fetchWebhooks();
         return { success: true, data: result.data };
       } else {
-        const errorMsg = result.error || 'Failed to create webhook';
+        const errorMsg = 'Failed to create webhook';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
@@ -130,7 +131,7 @@ export const useIntegrations = () => {
         await fetchWebhooks();
         return { success: true };
       } else {
-        const errorMsg = result.error || 'Failed to delete webhook';
+        const errorMsg = 'Failed to delete webhook';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
@@ -150,7 +151,7 @@ export const useIntegrations = () => {
       if (result.success) {
         return { success: true };
       } else {
-        const errorMsg = result.error || 'Failed to test webhook';
+        const errorMsg = 'Failed to test webhook';
         setError(errorMsg);
         return { success: false, error: errorMsg };
       }
@@ -163,7 +164,6 @@ export const useIntegrations = () => {
     }
   };
 
-  // Add the missing refreshIntegrations method
   const refreshIntegrations = async () => {
     await fetchConnections();
     await fetchWebhooks();
@@ -185,7 +185,7 @@ export const useIntegrations = () => {
     createWebhook,
     deleteWebhook,
     testWebhook,
-    refreshIntegrations, // Add this method
+    refreshIntegrations,
     refetch: () => {
       fetchConnections();
       fetchWebhooks();

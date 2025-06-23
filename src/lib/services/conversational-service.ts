@@ -15,7 +15,6 @@ export interface ConversationalResponse {
 }
 
 export class ConversationalService {
-  // Updated method signatures to match expected usage
   static async getAuthToken(): Promise<string> {
     return 'mock-auth-token';
   }
@@ -25,24 +24,14 @@ export class ConversationalService {
     return result.data || [];
   }
 
-  static async callDailyFocusAgent(
-    userQuery: string, 
-    campaignData?: any[], 
-    context?: any[], 
-    authToken?: string
-  ): Promise<ApiResponse<any>> {
+  static async callDailyFocusAgent(userQuery: string): Promise<ApiResponse<any>> {
     return {
       success: true,
       data: { response: `Daily focus response to: ${userQuery}` }
     };
   }
 
-  static async callGeneralCampaignAgent(
-    userQuery: string, 
-    campaignData?: any[], 
-    context?: any[], 
-    authToken?: string
-  ): Promise<ApiResponse<any>> {
+  static async callGeneralCampaignAgent(userQuery: string): Promise<ApiResponse<any>> {
     return {
       success: true,
       data: { response: `Campaign agent response to: ${userQuery}` }
@@ -57,7 +46,7 @@ export class ConversationalService {
         return {
           success: true,
           data: {
-            response: result.data.response,
+            response: result.data.message,
             suggestions: [
               'Tell me more about this',
               'Show me related metrics',

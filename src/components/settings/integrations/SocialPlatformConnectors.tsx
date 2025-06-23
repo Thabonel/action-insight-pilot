@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,8 +16,7 @@ const SocialPlatformConnectors: React.FC = () => {
   const fetchConnections = async () => {
     try {
       setLoading(true);
-      const socialPlatforms = await apiClient.socialPlatforms();
-      const result = await socialPlatforms.getPlatformConnections() as ApiResponse<SocialPlatformConnection[]>;
+      const result = await apiClient.socialPlatforms.getPlatformConnections() as ApiResponse<SocialPlatformConnection[]>;
       
       if (result.success && result.data) {
         setConnections(result.data);
@@ -36,8 +34,7 @@ const SocialPlatformConnectors: React.FC = () => {
   const handleConnect = async (platform: string) => {
     try {
       setActionLoading(platform);
-      const socialPlatforms = await apiClient.socialPlatforms();
-      const result = await socialPlatforms.initiatePlatformConnection(platform) as ApiResponse<any>;
+      const result = await apiClient.socialPlatforms.initiatePlatformConnection(platform) as ApiResponse<any>;
       
       if (result.success) {
         toast({
@@ -62,8 +59,7 @@ const SocialPlatformConnectors: React.FC = () => {
   const handleDisconnect = async (platform: string) => {
     try {
       setActionLoading(platform);
-      const socialPlatforms = await apiClient.socialPlatforms();
-      await socialPlatforms.disconnectPlatform(platform);
+      await apiClient.socialPlatforms.disconnectPlatform(platform);
       
       toast({
         title: "Platform Disconnected",
@@ -84,8 +80,7 @@ const SocialPlatformConnectors: React.FC = () => {
   const handleSync = async (platform: string) => {
     try {
       setActionLoading(`sync-${platform}`);
-      const socialPlatforms = await apiClient.socialPlatforms();
-      await socialPlatforms.syncPlatformData(platform);
+      await apiClient.socialPlatforms.syncPlatformData(platform);
       
       toast({
         title: "Sync Complete",
@@ -106,8 +101,7 @@ const SocialPlatformConnectors: React.FC = () => {
   const handleTest = async (platform: string) => {
     try {
       setActionLoading(`test-${platform}`);
-      const socialPlatforms = await apiClient.socialPlatforms();
-      await socialPlatforms.testPlatformConnection(platform);
+      await apiClient.socialPlatforms.testPlatformConnection(platform);
       
       toast({
         title: "Connection Test Successful",

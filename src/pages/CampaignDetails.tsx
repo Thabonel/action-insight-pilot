@@ -20,7 +20,7 @@ const CampaignDetails: React.FC = () => {
     name: '',
     description: '',
     type: 'email',
-    status: 'draft' as const
+    status: 'draft' as Campaign['status']
   });
 
   useEffect(() => {
@@ -177,7 +177,7 @@ const CampaignDetails: React.FC = () => {
                 <label className="block text-sm font-medium mb-1">Status</label>
                 <select
                   value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value as Campaign['status'])}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="draft">Draft</option>
