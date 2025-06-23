@@ -23,7 +23,7 @@ export class MCPService {
           name: conn.name,
           type: conn.type,
           status: conn.status === 'connected' ? 'connected' : 'disconnected',
-          description: `${conn.type} integration`,
+          description: conn.service_name || `${conn.type} integration`,
           config: conn.config
         }));
         
@@ -33,7 +33,7 @@ export class MCPService {
         };
       }
       
-      return result;
+      return result as ApiResponse<MCPConnector[]>;
     } catch (error) {
       console.error('Error getting MCP connectors:', error);
       return {
@@ -45,9 +45,6 @@ export class MCPService {
 
   async createConnector(data: Partial<MCPConnector>): Promise<ApiResponse<MCPConnector>> {
     try {
-      const integrationMethods = apiClient.integrations;
-      const result = await integrationMethods.getConnections(); // Using mock for now
-      
       const newConnector: MCPConnector = {
         id: 'mcp-' + Date.now(),
         name: data.name || 'New Connector',
@@ -72,8 +69,6 @@ export class MCPService {
 
   async deleteConnector(id: string): Promise<ApiResponse<void>> {
     try {
-      const integrationMethods = apiClient.integrations;
-      // Using mock implementation for now
       return {
         success: true,
         data: undefined

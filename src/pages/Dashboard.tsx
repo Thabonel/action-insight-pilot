@@ -1,81 +1,185 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
-import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
-import PerformanceChart from '@/components/dashboard/PerformanceChart';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Users, 
+  TrendingUp, 
+  Mail, 
+  BarChart3, 
+  Calendar,
+  DollarSign,
+  Target,
+  MessageSquare
+} from 'lucide-react';
 import EnhancedChatInterface from '@/components/dashboard/EnhancedChatInterface';
-import { RealInsights } from '@/types/insights';
+import { useEmailMetrics } from '@/hooks/useEmailMetrics';
+import { useRealTimeMetrics } from '@/hooks/useRealTimeMetrics';
+import { ChatMessage } from '@/lib/api-client-interface';
 
 const Dashboard: React.FC = () => {
-  // Mock dashboard data for the PerformanceChart
-  const mockDashboardData = {
-    analytics: {},
-    campaigns: {},
-    leads: {},
-    email: {},
-    social: {},
-    systemStats: {}
-  };
+  const { metrics: emailMetrics, loading: emailLoading } = useEmailMetrics();
+  const { metrics: realTimeMetrics, loading: realTimeLoading } = useRealTimeMetrics();
+  
+  // Chat interface state
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [query, setQuery] = useState('');
 
-  // Mock insights for QuickActionGrid - matches RealInsights interface
-  const mockInsights: RealInsights = {
-    totalActions: 1,
-    recentActivities: [
-      {
-        type: 'dashboard_visit',
-        message: 'Visited marketing dashboard',
-        timestamp: new Date()
-      }
-    ],
-    suggestions: ['Set up your first campaign', 'Connect your email platform', 'Review analytics'],
-    trends: {
-      positive: 1,
-      negative: 0,
-      neutral: 0
+  const handleQuerySubmit = async (query: string) => {
+    setIsProcessing(true);
+    try {
+      // Add user message
+      const userMessage: ChatMessage = {
+        id: 'user-' + Date.now(),
+        role: 'user',
+        content: query,
+        timestamp: new Date(),
+        query: query,
+        response: ''
+      };
+      
+      setChatHistory(prev => [...prev, userMessage]);
+      
+      // Simulate AI response
+      setTimeout(() => {
+        const aiMessage: ChatMessage = {
+          id: 'ai-' + Date.now(),
+          role: 'assistant',
+          content: `I understand you're asking about: "${query}". Here's what I can help you with...`,
+          timestamp: new Date(),
+          query: '',
+          response: `I understand you're asking about: "${query}". Here's what I can help you with...`
+        };
+        
+        setChatHistory(prev => [...prev, aiMessage]);
+        setIsProcessing(false);
+      }, 1000);
+    } catch (error) {
+      setIsProcessing(false);
     }
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuery(suggestion);
+  };
+
+  // Mock user data
+  const user = {
+    email: 'user@example.com',
+    name: 'Demo User'
+  };
+
+  const totalRevenue = 45231.89;
+  const activeCampaigns = 12;
+  const activeUsers = 2350;
+
+  const revenueChange = 20.1;
+  const campaignsChange = 2;
+  const usersChange = 180;
+
   return (
-    <div className="space-y-8 p-6 bg-white min-h-screen">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-black">Marketing Dashboard</h1>
-        <p className="text-gray-600 mt-2">
-          Monitor your campaigns, analyze performance, and optimize your marketing strategy.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-1">Welcome back! Here's your marketing overview.</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button variant="outline">
+              <Calendar className="h-4 w-4 mr-2" />
+              Last 30 days
+            </Button>
+            <Button>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              AI Assistant
+            </Button>
+          </div>
+        </div>
 
-      {/* System Overview Cards */}
-      <SystemOverviewCards />
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Performance Chart */}
-        <Card className="border-gray-200 shadow-sm bg-white">
+        {/* Enhanced Chat Interface */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-black">Performance Overview</CardTitle>
+            <CardTitle className="flex items-center">
+              <MessageSquare className="h-5 w-5 mr-2" />
+              AI Marketing Assistant
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <PerformanceChart dashboardData={mockDashboardData} />
+            <EnhancedChatInterface
+              chatHistory={chatHistory}
+              isProcessing={isProcessing}
+              query={query}
+              setQuery={setQuery}
+              handleQuerySubmit={handleQuerySubmit}
+              handleSuggestionClick={handleSuggestionClick}
+              user={user}
+            />
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <Card className="border-gray-200 shadow-sm bg-white">
-          <CardHeader>
-            <CardTitle className="text-black">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <QuickActionGrid insights={mockInsights} />
-          </CardContent>
-        </Card>
-      </div>
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">
+                +{revenueChange}% from last month
+              </p>
+            </CardContent>
+          </Card>
 
-      {/* Enhanced AI Chat Interface */}
-      <div>
-        <h2 className="text-2xl font-bold text-black mb-4">AI Marketing Assistant</h2>
-        <EnhancedChatInterface />
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+              <Target className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{activeCampaigns}</div>
+              <p className="text-xs text-muted-foreground">
+                +{campaignsChange} from last week
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Email Sent</CardTitle>
+              <Mail className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {emailLoading ? '...' : emailMetrics?.totalSent || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                +19% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{activeUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                +{usersChange} from last month
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional dashboard content can be added here */}
       </div>
     </div>
   );
