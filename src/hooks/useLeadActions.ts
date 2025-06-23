@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
@@ -12,7 +13,7 @@ export const useLeadActions = () => {
   const scoreLeads = async (leadIds?: string[]) => {
     setLoading(true);
     try {
-      const result = await apiClient.scoreLeads(leadIds) as ApiResponse<any>;
+      const result = await apiClient.scoreLeads() as ApiResponse<any>;
       if (result.success) {
         toast({
           title: "Leads Scored",
@@ -128,3 +129,4 @@ export const useLeadActions = () => {
     isSyncing
   };
 };
+

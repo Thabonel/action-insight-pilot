@@ -111,7 +111,7 @@ export interface Campaign {
   name: string;
   description?: string;
   type: string;
-  status: 'draft' | 'active' | 'paused' | 'completed';
+  status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
   created_at: string;
   updated_at: string;
   metrics?: any;
@@ -168,3 +168,4 @@ export interface ChatMessage {
   query?: string;
   response?: string;
 }
+

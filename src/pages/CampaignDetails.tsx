@@ -1,301 +1,270 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CalendarIcon, DollarSignIcon, TargetIcon, TrendingUpIcon } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { Campaign } from '@/lib/api-client-interface';
-import { ArrowLeft, Save, Play, Pause, Archive, Settings } from 'lucide-react';
 
 const CampaignDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    type: '',
-    status: 'draft' as Campaign['status']
-  });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id) {
-      loadCampaign();
-    }
+    const fetchCampaign = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const result = await apiClient.getCampaignById(id);
+        
+        if (result.success && result.data) {
+          setCampaign(result.data);
+        } else {
+          setError(result.error || 'Failed to fetch campaign');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCampaign();
   }, [id]);
 
-  const loadCampaign = async () => {
-    if (!id) return;
-    
-    try {
-      setLoading(true);
-      const result = await apiClient.getCampaignById(id);
-      
-      if (result.success && result.data) {
-        setCampaign(result.data);
-        setFormData({
-          name: result.data.name,
-          description: result.data.description || '',
-          type: result.data.type,
-          status: result.data.status
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to load campaign details",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error loading campaign:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load campaign details",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const updateCampaignStatus = async (newStatus: Campaign['status']) => {
+    if (!campaign) return;
 
-  const handleSave = async () => {
-    if (!id || !campaign) return;
-    
-    setSaving(true);
     try {
-      const result = await apiClient.updateCampaign(id, formData);
-      
+      const result = await apiClient.updateCampaign(campaign.id, {
+        status: newStatus
+      });
+
       if (result.success && result.data) {
         setCampaign(result.data);
-        setEditMode(false);
-        toast({
-          title: "Success",
-          description: "Campaign updated successfully",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to update campaign",
-          variant: "destructive",
-        });
       }
-    } catch (error) {
-      console.error('Error updating campaign:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update campaign",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      console.error('Failed to update campaign status:', err);
     }
   };
 
   const getStatusColor = (status: Campaign['status']) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'paused': return 'bg-yellow-100 text-yellow-800';
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      case 'archived': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'paused':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800';
+      case 'archived':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campaign...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  if (!campaign) {
+  if (error || !campaign) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Campaign not found</h2>
-        <Button onClick={() => navigate('/app/campaign-management')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Campaigns
-        </Button>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Campaign Not Found</h2>
+          <p className="text-gray-600">{error || 'The campaign you\'re looking for doesn\'t exist.'}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/app/campaign-management')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">{campaign.name}</h1>
-            <div className="flex items-center space-x-2 mt-1">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{campaign.name}</h1>
+              <p className="text-gray-600 mt-1">{campaign.description}</p>
+            </div>
+            <div className="flex items-center space-x-3">
               <Badge className={getStatusColor(campaign.status)}>
                 {campaign.status}
               </Badge>
-              <span className="text-sm text-gray-500">Campaign {campaign.type}</span>
+              {campaign.status === 'active' && (
+                <Button
+                  variant="outline"
+                  onClick={() => updateCampaignStatus('paused')}
+                >
+                  Pause Campaign
+                </Button>
+              )}
+              {campaign.status === 'paused' && (
+                <Button
+                  onClick={() => updateCampaignStatus('active')}
+                >
+                  Resume Campaign
+                </Button>
+              )}
+              {(campaign.status === 'completed' || campaign.status === 'paused') && (
+                <Button
+                  variant="outline"
+                  onClick={() => updateCampaignStatus('archived')}
+                >
+                  Archive
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex items-center space-x-3">
+              <CalendarIcon className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm text-gray-600">Created</p>
+                <p className="font-semibold">{new Date(campaign.created_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <DollarSignIcon className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="text-sm text-gray-600">Budget</p>
+                <p className="font-semibold">$0</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <TargetIcon className="h-8 w-8 text-purple-600" />
+              <div>
+                <p className="text-sm text-gray-600">Type</p>
+                <p className="font-semibold">{campaign.type}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <TrendingUpIcon className="h-8 w-8 text-orange-600" />
+              <div>
+                <p className="text-sm text-gray-600">Performance</p>
+                <p className="font-semibold">Good</p>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="flex space-x-2">
-          {!editMode ? (
-            <>
-              <Button variant="outline" onClick={() => setEditMode(true)}>
-                <Settings className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              {campaign.status === 'active' ? (
-                <Button variant="outline">
-                  <Pause className="h-4 w-4 mr-2" />
-                  Pause
-                </Button>
-              ) : (
-                <Button>
-                  <Play className="h-4 w-4 mr-2" />
-                  Activate
-                </Button>
-              )}
-            </>
-          ) : (
-            <>
-              <Button variant="outline" onClick={() => setEditMode(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                <Save className="h-4 w-4 mr-2" />
-                {saving ? 'Saving...' : 'Save'}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Campaign Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {editMode ? (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Campaign Name
-                    </label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Enter campaign name"
-                    />
+        {/* Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-white p-1 rounded-lg shadow">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Campaign Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Campaign Name</label>
+                      <p className="mt-1 text-gray-900">{campaign.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Description</label>
+                      <p className="mt-1 text-gray-900">{campaign.description || 'No description provided'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Type</label>
+                      <p className="mt-1 text-gray-900">{campaign.type}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Status</label>
+                      <Badge className={`mt-1 ${getStatusColor(campaign.status)}`}>
+                        {campaign.status}
+                      </Badge>
+                    </div>
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Description
-                    </label>
-                    <Textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Enter campaign description"
-                      rows={3}
-                    />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Campaign Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Reach</span>
+                      <span className="font-semibold">0</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Engagement Rate</span>
+                      <span className="font-semibold">0%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Conversion Rate</span>
+                      <span className="font-semibold">0%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">ROI</span>
+                      <span className="font-semibold">0%</span>
+                    </div>
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Status
-                    </label>
-                    <Select 
-                      value={formData.status} 
-                      onValueChange={(value: Campaign['status']) => setFormData(prev => ({ ...prev, status: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="paused">Paused</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-700">Description</h3>
-                    <p className="text-gray-900 mt-1">{campaign.description || 'No description provided'}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-700">Type</h3>
-                    <p className="text-gray-900 mt-1 capitalize">{campaign.type}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-700">Created</h3>
-                    <p className="text-gray-900 mt-1">
-                      {campaign.created_at ? new Date(campaign.created_at).toLocaleDateString() : 'Unknown'}
-                    </p>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Total Sent</span>
-                  <span className="font-medium">0</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Opens</span>
-                  <span className="font-medium">0</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Clicks</span>
-                  <span className="font-medium">0</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Conversions</span>
-                  <span className="font-medium">0</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Performance data will be displayed here once the campaign is active.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="content">
+            <Card>
+              <CardHeader>
+                <CardTitle>Campaign Content</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Campaign content and assets will be managed here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Campaign Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Campaign configuration and settings will be available here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
 };
 
 export default CampaignDetails;
+

@@ -11,7 +11,7 @@ export const useRealTimeMetrics = () => {
   const fetchMetrics = async () => {
     try {
       setLoading(true);
-      const result = await apiClient.getRealTimeMetrics('campaign', 'realtime') as ApiResponse<any>;
+      const result = await apiClient.getRealTimeMetrics() as ApiResponse<any>;
       
       if (result.success && result.data) {
         // Transform the data to match EmailMetrics interface
@@ -53,3 +53,4 @@ export const useRealTimeMetrics = () => {
     refetch: fetchMetrics
   };
 };
+

@@ -1,69 +1,60 @@
 
 import { apiClient } from '@/lib/api-client';
-import { ApiResponse } from '@/lib/api-client-interface';
-
-// Define UserPreferences type to match the expected interface
-export interface UserPreferences {
-  [key: string]: any;
-}
+import { ApiResponse, UserPreferences } from '@/lib/api-client-interface';
 
 export class UserPreferencesService {
-  static async getUserPreferences(category: string): Promise<ApiResponse<UserPreferences>> {
+  async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences>> {
     try {
-      const response = await apiClient.userPreferences.getUserPreferences(category);
-      
-      if (response.success && response.data && response.data.length > 0) {
-        // Extract preference_data from the first result
-        const preferences = response.data[0].preference_data || {};
-        return {
-          success: true,
-          data: preferences as UserPreferences
-        };
-      }
-      
-      return {
-        success: false,
-        data: {} as UserPreferences,
-        error: 'No preferences found'
-      };
+      const userPrefMethods = await apiClient.userPreferences();
+      return await userPrefMethods.getUserPreferences(category);
     } catch (error) {
+      console.error('Error getting user preferences:', error);
       return {
         success: false,
-        data: {} as UserPreferences,
-        error: error instanceof Error ? error.message : 'Failed to get user preferences'
+        error: error instanceof Error ? error.message : 'Failed to get preferences'
       };
     }
   }
 
-  static async updateUserPreferences(category: string, preferences: UserPreferences): Promise<ApiResponse<UserPreferences>> {
+  async updateUserPreferences(category: string, data: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
     try {
-      const response = await apiClient.userPreferences.updateUserPreferences(category, preferences);
-      return {
-        success: response.success,
-        data: preferences,
-        error: response.error
-      };
+      const userPrefMethods = await apiClient.userPreferences();
+      return await userPrefMethods.updateUserPreferences(category, data);
     } catch (error) {
+      console.error('Error updating user preferences:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to update user preferences'
+        error: error instanceof Error ? error.message : 'Failed to update preferences'
       };
     }
   }
 
-  static async getPreferencesByCategory(category: string): Promise<ApiResponse<any>> {
+  async getGeneralPreferences(): Promise<ApiResponse<UserPreferences>> {
     try {
-      const response = await apiClient.userPreferences.get();
-      return {
-        success: response.success,
-        data: response.data,
-        error: response.error
-      };
+      const userPrefMethods = await apiClient.userPreferences();
+      return await userPrefMethods.get();
     } catch (error) {
+      console.error('Error getting general preferences:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to get preferences by category'
+        error: error instanceof Error ? error.message : 'Failed to get general preferences'
+      };
+    }
+  }
+
+  async updateGeneralPreferences(data: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
+    try {
+      const userPrefMethods = await apiClient.userPreferences();
+      return await userPrefMethods.update(data);
+    } catch (error) {
+      console.error('Error updating general preferences:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update general preferences'
       };
     }
   }
 }
+
+export const userPreferencesService = new UserPreferencesService();
+
