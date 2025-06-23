@@ -107,6 +107,23 @@ export class ConversationalService {
       };
     }
   }
+
+  // Static methods for backward compatibility
+  static async getAuthToken(): Promise<string> {
+    return 'mock-auth-token';
+  }
+
+  static async fetchCampaignData(authToken: string): Promise<any[]> {
+    return [];
+  }
+
+  static async callDailyFocusAgent(query: string, campaignData: any[], context: any[], authToken: string): Promise<any> {
+    return { message: 'Daily focus response' };
+  }
+
+  static async callGeneralCampaignAgent(query: string, campaignData: any[], context: any[], authToken: string): Promise<any> {
+    return { message: 'General campaign response' };
+  }
 }
 
 export const conversationalService = new ConversationalService();

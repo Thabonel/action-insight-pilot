@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Globe, Plus, Settings, Trash2, TestTube, Loader2 } from 'lucide-react';
 import { useIntegrations } from '@/hooks/useIntegrations';
-import type { Webhook } from '@/lib/api/integrations-service';
+import type { Webhook } from '@/lib/api-client-interface';
 
 const WebhookManagement: React.FC = () => {
   const [newWebhookUrl, setNewWebhookUrl] = useState('');
@@ -39,7 +39,7 @@ const WebhookManagement: React.FC = () => {
         name: newWebhookName,
         url: newWebhookUrl,
         events: ['campaign.completed', 'lead.created'],
-        is_active: true
+        active: true
       });
       setNewWebhookUrl('');
       setNewWebhookName('');
@@ -135,9 +135,9 @@ const WebhookManagement: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <Badge 
                     variant="outline" 
-                    className={`text-${getStatusColor(webhook.is_active)}-600 border-${getStatusColor(webhook.is_active)}-300`}
+                    className={`text-${getStatusColor(webhook.active)}-600 border-${getStatusColor(webhook.active)}-300`}
                   >
-                    {webhook.is_active ? 'Active' : 'Inactive'}
+                    {webhook.active ? 'Active' : 'Inactive'}
                   </Badge>
                   <Button 
                     variant="outline" 
