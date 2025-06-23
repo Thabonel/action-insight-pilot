@@ -1,160 +1,85 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/api-client';
-import { SocialPost } from '@/lib/api-client-interface';
-import { Calendar, Clock, Sparkles, Send } from 'lucide-react';
+import { apiClient, ContentBrief } from '@/lib/api-client';
+import { Loader2, Share2 } from 'lucide-react';
 
 const IntelligentPostScheduler: React.FC = () => {
-  const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(false);
-  const [generatingContent, setGeneratingContent] = useState(false);
-  const [newPost, setNewPost] = useState<Partial<SocialPost>>({
-    content: '',
+  const [brief, setBrief] = useState({
+    title: '',
     platform: 'twitter',
-    scheduledTime: '',
-    status: 'draft',
-    campaignId: ''
+    audience: '',
+    tone: 'professional',
+    keywords: []
   });
+  const [generatedContent, setGeneratedContent] = useState<string>('');
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      const result = await apiClient.getSocialPosts();
-      if (result.success && result.data) {
-        setPosts(result.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch posts:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleInputChange = (field: string, value: string | string[]) => {
+    setBrief(prev => ({ ...prev, [field]: value }));
   };
 
-  const generateContent = async () => {
-    if (!newPost.platform) {
+  const handleKeywordsChange = (value: string) => {
+    const keywords = value.split(',').map(k => k.trim()).filter(k => k);
+    setBrief(prev => ({ ...prev, keywords }));
+  };
+
+  const generatePost = async () => {
+    if (!brief.title || !brief.audience) {
       toast({
-        title: "Missing Platform",
-        description: "Please select a platform first",
+        title: "Missing Information",
+        description: "Please provide a title and target audience",
         variant: "destructive",
       });
       return;
     }
 
-    setGeneratingContent(true);
+    setLoading(true);
     try {
-      const brief = {
-        platform: newPost.platform,
-        audience: 'general',
-        tone: 'professional',
-        keywords: []
+      console.log('Generating social post with brief:', brief);
+      
+      // Convert to ContentBrief format
+      const contentBrief: ContentBrief = {
+        title: brief.title,
+        content_type: 'social_media',
+        target_audience: brief.audience,
+        key_messages: [brief.title],
+        platform: brief.platform,
+        tone: brief.tone,
+        keywords: brief.keywords
       };
       
-      const result = await apiClient.generateSocialContent(brief);
+      const result = await apiClient.generateContent(contentBrief);
       
       if (result.success && result.data) {
-        setNewPost(prev => ({
-          ...prev,
-          content: result.data.content || 'Generated content'
-        }));
-        
+        setGeneratedContent(result.data.content || 'Social post generated successfully');
         toast({
-          title: "Content Generated",
-          description: "AI has generated content for your post!",
+          title: "Post Generated",
+          description: "Social media post has been created successfully!",
         });
       } else {
         toast({
           title: "Generation Failed",
-          description: result.error || "Failed to generate content",
+          description: result.error || "Failed to generate post",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Content generation error:', error);
+      console.error('Post generation error:', error);
       toast({
         title: "Error",
-        description: "Failed to generate content",
-        variant: "destructive",
-      });
-    } finally {
-      setGeneratingContent(false);
-    }
-  };
-
-  const schedulePost = async () => {
-    if (!newPost.content || !newPost.platform || !newPost.scheduledTime) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const postToSchedule: SocialPost = {
-        id: Date.now().toString(),
-        content: newPost.content || '',
-        platform: newPost.platform || '',
-        scheduledTime: newPost.scheduledTime || '',
-        status: 'scheduled',
-        campaignId: newPost.campaignId,
-        created_at: new Date().toISOString()
-      };
-
-      const result = await apiClient.scheduleSocialPost(postToSchedule);
-      
-      if (result.success) {
-        setPosts(prev => [...prev, postToSchedule]);
-        setNewPost({
-          content: '',
-          platform: 'twitter',
-          scheduledTime: '',
-          status: 'draft',
-          campaignId: ''
-        });
-        
-        toast({
-          title: "Post Scheduled",
-          description: "Your post has been scheduled successfully!",
-        });
-      } else {
-        toast({
-          title: "Scheduling Failed",
-          description: result.error || "Failed to schedule post",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Scheduling error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to schedule post",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'published': return 'default';
-      case 'scheduled': return 'secondary';
-      case 'failed': return 'destructive';
-      default: return 'outline';
     }
   };
 
@@ -163,115 +88,106 @@ const IntelligentPostScheduler: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5" />
-            <span>Schedule New Post</span>
+            <Share2 className="h-5 w-5" />
+            <span>Intelligent Post Scheduler</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Platform</label>
-              <Select 
-                value={newPost.platform} 
-                onValueChange={(value) => setNewPost(prev => ({ ...prev, platform: value }))}
-              >
+              <Label htmlFor="title">Post Topic</Label>
+              <Input
+                id="title"
+                value={brief.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                placeholder="What's your post about?"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="platform">Platform</Label>
+              <Select value={brief.platform} onValueChange={(value) => handleInputChange('platform', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select platform" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="twitter">Twitter</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
                   <SelectItem value="facebook">Facebook</SelectItem>
                   <SelectItem value="instagram">Instagram</SelectItem>
-                  <SelectItem value="linkedin">LinkedIn</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Schedule Time</label>
-              <Input
-                type="datetime-local"
-                value={newPost.scheduledTime}
-                onChange={(e) => setNewPost(prev => ({ ...prev, scheduledTime: e.target.value }))}
-              />
             </div>
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium">Content</label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={generateContent}
-                disabled={generatingContent}
-              >
-                {generatingContent ? (
-                  <>
-                    <Clock className="h-4 w-4 mr-1 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-1" />
-                    AI Generate
-                  </>
-                )}
-              </Button>
-            </div>
-            <Textarea
-              value={newPost.content}
-              onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Write your post content or use AI to generate..."
-              rows={4}
+            <Label htmlFor="audience">Target Audience</Label>
+            <Input
+              id="audience"
+              value={brief.audience}
+              onChange={(e) => handleInputChange('audience', e.target.value)}
+              placeholder="Describe your target audience"
             />
           </div>
 
-          <Button onClick={schedulePost} disabled={loading} className="w-full">
+          <div>
+            <Label htmlFor="tone">Tone</Label>
+            <Select value={brief.tone} onValueChange={(value) => handleInputChange('tone', value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="professional">Professional</SelectItem>
+                <SelectItem value="casual">Casual</SelectItem>
+                <SelectItem value="friendly">Friendly</SelectItem>
+                <SelectItem value="inspiring">Inspiring</SelectItem>
+                <SelectItem value="humorous">Humorous</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="keywords">Keywords (comma-separated)</Label>
+            <Input
+              id="keywords"
+              value={brief.keywords.join(', ')}
+              onChange={(e) => handleKeywordsChange(e.target.value)}
+              placeholder="Enter relevant keywords"
+            />
+          </div>
+
+          <Button onClick={generatePost} disabled={loading} className="w-full">
             {loading ? (
               <>
-                <Clock className="mr-2 h-4 w-4 animate-spin" />
-                Scheduling...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
               </>
             ) : (
               <>
-                <Send className="mr-2 h-4 w-4" />
-                Schedule Post
+                <Share2 className="mr-2 h-4 w-4" />
+                Generate Post
               </>
             )}
           </Button>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Scheduled Posts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {posts.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No posts scheduled yet</p>
-          ) : (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <div key={post.id} className="border rounded-lg p-4 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="outline">{post.platform}</Badge>
-                      <Badge variant={getStatusBadgeVariant(post.status)}>
-                        {post.status}
-                      </Badge>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {new Date(post.scheduledTime).toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-sm">{post.content}</p>
-                </div>
-              ))}
+      {generatedContent && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generated Social Post</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <pre className="whitespace-pre-wrap text-sm">{generatedContent}</pre>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="mt-4 flex space-x-2">
+              <Button variant="outline">Edit Post</Button>
+              <Button>Schedule Post</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -1,21 +1,9 @@
 
-import { HttpClient } from './http-client';
-import { UserPreferencesService } from './api/user-preferences-service';
+import { BaseApiClient } from './api/base-api-client';
+import { ApiResponse } from './api/api-client-interface';
 
-// Use the existing interfaces from api-client-interface.ts
-import { 
-  ApiResponse, 
-  UserPreferences, 
-  EmailMetrics, 
-  Campaign, 
-  SocialPost, 
-  IntegrationConnection, 
-  SocialPlatformConnection,
-  OAuthResponse 
-} from './api-client-interface';
-
-// Local interfaces to avoid conflicts
-interface ContentBrief {
+// Unified type definitions to match the codebase
+export interface ContentBrief {
   title: string;
   content_type: string;
   target_audience: string;
@@ -27,635 +15,424 @@ interface ContentBrief {
   cta?: string;
 }
 
-interface BlogPost {
+export interface BlogPost {
   id: string;
   title: string;
+  keyword: string;
+  wordCount: number;
+  tone: string;
+  includeCTA: boolean;
   content: string;
-  status: string;
-  created_at: string;
-  tone?: string;
-  includeCTA?: boolean;
+  metaDescription?: string;
+  createdAt: string;
 }
 
-interface BlogPostParams {
+export interface BlogPostParams {
   title: string;
-  topic: string;
-  audience: string;
+  keyword: string;
+  wordCount: number;
   tone: string;
-  length: string;
-  keywords: string[];
   includeCTA: boolean;
 }
 
-interface Workflow {
+export interface Campaign {
   id: string;
   name: string;
-  description: string;
-  status: string;
-  steps: any[];
+  type: string;
+  status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
+  startDate: string;
+  endDate?: string;
+  budget?: number;
+  target_audience?: string;
+  description?: string;
   created_at: string;
   updated_at: string;
 }
 
-interface Lead {
+export interface Lead {
   id: string;
+  name: string;
   email: string;
-  first_name?: string;
-  last_name?: string;
   company?: string;
   status: string;
-  lead_score: number;
+  source: string;
+  score: number;
   created_at: string;
 }
 
-export class ApiClient {
-  private httpClient: HttpClient;
-  public userPreferences: UserPreferencesService;
-  private authToken: string | null = null;
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  status: string;
+  steps: WorkflowStep[];
+  created_at: string;
+}
 
-  constructor() {
-    this.httpClient = new HttpClient();
-    this.userPreferences = new UserPreferencesService(this.httpClient);
-  }
+export interface WorkflowStep {
+  id: string;
+  name: string;
+  type: string;
+  config: any;
+  order: number;
+}
 
+export interface UserPreferences {
+  name?: string;
+  domain?: string;
+  industry?: string;
+  teamSize?: string;
+  branding?: {
+    logo?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+  };
+  features?: {
+    [key: string]: boolean;
+  };
+}
+
+export interface UserPreference {
+  id: string;
+  user_id: string;
+  preference_type: string;
+  preference_data: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IntegrationConnection {
+  id: string;
+  name: string;
+  type: string;
+  status: 'connected' | 'disconnected' | 'error' | 'pending';
+  service_name: string;
+  connection_status: 'connected' | 'disconnected' | 'error' | 'pending';
+  last_sync_at?: string;
+  sync_status: 'idle' | 'syncing' | 'error' | 'success';
+  configuration?: Record<string, any>;
+  error_message?: string;
+  lastSync?: string;
+}
+
+export interface SocialPlatformConnection {
+  id: string;
+  platform: string;
+  platform_name: string;
+  status: 'connected' | 'disconnected' | 'error';
+  connection_status: 'connected' | 'disconnected' | 'error';
+  username?: string;
+  platform_username?: string;
+  platform_user_id?: string;
+  lastSync?: string;
+  last_sync_at?: string;
+  token_expires_at?: string;
+  connection_metadata?: Record<string, any>;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  is_active: boolean;
+  active?: boolean;
+  last_triggered_at?: string;
+  last_response_code?: number;
+  secret?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+class ApiClient extends BaseApiClient {
   setToken(token: string) {
-    this.authToken = token;
-    this.httpClient.setAuthToken(token);
+    this.httpClient.setToken(token);
   }
 
   // User Preferences
-  async getUserPreferences(): Promise<ApiResponse<UserPreferences>> {
-    return this.userPreferences.getUserPreferences();
-  }
-
-  async updateUserPreferences(preferences: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
-    return this.userPreferences.updateUserPreferences('general', preferences);
-  }
-
-  // Social Platforms
-  socialPlatforms = {
-    getAll: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
+  userPreferences = {
+    getUserPreferences: async (type?: string): Promise<ApiResponse<UserPreference[]>> => {
       return {
         success: true,
-        data: [
-          {
-            id: '1',
-            platform: 'twitter',
-            platform_name: 'Twitter',
-            status: 'connected',
-            connection_status: 'connected',
-            username: 'example_user',
-            platform_username: 'example_user',
-            created_at: new Date().toISOString()
-          }
-        ]
+        data: []
       };
     },
-
-    connect: async (platform: string, config: any = {}): Promise<ApiResponse<SocialPlatformConnection>> => {
+    updateUserPreferences: async (type: string, data: any): Promise<ApiResponse<UserPreference>> => {
       return {
         success: true,
         data: {
-          id: Date.now().toString(),
-          platform,
+          id: '1',
+          user_id: 'user1',
+          preference_type: type,
+          preference_data: data,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      };
+    }
+  };
+
+  // Social Platform methods
+  socialPlatforms = {
+    getAll: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
+      return { success: true, data: [] };
+    },
+    connect: async (platform: string, config?: any): Promise<ApiResponse<SocialPlatformConnection>> => {
+      return { 
+        success: true, 
+        data: { 
+          id: '1', 
+          platform, 
           platform_name: platform,
           status: 'connected',
           connection_status: 'connected',
-          username: config.username || 'user',
-          platform_username: config.username || 'user',
           created_at: new Date().toISOString()
-        }
+        } 
       };
     },
-
     disconnect: async (platformId: string): Promise<ApiResponse<boolean>> => {
       return { success: true, data: true };
+    },
+    getPlatformConnections: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
+      return { success: true, data: [] };
+    },
+    initiatePlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
+      return { success: true, data: { authorization_url: '#' } };
+    },
+    disconnectPlatform: async (platformId: string): Promise<ApiResponse<boolean>> => {
+      return { success: true, data: true };
+    },
+    syncPlatformData: async (platformId: string): Promise<ApiResponse<any>> => {
+      return { success: true, data: {} };
+    },
+    testPlatformConnection: async (platformId: string): Promise<ApiResponse<any>> => {
+      return { success: true, data: { status: 'connected' } };
     }
   };
 
-  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
-    return this.socialPlatforms.getAll();
-  }
-
-  async connectSocialPlatform(data: { platform: string; [key: string]: any }): Promise<ApiResponse<SocialPlatformConnection>> {
-    return this.socialPlatforms.connect(data.platform, data);
-  }
-
-  // Integrations
+  // Integration methods
   integrations = {
-    getWebhooks: async (): Promise<ApiResponse<any[]>> => {
+    getWebhooks: async (): Promise<ApiResponse<Webhook[]>> => {
       return { success: true, data: [] };
     },
-
-    createWebhook: async (webhookData: any): Promise<ApiResponse<any>> => {
-      return { success: true, data: { id: Date.now().toString(), ...webhookData } };
+    createWebhook: async (webhookData: Partial<Webhook>): Promise<ApiResponse<Webhook>> => {
+      return { 
+        success: true, 
+        data: { 
+          id: '1', 
+          name: webhookData.name || 'Webhook',
+          url: webhookData.url || '',
+          events: webhookData.events || [],
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } 
+      };
     },
-
-    updateWebhook: async (id: string, webhookData: any): Promise<ApiResponse<any>> => {
-      return { success: true, data: { id, ...webhookData } };
+    updateWebhook: async (id: string, webhookData: Partial<Webhook>): Promise<ApiResponse<Webhook>> => {
+      return { 
+        success: true, 
+        data: { 
+          id, 
+          name: webhookData.name || 'Webhook',
+          url: webhookData.url || '',
+          events: webhookData.events || [],
+          is_active: webhookData.is_active || true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } 
+      };
     },
-
     deleteWebhook: async (id: string): Promise<ApiResponse<boolean>> => {
       return { success: true, data: true };
     },
-
+    testWebhook: async (id: string): Promise<ApiResponse<any>> => {
+      return { success: true, data: { status: 'success' } };
+    },
     getConnections: async (): Promise<ApiResponse<IntegrationConnection[]>> => {
-      return {
-        success: true,
-        data: [
-          {
-            id: '1',
-            name: 'Example Integration',
-            type: 'social',
-            status: 'connected',
-            service_name: 'example',
-            connection_status: 'connected',
-            sync_status: 'idle',
-            configuration: {},
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ]
-      };
+      return { success: true, data: [] };
     },
-
-    createConnection: async (connectionData: any): Promise<ApiResponse<IntegrationConnection>> => {
-      return {
-        success: true,
-        data: {
-          id: Date.now().toString(),
-          name: connectionData.name || 'New Connection',
-          type: connectionData.type || 'integration',
+    connectService: async (service: string): Promise<ApiResponse<IntegrationConnection>> => {
+      return { 
+        success: true, 
+        data: { 
+          id: '1', 
+          name: service,
+          type: 'oauth',
           status: 'connected',
-          service_name: connectionData.service_name || 'service',
+          service_name: service,
           connection_status: 'connected',
-          sync_status: 'idle',
-          configuration: connectionData.configuration || {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
+          sync_status: 'idle'
+        } 
       };
     },
-
-    deleteConnection: async (id: string): Promise<ApiResponse<boolean>> => {
-      return { success: true, data: true };
-    },
-
-    connectService: async (service: string): Promise<ApiResponse<OAuthResponse>> => {
-      return {
-        success: true,
-        data: {
-          authorization_url: `https://example.com/oauth/${service}`,
-          state: 'state123'
-        }
-      };
-    },
-
     disconnectService: async (service: string): Promise<ApiResponse<boolean>> => {
       return { success: true, data: true };
+    },
+    syncService: async (serviceId: string): Promise<ApiResponse<any>> => {
+      return { success: true, data: {} };
     }
   };
 
-  async getIntegrations(): Promise<ApiResponse<IntegrationConnection[]>> {
-    return this.integrations.getConnections();
-  }
+  // Conversational Agent methods
+  queryAgent: async (message: string, context?: any) => {
+    return { success: true, data: { response: 'Mock response', context: {} } };
+  };
 
-  async getOAuthUrl(platform: string, redirectUri: string): Promise<ApiResponse<{ auth_url: string }>> {
+  // Blog methods
+  generateBlogPost: async (params: BlogPostParams): Promise<ApiResponse<BlogPost>> => {
     return {
       success: true,
       data: {
-        auth_url: `https://example.com/oauth/${platform}?redirect_uri=${encodeURIComponent(redirectUri)}`
+        id: '1',
+        title: params.title,
+        keyword: params.keyword,
+        wordCount: params.wordCount,
+        tone: params.tone,
+        includeCTA: params.includeCTA,
+        content: 'Generated blog content...',
+        metaDescription: 'Generated meta description',
+        createdAt: new Date().toISOString()
       }
     };
-  }
+  };
 
-  // Conversational/Chat/AI Agent
-  async queryAgent(query: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        response: `AI response to: ${query}`,
-        message: `AI response to: ${query}`,
-        suggestions: ['Follow up suggestion 1', 'Follow up suggestion 2']
-      }
-    };
-  }
+  getBlogPosts: async (): Promise<ApiResponse<BlogPost[]>> => {
+    return { success: true, data: [] };
+  };
 
-  async callDailyFocusAgent(query: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        focus_summary: `Daily focus response for: ${query}`,
-        priority_items: ['Priority 1', 'Priority 2'],
-        business_impact: 'High impact on conversion rates',
-        recommended_actions: ['Action 1', 'Action 2']
-      }
-    };
-  }
+  // Content methods
+  generateContent: async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
+    return { success: true, data: { content: 'Generated content...' } };
+  };
 
-  async callGeneralCampaignAgent(query: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        explanation: `Campaign analysis for: ${query}`,
-        business_impact: 'Moderate impact on brand awareness',
-        recommended_actions: ['Review metrics', 'Optimize targeting']
-      }
-    };
-  }
+  generateSocialContent: async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
+    return { success: true, data: { content: 'Generated social content...' } };
+  };
 
-  // Blog
-  async getBlogPosts(): Promise<ApiResponse<BlogPost[]>> {
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          title: 'Sample Blog Post',
-          content: 'This is sample content',
-          status: 'published',
-          created_at: new Date().toISOString(),
-          tone: 'professional',
-          includeCTA: true
-        }
-      ]
-    };
-  }
+  generateEmailContent: async (brief: string): Promise<ApiResponse<{ content: string }>> => {
+    return { success: true, data: { content: 'Generated email content...' } };
+  };
 
-  async generateBlogPost(params: BlogPostParams): Promise<ApiResponse<BlogPost>> {
-    const contentBrief: ContentBrief = {
-      title: params.title,
-      content_type: 'blog_post',
-      target_audience: params.audience,
-      key_messages: [params.topic],
-      platform: 'website',
-      tone: params.tone,
-      length: params.length,
-      keywords: params.keywords,
-      cta: params.includeCTA ? 'Read more' : undefined
-    };
+  // Social methods
+  scheduleSocialPost: async (data: any): Promise<ApiResponse<any>> => {
+    return { success: true, data: { id: '1', status: 'scheduled' } };
+  };
 
-    const contentResponse = await this.generateContent(contentBrief);
-    
-    if (contentResponse.success && contentResponse.data) {
-      return {
-        success: true,
-        data: {
-          id: Date.now().toString(),
-          title: params.title,
-          content: contentResponse.data.content || 'Generated blog content',
-          status: 'draft',
-          created_at: new Date().toISOString(),
-          tone: params.tone,
-          includeCTA: params.includeCTA
-        }
+  // Workflow methods
+  workflows = {
+    getAll: async (): Promise<ApiResponse<Workflow[]>> => {
+      return { success: true, data: [] };
+    },
+    create: async (name: string, description?: string): Promise<ApiResponse<Workflow>> => {
+      return { 
+        success: true, 
+        data: { 
+          id: '1', 
+          name, 
+          description,
+          status: 'active',
+          steps: [],
+          created_at: new Date().toISOString()
+        } 
       };
-    }
-
-    return { success: false, error: 'Failed to generate blog post' };
-  }
-
-  async deleteBlogPost(id: string): Promise<ApiResponse<boolean>> {
-    return { success: true, data: true };
-  }
-
-  // Content
-  async generateContent(brief: ContentBrief): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        id: Date.now().toString(),
-        title: brief.title,
-        content: `Generated content for ${brief.title}`,
-        html_content: `<p>Generated content for ${brief.title}</p>`,
-        cta: brief.cta || 'Learn More',
-        seo_score: 85,
-        readability_score: 90,
-        engagement_prediction: 75,
-        tags: brief.keywords || [],
-        status: 'generated'
-      }
-    };
-  }
-
-  async createContent(content: any): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        id: Date.now().toString(),
-        ...content,
-        created_at: new Date().toISOString()
-      }
-    };
-  }
-
-  async generateEmailContent(subject: string, audience: string): Promise<ApiResponse<any>> {
-    const brief: ContentBrief = {
-      title: subject,
-      content_type: 'email',
-      target_audience: audience,
-      key_messages: [subject],
-      platform: 'email'
-    };
-
-    return this.generateContent(brief);
-  }
-
-  // Social
-  async getSocialPosts(): Promise<ApiResponse<SocialPost[]>> {
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          content: 'Sample social post',
-          platform: 'twitter',
-          scheduledTime: new Date().toISOString(),
-          status: 'scheduled',
+    },
+    update: async (id: string, data: Partial<Workflow>): Promise<ApiResponse<Workflow>> => {
+      return { 
+        success: true, 
+        data: { 
+          id, 
+          name: data.name || 'Workflow',
+          status: data.status || 'active',
+          steps: data.steps || [],
           created_at: new Date().toISOString()
-        }
-      ]
-    };
-  }
-
-  async scheduleSocialPost(postData: any): Promise<ApiResponse<SocialPost>> {
-    return {
-      success: true,
-      data: {
-        id: Date.now().toString(),
-        content: postData.content,
-        platform: postData.platform,
-        scheduledTime: postData.scheduledTime || new Date().toISOString(),
-        status: 'scheduled',
-        created_at: new Date().toISOString()
-      }
-    };
-  }
-
-  // Workflows
-  async getWorkflows(): Promise<ApiResponse<Workflow[]>> {
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          name: 'Sample Workflow',
-          description: 'A sample workflow',
-          status: 'active',
-          steps: [
-            { id: 1, type: 'trigger', title: 'Email Trigger', description: 'Trigger on email', icon: 'mail', color: 'blue', status: 'active' }
-          ],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]
-    };
-  }
-
-  async createWorkflow(workflowData: any): Promise<ApiResponse<Workflow>> {
-    return {
-      success: true,
-      data: {
-        id: Date.now().toString(),
-        name: workflowData.name,
-        description: workflowData.description,
-        status: 'draft',
-        steps: workflowData.steps || [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    };
-  }
-
-  async executeWorkflow(workflowId: string, data?: any): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        workflow_id: workflowId,
-        status: 'running',
-        started_at: new Date().toISOString()
-      }
-    };
-  }
-
-  async getWorkflowStatus(workflowId: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        workflow_id: workflowId,
-        status: 'completed',
-        current_step: 3,
-        total_steps: 3,
-        started_at: new Date().toISOString(),
-        estimated_completion: new Date().toISOString()
-      }
-    };
-  }
-
-  async updateWorkflow(workflowId: string, updates: any): Promise<ApiResponse<Workflow>> {
-    return {
-      success: true,
-      data: {
-        id: workflowId,
-        name: updates.name || 'Updated Workflow',
-        description: updates.description || 'Updated description',
-        status: updates.status || 'active',
-        steps: updates.steps || [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    };
-  }
-
-  async deleteWorkflow(workflowId: string): Promise<ApiResponse<boolean>> {
-    return { success: true, data: true };
-  }
-
-  // Metrics & Analytics
-  async getRealTimeMetrics(): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        campaigns: 5,
-        leads: 150,
-        conversion_rate: 12.5,
-        revenue: 25000
-      }
-    };
-  }
-
-  async getEmailMetrics(): Promise<ApiResponse<EmailMetrics>> {
-    return {
-      success: true,
-      data: {
-        totalSent: 1000,
-        delivered: 950,
-        opened: 380,
-        clicked: 95,
-        bounced: 50,
-        unsubscribed: 5,
-        openRate: 40,
-        clickRate: 25,
-        bounceRate: 5
-      }
-    };
-  }
-
-  async getEmailAnalytics(): Promise<ApiResponse<any>> {
-    return this.getEmailMetrics();
-  }
-
-  analytics = async (): Promise<ApiResponse<any>> => {
-    return {
-      success: true,
-      data: {
-        overview: {
-          total_campaigns: 10,
-          active_campaigns: 5,
-          total_leads: 500,
-          conversion_rate: 15.2
-        },
-        getAnalyticsOverview: () => ({
-          campaigns: 10,
-          leads: 500,
-          revenue: 50000,
-          growth: 12.5
-        })
-      }
-    };
+        } 
+      };
+    },
+    delete: async (id: string): Promise<ApiResponse<boolean>> => {
+      return { success: true, data: true };
+    }
   };
 
-  async getAnalytics(): Promise<ApiResponse<any>> {
-    return this.analytics();
-  }
-
-  // Leads
-  async getLeads(): Promise<ApiResponse<Lead[]>> {
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          email: 'lead@example.com',
-          first_name: 'John',
-          last_name: 'Doe',
-          company: 'Example Corp',
-          status: 'new',
-          lead_score: 75,
-          created_at: new Date().toISOString()
-        }
-      ]
-    };
-  }
-
-  async scoreLeads(): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        scored_leads: 50,
-        average_score: 65,
-        high_score_leads: 15
+  // Metrics methods
+  getAnalytics: async (): Promise<ApiResponse<any>> => {
+    const analytics = {
+      getAnalyticsOverview: async (): Promise<any> => {
+        return { totalCampaigns: 0, activeLeads: 0, conversionRate: 0 };
       }
     };
-  }
+    return { success: true, data: analytics };
+  };
 
-  async exportLeads(): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        export_url: 'https://example.com/export/leads.csv',
-        total_exported: 100
-      }
-    };
-  }
+  getEmailAnalytics: async (): Promise<ApiResponse<any>> => {
+    return { success: true, data: { sent: 0, opened: 0, clicked: 0 } };
+  };
 
-  async syncLeads(): Promise<ApiResponse<void>> {
-    return { success: true };
-  }
+  // Lead methods
+  scoreLeads: async (): Promise<any[]> => {
+    return [];
+  };
 
-  // Campaigns
-  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          name: 'Sample Campaign',
-          type: 'email',
-          status: 'active',
-          startDate: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]
-    };
-  }
-
-  async createCampaign(campaignData: any): Promise<ApiResponse<Campaign>> {
-    return {
-      success: true,
-      data: {
-        id: Date.now().toString(),
-        name: campaignData.name,
+  // Campaign methods
+  createCampaign: async (campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> => {
+    return { 
+      success: true, 
+      data: { 
+        id: '1', 
+        name: campaignData.name || 'New Campaign',
         type: campaignData.type || 'email',
-        status: campaignData.status || 'draft',
+        status: 'draft',
         startDate: new Date().toISOString(),
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        description: campaignData.description,
-        budget: campaignData.budget
-      }
+        updated_at: new Date().toISOString()
+      } 
     };
-  }
+  };
 
-  async getCampaign(id: string): Promise<ApiResponse<Campaign>> {
-    return {
-      success: true,
-      data: {
-        id,
-        name: 'Sample Campaign',
+  getCampaignById: async (id: string): Promise<ApiResponse<Campaign>> => {
+    return { 
+      success: true, 
+      data: { 
+        id, 
+        name: 'Campaign',
         type: 'email',
         status: 'active',
         startDate: new Date().toISOString(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }
+      } 
     };
-  }
+  };
 
-  async getCampaignById(id: string): Promise<ApiResponse<Campaign>> {
-    return this.getCampaign(id);
-  }
+  getCampaign: async (id: string): Promise<ApiResponse<Campaign>> => {
+    return this.getCampaignById(id);
+  };
 
-  async updateCampaign(id: string, updates: any): Promise<ApiResponse<Campaign>> {
-    return {
-      success: true,
-      data: {
-        id,
-        name: updates.name || 'Updated Campaign',
-        type: updates.type || 'email',
-        status: updates.status || 'active',
-        startDate: updates.startDate || new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        description: updates.description,
-        budget: updates.budget
-      }
+  // MCP Connection methods
+  getConnections: async (): Promise<ApiResponse<IntegrationConnection[]>> => {
+    return { success: true, data: [] };
+  };
+
+  createConnection: async (connectionData: any): Promise<ApiResponse<IntegrationConnection>> => {
+    return { 
+      success: true, 
+      data: { 
+        id: '1', 
+        name: connectionData.name,
+        type: connectionData.type,
+        status: 'connected',
+        service_name: connectionData.service_name,
+        connection_status: 'connected',
+        sync_status: 'idle'
+      } 
     };
-  }
+  };
 
-  // System Health
-  async getSystemHealth(): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        status: 'healthy',
-        uptime: '99.9%',
-        response_time: '120ms',
-        active_connections: 150
-      }
-    };
-  }
+  deleteConnection: async (id: string): Promise<ApiResponse<boolean>> => {
+    return { success: true, data: true };
+  };
 }
 
 export const apiClient = new ApiClient();

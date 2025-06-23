@@ -2,14 +2,23 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 
-export interface SystemMetrics {
-  campaigns: number;
-  leads: number;
-  emailsSent: number;
-  socialPosts: number;
-  systemHealth: 'healthy' | 'warning' | 'error';
-  uptime: number;
-  lastUpdated: string;
+interface SystemMetrics {
+  emailMetrics: {
+    totalSent: number;
+    delivered: number;
+    opened: number;
+    clicked: number;
+    bounced: number;
+    unsubscribed: number;
+    openRate: number;
+    clickRate: number;
+    bounceRate: number;
+  };
+  analyticsOverview: {
+    totalCampaigns: number;
+    activeLeads: number;
+    conversionRate: number;
+  };
 }
 
 export const useSystemMetrics = () => {
@@ -22,36 +31,37 @@ export const useSystemMetrics = () => {
       setLoading(true);
       setError(null);
 
-      const [
-        campaignResponse,
-        leadResponse,
-        emailResponse,
-        socialResponse,
-        healthResponse
-      ] = await Promise.all([
-        apiClient.getCampaigns(),
-        apiClient.getLeads(),
-        apiClient.getEmailAnalytics(),
-        apiClient.getAnalytics(),
-        apiClient.analytics.getAnalyticsOverview(),
-        apiClient.getSystemHealth()
-      ]);
+      // Fetch email analytics
+      const emailResult = await apiClient.getEmailAnalytics();
+      
+      // Fetch general analytics
+      const analyticsResult = await apiClient.getAnalytics();
+      const analyticsOverview = await analyticsResult.data?.getAnalyticsOverview();
 
-      const systemMetrics: SystemMetrics = {
-        campaigns: campaignResponse.data?.length || 0,
-        leads: leadResponse.data?.length || 0,
-        emailsSent: emailResponse.data?.totalSent || 0,
-        socialPosts: 0,
-        systemHealth: 'healthy',
-        uptime: Date.now(),
-        lastUpdated: new Date().toISOString()
-      };
-
-      setMetrics(systemMetrics);
+      if (emailResult.success && analyticsResult.success) {
+        setMetrics({
+          emailMetrics: emailResult.data || {
+            totalSent: 0,
+            delivered: 0,
+            opened: 0,
+            clicked: 0,
+            bounced: 0,
+            unsubscribed: 0,
+            openRate: 0,
+            clickRate: 0,
+            bounceRate: 0
+          },
+          analyticsOverview: analyticsOverview || {
+            totalCampaigns: 0,
+            activeLeads: 0,
+            conversionRate: 0
+          }
+        });
+      } else {
+        setError('Failed to fetch metrics');
+      }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch system metrics';
-      setError(errorMessage);
-      console.error('System metrics error:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -59,8 +69,6 @@ export const useSystemMetrics = () => {
 
   useEffect(() => {
     fetchMetrics();
-    const interval = setInterval(fetchMetrics, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
   }, []);
 
   return {

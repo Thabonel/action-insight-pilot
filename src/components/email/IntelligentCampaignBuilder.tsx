@@ -1,54 +1,49 @@
+
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import { Loader2, Mail, Target } from 'lucide-react';
+import { Loader2, Mail } from 'lucide-react';
 
 interface CampaignBrief {
-  name: string;
-  type: string;
-  target_audience: string;
-  objectives: string[];
-  content_themes: string[];
-  timeline: string;
+  subject: string;
+  audience: string;
+  goal: string;
+  tone: string;
+  keyPoints: string[];
 }
 
 const IntelligentCampaignBuilder: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [brief, setBrief] = useState<CampaignBrief>({
-    name: '',
-    type: 'email',
-    target_audience: '',
-    objectives: [],
-    content_themes: [],
-    timeline: '1_week'
+    subject: '',
+    audience: '',
+    goal: '',
+    tone: 'professional',
+    keyPoints: []
   });
-  const [campaignSuggestions, setCampaignSuggestions] = useState<any>(null);
+  const [generatedContent, setGeneratedContent] = useState<string>('');
   const { toast } = useToast();
 
   const handleInputChange = (field: keyof CampaignBrief, value: string | string[]) => {
     setBrief(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleObjectivesChange = (value: string) => {
-    const objectives = value.split('\n').filter(obj => obj.trim());
-    setBrief(prev => ({ ...prev, objectives }));
+  const handleKeyPointsChange = (value: string) => {
+    const points = value.split('\n').filter(point => point.trim());
+    setBrief(prev => ({ ...prev, keyPoints: points }));
   };
 
-  const handleThemesChange = (value: string) => {
-    const themes = value.split('\n').filter(theme => theme.trim());
-    setBrief(prev => ({ ...prev, content_themes: themes }));
-  };
-
-  const buildCampaign = async () => {
-    if (!brief.name || !brief.target_audience) {
+  const generateCampaign = async () => {
+    if (!brief.subject || !brief.audience || !brief.goal) {
       toast({
         title: "Missing Information",
-        description: "Please provide campaign name and target audience",
+        description: "Please provide subject, audience, and goal",
         variant: "destructive",
       });
       return;
@@ -56,24 +51,25 @@ const IntelligentCampaignBuilder: React.FC = () => {
 
     setLoading(true);
     try {
-      console.log('Building campaign with brief:', brief);
-      const result = await apiClient.generateEmailContent(brief, 'campaign');
+      console.log('Generating email campaign with brief:', brief);
+      const briefText = `Subject: ${brief.subject}, Audience: ${brief.audience}, Goal: ${brief.goal}, Tone: ${brief.tone}, Key Points: ${brief.keyPoints.join(', ')}`;
+      const result = await apiClient.generateEmailContent(briefText);
       
       if (result.success && result.data) {
-        setCampaignSuggestions(result.data);
+        setGeneratedContent(result.data.content || 'Email content generated successfully');
         toast({
-          title: "Campaign Built",
-          description: "Intelligent campaign suggestions have been generated!",
+          title: "Campaign Generated",
+          description: "Email campaign content has been created successfully!",
         });
       } else {
         toast({
-          title: "Build Failed",
-          description: result.error || "Failed to build campaign",
+          title: "Generation Failed",
+          description: result.error || "Failed to generate campaign",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Campaign building error:', error);
+      console.error('Campaign generation error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -89,107 +85,93 @@ const IntelligentCampaignBuilder: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Target className="h-5 w-5" />
-            <span>Intelligent Campaign Builder</span>
+            <Mail className="h-5 w-5" />
+            <span>Intelligent Email Campaign Builder</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Campaign Name</label>
+              <Label htmlFor="subject">Email Subject</Label>
               <Input
-                value={brief.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter campaign name"
+                id="subject"
+                value={brief.subject}
+                onChange={(e) => handleInputChange('subject', e.target.value)}
+                placeholder="Enter email subject line"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">Campaign Type</label>
-              <Select value={brief.type} onValueChange={(value) => handleInputChange('type', value)}>
+              <Label htmlFor="tone">Tone</Label>
+              <Select value={brief.tone} onValueChange={(value) => handleInputChange('tone', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="email">Email Campaign</SelectItem>
-                  <SelectItem value="social">Social Media</SelectItem>
-                  <SelectItem value="mixed">Multi-Channel</SelectItem>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="friendly">Friendly</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Target Audience</label>
+            <Label htmlFor="audience">Target Audience</Label>
             <Input
-              value={brief.target_audience}
-              onChange={(e) => handleInputChange('target_audience', e.target.value)}
+              id="audience"
+              value={brief.audience}
+              onChange={(e) => handleInputChange('audience', e.target.value)}
               placeholder="Describe your target audience"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Campaign Objectives (one per line)</label>
-            <Textarea
-              rows={3}
-              value={brief.objectives.join('\n')}
-              onChange={(e) => handleObjectivesChange(e.target.value)}
-              placeholder="Enter campaign objectives, one per line"
+            <Label htmlFor="goal">Campaign Goal</Label>
+            <Input
+              id="goal"
+              value={brief.goal}
+              onChange={(e) => handleInputChange('goal', e.target.value)}
+              placeholder="What do you want to achieve?"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Content Themes (one per line)</label>
+            <Label htmlFor="keyPoints">Key Points (one per line)</Label>
             <Textarea
-              rows={3}
-              value={brief.content_themes.join('\n')}
-              onChange={(e) => handleThemesChange(e.target.value)}
-              placeholder="Enter content themes, one per line"
+              id="keyPoints"
+              rows={4}
+              value={brief.keyPoints.join('\n')}
+              onChange={(e) => handleKeyPointsChange(e.target.value)}
+              placeholder="Enter key messages, one per line"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Timeline</label>
-            <Select value={brief.timeline} onValueChange={(value) => handleInputChange('timeline', value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1_week">1 Week</SelectItem>
-                <SelectItem value="2_weeks">2 Weeks</SelectItem>
-                <SelectItem value="1_month">1 Month</SelectItem>
-                <SelectItem value="3_months">3 Months</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button onClick={buildCampaign} disabled={loading} className="w-full">
+          <Button onClick={generateCampaign} disabled={loading} className="w-full">
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Building Campaign...
+                Generating...
               </>
             ) : (
               <>
                 <Mail className="mr-2 h-4 w-4" />
-                Build Intelligent Campaign
+                Generate Email Campaign
               </>
             )}
           </Button>
         </CardContent>
       </Card>
 
-      {campaignSuggestions && (
+      {generatedContent && (
         <Card>
           <CardHeader>
-            <CardTitle>Campaign Suggestions</CardTitle>
+            <CardTitle>Generated Email Content</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <pre className="whitespace-pre-wrap text-sm">
-                {JSON.stringify(campaignSuggestions, null, 2)}
-              </pre>
+              <pre className="whitespace-pre-wrap text-sm">{generatedContent}</pre>
             </div>
           </CardContent>
         </Card>
