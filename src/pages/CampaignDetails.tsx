@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +20,7 @@ const CampaignDetails: React.FC = () => {
     name: '',
     description: '',
     type: 'email',
-    status: 'draft'
+    status: 'draft' as const
   });
 
   useEffect(() => {
@@ -178,7 +177,7 @@ const CampaignDetails: React.FC = () => {
                 <label className="block text-sm font-medium mb-1">Status</label>
                 <select
                   value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  onChange={(e) => handleInputChange('status', e.target.value as Campaign['status'])}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="draft">Draft</option>

@@ -5,7 +5,8 @@ import { apiClient } from '@/lib/api-client';
 interface AuthContextType {
   user: any;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ error?: any }>;
+  signUp: (email: string, password: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -43,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<{ error?: any }> => {
     setLoading(true);
     try {
       // Mock sign in
@@ -55,9 +56,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       apiClient.setToken('mock-jwt-token');
       setUser(mockUser);
+      return {};
     } catch (error) {
       console.error('Sign in error:', error);
-      throw error;
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async (email: string, password: string): Promise<{ error?: any }> => {
+    setLoading(true);
+    try {
+      // Mock sign up
+      const mockUser = {
+        id: '1',
+        email,
+        name: 'Test User'
+      };
+      
+      apiClient.setToken('mock-jwt-token');
+      setUser(mockUser);
+      return {};
+    } catch (error) {
+      console.error('Sign up error:', error);
+      return { error };
     } finally {
       setLoading(false);
     }
@@ -80,6 +103,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loading,
     signIn,
+    signUp,
     signOut,
     isAuthenticated: !!user
   };
