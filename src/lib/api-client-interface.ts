@@ -110,3 +110,14 @@ export interface OAuthResponse {
   authorization_url: string;
   state: string;
 }
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  secret?: string;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
