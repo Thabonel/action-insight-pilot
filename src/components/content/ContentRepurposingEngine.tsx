@@ -1,591 +1,340 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  RefreshCw, Copy, Download, Edit, Share2, MessageCircle, Video, 
-  Mail, Instagram, Mic, Presentation, HelpCircle, FileText,
-  Twitter, Linkedin, Youtube, Target, Palette, Megaphone
+  Share2, 
+  Video, 
+  Mail, 
+  Instagram, 
+  Mic,
+  Presentation,
+  HelpCircle,
+  FileText,
+  Download,
+  Edit,
+  Copy
 } from 'lucide-react';
-import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 
-interface RepurposingOption {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  format: string;
-  platforms?: string[];
-  characterLimit?: number;
-  wordLimit?: number;
-}
-
-interface ContentVariant {
-  id: string;
-  format: string;
-  platform?: string;
+export interface ContentRepurposingEngineProps {
+  contentId: string;
+  title: string;
   content: string;
-  title?: string;
-  tone: string;
-  characterCount: number;
-  wordCount: number;
-  createdAt: string;
-  tags: string[];
 }
 
-interface ContentRepurposingEngineProps {
-  originalContent: string;
-  originalTitle: string;
-  contentId?: string;
-}
-
-const ContentRepurposingEngine: React.FC<ContentRepurposingEngineProps> = ({
-  originalContent,
-  originalTitle,
-  contentId = 'demo-content'
+export const ContentRepurposingEngine: React.FC<ContentRepurposingEngineProps> = ({
+  contentId,
+  title,
+  content
 }) => {
+  const [activeFormat, setActiveFormat] = useState<string | null>(null);
+  const [variants, setVariants] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [variants, setVariants] = useState<ContentVariant[]>([]);
-  const [selectedFormat, setSelectedFormat] = useState<string>('');
-  const [selectedTone, setSelectedTone] = useState<string>('professional');
-  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
-  const [editingVariant, setEditingVariant] = useState<ContentVariant | null>(null);
   const { toast } = useToast();
 
-  const repurposingOptions: RepurposingOption[] = [
+  const repurposingOptions = [
     {
       id: 'twitter-thread',
-      name: 'Twitter Thread',
+      title: 'Twitter Thread',
       description: 'Convert to engaging Twitter thread',
-      icon: <Twitter className="h-4 w-4" />,
-      format: 'social-thread',
-      platforms: ['Twitter'],
-      characterLimit: 280
+      icon: Share2,
+      limit: '280 chars per tweet'
     },
     {
       id: 'linkedin-post',
-      name: 'LinkedIn Post',
-      description: 'Transform into professional LinkedIn content',
-      icon: <Linkedin className="h-4 w-4" />,
-      format: 'social-post',
-      platforms: ['LinkedIn'],
-      characterLimit: 3000
+      title: 'LinkedIn Post',
+      description: 'Professional LinkedIn post format',
+      icon: Share2,
+      limit: '1300 chars recommended'
     },
     {
       id: 'youtube-script',
-      name: 'YouTube Script',
-      description: 'Create video script from blog outline',
-      icon: <Video className="h-4 w-4" />,
-      format: 'video-script',
-      platforms: ['YouTube']
+      title: 'YouTube Script',
+      description: 'Video script with timestamps',
+      icon: Video,
+      limit: '8-12 minutes recommended'
     },
     {
       id: 'email-newsletter',
-      name: 'Email Newsletter',
-      description: 'Generate newsletter content',
-      icon: <Mail className="h-4 w-4" />,
-      format: 'email-content',
-      platforms: ['Email']
+      title: 'Email Newsletter',
+      description: 'Newsletter format with sections',
+      icon: Mail,
+      limit: '500-800 words'
     },
     {
       id: 'instagram-quotes',
-      name: 'Instagram Quotes',
-      description: 'Extract key quotes for Instagram',
-      icon: <Instagram className="h-4 w-4" />,
-      format: 'quote-cards',
-      platforms: ['Instagram']
+      title: 'Instagram Quotes',
+      description: 'Key quotes for social posts',
+      icon: Instagram,
+      limit: 'Visual-friendly text'
     },
     {
       id: 'podcast-outline',
-      name: 'Podcast Outline',
-      description: 'Create podcast episode structure',
-      icon: <Mic className="h-4 w-4" />,
-      format: 'podcast-outline',
-      platforms: ['Podcast']
+      title: 'Podcast Outline',
+      description: 'Episode structure and talking points',
+      icon: Mic,
+      limit: '30-60 minute episode'
     },
     {
       id: 'slide-deck',
-      name: 'Slide Deck',
-      description: 'Generate presentation slides',
-      icon: <Presentation className="h-4 w-4" />,
-      format: 'presentation',
-      platforms: ['PowerPoint', 'Google Slides']
+      title: 'Slide Deck',
+      description: 'Presentation slides from headings',
+      icon: Presentation,
+      limit: '10-15 slides'
     },
     {
       id: 'faq-section',
-      name: 'FAQ Section',
-      description: 'Create FAQ from content',
-      icon: <HelpCircle className="h-4 w-4" />,
-      format: 'faq',
-      platforms: ['Website', 'Documentation']
+      title: 'FAQ Section',
+      description: 'Questions and answers format',
+      icon: HelpCircle,
+      limit: '5-10 Q&As'
     },
     {
       id: 'case-study',
-      name: 'Case Study',
+      title: 'Case Study',
       description: 'Transform into case study format',
-      icon: <FileText className="h-4 w-4" />,
-      format: 'case-study',
-      platforms: ['Website', 'Sales']
+      icon: FileText,
+      limit: 'Problem-solution structure'
     }
   ];
 
-  const toneOptions = [
-    { value: 'professional', label: 'Professional' },
-    { value: 'casual', label: 'Casual' },
-    { value: 'friendly', label: 'Friendly' },
-    { value: 'authoritative', label: 'Authoritative' },
-    { value: 'conversational', label: 'Conversational' },
-    { value: 'humorous', label: 'Humorous' },
-    { value: 'urgent', label: 'Urgent' },
-    { value: 'inspiring', label: 'Inspiring' }
-  ];
-
-  const audienceOptions = [
-    { value: 'b2b', label: 'B2B Decision Makers' },
-    { value: 'b2c', label: 'General Consumers' },
-    { value: 'technical', label: 'Technical Audience' },
-    { value: 'beginner', label: 'Beginners' },
-    { value: 'expert', label: 'Industry Experts' },
-    { value: 'startup', label: 'Startup Founders' },
-    { value: 'marketing', label: 'Marketing Professionals' }
-  ];
-
-  useEffect(() => {
-    loadExistingVariants();
-  }, [contentId]);
-
-  const loadExistingVariants = async () => {
-    try {
-      const response = await apiClient.getContentVariants(contentId);
-      if (response.success && response.data) {
-        setVariants(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading variants:', error);
-    }
-  };
-
-  const generateVariant = async (option: RepurposingOption) => {
+  const generateVariant = async (formatId: string) => {
     setIsGenerating(true);
-    setSelectedFormat(option.id);
-
+    setActiveFormat(formatId);
+    
     try {
-      const response = await apiClient.repurposeContent(contentId, option.format, {
-        tone: selectedTone,
-        platform: selectedPlatform || option.platforms?.[0],
-        characterLimit: option.characterLimit,
-        wordLimit: option.wordLimit,
-        originalContent,
-        originalTitle
-      });
+      // Simulate content generation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const mockVariants = {
+        'twitter-thread': [
+          "🧵 THREAD: Everything you need to know about " + title + " (1/8)",
+          "📊 The problem: Most people struggle with understanding the basics. Here's what you need to know...",
+          "💡 Key insight #1: The first principle is crucial for success...",
+          "🔑 Key insight #2: Implementation matters more than theory...",
+          "⚡ Pro tip: Start small and scale gradually for better results...",
+          "🎯 Common mistake: Don't try to do everything at once...",
+          "✅ Action step: Begin with these three simple steps...",
+          "🙏 That's a wrap! Found this helpful? RT the first tweet and follow for more insights!"
+        ],
+        'youtube-script': `# ${title} - YouTube Script
 
-      if (response.success && response.data) {
-        const newVariant: ContentVariant = {
-          id: `variant-${Date.now()}`,
-          format: option.format,
-          platform: selectedPlatform || option.platforms?.[0],
-          content: response.data.content || generateMockContent(option),
-          title: response.data.title || `${originalTitle} - ${option.name}`,
-          tone: selectedTone,
-          characterCount: response.data.content?.length || 0,
-          wordCount: response.data.content?.split(' ').length || 0,
-          createdAt: new Date().toISOString(),
-          tags: [option.format, selectedTone, selectedPlatform || option.platforms?.[0]].filter(Boolean)
-        };
+## Hook (0:00-0:15)
+"If you've ever wondered about ${title.toLowerCase()}, this video will change everything you thought you knew..."
 
-        setVariants(prev => [newVariant, ...prev]);
-        await apiClient.saveContentVariant(contentId, newVariant);
+## Introduction (0:15-1:00)
+Welcome back to the channel! Today we're diving deep into ${title.toLowerCase()}...
 
-        toast({
-          title: "Content Repurposed",
-          description: `Successfully created ${option.name} variant`,
-        });
-      }
-    } catch (error) {
-      console.error('Error generating variant:', error);
+## Main Content (1:00-8:00)
+### Section 1: The Basics
+[Explain fundamental concepts]
+
+### Section 2: Advanced Strategies
+[Detailed implementation]
+
+### Section 3: Common Pitfalls
+[What to avoid]
+
+## Call to Action (8:00-8:30)
+If you found this helpful, smash that like button...`,
+        'email-newsletter': `Subject: ${title} - Your Complete Guide
+
+Hi [Name],
+
+Hope you're having a great week! Today I want to share something that could completely transform how you think about ${title.toLowerCase()}.
+
+**The Problem**
+Most people struggle with this because...
+
+**The Solution**
+Here's what actually works...
+
+**Key Takeaways:**
+• Point one with actionable advice
+• Point two with specific examples
+• Point three with next steps
+
+**What's Next?**
+Try implementing just one of these strategies this week and let me know how it goes!
+
+Best regards,
+[Your Name]`
+      };
+
+      const generated = mockVariants[formatId as keyof typeof mockVariants] || 'Generated content would appear here...';
+      
+      const newVariant = {
+        id: Date.now().toString(),
+        formatId,
+        content: generated,
+        createdAt: new Date().toISOString(),
+        wordCount: typeof generated === 'string' ? generated.split(' ').length : generated.length,
+        characterCount: typeof generated === 'string' ? generated.length : generated.join(' ').length
+      };
+
+      setVariants(prev => [...prev, newVariant]);
+      
       toast({
-        title: "Error",
-        description: "Failed to generate content variant",
-        variant: "destructive",
+        title: "Content generated",
+        description: `Successfully repurposed content for ${repurposingOptions.find(opt => opt.id === formatId)?.title}`
+      });
+    } catch (error) {
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate repurposed content",
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
-      setSelectedFormat('');
+      setActiveFormat(null);
     }
   };
 
-  const generateMockContent = (option: RepurposingOption): string => {
-    const mockContent = {
-      'twitter-thread': `🧵 Thread about ${originalTitle}\n\n1/ ${originalContent.substring(0, 240)}...\n\n2/ Key insights from this topic...\n\n3/ Here's what you need to know...\n\n4/ The bottom line:`,
-      'linkedin-post': `📈 ${originalTitle}\n\n${originalContent.substring(0, 500)}...\n\nKey takeaways:\n• Point 1\n• Point 2\n• Point 3\n\nWhat's your experience with this? Share in the comments! 👇`,
-      'youtube-script': `[INTRO]\nHey everyone! Today we're diving into ${originalTitle}.\n\n[MAIN CONTENT]\n${originalContent.substring(0, 800)}...\n\n[CALL TO ACTION]\nWhat did you think? Let me know in the comments!`,
-      'email-content': `Subject: ${originalTitle}\n\nHi there!\n\n${originalContent.substring(0, 400)}...\n\nRead the full article here: [LINK]\n\nBest regards,\n[YOUR NAME]`,
-      'quote-cards': `"${originalContent.substring(0, 150)}..."\n\n--- \n\n"Key insight from ${originalTitle}"\n\n---\n\n"Remember: ${originalContent.substring(200, 350)}..."`,
-      'podcast-outline': `Episode: ${originalTitle}\n\n[00:00] Intro\n[02:00] Topic overview\n[05:00] Main discussion\n[15:00] Key insights\n[20:00] Wrap-up and next steps`,
-      'presentation': `Slide 1: ${originalTitle}\n\nSlide 2: Overview\n${originalContent.substring(0, 200)}...\n\nSlide 3: Key Points\n• Point 1\n• Point 2\n• Point 3\n\nSlide 4: Conclusion`,
-      'faq': `Q: What is ${originalTitle} about?\nA: ${originalContent.substring(0, 200)}...\n\nQ: How can I apply this?\nA: Start by implementing the key strategies mentioned...\n\nQ: What are the benefits?\nA: The main benefits include...`,
-      'case-study': `Case Study: ${originalTitle}\n\nChallenge:\n${originalContent.substring(0, 200)}...\n\nSolution:\nWe implemented a comprehensive approach...\n\nResults:\n• Outcome 1\n• Outcome 2\n• Outcome 3`
-    };
-
-    return mockContent[option.format as keyof typeof mockContent] || originalContent.substring(0, 500) + '...';
-  };
-
-  const copyToClipboard = (content: string) => {
-    navigator.clipboard.writeText(content);
+  const copyToClipboard = (content: any) => {
+    const text = typeof content === 'string' ? content : content.join('\n\n');
+    navigator.clipboard.writeText(text);
     toast({
       title: "Copied!",
-      description: "Content copied to clipboard",
+      description: "Content copied to clipboard"
     });
   };
 
-  const exportVariant = (variant: ContentVariant) => {
-    const blob = new Blob([variant.content], { type: 'text/plain' });
+  const exportVariant = (variant: any) => {
+    const format = repurposingOptions.find(opt => opt.id === variant.formatId);
+    const content = typeof variant.content === 'string' ? variant.content : variant.content.join('\n\n');
+    
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${variant.title || 'content'}-${variant.format}.txt`;
+    a.download = `${title} - ${format?.title}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Exported",
+      description: "Content exported as text file"
+    });
   };
 
-  const saveVariantEdit = async (variant: ContentVariant) => {
-    try {
-      await apiClient.saveContentVariant(contentId, variant);
-      setVariants(prev => prev.map(v => v.id === variant.id ? variant : v));
-      setEditingVariant(null);
-      toast({
-        title: "Saved",
-        description: "Content variant updated successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save changes",
-        variant: "destructive",
-      });
-    }
-  };
+  if (!content || content.length < 100) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          <Share2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+          <p className="text-gray-500">Add more content to enable repurposing features</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Generation Controls */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <RefreshCw className="h-5 w-5" />
-            <span>Content Repurposing Engine</span>
+          <CardTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" />
+            Content Repurposing Engine
           </CardTitle>
+          <p className="text-sm text-gray-600">
+            Transform your blog post into multiple content formats
+          </p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <Label>Tone</Label>
-              <Select value={selectedTone} onValueChange={setSelectedTone}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select tone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {toneOptions.map(tone => (
-                    <SelectItem key={tone.value} value={tone.value}>
-                      {tone.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Target Platform (Optional)</Label>
-              <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Auto-select platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Auto-select</SelectItem>
-                  <SelectItem value="Twitter">Twitter</SelectItem>
-                  <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                  <SelectItem value="Instagram">Instagram</SelectItem>
-                  <SelectItem value="YouTube">YouTube</SelectItem>
-                  <SelectItem value="Email">Email</SelectItem>
-                  <SelectItem value="Website">Website</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {repurposingOptions.map(option => (
-              <Card 
-                key={option.id} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedFormat === option.id ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => generateVariant(option)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      {option.icon}
+            {repurposingOptions.map((option) => {
+              const IconComponent = option.icon;
+              return (
+                <Card key={option.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <IconComponent className="h-5 w-5 text-blue-500" />
+                      <h4 className="font-medium">{option.title}</h4>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm">{option.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {option.description}
-                      </p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {option.platforms?.map(platform => (
-                          <Badge key={platform} variant="secondary" className="text-xs">
-                            {platform}
-                          </Badge>
-                        ))}
-                        {option.characterLimit && (
-                          <Badge variant="outline" className="text-xs">
-                            {option.characterLimit} chars
-                          </Badge>
-                        )}
-                      </div>
+                    <p className="text-sm text-gray-600 mb-3">{option.description}</p>
+                    <div className="flex justify-between items-center">
+                      <Badge variant="outline" className="text-xs">
+                        {option.limit}
+                      </Badge>
+                      <Button 
+                        size="sm" 
+                        onClick={() => generateVariant(option.id)}
+                        disabled={isGenerating && activeFormat === option.id}
+                      >
+                        {isGenerating && activeFormat === option.id ? 'Generating...' : 'Generate'}
+                      </Button>
                     </div>
-                  </div>
-                  {isGenerating && selectedFormat === option.id && (
-                    <div className="flex items-center justify-center mt-3">
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span className="ml-2 text-sm">Generating...</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
 
-      {/* Generated Variants */}
       {variants.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Generated Variants ({variants.length})</CardTitle>
+            <CardTitle>Generated Variants</CardTitle>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-96">
-              <div className="space-y-4">
-                {variants.map(variant => (
-                  <Card key={variant.id} className="border-l-4 border-l-primary">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium">{variant.title}</h4>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {variant.tags.map(tag => (
-                              <Badge key={tag} variant="secondary" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex space-x-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setEditingVariant(variant)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => copyToClipboard(variant.content)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => exportVariant(variant)}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
+            <div className="space-y-4">
+              {variants.map((variant) => {
+                const format = repurposingOptions.find(opt => opt.id === variant.formatId);
+                const IconComponent = format?.icon || FileText;
+                
+                return (
+                  <div key={variant.id} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2">
+                        <IconComponent className="h-4 w-4 text-blue-500" />
+                        <h4 className="font-medium">{format?.title}</h4>
                       </div>
-
-                      {editingVariant?.id === variant.id ? (
-                        <div className="space-y-3">
-                          <Textarea
-                            value={editingVariant.content}
-                            onChange={(e) => setEditingVariant({
-                              ...editingVariant,
-                              content: e.target.value,
-                              characterCount: e.target.value.length,
-                              wordCount: e.target.value.split(' ').length
-                            })}
-                            className="min-h-32"
-                          />
-                          <div className="flex justify-between items-center">
-                            <div className="text-sm text-muted-foreground">
-                              {editingVariant.characterCount} characters • {editingVariant.wordCount} words
-                            </div>
-                            <div className="space-x-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setEditingVariant(null)}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => saveVariantEdit(editingVariant)}
-                              >
-                                Save
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => copyToClipboard(variant.content)}>
+                          <Copy className="h-4 w-4 mr-1" />
+                          Copy
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => exportVariant(variant)}>
+                          <Download className="h-4 w-4 mr-1" />
+                          Export
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 rounded p-3 mb-3 max-h-40 overflow-y-auto">
+                      {typeof variant.content === 'string' ? (
+                        <pre className="text-sm whitespace-pre-wrap">{variant.content}</pre>
                       ) : (
-                        <div>
-                          <div className="bg-muted/50 rounded-lg p-3 mb-3">
-                            <pre className="whitespace-pre-wrap text-sm font-mono">
-                              {variant.content}
-                            </pre>
-                          </div>
-                          <div className="flex justify-between items-center text-sm text-muted-foreground">
-                            <span>
-                              {variant.characterCount} characters • {variant.wordCount} words
-                            </span>
-                            <span>
-                              Created {new Date(variant.createdAt).toLocaleDateString()}
-                            </span>
-                          </div>
+                        <div className="space-y-2">
+                          {variant.content.map((item: string, index: number) => (
+                            <div key={index} className="text-sm border-l-2 border-blue-200 pl-2">
+                              {item}
+                            </div>
+                          ))}
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
+                    </div>
+                    
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{variant.wordCount} words • {variant.characterCount} characters</span>
+                      <span>Generated {new Date(variant.createdAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
       )}
-
-      {/* Quick Optimization Tools */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Target className="h-5 w-5" />
-            <span>Quick Optimization</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="length" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="length">Length Optimizer</TabsTrigger>
-              <TabsTrigger value="audience">Audience Adjuster</TabsTrigger>
-              <TabsTrigger value="cta">CTA Generator</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="length" className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { name: 'Tweet', chars: 280 },
-                  { name: 'Instagram Caption', chars: 125 },
-                  { name: 'LinkedIn Post', chars: 1300 },
-                  { name: 'Email Subject', chars: 50 }
-                ].map(format => (
-                  <Button
-                    key={format.name}
-                    variant="outline"
-                    className="flex flex-col items-center p-4 h-auto"
-                    onClick={() => {
-                      // Generate optimized length variant
-                      const mockOption: RepurposingOption = {
-                        id: `optimize-${format.name.toLowerCase()}`,
-                        name: format.name,
-                        description: `Optimize for ${format.chars} characters`,
-                        icon: <Target className="h-4 w-4" />,
-                        format: 'optimized-length',
-                        characterLimit: format.chars
-                      };
-                      generateVariant(mockOption);
-                    }}
-                  >
-                    <span className="font-medium">{format.name}</span>
-                    <span className="text-xs text-muted-foreground">{format.chars} chars</span>
-                  </Button>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="audience" className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {audienceOptions.map(audience => (
-                  <Button
-                    key={audience.value}
-                    variant="outline"
-                    className="flex flex-col items-center p-4 h-auto"
-                    onClick={() => {
-                      // Generate audience-specific variant
-                      const mockOption: RepurposingOption = {
-                        id: `audience-${audience.value}`,
-                        name: audience.label,
-                        description: `Adjusted for ${audience.label}`,
-                        icon: <Palette className="h-4 w-4" />,
-                        format: 'audience-optimized'
-                      };
-                      generateVariant(mockOption);
-                    }}
-                  >
-                    <span className="font-medium text-center">{audience.label}</span>
-                  </Button>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="cta" className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {[
-                  'Learn More',
-                  'Get Started',
-                  'Book a Demo',
-                  'Download Now',
-                  'Subscribe',
-                  'Share This'
-                ].map(ctaType => (
-                  <Button
-                    key={ctaType}
-                    variant="outline"
-                    className="flex flex-col items-center p-4 h-auto"
-                    onClick={() => {
-                      // Generate CTA variant
-                      const mockOption: RepurposingOption = {
-                        id: `cta-${ctaType.toLowerCase().replace(' ', '-')}`,
-                        name: `${ctaType} CTA`,
-                        description: `Generate ${ctaType} call-to-action`,
-                        icon: <Megaphone className="h-4 w-4" />,
-                        format: 'cta-optimized'
-                      };
-                      generateVariant(mockOption);
-                    }}
-                  >
-                    <Megaphone className="h-4 w-4 mb-1" />
-                    <span className="font-medium text-center">{ctaType}</span>
-                  </Button>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
     </div>
   );
 };
-
-export default ContentRepurposingEngine;
