@@ -55,6 +55,19 @@ export const useUserPreferences = () => {
     }
   };
 
+  const resetPreferences = async () => {
+    try {
+      setLoading(true);
+      setPreferences({});
+      return { success: true };
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Unknown error');
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchPreferences();
   }, []);
@@ -64,6 +77,7 @@ export const useUserPreferences = () => {
     loading,
     error,
     updatePreferences,
+    resetPreferences,
     refetch: fetchPreferences
   };
 };
