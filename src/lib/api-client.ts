@@ -1,89 +1,560 @@
-
 import axios, { AxiosInstance } from 'axios';
-import { getCookie } from 'cookies-next';
-import { HttpClient } from './http-client';
 import { 
-  ApiResponse, User, Campaign, Lead, Workflow, Content, AnalyticsOverview, 
-  UserPreferences, UserPreference, SocialPlatformConnection, IntegrationConnection, 
-  Webhook, BlogPost, BlogPostParams, ContentBrief
+  User, 
+  Campaign, 
+  Lead, 
+  Workflow, 
+  Content, 
+  BlogPost, 
+  UserPreference,
+  SocialPlatformConnection,
+  IntegrationConnection,
+  Webhook,
+  ApiResponse,
+  EmailMetrics,
+  BlogAnalytics,
+  BlogPerformanceMetrics,
+  TrafficSource,
+  KeywordPerformance
 } from './api-client-interface';
-import { UserPreferencesService } from './services/user-preferences-service';
-import { SocialPlatformsService } from './services/social-platforms-service';
-import { ConversationalAgentService } from './services/conversational-agent-service';
-import { WorkflowService } from './services/workflow-service';
-import { ContentGenerationService } from './services/content-generation-service';
-import { BaseApiClient } from './api/base-api-client';
-import { ContentMethods } from './api/content-methods';
-import { HeadlinesService } from './api/headlines-service';
 
 export class ApiClient {
   private axiosInstance: AxiosInstance;
-  private httpClient: HttpClient;
-  private userPreferencesService: UserPreferencesService;
-  private socialPlatformsService: SocialPlatformsService;
-  private conversationalAgentService: ConversationalAgentService;
-  private workflowService: WorkflowService;
-  private contentGenerationService: ContentGenerationService;
-  private contentMethods: ContentMethods;
-  private headlinesService: HeadlinesService;
+  public userPreferences: any;
 
-  constructor() {
-    const baseURL = import.meta.env.VITE_API_URL || 'https://wheels-wins-orchestrator.onrender.com';
-    
+  constructor(baseURL: string) {
     this.axiosInstance = axios.create({
       baseURL,
-      timeout: 30000,
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
-    this.httpClient = new HttpClient();
-    
-    // Initialize services
-    this.userPreferencesService = new UserPreferencesService();
-    this.socialPlatformsService = new SocialPlatformsService();
-    this.conversationalAgentService = new ConversationalAgentService();
-    this.workflowService = new WorkflowService();
-    this.contentGenerationService = new ContentGenerationService();
-    this.contentMethods = new ContentMethods();
-    this.headlinesService = new HeadlinesService(this.httpClient);
-
-    this.setupInterceptors();
-  }
-
-  private setupInterceptors() {
-    this.axiosInstance.interceptors.request.use((config) => {
-      const token = getCookie('supabase-auth-token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('auth-token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
       }
-      return config;
-    });
-  }
+    );
 
-  // User preferences methods
-  get userPreferences() {
-    return {
-      get: () => this.userPreferencesService.getPreferencesByCategory('general'),
-      update: (data: any) => this.userPreferencesService.updateUserPreferences('general', data),
-      getUserPreferences: (category: string) => this.userPreferencesService.getUserPreferences(category),
-      updateUserPreferences: (category: string, preferences: UserPreferences) => 
-        this.userPreferencesService.updateUserPreferences(category, preferences)
+    this.userPreferences = {
+      getUserPreferences: async (category: string): Promise<ApiResponse<UserPreference[]>> => {
+        try {
+          const response = await this.axiosInstance.get(`/api/user/preferences?category=${category}`);
+          return { success: true, data: response.data };
+        } catch (error: any) {
+          return { success: false, error: error.message };
+        }
+      },
+      updateUserPreferences: async (category: string, preferences: any): Promise<ApiResponse<UserPreference>> => {
+        try {
+          const response = await this.axiosInstance.post(`/api/user/preferences?category=${category}`, preferences);
+          return { success: true, data: response.data };
+        } catch (error: any) {
+          return { success: false, error: error.message };
+        }
+      },
+      get: async (): Promise<ApiResponse<UserPreference[]>> => {
+        try {
+          const response = await this.axiosInstance.get('/api/user/preferences');
+          return { success: true, data: response.data };
+        } catch (error: any) {
+          return { success: false, error: error.message };
+        }
+      },
     };
   }
 
-  // Social platforms methods
-  get socialPlatforms() {
-    return {
-      get: () => this.socialPlatformsService.getPlatformConnections(),
-      update: (data: any) => this.socialPlatformsService.updatePlatformConnection(data),
-      getPlatformConnections: () => this.socialPlatformsService.getPlatformConnections(),
-      initiatePlatformConnection: (platform: string) => this.socialPlatformsService.initiatePlatformConnection(platform),
-      disconnectPlatform: (platformId: string) => this.socialPlatformsService.disconnectPlatform(platformId),
-      syncPlatformData: (platformId: string) => this.socialPlatformsService.syncPlatformData(platformId),
-      testPlatformConnection: (platformId: string) => this.socialPlatformsService.testPlatformConnection(platformId)
-    };
+  async register(userData: any): Promise<ApiResponse<User>> {
+    try {
+      const response = await this.axiosInstance.post('/api/auth/register', userData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
   }
 
-  // Integrations methods
+  async login(credentials: any): Promise<ApiResponse<User>> {
+    try {
+      const response = await this.axiosInstance.post('/api/auth/login', credentials);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async logout(): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.post('/api/auth/logout');
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getUser(): Promise<ApiResponse<User>> {
+    try {
+      const response = await this.axiosInstance.get('/api/user');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateUser(userData: any): Promise<ApiResponse<User>> {
+    try {
+      const response = await this.axiosInstance.put('/api/user', userData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteUser(): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete('/api/user');
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAllCampaigns(): Promise<ApiResponse<Campaign[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/campaigns');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getCampaign(id: string): Promise<ApiResponse<Campaign>> {
+    try {
+      const response = await this.axiosInstance.get(`/api/campaigns/${id}`);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createCampaign(campaignData: any): Promise<ApiResponse<Campaign>> {
+    try {
+      const response = await this.axiosInstance.post('/api/campaigns', campaignData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateCampaign(id: string, campaignData: any): Promise<ApiResponse<Campaign>> {
+    try {
+      const response = await this.axiosInstance.put(`/api/campaigns/${id}`, campaignData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteCampaign(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete(`/api/campaigns/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAllLeads(): Promise<ApiResponse<Lead[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/leads');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+   async getLeads(): Promise<ApiResponse<Lead[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/leads');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getLead(id: string): Promise<ApiResponse<Lead>> {
+    try {
+      const response = await this.axiosInstance.get(`/api/leads/${id}`);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createLead(leadData: any): Promise<ApiResponse<Lead>> {
+    try {
+      const response = await this.axiosInstance.post('/api/leads', leadData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateLead(id: string, leadData: any): Promise<ApiResponse<Lead>> {
+    try {
+      const response = await this.axiosInstance.put(`/api/leads/${id}`, leadData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteLead(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete(`/api/leads/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async scoreLeads(): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.post('/api/leads/score');
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAllWorkflows(): Promise<ApiResponse<Workflow[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/workflows');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getWorkflow(id: string): Promise<ApiResponse<Workflow>> {
+    try {
+      const response = await this.axiosInstance.get(`/api/workflows/${id}`);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createWorkflow(name: string, description?: string): Promise<ApiResponse<Workflow>> {
+    try {
+      const response = await this.axiosInstance.post('/api/workflows', { name, description });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateWorkflow(id: string, workflowData: any): Promise<ApiResponse<Workflow>> {
+    try {
+      const response = await this.axiosInstance.put(`/api/workflows/${id}`, workflowData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete(`/api/workflows/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async executeWorkflow(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.post(`/api/workflows/${id}/execute`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAllContent(): Promise<ApiResponse<Content[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/content');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getContent(id: string): Promise<ApiResponse<Content>> {
+    try {
+      const response = await this.axiosInstance.get(`/api/content/${id}`);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createContent(contentData: any): Promise<ApiResponse<Content>> {
+    try {
+      const response = await this.axiosInstance.post('/api/content', contentData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateContent(id: string, contentData: any): Promise<ApiResponse<Content>> {
+    try {
+      const response = await this.axiosInstance.put(`/api/content/${id}`, contentData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteContent(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete(`/api/content/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async generateBlogPost(params: any): Promise<ApiResponse<BlogPost>> {
+    try {
+      const response = await this.axiosInstance.post('/api/blog/generate', params);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAllBlogPosts(): Promise<ApiResponse<BlogPost[]>> {
+     try {
+      const response = await this.axiosInstance.get('/api/blog');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getBlogPost(id: string): Promise<ApiResponse<BlogPost>> {
+    try {
+      const response = await this.axiosInstance.get(`/api/blog/${id}`);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+   async createBlogPost(blogPostData: any): Promise<ApiResponse<BlogPost>> {
+    try {
+      const response = await this.axiosInstance.post('/api/blog', blogPostData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateBlogPost(id: string, blogPostData: any): Promise<ApiResponse<BlogPost>> {
+    try {
+      const response = await this.axiosInstance.put(`/api/blog/${id}`, blogPostData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteBlogPost(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete(`/api/blog/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/integrations/social-platforms');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async connectSocialPlatform(platform: string): Promise<ApiResponse<SocialPlatformConnection>> {
+    try {
+      const response = await this.axiosInstance.post(`/api/integrations/social-platforms/connect`, { platform });
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async disconnectSocialPlatform(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.post(`/api/integrations/social-platforms/${id}/disconnect`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getIntegrationConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/integrations/connections');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createIntegrationConnection(connectionData: any): Promise<ApiResponse<IntegrationConnection>> {
+    try {
+      const response = await this.axiosInstance.post('/api/integrations/connections', connectionData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateIntegrationConnection(id: string, connectionData: any): Promise<ApiResponse<IntegrationConnection>> {
+    try {
+      const response = await this.axiosInstance.put(`/api/integrations/connections/${id}`, connectionData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteIntegrationConnection(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete(`/api/integrations/connections/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getWebhooks(): Promise<ApiResponse<Webhook[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/webhooks');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async createWebhook(webhookData: any): Promise<ApiResponse<Webhook>> {
+    try {
+      const response = await this.axiosInstance.post('/api/webhooks', webhookData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateWebhook(id: string, webhookData: any): Promise<ApiResponse<Webhook>> {
+    try {
+      const response = await this.axiosInstance.put(`/api/webhooks/${id}`, webhookData);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteWebhook(id: string): Promise<ApiResponse<void>> {
+    try {
+      await this.axiosInstance.delete(`/api/webhooks/${id}`);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getEmailAnalytics(): Promise<ApiResponse<EmailMetrics>> {
+    try {
+      const response = await this.axiosInstance.get('/api/analytics/email');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async generateEmailContent(params: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.axiosInstance.post('/api/email/generate', params);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAnalytics(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.axiosInstance.get('/api/analytics');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getBlogAnalytics(blogId?: string): Promise<ApiResponse<BlogAnalytics>> {
+    try {
+      const url = blogId ? `/api/blog/analytics/${blogId}` : '/api/blog/analytics';
+      const response = await this.axiosInstance.get(url);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getBlogPerformanceMetrics(): Promise<ApiResponse<BlogPerformanceMetrics[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/blog/performance');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getTrafficSources(blogId?: string): Promise<ApiResponse<TrafficSource[]>> {
+    try {
+      const url = blogId ? `/api/blog/traffic/${blogId}` : '/api/blog/traffic';
+      const response = await this.axiosInstance.get(url);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getKeywordPerformance(): Promise<ApiResponse<KeywordPerformance[]>> {
+    try {
+      const response = await this.axiosInstance.get('/api/blog/keywords');
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  setToken(token: string): void {
+    localStorage.setItem('auth-token', token);
+  }
+
   get integrations() {
     return {
       getWebhooks: (): Promise<ApiResponse<Webhook[]>> => Promise.resolve({ success: true, data: [] }),
@@ -101,156 +572,8 @@ export class ApiClient {
       syncService: (serviceId: string): Promise<ApiResponse<void>> => Promise.resolve({ success: true })
     };
   }
-
-  // Workflow methods
-  get workflows() {
-    return {
-      getAll: (): Promise<ApiResponse<Workflow[]>> => this.workflowService.getWorkflows(),
-      create: (name: string, description?: string): Promise<ApiResponse<Workflow>> => 
-        this.workflowService.createWorkflow(name, description),
-      update: (id: string, data: Partial<Workflow>): Promise<ApiResponse<Workflow>> => 
-        this.workflowService.updateWorkflow(id, data),
-      delete: (id: string): Promise<ApiResponse<void>> => this.workflowService.deleteWorkflow(id),
-      execute: (id: string): Promise<ApiResponse<any>> => this.workflowService.executeWorkflow(id)
-    };
-  }
-
-  // Campaign methods
-  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
-    try {
-      const response = await this.axiosInstance.get('/api/campaigns');
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async createCampaign(data: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    try {
-      const response = await this.axiosInstance.post('/api/campaigns', data);
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async updateCampaign(id: string, data: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    try {
-      const response = await this.axiosInstance.put(`/api/campaigns/${id}`, data);
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Lead methods
-  async getLeads(): Promise<ApiResponse<Lead[]>> {
-    try {
-      const response = await this.axiosInstance.get('/api/leads');
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async scoreLeads(): Promise<ApiResponse<any>> {
-    try {
-      const response = await this.axiosInstance.post('/api/leads/score');
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Content methods
-  async createContent(contentData: any): Promise<ApiResponse<Content>> {
-    try {
-      const response = await this.axiosInstance.post('/api/content', contentData);
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async generateContent(brief: ContentBrief): Promise<ApiResponse<any>> {
-    return this.contentMethods.generateContent(brief);
-  }
-
-  async generateBlogPost(params: BlogPostParams): Promise<ApiResponse<BlogPost>> {
-    try {
-      const response = await this.axiosInstance.post('/api/content/blog', params);
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Social methods
-  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
-    try {
-      const response = await this.axiosInstance.get('/api/social/platforms');
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async connectSocialPlatform(platform: string): Promise<ApiResponse<SocialPlatformConnection>> {
-    try {
-      const response = await this.axiosInstance.post('/api/social/connect', { platform });
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async scheduleSocialPost(postData: any): Promise<ApiResponse<any>> {
-    try {
-      const response = await this.axiosInstance.post('/api/social/schedule', postData);
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getSocialPosts(): Promise<ApiResponse<any[]>> {
-    try {
-      const response = await this.axiosInstance.get('/api/social/posts');
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Agent methods
-  async queryAgent(query: string): Promise<any[]> {
-    return this.conversationalAgentService.processQuery(query, []);
-  }
-
-  async callDailyFocusAgent(query: string, context: any[]): Promise<any> {
-    return this.conversationalAgentService.callDailyFocusAgent(query, [], context);
-  }
-
-  async callGeneralCampaignAgent(query: string, context: any[]): Promise<any> {
-    return this.conversationalAgentService.callGeneralCampaignAgent(query, [], context);
-  }
-
-  // Analytics methods
-  async getRealTimeMetrics(): Promise<ApiResponse<any>> {
-    try {
-      const response = await this.axiosInstance.get('/api/analytics/metrics');
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
 }
 
-export const apiClient = new ApiClient();
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
-// Export types
-export type { 
-  Campaign, Lead, User, Workflow, Content, AnalyticsOverview, 
-  UserPreferences, SocialPlatformConnection, IntegrationConnection, 
-  Webhook, BlogPost, BlogPostParams, ContentBrief 
-};
+export const apiClient = new ApiClient(baseURL);

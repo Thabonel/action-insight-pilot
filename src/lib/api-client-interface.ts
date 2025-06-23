@@ -1,4 +1,3 @@
-
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -154,4 +153,89 @@ export interface Webhook {
   active: boolean;
   created_at: string;
   secret?: string;
+}
+
+export interface EmailMetrics {
+  totalSent: number;
+  delivered: number;
+  opened: number;
+  clicked: number;
+  bounced: number;
+  unsubscribed: number;
+  openRate: number;
+  clickRate: number;
+  bounceRate: number;
+}
+
+export interface BlogAnalytics {
+  views: number;
+  uniqueViews: number;
+  engagement: number;
+  shares: number;
+  timeOnPage: number;
+  bounceRate: number;
+  conversionRate: number;
+  leads: number;
+  revenue: number;
+}
+
+export interface BlogPerformanceMetrics {
+  id: string;
+  title: string;
+  publishDate: string;
+  views: number;
+  engagement: number;
+  shares: number;
+  conversionRate: number;
+  roi: number;
+  trending: 'up' | 'down' | 'stable';
+}
+
+export interface TrafficSource {
+  source: string;
+  visits: number;
+  percentage: number;
+  conversionRate: number;
+}
+
+export interface KeywordPerformance {
+  keyword: string;
+  impressions: number;
+  clicks: number;
+  position: number;
+  ctr: number;
+}
+
+export interface SocialPlatformConnection {
+  id: string;
+  platform: string;
+  account_name: string;
+  status: 'connected' | 'disconnected' | 'error';
+  connection_status: 'connected' | 'disconnected' | 'error';
+  last_sync: string;
+  follower_count?: number;
+}
+
+export interface IntegrationConnection {
+  id: string;
+  name: string;
+  service_name: string;
+  type: string;
+  status: 'connected' | 'disconnected' | 'pending' | 'error';
+  connection_status: 'connected' | 'disconnected' | 'pending' | 'error';
+  last_sync_at?: string;
+  config: Record<string, any>;
+}
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  is_active: boolean;
+  created_at: string;
+  secret?: string;
+  last_triggered_at?: string;
+  last_response_code?: number;
 }
