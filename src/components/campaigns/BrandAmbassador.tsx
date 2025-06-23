@@ -1,300 +1,326 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, MessageSquare, CheckCircle, Clock, AlertCircle, Send, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Upload, MessageSquare, FileText, Send, ChevronRight, ChevronLeft, Building2, FileCheck, MessageCircle, Lightbulb } from 'lucide-react';
 import { HttpClient } from '@/lib/http-client';
-import ChatResponse from '@/components/dashboard/ChatResponse';
-
-const httpClient = new HttpClient();
+import { ApiResponse } from '@/lib/api/api-client-interface';
 
 interface Document {
   id: string;
   name: string;
-  status: 'processing' | 'ready' | 'error';
-  summary?: string;
+  summary: string;
   category?: string;
-  uploadedAt: string;
 }
 
 interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-interface ChatApiResponse {
-  message?: string;
-  response?: string;
+  message: string;
+  response: string;
 }
 
 const BrandAmbassador: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const loadDocuments = async () => {
-    try {
-      const response = await httpClient.get('/api/brand-documents');
-      if (response.success && response.data) {
-        setDocuments(response.data as Document[]);
-      }
-    } catch (error) {
-      console.error('Failed to load documents:', error);
-    }
-  };
-
-  React.useEffect(() => {
-    loadDocuments();
+  useEffect(() => {
+    // Mock data for demonstration
+    setDocuments([
+      { id: '1', name: 'Brand Guidelines v1.2', summary: 'Comprehensive guidelines for brand usage', category: 'Guidelines' },
+      { id: '2', name: 'Messaging Framework 2023', summary: 'Approved messaging for all communications', category: 'Messaging' },
+    ]);
   }, []);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsUploading(true);
-    
-    try {
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await httpClient.post('/api/brand-documents/upload', formData);
-        
-        if (response.success && response.data) {
-          const uploadedDoc = response.data as Document;
-          setDocuments(prev => [...prev, {
-            id: uploadedDoc.id,
-            name: file.name,
-            status: 'processing',
-            uploadedAt: new Date().toISOString()
-          }]);
-        }
-      }
-      
-      // Refresh documents after upload
+    const files = event.target.files;
+    if (files) {
+      const newDocuments = Array.from(files).map((file, index) => ({
+        id: String(Date.now() + index),
+        name: file.name,
+        summary: 'Uploaded document',
+      }));
+      setDocuments((prev) => [...prev, ...newDocuments]);
       setTimeout(() => {
-        loadDocuments();
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Failed to upload documents:', error);
-    } finally {
+        setIsUploading(false);
+      }, 2000);
+    } else {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
-  const getStatusIcon = (status: Document['status']) => {
-    switch (status) {
-      case 'ready':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'processing':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+  const sendMessage = async () => {
+    if (currentMessage.trim()) {
+      setIsLoading(true);
+      setChatHistory((prev) => [...prev, { message: currentMessage, response: 'Thinking...' }]);
+      setCurrentMessage('');
+
+      // Simulate API call
+      setTimeout(() => {
+        const mockResponse = `Response to: ${currentMessage}. This is a simulated response from the Brand Assistant.`;
+        setChatHistory((prev) => {
+          const updatedHistory = [...prev];
+          updatedHistory[updatedHistory.length - 1].response = mockResponse;
+          return updatedHistory;
+        });
+        setIsLoading(false);
+      }, 3000);
     }
   };
 
-  const getStatusColor = (status: Document['status']) => {
-    switch (status) {
-      case 'ready':
-        return 'bg-green-100 text-green-800';
-      case 'processing':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'error':
-        return 'bg-red-100 text-red-800';
-    }
-  };
-
-  const getStatusText = (status: Document['status']) => {
-    switch (status) {
-      case 'ready':
-        return 'Ready';
-      case 'processing':
-        return 'Processing';
-      case 'error':
-        return 'Error';
-    }
-  };
-
-  const hasReadyDocuments = documents.some(doc => doc.status === 'ready');
-
-  const handleSendMessage = async () => {
-    if (!currentMessage.trim() || isLoading || !hasReadyDocuments) return;
-
-    const userMessage = currentMessage;
-    setCurrentMessage('');
-    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    setIsLoading(true);
-
-    try {
-      const readyDocs = documents
-        .filter(doc => doc.status === 'ready')
-        .map(doc => ({
-          id: doc.id,
-          name: doc.name,
-          summary: doc.summary || ''
-        }));
-
-      const response = await httpClient.post('/api/brand-ambassador/chat', {
-        message: userMessage,
-        documents: readyDocs,
-        conversationHistory: chatMessages
-      });
-
-      if (response.success && response.data) {
-        const chatResponse = response.data as ChatApiResponse;
-        const assistantMessage = chatResponse.message || chatResponse.response || 'No response received';
-        setChatMessages(prev => [...prev, { role: 'assistant', content: assistantMessage }]);
-      }
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      setChatMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.' 
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Brand Knowledge Base
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="flex items-center gap-2"
-              >
-                {isUploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4" />
-                )}
-                Upload Documents
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,.txt,.md"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <span className="text-sm text-gray-500">
-                Upload brand guidelines, product docs, marketing materials
-              </span>
-            </div>
+    <div className="container mx-auto p-4 max-w-7xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Brand Ambassador</h1>
+        <p className="text-gray-600 mt-2">Upload brand documents and chat with your brand's knowledge base</p>
+      </div>
 
-            {documents.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-medium">Uploaded Documents</h3>
-                <div className="grid gap-3">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-gray-500" />
-                        <div>
-                          <div className="font-medium">{doc.name}</div>
-                          {doc.summary && (
-                            <div className="text-sm text-gray-600">{doc.summary}</div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {doc.category && (
-                          <Badge variant="outline">{doc.category}</Badge>
-                        )}
-                        <Badge className={getStatusColor(doc.status)}>
-                          <div className="flex items-center gap-1">
-                            {getStatusIcon(doc.status)}
-                            {getStatusText(doc.status)}
+      <div className="flex gap-6 h-[calc(100vh-200px)]">
+        {/* Main Content Area */}
+        <div className={`transition-all duration-300 ${sidebarCollapsed ? 'flex-1' : 'flex-1 mr-80'}`}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+            {/* Document Upload Section */}
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Brand Documents
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer mb-4">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".txt,.pdf,.doc,.docx,.md"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-lg font-medium text-gray-900">Upload Brand Documents</p>
+                    <p className="text-gray-500">Drag and drop or click to select files</p>
+                    <p className="text-sm text-gray-400 mt-2">Supports: TXT, PDF, DOC, DOCX, MD</p>
+                  </label>
+                </div>
+
+                {isUploading && (
+                  <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                    <p className="text-blue-800">Uploading and processing documents...</p>
+                  </div>
+                )}
+
+                <ScrollArea className="flex-1">
+                  <div className="space-y-2">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <FileCheck className="h-4 w-4 text-green-600" />
+                          <div>
+                            <p className="font-medium text-sm">{doc.name}</p>
+                            <p className="text-xs text-gray-600">{doc.summary}</p>
                           </div>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {doc.category || 'General'}
                         </Badge>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Brand Ambassador Chat
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {!hasReadyDocuments && (
-              <div className="text-center p-8 text-gray-500">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Upload and process documents to start chatting with your brand ambassador</p>
-              </div>
-            )}
-
-            {chatMessages.length > 0 && (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {chatMessages.map((message, index) => (
-                  <div key={index} className="space-y-2">
-                    {message.role === 'user' ? (
-                      <div className="flex justify-end">
-                        <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs lg:max-w-md">
-                          {message.content}
+            {/* Chat Section */}
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Brand Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col">
+                <ScrollArea className="flex-1 mb-4 p-4 border rounded-lg bg-gray-50">
+                  <div className="space-y-4">
+                    {chatHistory.map((chat, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="bg-blue-100 p-3 rounded-lg">
+                          <p className="font-medium text-blue-900">You:</p>
+                          <p className="text-blue-800">{chat.message}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg border">
+                          <p className="font-medium text-gray-900">Brand Assistant:</p>
+                          <p className="text-gray-700">{chat.response}</p>
                         </div>
                       </div>
-                    ) : (
-                      <ChatResponse response={message.content} />
+                    ))}
+                    
+                    {isLoading && (
+                      <div className="bg-gray-100 p-3 rounded-lg">
+                        <p className="text-gray-600">Thinking...</p>
+                      </div>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                </ScrollArea>
 
-            {hasReadyDocuments && (
-              <div className="flex gap-2">
-                <Input
-                  value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
-                  placeholder="Ask about your brand, products, or marketing strategy..."
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  disabled={isLoading}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={isLoading || !currentMessage.trim()}
-                  size="icon"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
+                <div className="flex gap-2">
+                  <Textarea
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    placeholder="Ask about your brand guidelines, messaging, or get content suggestions..."
+                    className="flex-1 min-h-[60px] resize-none"
+                  />
+                  <Button 
+                    onClick={sendMessage} 
+                    disabled={!currentMessage.trim() || isLoading}
+                    className="px-4 self-end"
+                  >
                     <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Brand Context Sidebar */}
+        <div className={`fixed right-0 top-0 h-full bg-white border-l shadow-lg transition-all duration-300 z-50 ${
+          sidebarCollapsed ? 'w-12' : 'w-80'
+        }`}>
+          {/* Toggle Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="absolute left-2 top-20 z-10 p-2"
+          >
+            {sidebarCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+
+          {/* Sidebar Content */}
+          <div className={`p-4 pt-16 h-full overflow-hidden ${sidebarCollapsed ? 'hidden' : 'block'}`}>
+            <div className="space-y-6">
+              {/* Brand Overview */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                  <h3 className="font-semibold text-gray-900">Brand Overview</h3>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900">Your Brand</h4>
+                  <p className="text-sm text-blue-700 mt-1">
+                    {documents.length > 0 
+                      ? `${documents.length} documents loaded with brand guidelines and context`
+                      : 'Upload brand documents to see your brand overview here'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Key Guidelines */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <FileCheck className="h-5 w-5 text-green-600" />
+                  <h3 className="font-semibold text-gray-900">Key Guidelines</h3>
+                </div>
+                <ScrollArea className="h-40">
+                  <div className="space-y-2">
+                    {documents.length > 0 ? (
+                      documents.slice(0, 3).map((doc) => (
+                        <div key={doc.id} className="bg-green-50 p-3 rounded-lg">
+                          <p className="font-medium text-green-900 text-sm">{doc.name}</p>
+                          <p className="text-xs text-green-700 mt-1">{doc.summary}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">
+                        Guidelines will appear here after uploading brand documents
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              <Separator />
+
+              {/* Recent Decisions */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="h-5 w-5 text-purple-600" />
+                  <h3 className="font-semibold text-gray-900">Recent Insights</h3>
+                </div>
+                <ScrollArea className="h-32">
+                  <div className="space-y-2">
+                    {chatHistory.length > 0 ? (
+                      chatHistory.slice(-2).map((chat, index) => (
+                        <div key={index} className="bg-purple-50 p-3 rounded-lg">
+                          <p className="text-xs text-purple-700 font-medium">Recent Query:</p>
+                          <p className="text-xs text-purple-600 mt-1 truncate">
+                            {chat.message.substring(0, 60)}...
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">
+                        Recent conversation insights will appear here
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              <Separator />
+
+              {/* Quick Actions */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Lightbulb className="h-5 w-5 text-yellow-600" />
+                  <h3 className="font-semibold text-gray-900">Quick Actions</h3>
+                </div>
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start text-xs"
+                    onClick={() => setCurrentMessage("What are our key brand values?")}
+                  >
+                    Ask about brand values
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start text-xs"
+                    onClick={() => setCurrentMessage("Create a social media post")}
+                  >
+                    Generate content
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start text-xs"
+                    onClick={() => setCurrentMessage("Review messaging guidelines")}
+                  >
+                    Review guidelines
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
