@@ -16,7 +16,9 @@ export class IntegrationMethods extends BaseApiClient {
           status: 'connected',
           connection_status: 'connected',
           last_sync_at: new Date().toISOString(),
-          config: {}
+          config: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         },
         {
           id: '2',
@@ -26,7 +28,9 @@ export class IntegrationMethods extends BaseApiClient {
           status: 'connected',
           connection_status: 'connected',
           last_sync_at: new Date().toISOString(),
-          config: {}
+          config: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }
       ]
     };
@@ -39,7 +43,8 @@ export class IntegrationMethods extends BaseApiClient {
         id: 'new-connection',
         ...data,
         status: 'connected',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
     };
   }
@@ -67,8 +72,8 @@ export class IntegrationMethods extends BaseApiClient {
         url: data.url || '',
         events: data.events || [],
         active: true,
-        is_active: true,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
     };
   }
