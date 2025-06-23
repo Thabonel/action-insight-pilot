@@ -117,6 +117,35 @@ export const useWorkflows = () => {
     }
   };
 
+  const executeWorkflow = async (id: string) => {
+    try {
+      const result = await apiClient.workflows.execute(id);
+      
+      if (result.success) {
+        toast({
+          title: "Workflow Executed",
+          description: "Workflow has been executed successfully",
+        });
+        return true;
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to execute workflow",
+          variant: "destructive",
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error('Error executing workflow:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchWorkflows();
   }, []);
@@ -128,6 +157,7 @@ export const useWorkflows = () => {
     createWorkflow,
     updateWorkflow,
     deleteWorkflow,
+    executeWorkflow,
     refetch: fetchWorkflows
   };
 };
