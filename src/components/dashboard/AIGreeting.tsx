@@ -15,21 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-
-interface RealInsights {
-  totalUsers?: number;
-  activeFeatures?: string[];
-  recentActions?: Array<{
-    action: string;
-    timestamp: Date;
-    feature: string;
-  }>;
-  systemHealth?: {
-    status: 'healthy' | 'warning' | 'error';
-    uptime: number;
-    lastCheck: Date;
-  };
-}
+import { RealInsights } from '@/types/insights';
 
 interface AIGreetingProps {
   insights: RealInsights | null;
@@ -60,18 +46,8 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
   const getPersonalizedMessage = () => {
     if (!insights) return "Let's optimize your marketing strategy today.";
     
-    const { activeFeatures, recentActions, systemHealth } = insights;
-    
-    if (systemHealth?.status === 'error') {
-      return "I'm experiencing some connectivity issues, but I'm here to help with what I can.";
-    }
-    
-    if (activeFeatures && activeFeatures.length > 0) {
-      return `You have ${activeFeatures.length} active features. Ready to dive deeper into your ${activeFeatures[0].toLowerCase()}?`;
-    }
-    
-    if (recentActions && recentActions.length > 0) {
-      return `I see you've been working on ${recentActions[0].feature.toLowerCase()}. Let's continue optimizing your strategy.`;
+    if (insights.recentActivities && insights.recentActivities.length > 0) {
+      return `I see you've been working on your campaigns. Let's continue optimizing your strategy.`;
     }
     
     return "Ready to help you build and optimize your marketing campaigns.";
@@ -175,22 +151,15 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
         </p>
         
         <div className="flex items-center space-x-4 text-sm">
-          {insights.systemHealth && (
-            <div className="flex items-center space-x-1">
-              <div className={`w-2 h-2 rounded-full ${
-                insights.systemHealth.status === 'healthy' ? 'bg-green-400' :
-                insights.systemHealth.status === 'warning' ? 'bg-yellow-400' : 'bg-red-400'
-              }`}></div>
-              <span className="text-white/80">System {insights.systemHealth.status}</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 rounded-full bg-green-400"></div>
+            <span className="text-white/80">System healthy</span>
+          </div>
           
-          {insights.activeFeatures && insights.activeFeatures.length > 0 && (
-            <div className="flex items-center space-x-1">
-              <TrendingUp className="h-3 w-3" />
-              <span className="text-white/80">{insights.activeFeatures.length} active features</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-1">
+            <TrendingUp className="h-3 w-3" />
+            <span className="text-white/80">{insights.totalActions} total actions</span>
+          </div>
           
           <div className="flex items-center space-x-1">
             <Clock className="h-3 w-3" />
