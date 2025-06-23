@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ConversationalData {
   campaigns: any[];
