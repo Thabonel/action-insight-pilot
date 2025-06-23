@@ -1,4 +1,3 @@
-
 import { ApiResponse, Campaign, EmailMetrics, UserPreferences, Webhook, SocialPost, IntegrationConnection, SocialPlatformConnection } from './api-client-interface';
 
 export class ApiClient {
@@ -171,6 +170,58 @@ export class ApiClient {
     return this.makeRequest('/api/agents/daily-focus', {
       method: 'POST',
       body: JSON.stringify({ query, campaigns, context }),
+    });
+  }
+
+  // Content methods
+  async createContent(content: { title: string; content: string; platform: string; scheduled_for?: string; status?: string }): Promise<ApiResponse<any>> {
+    return this.makeRequest('/api/content', {
+      method: 'POST',
+      body: JSON.stringify(content),
+    });
+  }
+
+  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string): Promise<ApiResponse<any>> {
+    return this.makeRequest('/api/social/generate-content', {
+      method: 'POST',
+      body: JSON.stringify({ platform, contentTheme, brandVoice }),
+    });
+  }
+
+  // Email methods
+  async generateEmailContent(campaignType: string, audience: any, options?: any): Promise<ApiResponse<any>> {
+    return this.makeRequest('/api/email/generate-content', {
+      method: 'POST',
+      body: JSON.stringify({ campaignType, audience, options }),
+    });
+  }
+
+  async generateABVariants(baseMessage: string): Promise<ApiResponse<any>> {
+    return this.makeRequest('/api/email/ab-variants', {
+      method: 'POST',
+      body: JSON.stringify({ baseMessage }),
+    });
+  }
+
+  async suggestSendTime(audienceProfile: any): Promise<ApiResponse<any>> {
+    return this.makeRequest('/api/email/suggest-send-time', {
+      method: 'POST',
+      body: JSON.stringify({ audienceProfile }),
+    });
+  }
+
+  // Lead management methods
+  async executeAgentTask(task: string, context?: any): Promise<ApiResponse<any>> {
+    return this.makeRequest('/api/leads/agent-task', {
+      method: 'POST',
+      body: JSON.stringify({ task, context }),
+    });
+  }
+
+  async scoreLeads(leads: any[]): Promise<ApiResponse<any>> {
+    return this.makeRequest('/api/leads/score', {
+      method: 'POST',
+      body: JSON.stringify({ leads }),
     });
   }
 }
