@@ -13,7 +13,7 @@ export class ChatAgentRouter {
         throw new Error('Unable to authenticate with backend service');
       }
 
-      const campaignData = await ConversationalService.fetchCampaignData(authToken);
+      const campaignData = await ConversationalService.fetchCampaignData();
       const queryType = QueryProcessor.determineQueryType(userQuery);
       
       let agentResponse;
@@ -21,14 +21,14 @@ export class ChatAgentRouter {
       // Route to appropriate agent based on query type
       switch (queryType) {
         case 'daily_focus':
-          agentResponse = await ConversationalService.callDailyFocusAgent(userQuery, campaignData, context, authToken);
+          agentResponse = await ConversationalService.callDailyFocusAgent(userQuery);
           break;
         case 'campaign_analysis':
         case 'lead_analysis':
         case 'content_strategy':
         case 'performance_metrics':
         default:
-          agentResponse = await ConversationalService.callGeneralCampaignAgent(userQuery, campaignData, context, authToken);
+          agentResponse = await ConversationalService.callGeneralCampaignAgent(userQuery);
           break;
       }
       
@@ -83,7 +83,7 @@ export class ChatAgentRouter {
       if (!authToken) return false;
       
       // Simple health check - try to fetch campaign data
-      await ConversationalService.fetchCampaignData(authToken);
+      await ConversationalService.fetchCampaignData();
       return true;
     } catch (error) {
       console.log('Backend health check failed:', error);
