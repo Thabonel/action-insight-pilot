@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { createSocialMethods } from './api/social-methods';
 import { IntegrationMethods } from './api/integration-methods';
@@ -9,13 +10,15 @@ import {
   EmailMetrics,
   Campaign,
   IntegrationConnection,
-  Webhook
+  Webhook,
+  Workflow
 } from './api-client-interface';
 
 class ApiClient {
   private client: any;
   private socialMethods: any;
   private integrationMethods: IntegrationMethods;
+  private authToken: string | null = null;
 
   constructor() {
     const config = {
@@ -29,6 +32,11 @@ class ApiClient {
     this.client = axios.create(config);
     this.socialMethods = createSocialMethods();
     this.integrationMethods = new IntegrationMethods();
+  }
+
+  setToken(token: string) {
+    this.authToken = token;
+    this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 
   async get(url: string, params?: any): Promise<any> {
@@ -78,6 +86,16 @@ class ApiClient {
       return response;
     } catch (error: any) {
       console.error('Agent query failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async callGeneralCampaignAgent(query: string, campaignData?: any[], context?: any[], authToken?: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/agent/campaign', { query, campaignData, context });
+      return response;
+    } catch (error: any) {
+      console.error('Campaign agent query failed:', error);
       return { success: false, error: error.message };
     }
   }
@@ -165,6 +183,16 @@ class ApiClient {
     }
   }
 
+  async getEmailAnalytics(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/email/analytics');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch email analytics:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Lead methods
   async scoreLeads(): Promise<ApiResponse<any>> {
     try {
@@ -176,9 +204,73 @@ class ApiClient {
     }
   }
 
+  async getLeads(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/leads');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch leads:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Analytics methods
+  async getAnalytics(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/analytics');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch analytics:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Social media methods
+  async getSocialPlatforms(): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.get('/social/platforms');
+      return response;
+    } catch (error: any) {
+      console.error('Failed to fetch social platforms:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async connectSocialPlatform(data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/social/connect', data);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to connect social platform:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async scheduleSocialPost(data: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await this.post('/social/schedule', data);
+      return response;
+    } catch (error: any) {
+      console.error('Failed to schedule social post:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Integration methods
   get integrations(): IntegrationMethods {
     return this.integrationMethods;
+  }
+
+  async getConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
+    return this.integrationMethods.getConnections();
+  }
+
+  async createConnection(data: any): Promise<ApiResponse<any>> {
+    return this.integrationMethods.createConnection(data);
+  }
+
+  async deleteConnection(id: string): Promise<ApiResponse<any>> {
+    return this.integrationMethods.deleteConnection(id);
   }
 
   // Social platform methods
@@ -211,3 +303,4 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
+export type { Workflow, WorkflowMethods, Campaign } from './api-client-interface';
