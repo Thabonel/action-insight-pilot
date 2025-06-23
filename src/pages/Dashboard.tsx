@@ -5,6 +5,7 @@ import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import PerformanceChart from '@/components/dashboard/PerformanceChart';
 import EnhancedChatInterface from '@/components/dashboard/EnhancedChatInterface';
+import { RealInsights } from '@/types/insights';
 
 const Dashboard: React.FC = () => {
   // Mock dashboard data for the PerformanceChart
@@ -17,15 +18,21 @@ const Dashboard: React.FC = () => {
     systemStats: {}
   };
 
-  // Mock insights for QuickActionGrid - will be replaced with real data later
-  const mockInsights = {
-    totalUsers: 1,
-    activeFeatures: ['AI Assistant'],
-    recentActions: [],
-    systemHealth: {
-      status: 'healthy' as const,
-      uptime: 0,
-      lastCheck: new Date()
+  // Mock insights for QuickActionGrid - matches RealInsights interface
+  const mockInsights: RealInsights = {
+    totalActions: 1,
+    recentActivities: [
+      {
+        type: 'dashboard_visit',
+        message: 'Visited marketing dashboard',
+        timestamp: new Date()
+      }
+    ],
+    suggestions: ['Set up your first campaign', 'Connect your email platform', 'Review analytics'],
+    trends: {
+      positive: 1,
+      negative: 0,
+      neutral: 0
     }
   };
 
