@@ -1,4 +1,3 @@
-
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -73,6 +72,7 @@ export interface Content {
   updated_at: string;
   user_id: string;
   platform?: string;
+  scheduled_for?: string; // Add this field
 }
 
 export interface BlogPost {
