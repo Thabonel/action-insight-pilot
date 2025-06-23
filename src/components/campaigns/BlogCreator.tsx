@@ -11,8 +11,9 @@ import { AIWritingAssistant } from '@/components/content/AIWritingAssistant';
 import { BrandVoiceChecker } from '@/components/brand/BrandVoiceChecker';
 import { PublishingWorkflow } from '@/components/blog/PublishingWorkflow';
 import { ContentLibrary } from '@/components/content/ContentLibrary';
+import { AIOptimizationCoach } from '@/components/content/AIOptimizationCoach';
 import IntegrationHub from '@/components/blog/IntegrationHub';
-import { Edit, Save, Sparkles, CheckCircle, Library, Share2 } from 'lucide-react';
+import { Edit, Save, Sparkles, CheckCircle, Library, Share2, Brain } from 'lucide-react';
 
 const BlogCreator: React.FC = () => {
   const [blogPost, setBlogPost] = useState({
@@ -26,6 +27,7 @@ const BlogCreator: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState('editor');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showOptimizationCoach, setShowOptimizationCoach] = useState(true);
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -51,6 +53,19 @@ const BlogCreator: React.FC = () => {
     });
   };
 
+  const handlePublishReady = () => {
+    setBlogPost(prev => ({ ...prev, status: 'published' }));
+    toast({
+      title: "Blog post published",
+      description: "Your blog post has been successfully published."
+    });
+  };
+
+  const handlePostSelect = (postId: string) => {
+    console.log('Selected post:', postId);
+    // Load selected post data
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -69,6 +84,13 @@ const BlogCreator: React.FC = () => {
           >
             <Sparkles className="h-4 w-4 mr-2" />
             AI Assistant
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowOptimizationCoach(!showOptimizationCoach)}
+          >
+            <Brain className="h-4 w-4 mr-2" />
+            AI Coach
           </Button>
         </div>
       </div>
@@ -142,6 +164,14 @@ const BlogCreator: React.FC = () => {
             </div>
 
             <div className="space-y-6">
+              {showOptimizationCoach && (
+                <AIOptimizationCoach
+                  content={blogPost.content}
+                  title={blogPost.title}
+                  onContentUpdate={handleContentUpdate}
+                />
+              )}
+              
               {showAIAssistant && (
                 <AIWritingAssistant
                   content={blogPost.content}
@@ -157,15 +187,15 @@ const BlogCreator: React.FC = () => {
         <TabsContent value="brand">
           <BrandVoiceChecker
             content={blogPost.content}
-            title={blogPost.title}
             onContentUpdate={handleContentUpdate}
           />
         </TabsContent>
 
         <TabsContent value="publish">
           <PublishingWorkflow
-            blogPost={blogPost}
-            onUpdateBlogPost={setBlogPost}
+            content={blogPost.content}
+            title={blogPost.title}
+            onPublish={handlePublishReady}
           />
         </TabsContent>
 
@@ -181,7 +211,7 @@ const BlogCreator: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="library">
-          <ContentLibrary />
+          <ContentLibrary onPostSelect={handlePostSelect} />
         </TabsContent>
       </Tabs>
     </div>
