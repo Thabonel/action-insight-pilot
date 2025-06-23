@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 import { Loader2, Bot, Users } from 'lucide-react';
 
 interface LeadInsight {
@@ -33,7 +35,7 @@ const LeadAIAssistant: React.FC = () => {
     setLoading(true);
     try {
       console.log('Analyzing leads with query:', query);
-      const result = await apiClient.queryAgent(query);
+      const result = await apiClient.queryAgent(query) as ApiResponse<any>;
       
       if (result.success && result.data) {
         // Transform the response into LeadInsight format
@@ -74,7 +76,7 @@ const LeadAIAssistant: React.FC = () => {
     setLoading(true);
     try {
       console.log('Scoring leads...');
-      const result = await apiClient.scoreLeads();
+      const result = await apiClient.scoreLeads() as ApiResponse<any>;
       
       if (result.success) {
         toast({
@@ -84,7 +86,7 @@ const LeadAIAssistant: React.FC = () => {
       } else {
         toast({
           title: "Scoring Failed",
-          description: result.error || "Failed to score leads",
+          description: "Failed to score leads",
           variant: "destructive",
         });
       }

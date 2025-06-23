@@ -7,19 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse, ContentBrief } from '@/lib/api-client-interface';
 import { Loader2, Sparkles } from 'lucide-react';
-
-interface ContentBrief {
-  title: string;
-  content_type: string;
-  target_audience: string;
-  key_messages: string[];
-  platform: string;
-  tone?: string;
-  length?: string;
-  keywords?: string[];
-  cta?: string;
-}
 
 const IntelligentContentGenerator: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -55,7 +44,7 @@ const IntelligentContentGenerator: React.FC = () => {
     setLoading(true);
     try {
       console.log('Generating content with brief:', brief);
-      const result = await apiClient.generateContent(brief);
+      const result = await apiClient.generateContent(brief) as ApiResponse<any>;
       
       if (result.success && result.data) {
         setGeneratedContent(result.data.content || 'Content generated successfully');

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar, Clock, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 
 interface ContentSchedulingDialogProps {
   children: React.ReactNode;
@@ -47,7 +48,7 @@ const ContentSchedulingDialog: React.FC<ContentSchedulingDialogProps> = ({
         platform,
         scheduled_for: scheduledDateTime,
         status: 'scheduled'
-      });
+      }) as ApiResponse<any>;
 
       if (response.success) {
         toast({

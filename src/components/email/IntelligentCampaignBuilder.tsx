@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 import { Loader2, Mail } from 'lucide-react';
 
 interface CampaignBrief {
@@ -53,7 +54,7 @@ const IntelligentCampaignBuilder: React.FC = () => {
     try {
       console.log('Generating email campaign with brief:', brief);
       const briefText = `Subject: ${brief.subject}, Audience: ${brief.audience}, Goal: ${brief.goal}, Tone: ${brief.tone}, Key Points: ${brief.keyPoints.join(', ')}`;
-      const result = await apiClient.generateEmailContent(briefText);
+      const result = await apiClient.generateEmailContent(briefText) as ApiResponse<any>;
       
       if (result.success && result.data) {
         setGeneratedContent(result.data.content || 'Email content generated successfully');
@@ -90,6 +91,7 @@ const IntelligentCampaignBuilder: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="subject">Email Subject</Label>
