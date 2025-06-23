@@ -1,258 +1,55 @@
 import { HttpClient } from './http-client';
-import { 
-  Campaign, 
-  EmailMetrics, 
-  UserPreferences, 
-  ApiResponse, 
-  SocialPlatformConnection, 
-  IntegrationConnection 
-} from './api-client-interface';
+import { ApiResponse } from './api-response';
 
 export class ApiClient {
-  public httpClient: HttpClient;
-  public integrations: any;
-  public analytics: any;
-  public userPreferences: any;
-  public socialPlatforms: any;
+  private httpClient: HttpClient;
+  private token: string | null = null;
 
-  constructor(baseURL?: string) {
-    this.httpClient = new HttpClient(baseURL);
-    this.setupNestedObjects();
-  }
-
-  private setupNestedObjects() {
-    this.integrations = {
-      getConnections: () => this.getIntegrationConnections(),
-      createConnection: (data: any) => this.createIntegrationConnection(data),
-      deleteConnection: (id: string) => this.deleteIntegrationConnection(id)
-    };
-
-    this.analytics = {
-      getAnalyticsOverview: () => this.getAnalyticsOverview(),
-      getSystemStats: () => this.getSystemStats(),
-      exportAnalyticsReport: (format: string, timeRange: string) => this.exportAnalyticsReport(format, timeRange)
-    };
-
-    this.userPreferences = {
-      get: () => this.getUserPreferences(),
-      getUserPreferences: (category?: string) => this.getUserPreferences(category),
-      updateUserPreferences: (preferences: UserPreferences) => this.updateUserPreferences(preferences)
-    };
-
-    this.socialPlatforms = {
-      getConnected: () => this.getSocialPlatforms()
-    };
+  constructor() {
+    this.httpClient = new HttpClient();
   }
 
   setToken(token: string) {
-    this.httpClient.setToken(token);
+    this.token = token;
+    this.httpClient.setAuthToken(token);
   }
 
-  // Campaign methods
-  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
-    return this.httpClient.get<Campaign[]>('/api/campaigns');
+  clearToken() {
+    this.token = null;
+    this.httpClient.clearAuthToken();
   }
 
-  async getCampaignById(id: string): Promise<ApiResponse<Campaign>> {
-    return this.httpClient.get<Campaign>(`/api/campaigns/${id}`);
+  async getCampaigns(): Promise<ApiResponse<any[]>> {
+    return this.httpClient.request('/api/campaigns');
   }
 
-  async createCampaign(campaign: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    return this.httpClient.post<Campaign>('/api/campaigns', campaign);
-  }
-
-  async updateCampaign(id: string, updates: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    return this.httpClient.put<Campaign>(`/api/campaigns/${id}`, updates);
-  }
-
-  // Lead methods
   async getLeads(): Promise<ApiResponse<any[]>> {
-    return this.httpClient.get<any[]>('/api/leads');
+    return this.httpClient.request('/api/leads');
   }
 
-  async exportLeads(format: string = 'csv'): Promise<ApiResponse<string>> {
-    return this.httpClient.get<string>(`/api/leads/export?format=${format}`);
-  }
-
-  async syncLeads(): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/leads/sync');
-  }
-
-  async executeAgentTask(taskType: string, data?: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/agents/execute', { taskType, data });
-  }
-
-  async scoreLeads(): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/leads/score');
-  }
-
-  // Analytics methods
   async getAnalytics(): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>('/api/analytics');
+    return this.httpClient.request('/api/analytics');
   }
 
-  async getRealTimeMetrics(): Promise<ApiResponse<EmailMetrics>> {
-    return this.httpClient.get<EmailMetrics>('/api/metrics/realtime');
-  }
-
-  async getAnalyticsOverview(): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>('/api/analytics/overview');
-  }
-
-  async getSystemStats(): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>('/api/system/stats');
-  }
-
-  async exportAnalyticsReport(format: string, timeRange: string): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>(`/api/analytics/export?format=${format}&timeRange=${timeRange}`);
-  }
-
-  async getEmailAnalytics(): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>('/api/analytics/email');
-  }
-
-  async getSocialAnalytics(): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>('/api/analytics/social');
-  }
-
-  async getSystemHealth(): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>('/api/system/health');
-  }
-
-  // Social Platform methods
-  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
-    return this.httpClient.get<SocialPlatformConnection[]>('/api/social/platforms');
-  }
-
-  async connectSocialPlatform(platform: string, config: any = {}): Promise<ApiResponse<SocialPlatformConnection>> {
-    return this.httpClient.post<SocialPlatformConnection>('/api/social/connect', { platform, config });
-  }
-
-  async scheduleSocialPost(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/social/schedule', data);
-  }
-
-  async createSocialPost(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/social/posts', data);
-  }
-
-  // User Preferences methods
-  async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences>> {
-    const url = category ? `/api/user/preferences?category=${category}` : '/api/user/preferences';
-    return this.httpClient.get<UserPreferences>(url);
-  }
-
-  async updateUserPreferences(preferences: UserPreferences): Promise<ApiResponse<UserPreferences>> {
-    return this.httpClient.put<UserPreferences>('/api/user/preferences', preferences);
-  }
-
-  // Integration methods
-  async getIntegrationConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
-    return this.httpClient.get<IntegrationConnection[]>('/api/integrations');
-  }
-
-  async createIntegrationConnection(data: any): Promise<ApiResponse<IntegrationConnection>> {
-    return this.httpClient.post<IntegrationConnection>('/api/integrations', data);
-  }
-
-  async deleteIntegrationConnection(id: string): Promise<ApiResponse<void>> {
-    return this.httpClient.delete<void>(`/api/integrations/${id}`);
-  }
-
-  // Content methods
-  async createContent(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content', data);
-  }
-
-  async generateContent(brief: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content/generate', brief);
-  }
-
-  async generateSocialContent(brief: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content/social/generate', brief);
-  }
-
-  async generateEmailContent(brief: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content/email/generate', brief);
-  }
-
-  async generateABVariants(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content/ab-variants', data);
-  }
-
-  async suggestSendTime(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/content/send-time', data);
-  }
-
-  // Workflow methods
-  async getWorkflows(): Promise<ApiResponse<any[]>> {
-    return this.httpClient.get<any[]>('/api/workflows');
-  }
-
-  async createWorkflow(data: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/workflows', data);
-  }
-
-  async executeWorkflow(id: string): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>(`/api/workflows/${id}/execute`);
-  }
-
-  async getWorkflowStatus(id: string): Promise<ApiResponse<any>> {
-    return this.httpClient.get<any>(`/api/workflows/${id}/status`);
-  }
-
-  async updateWorkflow(id: string, updates: any): Promise<ApiResponse<any>> {
-    return this.httpClient.put<any>(`/api/workflows/${id}`, updates);
-  }
-
-  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
-    return this.httpClient.delete<void>(`/api/workflows/${id}`);
-  }
-
-  // Agent methods
   async queryAgent(query: string): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/agents/query', { query });
+    return this.httpClient.request(`/api/agent/query?query=${encodeURIComponent(query)}`);
   }
 
-  async callDailyFocusAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/agents/daily-focus', { query, campaigns, context });
-  }
-
-  async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/agents/general-campaign', { query, campaigns, context });
-  }
-
-  // Brand Ambassador methods
-  async uploadBrandDocument(file: File, metadata?: any): Promise<ApiResponse<any>> {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (metadata) {
-      formData.append('metadata', JSON.stringify(metadata));
-    }
-    
-    return this.httpClient.request('/api/brand/documents', {
+  // Blog creation methods
+  async generateBlogPost(params: {
+    title: string;
+    keyword: string;
+    wordCount: number;
+    tone: string;
+    includeCTA: boolean;
+  }): Promise<ApiResponse<any>> {
+    return this.httpClient.request('/api/content/blog/generate', {
       method: 'POST',
-      body: formData,
-      headers: {} // Remove Content-Type to let browser set it for FormData
+      body: JSON.stringify(params)
     });
   }
 
-  async getBrandDocuments(): Promise<ApiResponse<any[]>> {
-    return this.httpClient.get<any[]>('/api/brand/documents');
+  async getBlogPosts(): Promise<ApiResponse<any[]>> {
+    return this.httpClient.request('/api/content/blog');
   }
-
-  async deleteBrandDocument(id: string): Promise<ApiResponse<void>> {
-    return this.httpClient.delete<void>(`/api/brand/documents/${id}`);
-  }
-
-  async chatWithBrand(message: string, context?: any): Promise<ApiResponse<any>> {
-    return this.httpClient.post<any>('/api/brand/chat', { message, context });
-  }
-
-  // Connection methods for MCP
-  getConnections = () => this.getIntegrationConnections();
-  createConnection = (data: any) => this.createIntegrationConnection(data);
-  deleteConnection = (id: string) => this.deleteIntegrationConnection(id);
 }
-
-export const apiClient = new ApiClient();
