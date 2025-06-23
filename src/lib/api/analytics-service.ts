@@ -1,57 +1,70 @@
 
 import { HttpClient } from '../http-client';
+import { ApiResponse } from '@/lib/api-client-interface';
+
+export interface AnalyticsMetrics {
+  campaigns: number;
+  leads: number;
+  conversion_rate: number;
+  revenue: number;
+  traffic: number;
+  engagement: number;
+}
+
+export interface AnalyticsInsight {
+  id: string;
+  type: 'trend' | 'anomaly' | 'recommendation';
+  title: string;
+  description: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  confidence: number;
+  created_at: string;
+}
+
+export interface AnalyticsData {
+  metrics: AnalyticsMetrics;
+  insights: AnalyticsInsight[];
+  period: string;
+  last_updated: string;
+}
 
 export class AnalyticsService {
   constructor(private httpClient: HttpClient) {}
 
-  async getAnalyticsOverview() {
-    return this.httpClient.request('/api/analytics/overview');
-  }
-
-  async getSystemStats() {
-    return this.httpClient.request('/api/system/health');
-  }
-
-  async getPerformanceMetrics(timeRange: string = '24h') {
-    return this.httpClient.request(`/api/analytics/performance?timeRange=${timeRange}`);
-  }
-
-  async getCampaignAnalytics() {
-    return this.httpClient.request('/api/campaigns');
-  }
-
-  async getLeadAnalytics() {
-    return this.httpClient.request('/api/leads');
-  }
-
-  async getEmailAnalytics() {
-    return this.httpClient.request('/api/email/analytics');
-  }
-
-  async getSocialAnalytics() {
-    return this.httpClient.request('/api/social/analytics');
-  }
-
-  async exportAnalyticsReport(format: 'pdf' | 'csv' | 'excel', timeRange: string = '30d') {
-    const response = await this.httpClient.request(`/api/analytics/export?format=${format}&timeRange=${timeRange}`, {
-      method: 'GET'
-    });
-    
-    if (response.success && response.data) {
-      // Create download link for the exported file
-      const blob = new Blob([JSON.stringify(response.data)], { 
-        type: format === 'pdf' ? 'application/pdf' : 'text/csv' 
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `analytics-report-${new Date().toISOString().split('T')[0]}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+  async getAnalytics(): Promise<ApiResponse<AnalyticsData>> {
+    try {
+      const data = await this.httpClient.request<AnalyticsData>('/api/analytics/overview');
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get analytics',
+      };
     }
-    
-    return response;
+  }
+
+  async getInsights(): Promise<ApiResponse<AnalyticsInsight[]>> {
+    try {
+      const response = await this.httpClient.request<any>('/api/analytics/insights');
+      
+      if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
+        return response as ApiResponse<AnalyticsInsight[]>;
+      }
+      
+      // If response is direct data, wrap it
+      return {
+        success: true,
+        data: Array.isArray(response) ? response : []
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        error: error instanceof Error ? error.message : 'Failed to get insights',
+      };
+    }
   }
 }

@@ -14,6 +14,20 @@ export interface UserPreferences {
   };
 }
 
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  is_active: boolean;
+  active?: boolean; // Alternative property name for backward compatibility
+  last_triggered_at?: string;
+  last_response_code?: number;
+  secret?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SocialPlatformConnection {
   id: string;
   platform: string;
@@ -109,15 +123,4 @@ export interface IntegrationConnection {
 export interface OAuthResponse {
   authorization_url: string;
   state: string;
-}
-
-export interface Webhook {
-  id: string;
-  name: string;
-  url: string;
-  events: string[];
-  secret?: string;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
 }

@@ -20,7 +20,7 @@ export class MCPService {
           id: conn.service_name,
           name: conn.service_name,
           type: 'mcp',
-          status: conn.connection_status,
+          status: conn.connection_status === 'pending' ? 'disconnected' : conn.connection_status as 'connected' | 'disconnected' | 'error',
           lastSync: conn.last_sync_at
         }));
         
@@ -53,7 +53,7 @@ export class MCPService {
           id: response.data.service_name,
           name: response.data.service_name,
           type: 'mcp',
-          status: response.data.connection_status,
+          status: response.data.connection_status === 'pending' ? 'disconnected' : response.data.connection_status as 'connected' | 'disconnected' | 'error',
           lastSync: response.data.last_sync_at
         };
         
