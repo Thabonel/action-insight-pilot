@@ -1,120 +1,155 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { 
   PenTool, 
   Sparkles, 
-  Target, 
-  TrendingUp, 
-  Calendar,
-  Share2,
-  Mic,
+  Eye, 
+  Share2, 
+  Settings,
+  FileText,
+  Brain,
   CheckCircle,
-  Send
+  Archive
 } from 'lucide-react';
-import AIWritingAssistant from '@/components/ai/AIWritingAssistant';
-import BlogWorkflowAutomation from '@/components/blog/BlogWorkflowAutomation';
-import ContentRepurposingEngine from '@/components/content/ContentRepurposingEngine';
-import BrandVoiceChecker from '@/components/brand/BrandVoiceChecker';
-import PublishingWorkflow from '@/components/blog/PublishingWorkflow';
 
-const BlogCreator: React.FC = () => {
-  const [blogData, setBlogData] = useState({
-    title: '',
-    content: '',
-    excerpt: '',
-    keywords: '',
-    targetAudience: 'general',
-    tone: 'professional',
-    category: 'marketing'
-  });
-  
+// Import components with proper error handling
+import { AIWritingAssistant } from '@/components/content/AIWritingAssistant';
+import { BrandVoiceChecker } from '@/components/brand/BrandVoiceChecker';
+import { ContentRepurposingEngine } from '@/components/content/ContentRepurposingEngine';
+import { PublishingWorkflow } from '@/components/blog/PublishingWorkflow';
+import { ContentLibrary } from '@/components/content/ContentLibrary';
+
+interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  tags: string[];
+  status: 'draft' | 'published' | 'archived';
+  seoScore: number;
+  readabilityScore: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const BlogCreator: React.FC = () => {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState('create');
+  const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
+  const [activeTab, setActiveTab] = useState('editor');
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const { toast } = useToast();
 
-  const handleInputChange = (field: string, value: string) => {
-    setBlogData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handlePostSelect = (post: any) => {
+    setTitle(post.title);
+    setContent(post.content);
+    setCurrentPost(post);
+    setActiveTab('editor');
+    toast({
+      title: "Post loaded",
+      description: "Post content loaded for editing"
+    });
   };
 
-  const generateBlogPost = async () => {
-    if (!blogData.title || !blogData.keywords) {
+  const handleContentUpdate = (newContent: string) => {
+    setContent(newContent);
+  };
+
+  const handleSaveDraft = async () => {
+    try {
+      const newPost: BlogPost = {
+        id: currentPost?.id || Date.now().toString(),
+        title: title || 'Untitled Post',
+        content,
+        excerpt: content.substring(0, 150) + '...',
+        tags: [],
+        status: 'draft',
+        seoScore: 0,
+        readabilityScore: 0,
+        createdAt: currentPost?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      setCurrentPost(newPost);
       toast({
-        title: "Missing Information",
-        description: "Please provide a title and keywords for your blog post.",
-        variant: "destructive",
+        title: "Draft saved",
+        description: "Your blog post has been saved as a draft"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save draft",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleGenerateContent = async () => {
+    if (!title.trim()) {
+      toast({
+        title: "Title required",
+        description: "Please enter a title first",
+        variant: "destructive"
       });
       return;
     }
 
     setIsGenerating(true);
     try {
-      // Simulate AI generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Simulate AI content generation
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const generatedContent = `# ${blogData.title}
+      const generatedContent = `# ${title}
 
 ## Introduction
 
-${blogData.keywords.split(',').map(keyword => keyword.trim()).join(', ')} are crucial elements in today's digital landscape. This comprehensive guide will explore how to leverage these concepts effectively for your ${blogData.targetAudience} audience.
+This is a comprehensive guide about ${title.toLowerCase()}. In this post, we'll explore the key concepts, best practices, and actionable strategies you can implement.
 
-## Key Benefits
+## Key Points
 
-1. **Enhanced Visibility**: Implementing these strategies can significantly improve your online presence
-2. **Better Engagement**: Connect more effectively with your target audience
-3. **Measurable Results**: Track and optimize your performance over time
+1. **Understanding the Basics**: Before diving deep, it's important to understand the fundamental concepts.
 
-## Best Practices
+2. **Best Practices**: Here are the proven strategies that work:
+   - Strategy one with detailed explanation
+   - Strategy two with examples
+   - Strategy three with implementation tips
 
-When working with ${blogData.keywords.split(',')[0]?.trim() || 'these concepts'}, it's important to:
+3. **Common Challenges**: Let's address the most frequent obstacles:
+   - Challenge one and how to overcome it
+   - Challenge two with practical solutions
 
-- Focus on quality over quantity
-- Maintain consistency across all platforms
-- Regularly analyze and adjust your approach
-- Stay updated with industry trends
+## Implementation Guide
 
-## Implementation Strategy
+Step-by-step instructions for getting started:
 
-To get started, consider the following steps:
-
-1. **Research Phase**: Understand your audience's needs and preferences
-2. **Planning**: Develop a comprehensive strategy aligned with your goals
-3. **Execution**: Implement your plan with attention to detail
-4. **Monitoring**: Track performance and make data-driven adjustments
+1. Start with research and planning
+2. Set up your framework
+3. Execute with consistency
+4. Measure and optimize
 
 ## Conclusion
 
-By following these guidelines and maintaining a focus on delivering value to your audience, you'll be well-positioned to achieve your objectives. Remember that success in this field requires patience, persistence, and continuous learning.
+${title} is a powerful approach when implemented correctly. By following these guidelines, you'll be well on your way to success.
 
-Ready to take the next step? Start implementing these strategies today and watch your results improve over time.`;
+*What are your thoughts on ${title.toLowerCase()}? Share your experiences in the comments below.*`;
 
-      setBlogData(prev => ({
-        ...prev,
-        content: generatedContent,
-        excerpt: `Learn how to effectively use ${blogData.keywords.split(',')[0]?.trim()} to improve your digital marketing strategy and engage your audience.`
-      }));
-
+      setContent(generatedContent);
       toast({
-        title: "Blog Post Generated",
-        description: "Your AI-powered blog post has been created successfully!",
+        title: "Content generated",
+        description: "AI has generated your blog post content"
       });
-
-      setActiveTab('review');
     } catch (error) {
       toast({
-        title: "Generation Failed",
-        description: "There was an error generating your blog post. Please try again.",
-        variant: "destructive",
+        title: "Generation failed",
+        description: "Failed to generate content. Please try again.",
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
@@ -122,240 +157,131 @@ Ready to take the next step? Start implementing these strategies today and watch
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Blog Creator</h1>
-        <p className="text-gray-600">Create, optimize, and publish high-quality blog content with AI assistance</p>
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Blog Creator</h1>
+          <p className="text-gray-600 mt-1">Create engaging blog content with AI assistance</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleSaveDraft}>
+            <FileText className="h-4 w-4 mr-2" />
+            Save Draft
+          </Button>
+          <Button onClick={() => setActiveTab('publish')}>
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Publish
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="create" className="flex items-center space-x-2">
+          <TabsTrigger value="editor" className="flex items-center gap-2">
             <PenTool className="h-4 w-4" />
-            <span>Create</span>
+            Editor
           </TabsTrigger>
-          <TabsTrigger value="assistant" className="flex items-center space-x-2">
+          <TabsTrigger value="assistant" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            AI Assistant
+          </TabsTrigger>
+          <TabsTrigger value="brand" className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
-            <span>AI Assistant</span>
+            Brand Voice
           </TabsTrigger>
-          <TabsTrigger value="workflow" className="flex items-center space-x-2">
-            <Target className="h-4 w-4" />
-            <span>Workflow</span>
-          </TabsTrigger>
-          <TabsTrigger value="repurpose" className="flex items-center space-x-2">
+          <TabsTrigger value="repurpose" className="flex items-center gap-2">
             <Share2 className="h-4 w-4" />
-            <span>Repurpose</span>
+            Repurpose
           </TabsTrigger>
-          <TabsTrigger value="review" className="flex items-center space-x-2">
+          <TabsTrigger value="publish" className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
-            <span>Review</span>
+            Publish
           </TabsTrigger>
-          <TabsTrigger value="publish" className="flex items-center space-x-2">
-            <Send className="h-4 w-4" />
-            <span>Publish</span>
+          <TabsTrigger value="library" className="flex items-center gap-2">
+            <Archive className="h-4 w-4" />
+            Library
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="create">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <PenTool className="h-5 w-5 text-blue-600" />
-                  <span>Blog Details</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="title">Blog Title</Label>
-                  <Input
-                    id="title"
-                    placeholder="Enter your blog post title..."
-                    value={blogData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
-                  />
+        <TabsContent value="editor" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Blog Post Editor</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter your blog post title..."
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium">Content</label>
+                  <Button 
+                    onClick={handleGenerateContent}
+                    disabled={isGenerating}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {isGenerating ? 'Generating...' : 'Generate with AI'}
+                  </Button>
                 </div>
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Start writing your blog post content..."
+                  rows={20}
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                />
+              </div>
 
-                <div>
-                  <Label htmlFor="keywords">Keywords (comma-separated)</Label>
-                  <Input
-                    id="keywords"
-                    placeholder="SEO, content marketing, digital strategy..."
-                    value={blogData.keywords}
-                    onChange={(e) => handleInputChange('keywords', e.target.value)}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="audience">Target Audience</Label>
-                    <select
-                      id="audience"
-                      value={blogData.targetAudience}
-                      onChange={(e) => handleInputChange('targetAudience', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="general">General Audience</option>
-                      <option value="business">Business Professionals</option>
-                      <option value="technical">Technical Audience</option>
-                      <option value="beginners">Beginners</option>
-                      <option value="experts">Subject Experts</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="tone">Writing Tone</Label>
-                    <select
-                      id="tone"
-                      value={blogData.tone}
-                      onChange={(e) => handleInputChange('tone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="professional">Professional</option>
-                      <option value="casual">Casual</option>
-                      <option value="authoritative">Authoritative</option>
-                      <option value="friendly">Friendly</option>
-                      <option value="conversational">Conversational</option>
-                    </select>
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={generateBlogPost}
-                  disabled={isGenerating}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                      Generating Blog Post...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Generate Blog Post
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Content Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {blogData.content ? (
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">{blogData.title}</h3>
-                      {blogData.excerpt && (
-                        <p className="text-gray-600 text-sm mt-2">{blogData.excerpt}</p>
-                      )}
-                    </div>
-                    <div className="prose prose-sm max-w-none">
-                      <div className="whitespace-pre-wrap text-sm bg-gray-50 p-4 rounded-lg max-h-64 overflow-y-auto">
-                        {blogData.content.substring(0, 500)}...
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {blogData.keywords.split(',').map((keyword, index) => (
-                        <Badge key={index} variant="secondary">
-                          {keyword.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <PenTool className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Your generated blog post will appear here</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              <div className="flex justify-between items-center text-sm text-gray-500">
+                <span>{content.length} characters</span>
+                <span>{content.split(' ').filter(word => word.length > 0).length} words</span>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="assistant">
-          <AIWritingAssistant 
-            content={blogData.content}
-            onContentUpdate={(newContent) => handleInputChange('content', newContent)}
+          <AIWritingAssistant
+            content={content}
+            onContentUpdate={handleContentUpdate}
+            isVisible={true}
+            onToggle={() => {}}
           />
         </TabsContent>
 
-        <TabsContent value="workflow">
-          <BlogWorkflowAutomation 
-            content={blogData.content}
-            title={blogData.title}
-          />
+        <TabsContent value="brand">
+          <BrandVoiceChecker content={content} />
         </TabsContent>
 
         <TabsContent value="repurpose">
           <ContentRepurposingEngine
-            content={blogData.content}
-            title={blogData.title}
-            contentId="blog-draft"
+            contentId={currentPost?.id || 'temp'}
+            title={title}
+            content={content}
           />
         </TabsContent>
 
-        <TabsContent value="review">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Content Review</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="edit-title">Title</Label>
-                  <Input
-                    id="edit-title"
-                    value={blogData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="edit-excerpt">Excerpt</Label>
-                  <Textarea
-                    id="edit-excerpt"
-                    value={blogData.excerpt}
-                    onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="edit-content">Content</Label>
-                  <Textarea
-                    id="edit-content"
-                    value={blogData.content}
-                    onChange={(e) => handleInputChange('content', e.target.value)}
-                    rows={10}
-                    className="font-mono text-sm"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <BrandVoiceChecker 
-              content={blogData.content}
-              title={blogData.title}
-            />
-          </div>
+        <TabsContent value="publish">
+          <PublishingWorkflow content={content} title={title} />
         </TabsContent>
 
-        <TabsContent value="publish">
-          <PublishingWorkflow
-            content={blogData.content}
-            title={blogData.title}
-            contentId="blog-draft"
+        <TabsContent value="library">
+          <ContentLibrary 
+            onPostSelect={handlePostSelect}
+            currentContent={content}
           />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
-
-export default BlogCreator;
