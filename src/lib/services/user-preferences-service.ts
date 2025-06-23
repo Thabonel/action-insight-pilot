@@ -1,6 +1,11 @@
 
 import { apiClient } from '@/lib/api-client';
-import { ApiResponse, UserPreferences } from '@/lib/api-client-interface';
+import { ApiResponse } from '@/lib/api-client-interface';
+
+// Define UserPreferences type to match the expected interface
+export interface UserPreferences {
+  [key: string]: any;
+}
 
 export class UserPreferencesService {
   static async getUserPreferences(category: string): Promise<ApiResponse<UserPreferences>> {
@@ -8,9 +13,11 @@ export class UserPreferencesService {
       const response = await apiClient.userPreferences.getUserPreferences(category);
       
       if (response.success && response.data && response.data.length > 0) {
+        // Extract preference_data from the first result
+        const preferences = response.data[0].preference_data || {};
         return {
           success: true,
-          data: response.data[0].preference_data || {}
+          data: preferences as UserPreferences
         };
       }
       
@@ -33,7 +40,7 @@ export class UserPreferencesService {
       const response = await apiClient.userPreferences.updateUserPreferences(category, preferences);
       return {
         success: response.success,
-        data: response.data,
+        data: preferences,
         error: response.error
       };
     } catch (error) {
@@ -46,7 +53,7 @@ export class UserPreferencesService {
 
   static async getPreferencesByCategory(category: string): Promise<ApiResponse<any>> {
     try {
-      const response = await apiClient.userPreferences.get(category);
+      const response = await apiClient.userPreferences.get();
       return {
         success: response.success,
         data: response.data,
