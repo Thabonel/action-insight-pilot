@@ -5,6 +5,8 @@ import { apiClient } from '@/lib/api-client';
 
 export const useLeadActions = () => {
   const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const { toast } = useToast();
 
   const scoreLeads = async () => {
@@ -76,10 +78,60 @@ export const useLeadActions = () => {
     }
   };
 
+  const exportLeads = async (format: 'csv' | 'json') => {
+    setIsExporting(true);
+    try {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast({
+        title: "Export Complete",
+        description: `Leads exported as ${format.toUpperCase()}`,
+      });
+      return true;
+    } catch (error) {
+      console.error('Error exporting leads:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export leads",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const syncLeads = async () => {
+    setIsSyncing(true);
+    try {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      toast({
+        title: "Sync Complete",
+        description: "Lead data has been synchronized",
+      });
+      return true;
+    } catch (error) {
+      console.error('Error syncing leads:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sync leads",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return {
     scoreLeads,
     enrichLead,
     convertLead,
-    loading
+    exportLeads,
+    syncLeads,
+    loading,
+    isExporting,
+    isSyncing
   };
 };
