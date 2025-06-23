@@ -1,4 +1,3 @@
-
 import { HttpClient } from './http-client';
 import { 
   Campaign, 
@@ -221,6 +220,33 @@ export class ApiClient {
 
   async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse<any>> {
     return this.httpClient.post<any>('/api/agents/general-campaign', { query, campaigns, context });
+  }
+
+  // Brand Ambassador methods
+  async uploadBrandDocument(file: File, metadata?: any): Promise<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (metadata) {
+      formData.append('metadata', JSON.stringify(metadata));
+    }
+    
+    return this.httpClient.request('/api/brand/documents', {
+      method: 'POST',
+      body: formData,
+      headers: {} // Remove Content-Type to let browser set it for FormData
+    });
+  }
+
+  async getBrandDocuments(): Promise<ApiResponse<any[]>> {
+    return this.httpClient.get<any[]>('/api/brand/documents');
+  }
+
+  async deleteBrandDocument(id: string): Promise<ApiResponse<void>> {
+    return this.httpClient.delete<void>(`/api/brand/documents/${id}`);
+  }
+
+  async chatWithBrand(message: string, context?: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/brand/chat', { message, context });
   }
 
   // Connection methods for MCP
