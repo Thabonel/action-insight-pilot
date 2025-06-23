@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
@@ -20,8 +19,7 @@ export const useUserPreferences = () => {
     try {
       setLoading(true);
       setError(null);
-      const userPrefs = await apiClient.userPreferences();
-      const result = await userPrefs.getUserPreferences(category) as ApiResponse<UserPreferences>;
+      const result = await apiClient.userPreferences.getUserPreferences(category) as ApiResponse<UserPreferences>;
       
       if (result.success) {
         setPreferences(result.data || {});
@@ -38,8 +36,7 @@ export const useUserPreferences = () => {
   const updatePreferences = async (category: string, data: Partial<UserPreferences>) => {
     try {
       setLoading(true);
-      const userPrefs = await apiClient.userPreferences();
-      const result = await userPrefs.updateUserPreferences(category, data) as ApiResponse<UserPreferences>;
+      const result = await apiClient.userPreferences.updateUserPreferences(category, data) as ApiResponse<UserPreferences>;
       
       if (result.success) {
         setPreferences(prev => ({ ...prev, ...data }));

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse, IntegrationConnection, Webhook } from '@/lib/api-client-interface';
@@ -143,6 +142,26 @@ export const useIntegrations = () => {
     }
   };
 
+  const testWebhook = async (id: string) => {
+    try {
+      setLoading(true);
+      const result = await apiClient.integrations.testWebhook(id);
+      if (result.success) {
+        return { success: true };
+      } else {
+        const errorMsg = result.error || 'Failed to test webhook';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setError(errorMsg);
+      return { success: false, error: errorMsg };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchConnections();
     fetchWebhooks();
@@ -158,6 +177,7 @@ export const useIntegrations = () => {
     disconnectService,
     createWebhook,
     deleteWebhook,
+    testWebhook,
     refetch: () => {
       fetchConnections();
       fetchWebhooks();

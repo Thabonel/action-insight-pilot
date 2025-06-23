@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ConversationalService } from '@/lib/services/conversational-service';
@@ -12,16 +11,16 @@ export const useQueryProcessor = () => {
       console.log('Processing query with local backend...');
       
       const authToken = await ConversationalService.getAuthToken();
-      const campaignData = await ConversationalService.fetchCampaignData(authToken);
+      const campaignData = await ConversationalService.fetchCampaignData();
       const queryType = QueryProcessor.determineQueryType(userQuery);
       
       let agentResponse;
       
       try {
         if (queryType === 'daily_focus') {
-          agentResponse = await ConversationalService.callDailyFocusAgent(userQuery, campaignData, context, authToken);
+          agentResponse = await ConversationalService.callDailyFocusAgent(userQuery);
         } else {
-          agentResponse = await ConversationalService.callGeneralCampaignAgent(userQuery, campaignData, context, authToken);
+          agentResponse = await ConversationalService.callGeneralCampaignAgent(userQuery);
         }
         
         return QueryProcessor.formatAgentResponse(agentResponse, queryType, campaignData);
