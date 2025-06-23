@@ -1,3 +1,4 @@
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -50,6 +51,14 @@ export interface ContentBrief {
   key_messages?: string[];
 }
 
+export interface BlogPostParams {
+  topic: string;
+  targetAudience: string;
+  tone: string;
+  keywords: string[];
+  wordCount: number;
+}
+
 export interface EmailInsight {
   type: string;
   impact: 'positive' | 'negative' | 'neutral';
@@ -91,7 +100,7 @@ export interface IntegrationConnection {
   service_name?: string;
   connection_status?: 'connected' | 'disconnected' | 'error';
   last_sync_at?: string;
-  description?: string; // Added missing description property
+  description?: string;
 }
 
 export interface Webhook {

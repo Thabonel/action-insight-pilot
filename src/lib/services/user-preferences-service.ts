@@ -5,8 +5,7 @@ import { UserPreferences, ApiResponse } from '@/lib/api-client-interface';
 export class UserPreferencesService {
   async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences>> {
     try {
-      const userPrefs = apiClient.userPreferences;
-      const result = await userPrefs.getUserPreferences(category);
+      const result = await apiClient.userPreferences.getUserPreferences(category);
       return result;
     } catch (error) {
       console.error('Error fetching user preferences:', error);
@@ -19,8 +18,7 @@ export class UserPreferencesService {
 
   async updateUserPreferences(category: string, data: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
     try {
-      const userPrefs = apiClient.userPreferences;
-      const result = await userPrefs.updateUserPreferences(category, data);
+      const result = await apiClient.userPreferences.updateUserPreferences(category, data);
       return result;
     } catch (error) {
       console.error('Error updating user preferences:', error);
@@ -31,9 +29,17 @@ export class UserPreferencesService {
     }
   }
 
+  // Add missing methods that components are expecting
+  async getGeneralPreferences(): Promise<ApiResponse<UserPreferences>> {
+    return this.getUserPreferences('general');
+  }
+
+  async updateGeneralPreferences(data: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
+    return this.updateUserPreferences('general', data);
+  }
+
   async resetPreferences(): Promise<ApiResponse<void>> {
     try {
-      // Reset to default preferences
       const defaultPrefs: UserPreferences = {
         theme: 'light',
         notifications: true,
@@ -41,8 +47,7 @@ export class UserPreferencesService {
         timezone: 'UTC'
       };
       
-      const userPrefs = apiClient.userPreferences;
-      await userPrefs.update(defaultPrefs);
+      await apiClient.userPreferences.update(defaultPrefs);
       
       return {
         success: true,
@@ -59,8 +64,7 @@ export class UserPreferencesService {
 
   async getPreferences(): Promise<ApiResponse<UserPreferences>> {
     try {
-      const userPrefs = apiClient.userPreferences;
-      const result = await userPrefs.get();
+      const result = await apiClient.userPreferences.get();
       return result;
     } catch (error) {
       console.error('Error getting preferences:', error);
