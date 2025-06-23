@@ -4,6 +4,7 @@ export interface ApiResponse<T = any> {
   error?: string;
   success: boolean;
   response?: T; // Add this for compatibility
+  authorization_url?: string; // Add this for OAuth flows
 }
 
 export interface Campaign {
