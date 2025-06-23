@@ -1,386 +1,219 @@
-import { ApiResponse, Campaign, EmailMetrics, UserPreferences, Webhook, SocialPost, IntegrationConnection, SocialPlatformConnection } from './api-client-interface';
+
+import { HttpClient } from './http-client';
+import { 
+  Campaign, 
+  EmailMetrics, 
+  UserPreferences, 
+  ApiResponse, 
+  SocialPlatformConnection, 
+  IntegrationConnection 
+} from './api-client-interface';
 
 export class ApiClient {
-  private baseURL: string;
-  private token: string | null = null;
+  public httpClient: HttpClient;
+  public integrations: any;
+  public analytics: any;
+  public userPreferences: any;
+  public socialPlatforms: any;
 
-  constructor() {
-    // Use environment-specific URLs
-    this.baseURL = process.env.NODE_ENV === 'production' 
-      ? 'https://wheels-wins-orchestrator.onrender.com'
-      : 'http://localhost:8000';
+  constructor(baseURL?: string) {
+    this.httpClient = new HttpClient(baseURL);
+    this.setupNestedObjects();
   }
 
-  setToken(token: string | null) {
-    this.token = token;
-  }
+  private setupNestedObjects() {
+    this.integrations = {
+      getConnections: () => this.getIntegrationConnections(),
+      createConnection: (data: any) => this.createIntegrationConnection(data),
+      deleteConnection: (id: string) => this.deleteIntegrationConnection(id)
+    };
 
-  // HTTP Client for direct access (needed by some hooks)
-  public get httpClient() {
-    return {
-      get: (url: string) => this.makeRequest(url),
-      post: (url: string, data?: any) => this.makeRequest(url, { method: 'POST', body: JSON.stringify(data) }),
-      put: (url: string, data?: any) => this.makeRequest(url, { method: 'PUT', body: JSON.stringify(data) }),
-      delete: (url: string) => this.makeRequest(url, { method: 'DELETE' })
+    this.analytics = {
+      getAnalyticsOverview: () => this.getAnalyticsOverview(),
+      getSystemStats: () => this.getSystemStats(),
+      exportAnalyticsReport: (format: string, timeRange: string) => this.exportAnalyticsReport(format, timeRange)
+    };
+
+    this.userPreferences = {
+      get: () => this.getUserPreferences(),
+      getUserPreferences: (category: string) => this.getUserPreferences(category),
+      updateUserPreferences: (category: string, preferences: any) => this.updateUserPreferences(category, preferences)
+    };
+
+    this.socialPlatforms = {
+      getConnected: () => this.getSocialPlatforms()
     };
   }
 
-  public async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-    try {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      };
-
-      if (this.token) {
-        headers['Authorization'] = `Bearer ${this.token}`;
-      }
-
-      const response = await fetch(`${this.baseURL}${endpoint}`, {
-        ...options,
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return { success: true, data, response: data };
-    } catch (error) {
-      console.error('API request failed:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
-      };
-    }
+  setToken(token: string) {
+    this.httpClient.setToken(token);
   }
 
   // Campaign methods
   async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
-    return this.makeRequest<Campaign[]>('/api/campaigns');
+    return this.httpClient.get<Campaign[]>('/api/campaigns');
   }
 
   async getCampaignById(id: string): Promise<ApiResponse<Campaign>> {
-    return this.makeRequest<Campaign>(`/api/campaigns/${id}`);
+    return this.httpClient.get<Campaign>(`/api/campaigns/${id}`);
   }
 
   async createCampaign(campaign: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    return this.makeRequest<Campaign>('/api/campaigns', {
-      method: 'POST',
-      body: JSON.stringify(campaign),
-    });
+    return this.httpClient.post<Campaign>('/api/campaigns', campaign);
   }
 
-  async updateCampaign(id: string, campaign: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    return this.makeRequest<Campaign>(`/api/campaigns/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(campaign),
-    });
+  async updateCampaign(id: string, updates: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
+    return this.httpClient.put<Campaign>(`/api/campaigns/${id}`, updates);
   }
 
-  // Email metrics methods
-  async getRealTimeMetrics(): Promise<ApiResponse<EmailMetrics>> {
-    return this.makeRequest<EmailMetrics>('/api/email/metrics/realtime');
+  // Lead methods
+  async getLeads(): Promise<ApiResponse<any[]>> {
+    return this.httpClient.get<any[]>('/api/leads');
   }
 
-  async getEmailAnalytics(): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/email/analytics');
+  async exportLeads(format: string = 'csv'): Promise<ApiResponse<string>> {
+    return this.httpClient.get<string>(`/api/leads/export?format=${format}`);
   }
 
-  async getSocialAnalytics(): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/social/analytics');
+  async syncLeads(): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/leads/sync');
   }
 
-  // User preferences methods
-  async getUserPreferences(): Promise<ApiResponse<UserPreferences>> {
-    return this.makeRequest<UserPreferences>('/api/user/preferences');
+  async executeAgentTask(taskType: string, data?: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/agents/execute', { taskType, data });
   }
 
-  async updateUserPreferences(preferences: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
-    return this.makeRequest<UserPreferences>('/api/user/preferences', {
-      method: 'PUT',
-      body: JSON.stringify(preferences),
-    });
-  }
-
-  // User preferences object for direct access
-  get userPreferences() {
-    return {
-      get: () => this.getUserPreferences(),
-      update: (prefs: Partial<UserPreferences>) => this.updateUserPreferences(prefs)
-    };
+  async scoreLeads(criteria: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/leads/score', criteria);
   }
 
   // Analytics methods
   async getAnalytics(): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/analytics');
+    return this.httpClient.get<any>('/api/analytics');
   }
 
-  // Analytics object for direct access
-  get analytics() {
-    return {
-      getOverview: () => this.getAnalytics(),
-      getEmail: () => this.getEmailAnalytics(),
-      getSocial: () => this.getSocialAnalytics(),
-      getSystemHealth: () => this.getSystemHealth()
-    };
+  async getRealTimeMetrics(): Promise<ApiResponse<EmailMetrics>> {
+    return this.httpClient.get<EmailMetrics>('/api/metrics/realtime');
+  }
+
+  async getAnalyticsOverview(): Promise<ApiResponse<any>> {
+    return this.httpClient.get<any>('/api/analytics/overview');
+  }
+
+  async getSystemStats(): Promise<ApiResponse<any>> {
+    return this.httpClient.get<any>('/api/system/stats');
+  }
+
+  async exportAnalyticsReport(format: string, timeRange: string): Promise<ApiResponse<any>> {
+    return this.httpClient.get<any>(`/api/analytics/export?format=${format}&timeRange=${timeRange}`);
+  }
+
+  async getEmailAnalytics(): Promise<ApiResponse<any>> {
+    return this.httpClient.get<any>('/api/analytics/email');
+  }
+
+  async getSocialAnalytics(): Promise<ApiResponse<any>> {
+    return this.httpClient.get<any>('/api/analytics/social');
   }
 
   async getSystemHealth(): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/system/health');
+    return this.httpClient.get<any>('/api/system/health');
   }
 
-  async getLeads(): Promise<ApiResponse<any[]>> {
-    return this.makeRequest('/api/leads');
+  // Social Platform methods
+  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
+    return this.httpClient.get<SocialPlatformConnection[]>('/api/social/platforms');
   }
 
-  // Lead export and sync methods
-  async exportLeads(format: string = 'csv', filters?: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/leads/export', {
-      method: 'POST',
-      body: JSON.stringify({ format, filters }),
-    });
+  async connectSocialPlatform(platform: string, config: any = {}): Promise<ApiResponse<SocialPlatformConnection>> {
+    return this.httpClient.post<SocialPlatformConnection>('/api/social/connect', { platform, config });
   }
 
-  async syncLeads(source?: string): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/leads/sync', {
-      method: 'POST',
-      body: JSON.stringify({ source }),
-    });
+  async scheduleSocialPost(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/social/schedule', data);
+  }
+
+  // User Preferences methods
+  async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences[]>> {
+    const url = category ? `/api/user/preferences?category=${category}` : '/api/user/preferences';
+    return this.httpClient.get<UserPreferences[]>(url);
+  }
+
+  async updateUserPreferences(category: string, preferences: any): Promise<ApiResponse<UserPreferences[]>> {
+    return this.httpClient.put<UserPreferences[]>(`/api/user/preferences/${category}`, preferences);
   }
 
   // Integration methods
-  async getConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
-    return this.makeRequest<IntegrationConnection[]>('/api/integrations/connections');
+  async getIntegrationConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
+    return this.httpClient.get<IntegrationConnection[]>('/api/integrations');
   }
 
-  async createConnection(connection: Partial<IntegrationConnection>): Promise<ApiResponse<IntegrationConnection>> {
-    return this.makeRequest<IntegrationConnection>('/api/integrations/connections', {
-      method: 'POST',
-      body: JSON.stringify(connection),
-    });
+  async createIntegrationConnection(data: any): Promise<ApiResponse<IntegrationConnection>> {
+    return this.httpClient.post<IntegrationConnection>('/api/integrations', data);
   }
 
-  async deleteConnection(id: string): Promise<ApiResponse<void>> {
-    return this.makeRequest<void>(`/api/integrations/connections/${id}`, {
-      method: 'DELETE',
-    });
+  async deleteIntegrationConnection(id: string): Promise<ApiResponse<void>> {
+    return this.httpClient.delete<void>(`/api/integrations/${id}`);
   }
 
-  // Integrations object for direct access
-  get integrations() {
-    return {
-      list: () => this.getConnections(),
-      connect: (platform: string, config: any) => this.connectPlatform(platform, config),
-      disconnect: (id: string) => this.deleteConnection(id),
-      getStatus: (platform: string) => this.getPlatformStatus(platform),
-      sync: (serviceId: string) => this.syncService(serviceId)
-    };
+  // Content methods
+  async createContent(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/content', data);
   }
 
-  async connectPlatform(platform: string, config: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/integrations/connect', {
-      method: 'POST',
-      body: JSON.stringify({ platform, config }),
-    });
+  async generateSocialContent(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/content/social/generate', data);
   }
 
-  async getPlatformStatus(platform: string): Promise<ApiResponse<any>> {
-    return this.makeRequest(`/api/integrations/status/${platform}`);
+  async generateEmailContent(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/content/email/generate', data);
+  }
+
+  async generateABVariants(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/content/ab-variants', data);
+  }
+
+  async suggestSendTime(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/content/send-time', data);
   }
 
   // Workflow methods
   async getWorkflows(): Promise<ApiResponse<any[]>> {
-    return this.makeRequest('/api/workflows');
+    return this.httpClient.get<any[]>('/api/workflows');
   }
 
-  async createWorkflow(workflow: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/workflows', {
-      method: 'POST',
-      body: JSON.stringify(workflow),
-    });
+  async createWorkflow(data: any): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/workflows', data);
   }
 
-  async updateWorkflow(id: string, workflow: any): Promise<ApiResponse<any>> {
-    return this.makeRequest(`/api/workflows/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(workflow),
-    });
-  }
-
-  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
-    return this.makeRequest(`/api/workflows/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async executeWorkflow(id: string, context?: any): Promise<ApiResponse<any>> {
-    return this.makeRequest(`/api/workflows/${id}/execute`, {
-      method: 'POST',
-      body: JSON.stringify({ context }),
-    });
+  async executeWorkflow(id: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>(`/api/workflows/${id}/execute`);
   }
 
   async getWorkflowStatus(id: string): Promise<ApiResponse<any>> {
-    return this.makeRequest(`/api/workflows/${id}/status`);
+    return this.httpClient.get<any>(`/api/workflows/${id}/status`);
   }
 
-  // Webhook methods
-  async getWebhooks(): Promise<ApiResponse<Webhook[]>> {
-    return this.makeRequest<Webhook[]>('/api/webhooks');
+  async updateWorkflow(id: string, updates: any): Promise<ApiResponse<any>> {
+    return this.httpClient.put<any>(`/api/workflows/${id}`, updates);
   }
 
-  async createWebhook(webhook: Partial<Webhook>): Promise<ApiResponse<Webhook>> {
-    return this.makeRequest<Webhook>('/api/webhooks', {
-      method: 'POST',
-      body: JSON.stringify(webhook),
-    });
+  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
+    return this.httpClient.delete<void>(`/api/workflows/${id}`);
   }
 
-  async updateWebhook(id: string, webhook: Partial<Webhook>): Promise<ApiResponse<Webhook>> {
-    return this.makeRequest<Webhook>(`/api/webhooks/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(webhook),
-    });
+  // Agent methods
+  async queryAgent(query: string): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/agents/query', { query });
   }
 
-  async deleteWebhook(id: string): Promise<ApiResponse<void>> {
-    return this.makeRequest<void>(`/api/webhooks/${id}`, {
-      method: 'DELETE',
-    });
+  async callDailyFocusAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/agents/daily-focus', { query, campaigns, context });
   }
 
-  async testWebhook(id: string): Promise<ApiResponse<any>> {
-    return this.makeRequest(`/api/webhooks/${id}/test`, {
-      method: 'POST',
-    });
-  }
-
-  async syncService(serviceId: string): Promise<ApiResponse<any>> {
-    return this.makeRequest(`/api/integrations/sync/${serviceId}`, {
-      method: 'POST',
-    });
-  }
-
-  // Social media methods
-  async createSocialPost(post: Partial<SocialPost>): Promise<ApiResponse<SocialPost>> {
-    return this.makeRequest<SocialPost>('/api/social/posts', {
-      method: 'POST',
-      body: JSON.stringify(post),
-    });
-  }
-
-  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
-    return this.makeRequest<SocialPlatformConnection[]>('/api/social/platforms');
-  }
-
-  async connectSocialPlatform(platform: string, config: any): Promise<ApiResponse<SocialPlatformConnection>> {
-    return this.makeRequest<SocialPlatformConnection>('/api/social/platforms/connect', {
-      method: 'POST',
-      body: JSON.stringify({ platform, config }),
-    });
-  }
-
-  // Social platforms object for direct access
-  get socialPlatforms() {
-    return {
-      list: () => this.getSocialPlatforms(),
-      connect: (platform: string, config: any) => this.connectSocialPlatform(platform, config),
-      schedule: (post: any) => this.scheduleSocialPost(post)
-    };
-  }
-
-  async scheduleSocialPost(post: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/social/schedule', {
-      method: 'POST',
-      body: JSON.stringify(post),
-    });
-  }
-
-  // AI Agent methods
-  async queryAgent(query: string, context?: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/agents/query', {
-      method: 'POST',
-      body: JSON.stringify({ query, context }),
-    });
-  }
-
-  async getDailyFocus(query: string, campaigns: any[], context: any[] = []): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/agents/daily-focus', {
-      method: 'POST',
-      body: JSON.stringify({ query, campaigns, context }),
-    });
-  }
-
-  async callDailyFocusAgent(query: string, context?: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/agents/daily-focus', {
-      method: 'POST',
-      body: JSON.stringify({ query, context }),
-    });
-  }
-
-  async callGeneralCampaignAgent(query: string, context?: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/agents/campaign', {
-      method: 'POST',
-      body: JSON.stringify({ query, context }),
-    });
-  }
-
-  // Content methods
-  async createContent(content: { title: string; content: string; platform: string; scheduled_for?: string; status?: string }): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/content', {
-      method: 'POST',
-      body: JSON.stringify(content),
-    });
-  }
-
-  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/social/generate-content', {
-      method: 'POST',
-      body: JSON.stringify({ platform, contentTheme, brandVoice }),
-    });
-  }
-
-  // Email methods
-  async generateEmailContent(campaignType: string, audience: any, options?: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/email/generate-content', {
-      method: 'POST',
-      body: JSON.stringify({ campaignType, audience, options }),
-    });
-  }
-
-  async generateABVariants(baseMessage: string): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/email/ab-variants', {
-      method: 'POST',
-      body: JSON.stringify({ baseMessage }),
-    });
-  }
-
-  async suggestSendTime(audienceProfile: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/email/suggest-send-time', {
-      method: 'POST',
-      body: JSON.stringify({ audienceProfile }),
-    });
-  }
-
-  // Lead management methods
-  async executeAgentTask(task: string, context?: any): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/leads/agent-task', {
-      method: 'POST',
-      body: JSON.stringify({ task, context }),
-    });
-  }
-
-  async scoreLeads(leads: any[]): Promise<ApiResponse<any>> {
-    return this.makeRequest('/api/leads/score', {
-      method: 'POST',
-      body: JSON.stringify({ leads }),
-    });
+  async callGeneralCampaignAgent(query: string, campaigns: any[], context: any[]): Promise<ApiResponse<any>> {
+    return this.httpClient.post<any>('/api/agents/general-campaign', { query, campaigns, context });
   }
 }
 
 export const apiClient = new ApiClient();
-
-// Export the interface for use in other files
-export type { IntegrationConnection };

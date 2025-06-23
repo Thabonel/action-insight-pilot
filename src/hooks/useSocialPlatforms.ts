@@ -75,6 +75,7 @@ export const useSocialPlatforms = () => {
     connectPlatform,
     disconnectPlatform,
     getPlatformStatus,
-    refetch: fetchPlatforms
+    refetch: fetchPlatforms,
+    reload: fetchPlatforms
   };
 };
