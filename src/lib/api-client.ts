@@ -277,12 +277,20 @@ class ApiClient extends BaseApiClient {
   };
 
   // Conversational Agent methods
-  queryAgent: async (message: string, context?: any) => {
+  queryAgent = async (message: string, context?: any): Promise<ApiResponse<any>> => {
     return { success: true, data: { response: 'Mock response', context: {} } };
   };
 
+  callDailyFocusAgent = async (query: string, campaigns: any[]): Promise<ApiResponse<any>> => {
+    return { success: true, data: { response: 'Daily focus response' } };
+  };
+
+  callGeneralCampaignAgent = async (query: string, campaigns: any[]): Promise<ApiResponse<any>> => {
+    return { success: true, data: { response: 'Campaign analysis response' } };
+  };
+
   // Blog methods
-  generateBlogPost: async (params: BlogPostParams): Promise<ApiResponse<BlogPost>> => {
+  generateBlogPost = async (params: BlogPostParams): Promise<ApiResponse<BlogPost>> => {
     return {
       success: true,
       data: {
@@ -299,25 +307,25 @@ class ApiClient extends BaseApiClient {
     };
   };
 
-  getBlogPosts: async (): Promise<ApiResponse<BlogPost[]>> => {
+  getBlogPosts = async (): Promise<ApiResponse<BlogPost[]>> => {
     return { success: true, data: [] };
   };
 
   // Content methods
-  generateContent: async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
+  generateContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
     return { success: true, data: { content: 'Generated content...' } };
   };
 
-  generateSocialContent: async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
+  generateSocialContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
     return { success: true, data: { content: 'Generated social content...' } };
   };
 
-  generateEmailContent: async (brief: string): Promise<ApiResponse<{ content: string }>> => {
+  generateEmailContent = async (brief: string): Promise<ApiResponse<{ content: string }>> => {
     return { success: true, data: { content: 'Generated email content...' } };
   };
 
   // Social methods
-  scheduleSocialPost: async (data: any): Promise<ApiResponse<any>> => {
+  scheduleSocialPost = async (data: any): Promise<ApiResponse<any>> => {
     return { success: true, data: { id: '1', status: 'scheduled' } };
   };
 
@@ -357,7 +365,7 @@ class ApiClient extends BaseApiClient {
   };
 
   // Metrics methods
-  getAnalytics: async (): Promise<ApiResponse<any>> => {
+  getAnalytics = async (): Promise<ApiResponse<any>> => {
     const analytics = {
       getAnalyticsOverview: async (): Promise<any> => {
         return { totalCampaigns: 0, activeLeads: 0, conversionRate: 0 };
@@ -366,17 +374,25 @@ class ApiClient extends BaseApiClient {
     return { success: true, data: analytics };
   };
 
-  getEmailAnalytics: async (): Promise<ApiResponse<any>> => {
+  getEmailAnalytics = async (): Promise<ApiResponse<any>> => {
     return { success: true, data: { sent: 0, opened: 0, clicked: 0 } };
   };
 
   // Lead methods
-  scoreLeads: async (): Promise<any[]> => {
+  scoreLeads = async (): Promise<any[]> => {
     return [];
   };
 
+  getLeads = async (): Promise<ApiResponse<Lead[]>> => {
+    return { success: true, data: [] };
+  };
+
+  getCampaigns = async (): Promise<ApiResponse<Campaign[]>> => {
+    return { success: true, data: [] };
+  };
+
   // Campaign methods
-  createCampaign: async (campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> => {
+  createCampaign = async (campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> => {
     return { 
       success: true, 
       data: { 
@@ -391,7 +407,7 @@ class ApiClient extends BaseApiClient {
     };
   };
 
-  getCampaignById: async (id: string): Promise<ApiResponse<Campaign>> => {
+  getCampaignById = async (id: string): Promise<ApiResponse<Campaign>> => {
     return { 
       success: true, 
       data: { 
@@ -406,16 +422,16 @@ class ApiClient extends BaseApiClient {
     };
   };
 
-  getCampaign: async (id: string): Promise<ApiResponse<Campaign>> => {
+  getCampaign = async (id: string): Promise<ApiResponse<Campaign>> => {
     return this.getCampaignById(id);
   };
 
   // MCP Connection methods
-  getConnections: async (): Promise<ApiResponse<IntegrationConnection[]>> => {
+  getConnections = async (): Promise<ApiResponse<IntegrationConnection[]>> => {
     return { success: true, data: [] };
   };
 
-  createConnection: async (connectionData: any): Promise<ApiResponse<IntegrationConnection>> => {
+  createConnection = async (connectionData: any): Promise<ApiResponse<IntegrationConnection>> => {
     return { 
       success: true, 
       data: { 
@@ -430,7 +446,7 @@ class ApiClient extends BaseApiClient {
     };
   };
 
-  deleteConnection: async (id: string): Promise<ApiResponse<boolean>> => {
+  deleteConnection = async (id: string): Promise<ApiResponse<boolean>> => {
     return { success: true, data: true };
   };
 }
