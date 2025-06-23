@@ -12,21 +12,7 @@ import {
   CheckCircle,
   ArrowRight
 } from 'lucide-react';
-
-interface RealInsights {
-  totalUsers?: number;
-  activeFeatures?: string[];
-  recentActions?: Array<{
-    action: string;
-    timestamp: Date;
-    feature: string;
-  }>;
-  systemHealth?: {
-    status: 'healthy' | 'warning' | 'error';
-    uptime: number;
-    lastCheck: Date;
-  };
-}
+import { RealInsights } from '@/types/insights';
 
 interface LearningInsightsProps {
   insights: RealInsights | null;
@@ -38,59 +24,40 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
 
     const generatedInsights = [];
 
-    // System health insight
-    if (insights.systemHealth) {
-      const { status, uptime } = insights.systemHealth;
-      if (status === 'healthy' && uptime > 0) {
-        generatedInsights.push({
-          type: 'positive',
-          title: 'System Running Smoothly',
-          description: `Your system has been running reliably${uptime > 3600 ? ` for ${Math.floor(uptime / 3600)} hours` : ''}`,
-          action: 'View System Status',
-          priority: 'low'
-        });
-      } else if (status === 'warning') {
-        generatedInsights.push({
-          type: 'warning',
-          title: 'System Performance Notice',
-          description: 'Some features may be running slower than usual',
-          action: 'Check System Health',
-          priority: 'medium'
-        });
-      }
-    }
-
     // Activity-based insights
-    if (insights.recentActions && insights.recentActions.length > 0) {
-      const recentFeatures = [...new Set(insights.recentActions.map(a => a.feature))];
-      if (recentFeatures.length === 1) {
-        generatedInsights.push({
-          type: 'info',
-          title: `Focused on ${recentFeatures[0]}`,
-          description: `You've been actively working with ${recentFeatures[0].toLowerCase()} features`,
-          action: 'Explore More Features',
-          priority: 'low'
-        });
-      } else if (recentFeatures.length > 2) {
-        generatedInsights.push({
-          type: 'positive',
-          title: 'Multi-Feature Usage',
-          description: `You're effectively using ${recentFeatures.length} different features`,
-          action: 'View Usage Analytics',
-          priority: 'low'
-        });
-      }
+    if (insights.recentActivities && insights.recentActivities.length > 0) {
+      generatedInsights.push({
+        type: 'positive',
+        title: 'Recent Activity Detected',
+        description: `You've completed ${insights.recentActivities.length} actions recently`,
+        action: 'View Activity Details',
+        priority: 'medium'
+      });
     }
 
-    // Feature availability insight
-    if (insights.activeFeatures && insights.activeFeatures.length > 0) {
+    // Suggestions-based insights
+    if (insights.suggestions && insights.suggestions.length > 0) {
       generatedInsights.push({
         type: 'info',
-        title: 'Available Features',
-        description: `${insights.activeFeatures.length} features are ready to help optimize your marketing`,
-        action: 'Explore Features',
+        title: 'Optimization Suggestions',
+        description: `${insights.suggestions.length} suggestions available to improve your campaigns`,
+        action: 'View Suggestions',
         priority: 'low'
       });
+    }
+
+    // Trends-based insights
+    if (insights.trends) {
+      const { positive, negative, neutral } = insights.trends;
+      if (positive > negative) {
+        generatedInsights.push({
+          type: 'positive',
+          title: 'Positive Trends',
+          description: `${positive} positive trends detected in your performance`,
+          action: 'Analyze Trends',
+          priority: 'low'
+        });
+      }
     }
 
     // Default helpful insight

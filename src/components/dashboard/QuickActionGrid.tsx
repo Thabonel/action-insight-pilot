@@ -13,21 +13,7 @@ import {
   Target
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-interface RealInsights {
-  totalUsers?: number;
-  activeFeatures?: string[];
-  recentActions?: Array<{
-    action: string;
-    timestamp: Date;
-    feature: string;
-  }>;
-  systemHealth?: {
-    status: 'healthy' | 'warning' | 'error';
-    uptime: number;
-    lastCheck: Date;
-  };
-}
+import { RealInsights } from '@/types/insights';
 
 interface QuickActionGridProps {
   insights: RealInsights | null;
@@ -80,36 +66,14 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
     // Add contextual actions based on insights
     const contextualActions = [];
 
-    if (insights?.systemHealth?.status === 'warning' || insights?.systemHealth?.status === 'error') {
-      contextualActions.push({
-        icon: Settings,
-        title: 'System Health',
-        description: 'Check system status',
-        action: () => navigate('/settings'),
-        color: 'bg-yellow-500 hover:bg-yellow-600',
-        priority: 0
-      });
-    }
-
-    if (insights?.activeFeatures && insights.activeFeatures.includes('Campaigns')) {
+    if (insights?.recentActivities && insights.recentActivities.length > 0) {
       contextualActions.push({
         icon: TrendingUp,
-        title: 'Campaign Performance',
-        description: 'Review active campaigns',
+        title: 'Continue Work',
+        description: 'Resume recent activities',
         action: () => navigate('/campaigns'),
         color: 'bg-indigo-500 hover:bg-indigo-600',
         priority: 1.5
-      });
-    }
-
-    if (insights?.recentActions && insights.recentActions.some(a => a.feature === 'Lead Management')) {
-      contextualActions.push({
-        icon: Target,
-        title: 'Lead Scoring',
-        description: 'Continue lead optimization',
-        action: () => navigate('/leads'),
-        color: 'bg-pink-500 hover:bg-pink-600',
-        priority: 2.5
       });
     }
 
