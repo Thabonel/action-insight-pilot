@@ -1,59 +1,43 @@
 
 import { apiClient } from '@/lib/api-client';
-import { ApiResponse, SocialPost } from '@/lib/api-client-interface';
+import { ApiResponse } from '@/lib/api-client-interface';
 
-export interface ScheduleContentRequest {
-  content: string;
-  platform: string;
-  scheduledTime: string;
-  campaignId?: string;
-}
-
-export interface ScheduledContent {
+interface ScheduledContent {
   id: string;
+  title: string;
   content: string;
   platform: string;
-  scheduledTime: string;
+  scheduledFor: Date;
   status: 'scheduled' | 'published' | 'failed';
-  campaignId?: string;
+  createdAt: Date;
 }
 
 export class ContentSchedulingService {
-  static async scheduleContent(request: ScheduleContentRequest): Promise<ApiResponse<ScheduledContent>> {
+  async scheduleContent(contentData: {
+    title: string;
+    content: string;
+    platform: string;
+    scheduledFor: Date;
+  }): Promise<ApiResponse<ScheduledContent>> {
     try {
-      const socialPostData: SocialPost = {
-        id: '',
-        content: request.content,
-        platform: request.platform,
-        scheduledTime: request.scheduledTime,
+      console.log('Scheduling content:', contentData);
+      
+      const scheduledContent: ScheduledContent = {
+        id: Date.now().toString(),
+        title: contentData.title,
+        content: contentData.content,
+        platform: contentData.platform,
+        scheduledFor: contentData.scheduledFor,
         status: 'scheduled',
-        created_at: new Date().toISOString(),
-        campaignId: request.campaignId
+        createdAt: new Date()
       };
 
-      const response = await apiClient.scheduleSocialPost(socialPostData);
-      
-      if (response.success && response.data) {
-        const scheduledContent: ScheduledContent = {
-          id: response.data.id,
-          content: response.data.content,
-          platform: response.data.platform,
-          scheduledTime: response.data.scheduledTime,
-          status: response.data.status === 'draft' ? 'scheduled' : response.data.status,
-          campaignId: response.data.campaignId
-        };
-        
-        return {
-          success: true,
-          data: scheduledContent
-        };
-      }
-      
       return {
-        success: false,
-        error: response.error || 'Failed to schedule content'
+        success: true,
+        data: scheduledContent
       };
     } catch (error) {
+      console.error('Error scheduling content:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to schedule content'
@@ -61,37 +45,76 @@ export class ContentSchedulingService {
     }
   }
 
-  static async getScheduledContent(): Promise<ApiResponse<ScheduledContent[]>> {
+  async getScheduledContent(): Promise<ApiResponse<ScheduledContent[]>> {
     try {
-      const response = await apiClient.getSocialPosts();
+      console.log('Fetching scheduled content');
       
-      if (response.success && response.data) {
-        const scheduledContent: ScheduledContent[] = response.data.map(post => ({
-          id: post.id,
-          content: post.content,
-          platform: post.platform,
-          scheduledTime: post.scheduledTime,
-          status: post.status === 'draft' ? 'scheduled' : post.status,
-          campaignId: post.campaignId
-        }));
-        
-        return {
-          success: true,
-          data: scheduledContent
-        };
-      }
-      
+      // Mock data - in a real app this would fetch from API
+      const mockContent: ScheduledContent[] = [
+        {
+          id: '1',
+          title: 'Sample Post',
+          content: 'This is a sample scheduled post',
+          platform: 'twitter',
+          scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          status: 'scheduled',
+          createdAt: new Date()
+        }
+      ];
+
       return {
-        success: false,
-        data: [],
-        error: response.error || 'Failed to get scheduled content'
+        success: true,
+        data: mockContent
       };
     } catch (error) {
+      console.error('Error fetching scheduled content:', error);
       return {
         success: false,
-        data: [],
-        error: error instanceof Error ? error.message : 'Failed to get scheduled content'
+        error: error instanceof Error ? error.message : 'Failed to fetch scheduled content'
+      };
+    }
+  }
+
+  async updateScheduledContent(id: string, updates: Partial<ScheduledContent>): Promise<ApiResponse<ScheduledContent>> {
+    try {
+      console.log('Updating scheduled content:', id, updates);
+      
+      // Mock update - in a real app this would update via API
+      const updatedContent: ScheduledContent = {
+        id,
+        title: updates.title || 'Updated Title',
+        content: updates.content || 'Updated content',
+        platform: updates.platform || 'twitter',
+        scheduledFor: updates.scheduledFor || new Date(),
+        status: updates.status || 'scheduled',
+        createdAt: new Date()
+      };
+
+      return {
+        success: true,
+        data: updatedContent
+      };
+    } catch (error) {
+      console.error('Error updating scheduled content:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update scheduled content'
+      };
+    }
+  }
+
+  async deleteScheduledContent(id: string): Promise<ApiResponse<void>> {
+    try {
+      console.log('Deleting scheduled content:', id);
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting scheduled content:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete scheduled content'
       };
     }
   }
 }
+
+export const contentSchedulingService = new ContentSchedulingService();

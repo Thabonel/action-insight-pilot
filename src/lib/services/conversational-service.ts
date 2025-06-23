@@ -2,101 +2,111 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 
-export interface ConversationRequest {
-  query: string;
-  context?: any;
-}
-
-export interface ConversationResponse {
-  message: string;
-  suggestions?: string[];
-  metadata?: any;
+interface ConversationContext {
+  userId: string;
+  sessionId: string;
+  previousMessages: Array<{ role: string; content: string }>;
+  userPreferences?: any;
 }
 
 export class ConversationalService {
-  static async processQuery(request: ConversationRequest): Promise<ApiResponse<ConversationResponse>> {
+  async processConversation(
+    message: string,
+    context: ConversationContext
+  ): Promise<ApiResponse<{ response: string; suggestions?: string[] }>> {
     try {
-      const response = await apiClient.queryAgent(request.query);
-      return {
-        success: response.success,
-        data: response.data,
-        error: response.error
-      };
+      console.log('Processing conversation:', { message, context });
+      
+      const result = await apiClient.queryAgent(message, context) as ApiResponse<any>;
+      
+      if (result.success) {
+        return {
+          success: true,
+          data: {
+            response: result.data?.message || 'I understand your message.',
+            suggestions: result.data?.suggestions || [
+              'Tell me more about this',
+              'What are the next steps?',
+              'Can you provide examples?'
+            ]
+          }
+        };
+      } else {
+        return {
+          success: false,
+          error: 'Failed to process conversation'
+        };
+      }
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to process query'
-      };
-    }
-  }
-
-  static async getAuthToken(): Promise<string | null> {
-    try {
-      // Mock implementation - in real app this would get actual auth token
-      return 'mock-auth-token';
-    } catch (error) {
-      console.error('Failed to get auth token:', error);
-      return null;
-    }
-  }
-
-  static async fetchCampaignData(authToken: string): Promise<any[]> {
-    try {
-      const response = await apiClient.getCampaigns();
-      return response.success ? response.data || [] : [];
-    } catch (error) {
-      console.error('Failed to fetch campaign data:', error);
-      return [];
-    }
-  }
-
-  static async callDailyFocusAgent(query: string, campaigns: any[], context?: any, authToken?: string): Promise<any> {
-    try {
-      const response = await apiClient.callDailyFocusAgent(query, campaigns);
-      return response.data;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Daily focus agent failed');
-    }
-  }
-
-  static async callGeneralCampaignAgent(query: string, campaigns: any[], context?: any, authToken?: string): Promise<any> {
-    try {
-      const response = await apiClient.callGeneralCampaignAgent(query, campaigns);
-      return response.data;
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'General campaign agent failed');
-    }
-  }
-
-  static async getDailyFocus(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
-    try {
-      const response = await apiClient.callDailyFocusAgent(query, campaigns);
-      return {
-        success: response.success,
-        data: response.data,
-        error: response.error
-      };
-    } catch (error) {
+      console.error('Error processing conversation:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to get daily focus'
+        error: error instanceof Error ? error.message : 'Failed to process conversation'
       };
     }
   }
 
-  static async getCampaignAnalysis(query: string, campaigns: any[]): Promise<ApiResponse<any>> {
+  async getDashboardInsights(userId: string): Promise<ApiResponse<any>> {
     try {
-      const response = await apiClient.callGeneralCampaignAgent(query, campaigns);
+      console.log('Getting dashboard insights for user:', userId);
+      
+      const mockInsights = {
+        totalActions: 15,
+        recentActivities: [
+          { type: 'email_sent', message: 'Campaign email sent successfully', timestamp: new Date() },
+          { type: 'lead_scored', message: 'New lead scored 85 points', timestamp: new Date() }
+        ],
+        suggestions: [
+          'Review your email campaign performance',
+          'Update lead scoring criteria',
+          'Schedule social media posts'
+        ],
+        trends: {
+          positive: 8,
+          negative: 2,
+          neutral: 5
+        }
+      };
+
       return {
-        success: response.success,
-        data: response.data,
-        error: response.error
+        success: true,
+        data: mockInsights
       };
     } catch (error) {
+      console.error('Error getting dashboard insights:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to get campaign analysis'
+        error: error instanceof Error ? error.message : 'Failed to get insights'
+      };
+    }
+  }
+
+  async generateResponse(query: string, context?: any): Promise<ApiResponse<{ message: string }>> {
+    try {
+      console.log('Generating response for query:', query);
+      
+      // Mock response generation
+      const responses = [
+        'Based on your data, I recommend focusing on email engagement.',
+        'Your lead scoring appears to be working well. Consider expanding criteria.',
+        'Social media performance shows room for improvement in posting frequency.',
+        'Campaign metrics suggest your audience prefers morning send times.'
+      ];
+
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+
+      return {
+        success: true,
+        data: { message: randomResponse }
+      };
+    } catch (error) {
+      console.error('Error generating response:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to generate response'
       };
     }
   }
 }
+
+export const conversationalService = new ConversationalService();

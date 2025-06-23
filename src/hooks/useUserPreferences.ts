@@ -1,69 +1,69 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 
-export function useUserPreferences<T = Record<string, any>>(category: string, defaultValues: T) {
-  const [preferences, setPreferences] = useState<T>(defaultValues);
-  const [isLoading, setIsLoading] = useState(true);
+interface UserPreferences {
+  theme?: string;
+  notifications?: boolean;
+  language?: string;
+  timezone?: string;
+  [key: string]: any;
+}
+
+export const useUserPreferences = () => {
+  const [preferences, setPreferences] = useState<UserPreferences>({});
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+
+  const fetchPreferences = async (category?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const userPrefs = await apiClient.userPreferences();
+      const result = await userPrefs.getUserPreferences(category) as ApiResponse<UserPreferences>;
+      
+      if (result.success) {
+        setPreferences(result.data || {});
+      } else {
+        setError('Failed to fetch preferences');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePreferences = async (category: string, data: Partial<UserPreferences>) => {
+    try {
+      setLoading(true);
+      const userPrefs = await apiClient.userPreferences();
+      const result = await userPrefs.updateUserPreferences(category, data) as ApiResponse<UserPreferences>;
+      
+      if (result.success) {
+        setPreferences(prev => ({ ...prev, ...data }));
+        return { success: true };
+      } else {
+        throw new Error('Failed to update preferences');
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Unknown error');
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    loadPreferences();
-  }, [category]);
-
-  const loadPreferences = async () => {
-    try {
-      setIsLoading(true);
-      const response = await apiClient.userPreferences.getUserPreferences(category);
-      if (response.success && response.data && response.data.length > 0) {
-        setPreferences({ ...defaultValues, ...response.data[0].preference_data });
-      }
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load preferences');
-      console.error('Error loading preferences:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updatePreferences = async (newPreferences: Partial<T>) => {
-    try {
-      const updatedPreferences = { ...preferences, ...newPreferences };
-      const response = await apiClient.userPreferences.updateUserPreferences(category, updatedPreferences);
-      
-      if (response.success) {
-        setPreferences(updatedPreferences);
-        toast({
-          title: "Preferences Updated",
-          description: "Your preferences have been saved successfully.",
-        });
-      } else {
-        throw new Error(response.error || 'Failed to update preferences');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update preferences';
-      setError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const resetPreferences = () => {
-    setPreferences(defaultValues);
-  };
+    fetchPreferences();
+  }, []);
 
   return {
     preferences,
-    updatePreferences,
-    resetPreferences,
-    isLoading,
+    loading,
     error,
-    reload: loadPreferences
+    updatePreferences,
+    refetch: fetchPreferences
   };
-}
+};

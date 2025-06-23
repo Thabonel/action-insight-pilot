@@ -4,10 +4,74 @@ import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 
-export const useChatLogic = () => {
+interface ChatMessage {
+  id: string;
+  message: string;
+  response: string;
+  timestamp: Date;
+}
+
+export const useChatLogic = ({ onChatUpdate }: { onChatUpdate?: (chatHistory: ChatMessage[]) => void } = {}) => {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
+
+  // Mock user - in a real app this would come from auth
+  const user = { id: 'user-1', name: 'User' };
+
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatMessage.trim()) return;
+
+    setIsTyping(true);
+    const newMessage: ChatMessage = {
+      id: Date.now().toString(),
+      message: chatMessage,
+      response: '',
+      timestamp: new Date()
+    };
+
+    try {
+      const result = await apiClient.queryAgent(chatMessage) as ApiResponse<any>;
+      
+      if (result.success) {
+        const responseData = result.data || { message: 'No response received' };
+        const updatedMessage = {
+          ...newMessage,
+          response: responseData.message || 'Response received'
+        };
+        
+        const updatedHistory = [...chatHistory, updatedMessage];
+        setChatHistory(updatedHistory);
+        onChatUpdate?.(updatedHistory);
+        
+        setMessages(prev => [
+          ...prev,
+          { role: 'user', content: chatMessage },
+          { role: 'assistant', content: updatedMessage.response }
+        ]);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to send message",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTyping(false);
+      setChatMessage('');
+    }
+  };
 
   const sendMessage = async (message: string, agentType: string) => {
     setLoading(true);
@@ -15,18 +79,18 @@ export const useChatLogic = () => {
       const result = await apiClient.queryAgent(message) as ApiResponse<any>;
       
       if (result.success) {
-        toast({
-          title: "Message Sent",
-          description: result.error || "Failed to send message",
-          variant: "destructive",
-        });
-      } else {
         const responseData = result.data || { message: 'No response received' };
         setMessages(prev => [
           ...prev,
           { role: 'user', content: message },
           { role: 'assistant', content: responseData.message || 'Response received' }
         ]);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to send message",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -46,18 +110,18 @@ export const useChatLogic = () => {
       const result = await apiClient.callGeneralCampaignAgent(message, campaigns) as ApiResponse<any>;
       
       if (result.success) {
-        toast({
-          title: "Message Sent",
-          description: result.error || "Failed to send message",
-          variant: "destructive",
-        });
-      } else {
         const responseData = result.data || { message: 'No response received' };
         setMessages(prev => [
           ...prev,
           { role: 'user', content: message },
           { role: 'assistant', content: responseData.message || 'Response received' }
         ]);
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to send message",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Campaign chat error:', error);
@@ -84,7 +148,7 @@ export const useChatLogic = () => {
       } else {
         return {
           success: false,
-          error: result.data?.message || 'Failed to process query'
+          error: result.error || 'Failed to process query'
         };
       }
     } catch (error) {
@@ -101,6 +165,12 @@ export const useChatLogic = () => {
   return {
     loading,
     messages,
+    chatMessage,
+    setChatMessage,
+    chatHistory,
+    isTyping,
+    handleChatSubmit,
+    user,
     sendMessage,
     sendCampaignMessage,
     processQuery,
