@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
@@ -26,12 +27,7 @@ export function useIntegrations() {
       console.log('Connections response:', connectionsResponse);
 
       if (webhooksResponse.success && Array.isArray(webhooksResponse.data)) {
-        // Ensure webhooks have the required is_active property
-        const normalizedWebhooks = webhooksResponse.data.map(webhook => ({
-          ...webhook,
-          is_active: webhook.is_active ?? webhook.active ?? true
-        }));
-        setWebhooks(normalizedWebhooks);
+        setWebhooks(webhooksResponse.data);
       } else {
         console.warn('Webhooks response data is not an array:', webhooksResponse.data);
         setWebhooks([]);
@@ -49,7 +45,6 @@ export function useIntegrations() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load integrations';
       setError(errorMessage);
       console.error('Error loading integrations:', err);
-      // Ensure arrays are set even on error
       setWebhooks([]);
       setConnections([]);
     } finally {
@@ -61,16 +56,12 @@ export function useIntegrations() {
     try {
       const response = await apiClient.integrations.createWebhook(webhookData);
       if (response.success && response.data) {
-        const normalizedWebhook = {
-          ...response.data,
-          is_active: response.data.is_active ?? response.data.active ?? true
-        };
-        setWebhooks(prev => [...prev, normalizedWebhook]);
+        setWebhooks(prev => [...prev, response.data!]);
         toast({
           title: "Webhook Created",
           description: "Webhook has been successfully created",
         });
-        return normalizedWebhook;
+        return response.data;
       } else {
         throw new Error(response.error || 'Failed to create webhook');
       }
@@ -135,7 +126,7 @@ export function useIntegrations() {
     try {
       const response = await apiClient.integrations.connectService(service, apiKey);
       if (response.success) {
-        await loadIntegrations(); // Reload to get updated connection status
+        await loadIntegrations();
         toast({
           title: "Service Connected",
           description: `Successfully connected to ${service}`,
@@ -159,7 +150,7 @@ export function useIntegrations() {
     try {
       const response = await apiClient.integrations.syncService(service);
       if (response.success) {
-        await loadIntegrations(); // Reload to get updated sync status
+        await loadIntegrations();
         toast({
           title: "Sync Complete",
           description: `Successfully synced data from ${service}`,
@@ -183,7 +174,7 @@ export function useIntegrations() {
     try {
       const response = await apiClient.integrations.disconnectService(service);
       if (response.success) {
-        await loadIntegrations(); // Reload to get updated connection status
+        await loadIntegrations();
         toast({
           title: "Service Disconnected",
           description: `Successfully disconnected from ${service}`,

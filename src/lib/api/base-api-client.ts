@@ -1,15 +1,33 @@
 
-import { HttpClient } from '../http-client';
-import { ApiResponse } from './api-client-interface';
-
 export class BaseApiClient {
-  public httpClient: HttpClient;
+  protected baseUrl: string;
 
-  constructor() {
-    this.httpClient = new HttpClient();
+  constructor(baseUrl: string = 'http://localhost:3000/api') {
+    this.baseUrl = baseUrl;
   }
 
-  setToken(token: string) {
-    this.httpClient.setToken(token);
+  protected async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<{ success: boolean; data?: T; error?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('API request failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 }

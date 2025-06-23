@@ -51,6 +51,21 @@ export interface ContentBrief {
   key_messages?: string[];
 }
 
+export interface EmailInsight {
+  type: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  message: string;
+}
+
+export interface EmailTrends {
+  sent?: number[];
+  opened?: number[];
+  clicked?: number[];
+  positive: number;
+  negative: number;
+  neutral: number;
+}
+
 export interface EmailMetrics {
   totalSent: number;
   delivered: number;
@@ -61,12 +76,8 @@ export interface EmailMetrics {
   openRate: number;
   clickRate: number;
   bounceRate: number;
-  insights?: string[];
-  trends?: {
-    positive: number;
-    negative: number;
-    neutral: number;
-  };
+  insights?: EmailInsight[];
+  trends?: EmailTrends;
   last_updated?: string;
 }
 
@@ -95,6 +106,17 @@ export interface Webhook {
   last_response_code?: number;
 }
 
+export interface Campaign {
+  id: string;
+  name: string;
+  description?: string;
+  type: string;
+  status: 'draft' | 'active' | 'paused' | 'completed';
+  created_at: string;
+  updated_at: string;
+  metrics?: any;
+}
+
 export interface WorkflowMethods {
   getAll: () => Promise<ApiResponse<Workflow[]>>;
   create: (workflow: Partial<Workflow>) => Promise<ApiResponse<Workflow>>;
@@ -116,4 +138,31 @@ export interface UserPreferencesMethods {
   update: (data: Partial<UserPreferences>) => Promise<ApiResponse<UserPreferences>>;
   getUserPreferences: (category?: string) => Promise<ApiResponse<UserPreferences>>;
   updateUserPreferences: (category: string, data: Partial<UserPreferences>) => Promise<ApiResponse<UserPreferences>>;
+}
+
+export interface IntegrationMethods {
+  getWebhooks: () => Promise<ApiResponse<Webhook[]>>;
+  createWebhook: (data: Partial<Webhook>) => Promise<ApiResponse<Webhook>>;
+  deleteWebhook: (id: string) => Promise<ApiResponse<void>>;
+  testWebhook: (id: string) => Promise<ApiResponse<any>>;
+  getConnections: () => Promise<ApiResponse<IntegrationConnection[]>>;
+  connectService: (service: string, apiKey: string) => Promise<ApiResponse<any>>;
+  syncService: (service: string) => Promise<ApiResponse<any>>;
+  disconnectService: (service: string) => Promise<ApiResponse<any>>;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: Date;
+  updated_at?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  metadata?: any;
 }
