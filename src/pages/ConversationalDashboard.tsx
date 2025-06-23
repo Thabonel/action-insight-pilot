@@ -6,6 +6,7 @@ import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
+import { RealInsights } from '@/types/insights';
 
 const ConversationalDashboard: React.FC = () => {
   const {
@@ -19,8 +20,8 @@ const ConversationalDashboard: React.FC = () => {
     handleSuggestionClick
   } = useConversationalDashboard();
 
-  // Convert insights array to proper format
-  const insights = React.useMemo(() => {
+  // Convert insights array to proper RealInsights format
+  const insights: RealInsights = React.useMemo(() => {
     if (Array.isArray(rawInsights)) {
       return {
         totalActions: rawInsights.length,
@@ -38,12 +39,12 @@ const ConversationalDashboard: React.FC = () => {
       };
     }
     
-    // If rawInsights is already an object, return it as is
+    // If rawInsights is already an object with the right structure, return it as RealInsights
     if (rawInsights && typeof rawInsights === 'object' && 'totalActions' in rawInsights) {
-      return rawInsights;
+      return rawInsights as RealInsights;
     }
     
-    // Default fallback
+    // Default fallback that matches RealInsights interface
     return {
       totalActions: 0,
       recentActivities: [],
