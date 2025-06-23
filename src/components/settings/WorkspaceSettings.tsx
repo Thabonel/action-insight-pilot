@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -5,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
 
 interface WorkspaceSettingsProps {
   name?: string;
@@ -31,7 +33,8 @@ const WorkspaceSettings: React.FC = () => {
 
   const updateSettings = async () => {
     try {
-      const response = await apiClient.userPreferences.updateUserPreferences('workspace', settings);
+      const userPrefs = await apiClient.userPreferences();
+      const response = await userPrefs.updateUserPreferences('workspace', settings) as ApiResponse<any>;
       
       if (response.success) {
         toast({
@@ -54,7 +57,8 @@ const WorkspaceSettings: React.FC = () => {
   const loadPreferences = async () => {
     try {
       setIsLoading(true);
-      const response = await apiClient.userPreferences.getUserPreferences('workspace');
+      const userPrefs = await apiClient.userPreferences();
+      const response = await userPrefs.getUserPreferences('workspace') as ApiResponse<any>;
       
       if (response.success && response.data && response.data.length > 0) {
         const prefs = response.data[0].preference_data;
