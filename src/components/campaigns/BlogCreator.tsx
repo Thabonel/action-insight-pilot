@@ -1,34 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { FileText, Target, Copy, Download, Loader2, Edit, Trash2, Upload } from 'lucide-react';
-import { apiClient } from '@/lib/api-client';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Edit, Copy, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface BlogPostParams {
-  title: string;
-  keyword: string;
-  wordCount: number;
-  tone: string;
-  includeCTA: boolean;
-}
+import { apiClient } from '@/lib/api-client';
 
 interface BlogPost {
   id: string;
@@ -38,394 +20,348 @@ interface BlogPost {
   tone: string;
   includeCTA: boolean;
   content: string;
+  metaDescription?: string;
   createdAt: string;
 }
 
-interface BlogCreatorProps {
-  // Additional props can be defined here if needed
+interface BlogPostParams {
+  title: string;
+  keyword: string;
+  wordCount: number;
+  tone: string;
+  includeCTA: boolean;
 }
 
-const BlogCreator: React.FC<BlogCreatorProps> = () => {
-  const [blogPostParams, setBlogPostParams] = useState<BlogPostParams>({
-    title: '',
-    keyword: '',
-    wordCount: 500,
-    tone: 'neutral',
-    includeCTA: false,
-  });
-  const [generating, setGenerating] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState('');
+const BlogCreator = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadBlogPosts();
-  }, []);
+  const [formData, setFormData] = useState<BlogPostParams>({
+    title: '',
+    keyword: '',
+    wordCount: 800,
+    tone: 'professional',
+    includeCTA: true,
+  });
+
+  const handleInputChange = (field: keyof BlogPostParams, value: string | number | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const loadBlogPosts = async () => {
-    setLoadingPosts(true);
     try {
       const response = await apiClient.getBlogPosts();
       if (response.success && response.data) {
-        setBlogPosts(response.data);
-      } else {
-        toast({
-          title: "Error",
-          description: response.error || "Failed to load blog posts",
-          variant: "destructive",
-        });
+        // Transform the API data to match our local BlogPost interface
+        const transformedPosts: BlogPost[] = response.data.map(post => ({
+          id: post.id,
+          title: post.title,
+          keyword: post.keyword || '',
+          wordCount: post.wordCount || 0,
+          tone: post.tone || 'professional',
+          includeCTA: post.includeCTA || false,
+          content: post.content,
+          metaDescription: post.metaDescription,
+          createdAt: post.createdAt || new Date().toISOString(),
+        }));
+        setBlogPosts(transformedPosts);
       }
     } catch (error) {
-      console.error("Error loading blog posts:", error);
       toast({
         title: "Error",
         description: "Failed to load blog posts",
-        variant: "destructive",
+        variant: "destructive"
       });
-    } finally {
-      setLoadingPosts(false);
     }
   };
 
-  const handleLoadPost = (post: BlogPost) => {
-    setBlogPostParams({
-      title: post.title,
-      keyword: post.keyword,
-      wordCount: post.wordCount,
-      tone: post.tone,
-      includeCTA: post.includeCTA,
-    });
-    setGeneratedContent(post.content);
-    toast({
-      title: "Post Loaded",
-      description: "Blog post data has been loaded into the form.",
-    });
-  };
+  React.useEffect(() => {
+    loadBlogPosts();
+  }, []);
 
-  const handleDeletePost = async (postId: string) => {
-    setDeletingPostId(postId);
-    try {
-      const response = await apiClient.deleteBlogPost(postId);
-      if (response.success) {
-        setBlogPosts(prev => prev.filter(post => post.id !== postId));
-        toast({
-          title: "Post Deleted",
-          description: "Blog post has been deleted successfully.",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: response.error || "Failed to delete blog post",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error deleting blog post:", error);
+  const handleGenerate = async () => {
+    if (!formData.title || !formData.keyword) {
       toast({
-        title: "Error",
-        description: "Failed to delete blog post",
-        variant: "destructive",
+        title: "Missing Information",
+        description: "Please provide both title and keyword",
+        variant: "destructive"
       });
-    } finally {
-      setDeletingPostId(null);
+      return;
     }
-  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setBlogPostParams(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBlogPostParams(prevState => ({
-      ...prevState,
-      includeCTA: e.target.checked,
-    }));
-  };
-
-  const handleSelectChange = (value: string) => {
-    setBlogPostParams(prevState => ({
-      ...prevState,
-      tone: value,
-    }));
-  };
-
-  const generateBlogPost = async () => {
-    setGenerating(true);
+    setIsGenerating(true);
     try {
-      const response = await apiClient.generateBlogPost(blogPostParams);
+      // Transform BlogPostParams to ContentBrief format expected by the API
+      const contentBrief = {
+        title: formData.title,
+        content_type: 'blog_post',
+        target_audience: 'general',
+        key_messages: [formData.keyword],
+        platform: 'blog',
+        tone: formData.tone,
+        word_count: formData.wordCount,
+        include_cta: formData.includeCTA,
+      };
+
+      const response = await apiClient.generateBlogPost(contentBrief);
+      
       if (response.success && response.data) {
-        setGeneratedContent(response.data.content);
-        toast({
-          title: "Blog Post Generated",
-          description: "Your blog post has been generated successfully!",
+        const newPost: BlogPost = {
+          id: Date.now().toString(),
+          title: formData.title,
+          keyword: formData.keyword,
+          wordCount: formData.wordCount,
+          tone: formData.tone,
+          includeCTA: formData.includeCTA,
+          content: response.data,
+          createdAt: new Date().toISOString(),
+        };
+
+        setBlogPosts(prev => [newPost, ...prev]);
+        
+        // Reset form
+        setFormData({
+          title: '',
+          keyword: '',
+          wordCount: 800,
+          tone: 'professional',
+          includeCTA: true,
         });
-        // Reload posts to include the new one
-        loadBlogPosts();
-      } else {
+
         toast({
-          title: "Error",
-          description: response.error || "Failed to generate blog post",
-          variant: "destructive",
+          title: "Success",
+          description: "Blog post generated successfully!",
         });
       }
     } catch (error) {
-      console.error("Error generating blog post:", error);
       toast({
         title: "Error",
         description: "Failed to generate blog post",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
-      setGenerating(false);
+      setIsGenerating(false);
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedContent);
+  const handleEdit = (post: BlogPost) => {
+    setEditingPost(post);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingPost) return;
+
+    try {
+      // Update the post in the list
+      setBlogPosts(prev => 
+        prev.map(post => 
+          post.id === editingPost.id ? editingPost : post
+        )
+      );
+      
+      setEditingPost(null);
+      toast({
+        title: "Success",
+        description: "Blog post updated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update blog post",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = (postId: string) => {
+    setBlogPosts(prev => prev.filter(post => post.id !== postId));
     toast({
-      title: "Copied to Clipboard",
-      description: "The blog post content has been copied to your clipboard.",
+      title: "Success",
+      description: "Blog post deleted successfully!",
     });
   };
 
-  const downloadBlogPost = () => {
-    const element = document.createElement("a");
-    const file = new Blob([generatedContent], { type: 'text/plain' });
+  const handleCopy = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast({
+      title: "Success",
+      description: "Content copied to clipboard!",
+    });
+  };
+
+  const handleDownload = (post: BlogPost) => {
+    const element = document.createElement('a');
+    const file = new Blob([post.content], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = `${blogPostParams.title.replace(/\s+/g, '_').toLowerCase() || 'blog_post'}.txt`;
+    element.download = `${post.title.replace(/\s+/g, '-').toLowerCase()}.txt`;
     document.body.appendChild(element);
     element.click();
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    document.body.removeChild(element);
   };
 
   return (
     <div className="space-y-6">
-      {/* Recent Blog Posts Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileText className="h-5 w-5" />
-            <span>Recent Blog Posts</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loadingPosts ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span className="ml-2">Loading blog posts...</span>
-            </div>
-          ) : blogPosts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No blog posts found. Create your first blog post below!</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {blogPosts.map((post) => (
-                <div key={post.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-2">{post.title}</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
-                        <div>
-                          <span className="font-medium">Keyword:</span> {post.keyword}
-                        </div>
-                        <div>
-                          <span className="font-medium">Words:</span> {post.wordCount}
-                        </div>
-                        <div>
-                          <span className="font-medium">Tone:</span> {post.tone}
-                        </div>
-                        <div>
-                          <span className="font-medium">Created:</span> {formatDate(post.createdAt)}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleLoadPost(post)}
-                        className="flex items-center space-x-1"
-                      >
-                        <Upload className="h-4 w-4" />
-                        <span>Load</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center space-x-1"
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span>Edit</span>
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center space-x-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            disabled={deletingPostId === post.id}
-                          >
-                            {deletingPostId === post.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                            <span>Delete</span>
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the blog post "{post.title}".
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeletePost(post.id)}
-                              className="bg-red-600 hover:bg-red-700"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Blog Post Creation Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileText className="h-5 w-5" />
-            <span>AI Blog Post Generator</span>
-          </CardTitle>
+          <CardTitle>Create Blog Post</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">Blog Title</Label>
               <Input
-                type="text"
                 id="title"
-                name="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="Enter blog post title"
-                value={blogPostParams.title}
-                onChange={handleInputChange}
               />
             </div>
             <div>
-              <Label htmlFor="keyword">Keyword</Label>
+              <Label htmlFor="keyword">Target Keyword</Label>
               <Input
-                type="text"
                 id="keyword"
-                name="keyword"
-                placeholder="Enter main keyword"
-                value={blogPostParams.keyword}
-                onChange={handleInputChange}
+                value={formData.keyword}
+                onChange={(e) => handleInputChange('keyword', e.target.value)}
+                placeholder="Enter target keyword"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="wordCount">Word Count</Label>
               <Input
-                type="number"
                 id="wordCount"
-                name="wordCount"
-                placeholder="Enter desired word count"
-                value={blogPostParams.wordCount}
-                onChange={handleInputChange}
+                type="number"
+                value={formData.wordCount}
+                onChange={(e) => handleInputChange('wordCount', parseInt(e.target.value))}
+                min="100"
+                max="3000"
               />
             </div>
             <div>
               <Label htmlFor="tone">Tone</Label>
-              <Select value={blogPostParams.tone} onValueChange={handleSelectChange}>
+              <Select value={formData.tone} onValueChange={(value) => handleInputChange('tone', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select tone" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="neutral">Neutral</SelectItem>
-                  <SelectItem value="formal">Formal</SelectItem>
-                  <SelectItem value="informal">Informal</SelectItem>
-                  <SelectItem value="optimistic">Optimistic</SelectItem>
-                  <SelectItem value="humorous">Humorous</SelectItem>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
+                  <SelectItem value="friendly">Friendly</SelectItem>
+                  <SelectItem value="authoritative">Authoritative</SelectItem>
+                  <SelectItem value="conversational">Conversational</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="includeCTA"
+                checked={formData.includeCTA}
+                onCheckedChange={(checked) => handleInputChange('includeCTA', checked)}
+              />
+              <Label htmlFor="includeCTA">Include CTA</Label>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="includeCTA"
-              checked={blogPostParams.includeCTA}
-              onCheckedChange={(checked) => setBlogPostParams(prevState => ({ ...prevState, includeCTA: !!checked }))}
-            />
-            <Label htmlFor="includeCTA">Include Call to Action</Label>
-          </div>
-
-          <Button onClick={generateBlogPost} disabled={generating} className="w-full">
-            {generating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Target className="mr-2 h-4 w-4" />
-                Generate Blog Post
-              </>
-            )}
+          <Button 
+            onClick={handleGenerate} 
+            disabled={isGenerating || !formData.title || !formData.keyword}
+            className="w-full"
+          >
+            {isGenerating ? 'Generating...' : 'Generate Blog Post'}
           </Button>
         </CardContent>
       </Card>
 
-      {/* Generated Content Section */}
-      {generatedContent && (
+      {/* Generated Blog Posts */}
+      <div className="space-y-4">
+        {blogPosts.map((post) => (
+          <Card key={post.id}>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">{post.title}</CardTitle>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge variant="secondary">{post.keyword}</Badge>
+                  <Badge variant="outline">{post.wordCount} words</Badge>
+                  <Badge variant="outline">{post.tone}</Badge>
+                  {post.includeCTA && <Badge variant="outline">CTA</Badge>}
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEdit(post)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopy(post.content)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDownload(post)}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(post.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="max-h-60 overflow-y-auto">
+                <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                  {post.content}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Edit Modal */}
+      {editingPost && (
         <Card>
           <CardHeader>
-            <CardTitle>Generated Blog Post</CardTitle>
+            <CardTitle>Edit Blog Post</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea
-              value={generatedContent}
-              readOnly
-              className="min-h-[150px] bg-gray-100"
-            />
-            <div className="flex justify-end space-x-2">
-              <Button variant="secondary" onClick={copyToClipboard}>
-                <Copy className="mr-2 h-4 w-4" />
-                Copy
-              </Button>
-              <Button variant="secondary" onClick={downloadBlogPost}>
-                <Download className="mr-2 h-4 w-4" />
-                Download
-              </Button>
+            <div>
+              <Label htmlFor="editTitle">Title</Label>
+              <Input
+                id="editTitle"
+                value={editingPost.title}
+                onChange={(e) => setEditingPost({...editingPost, title: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="editContent">Content</Label>
+              <Textarea
+                id="editContent"
+                value={editingPost.content}
+                onChange={(e) => setEditingPost({...editingPost, content: e.target.value})}
+                rows={10}
+              />
+            </div>
+            <div className="flex space-x-2">
+              <Button onClick={handleSaveEdit}>Save Changes</Button>
+              <Button variant="outline" onClick={() => setEditingPost(null)}>Cancel</Button>
             </div>
           </CardContent>
         </Card>
