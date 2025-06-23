@@ -13,7 +13,7 @@ export const useEmailMetrics = () => {
       setLoading(true);
       setError(null);
       
-      const result = await apiClient.getRealTimeMetrics('email', 'metrics') as ApiResponse<any>;
+      const result = await apiClient.getRealTimeMetrics() as ApiResponse<any>;
       
       if (result.success && result.data) {
         // Transform the data to match EmailMetrics interface
@@ -50,3 +50,4 @@ export const useEmailMetrics = () => {
     refetch: fetchMetrics
   };
 };
+

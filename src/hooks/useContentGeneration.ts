@@ -2,19 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import { ApiResponse } from '@/lib/api-client-interface';
-
-interface ContentBrief {
-  title: string;
-  content_type: string;
-  target_audience: string;
-  key_messages: string[];
-  platform: string;
-  tone?: string;
-  length?: string;
-  keywords?: string[];
-  cta?: string;
-}
+import { ApiResponse, ContentBrief } from '@/lib/api-client-interface';
 
 interface GeneratedContent {
   id: string;
@@ -35,12 +23,26 @@ export function useContentGeneration() {
   const [content, setContent] = useState<GeneratedContent | null>(null);
   const { toast } = useToast();
 
-  const generateContent = async (brief: ContentBrief) => {
+  const generateContent = async (brief: Partial<ContentBrief>) => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await apiClient.generateContent(brief) as ApiResponse<any>;
+      // Create a proper ContentBrief with required properties
+      const fullBrief: ContentBrief = {
+        topic: brief.title || brief.topic || '',
+        audience: brief.target_audience || brief.audience || '',
+        tone: brief.tone || 'professional',
+        platform: brief.platform || 'website',
+        length: brief.length || 'medium',
+        keywords: brief.keywords,
+        title: brief.title,
+        target_audience: brief.target_audience,
+        content_type: brief.content_type,
+        key_messages: brief.key_messages
+      };
+
+      const response = await apiClient.generateContent(fullBrief) as ApiResponse<any>;
 
       if (response.success && response.data) {
         const responseData = response.data as any;
@@ -102,3 +104,4 @@ export function useContentGeneration() {
     reset
   };
 }
+

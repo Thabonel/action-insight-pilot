@@ -57,6 +57,13 @@ const ConversationalDashboard: React.FC = () => {
     };
   }, [rawInsights]);
 
+  // Convert chatHistory to match expected interface
+  const convertedChatHistory = chatHistory.map(msg => ({
+    ...msg,
+    query: msg.content,
+    response: msg.role === 'assistant' ? msg.content : ''
+  }));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -71,7 +78,7 @@ const ConversationalDashboard: React.FC = () => {
           {/* Chat Area */}
           <div className="lg:col-span-2 space-y-6">
             <ConversationalChatInterface
-              chatHistory={chatHistory}
+              chatHistory={convertedChatHistory}
               isProcessing={isProcessing}
               query={query}
               setQuery={setQuery}
@@ -96,3 +103,4 @@ const ConversationalDashboard: React.FC = () => {
 };
 
 export default ConversationalDashboard;
+
