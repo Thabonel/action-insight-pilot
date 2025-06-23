@@ -1,250 +1,297 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Bell, 
-  Moon, 
-  Globe, 
-  Shield, 
-  Smartphone,
-  Mail,
-  MessageSquare,
-  Calendar
-} from 'lucide-react';
-import { useUserPreferences } from '@/hooks/useUserPreferences';
 
-interface SystemPreferencesData {
-  notifications: {
-    email: boolean;
-    push: boolean;
-    desktop: boolean;
-    slack: boolean;
-  };
-  appearance: {
-    darkMode: boolean;
-    compactView: boolean;
-    animations: boolean;
-  };
-  privacy: {
-    analytics: boolean;
-    marketing: boolean;
-    thirdParty: boolean;
-  };
-  accessibility: {
-    highContrast: boolean;
-    largeText: boolean;
-    screenReader: boolean;
-  };
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { userPreferencesService } from '@/lib/services/user-preferences-service';
+import { 
+  Settings, 
+  Bell, 
+  Globe, 
+  Palette, 
+  Shield, 
+  Database,
+  Clock,
+  Download,
+  Trash2
+} from 'lucide-react';
+
+interface SystemPreference {
+  id: string;
+  category: string;
+  name: string;
+  description: string;
+  type: 'boolean' | 'select' | 'number';
+  value: any;
+  options?: string[];
 }
 
-const defaultPreferences: SystemPreferencesData = {
-  notifications: {
-    email: true,
-    push: false,
-    desktop: true,
-    slack: false
-  },
-  appearance: {
-    darkMode: false,
-    compactView: false,
-    animations: true
-  },
-  privacy: {
-    analytics: true,
-    marketing: false,
-    thirdParty: false
-  },
-  accessibility: {
-    highContrast: false,
-    largeText: false,
-    screenReader: false
-  }
-};
-
 const SystemPreferences: React.FC = () => {
-  const { 
-    preferences, 
-    updatePreferences, 
-    resetPreferences 
-  } = useUserPreferences<SystemPreferencesData>('system', defaultPreferences);
+  const [preferences, setPreferences] = useState<SystemPreference[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const notificationTypes = [
-    { key: 'email', label: 'Email Notifications', icon: Mail, description: 'Receive updates via email' },
-    { key: 'push', label: 'Push Notifications', icon: Smartphone, description: 'Browser push notifications' },
-    { key: 'desktop', label: 'Desktop Notifications', icon: Bell, description: 'System desktop notifications' },
-    { key: 'slack', label: 'Slack Integration', icon: MessageSquare, description: 'Notifications in Slack channels' }
-  ];
+  useEffect(() => {
+    loadPreferences();
+  }, []);
 
-  const appearanceSettings = [
-    { key: 'darkMode', label: 'Dark Mode', icon: Moon, description: 'Use dark theme across the interface' },
-    { key: 'compactView', label: 'Compact View', icon: Globe, description: 'Show more content in less space' },
-    { key: 'animations', label: 'Animations', icon: Calendar, description: 'Enable smooth transitions and animations' }
-  ];
-
-  const privacySettings = [
-    { key: 'analytics', label: 'Usage Analytics', icon: Shield, description: 'Help improve the product with usage data' },
-    { key: 'marketing', label: 'Marketing Communications', icon: Mail, description: 'Receive product updates and tips' },
-    { key: 'thirdParty', label: 'Third-party Integrations', icon: Globe, description: 'Allow data sharing with connected services' }
-  ];
-
-  const accessibilitySettings = [
-    { key: 'highContrast', label: 'High Contrast', icon: Shield, description: 'Increase color contrast for better visibility' },
-    { key: 'largeText', label: 'Large Text', icon: Globe, description: 'Increase font size throughout the interface' },
-    { key: 'screenReader', label: 'Screen Reader Support', icon: Bell, description: 'Optimize for screen reader software' }
-  ];
-
-  const updatePreference = (category: keyof SystemPreferencesData, key: string, value: boolean) => {
-    updatePreferences({
-      [category]: {
-        ...preferences[category],
-        [key]: value
+  const loadPreferences = async () => {
+    try {
+      setLoading(true);
+      const result = await userPreferencesService.getGeneralPreferences();
+      
+      if (result.success && result.data) {
+        // Transform the preferences data into our SystemPreference format
+        const systemPrefs: SystemPreference[] = [
+          {
+            id: 'notifications',
+            category: 'Notifications',
+            name: 'Push Notifications',
+            description: 'Receive push notifications for important updates',
+            type: 'boolean',
+            value: result.data.notifications ?? true
+          },
+          {
+            id: 'theme',
+            category: 'Appearance',
+            name: 'Theme',
+            description: 'Choose your preferred color theme',
+            type: 'select',
+            value: result.data.theme ?? 'light',
+            options: ['light', 'dark', 'auto']
+          },
+          {
+            id: 'language',
+            category: 'Localization',
+            name: 'Language',
+            description: 'Select your preferred language',
+            type: 'select',
+            value: result.data.language ?? 'en',
+            options: ['en', 'es', 'fr', 'de', 'ja']
+          },
+          {
+            id: 'timezone',
+            category: 'Localization',
+            name: 'Timezone',
+            description: 'Set your local timezone',
+            type: 'select',
+            value: result.data.timezone ?? 'UTC',
+            options: ['UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London', 'Asia/Tokyo']
+          }
+        ];
+        setPreferences(systemPrefs);
       }
-    });
+    } catch (error) {
+      console.error('Error loading preferences:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load system preferences",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="mt-8 pt-8 border-t">
-      <h3 className="text-lg font-semibold mb-4">System Preferences</h3>
+  const updatePreference = async (id: string, value: any) => {
+    try {
+      setSaving(id);
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-base">
-              <Bell className="h-4 w-4" />
-              <span>Notifications</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {notificationTypes.map(type => {
-              const Icon = type.icon;
-              return (
-                <div key={type.key} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Icon className="h-4 w-4 text-gray-500" />
-                    <div>
-                      <div className="text-sm font-medium">{type.label}</div>
-                      <div className="text-xs text-gray-600">{type.description}</div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={preferences.notifications[type.key as keyof typeof preferences.notifications]}
-                    onCheckedChange={(checked) => updatePreference('notifications', type.key, checked)}
-                  />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+      const updatedPrefs = preferences.map(pref => 
+        pref.id === id ? { ...pref, value } : pref
+      );
+      setPreferences(updatedPrefs);
 
-        {/* Appearance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-base">
-              <Globe className="h-4 w-4" />
-              <span>Appearance</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {appearanceSettings.map(setting => {
-              const Icon = setting.icon;
-              return (
-                <div key={setting.key} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Icon className="h-4 w-4 text-gray-500" />
-                    <div>
-                      <div className="text-sm font-medium">{setting.label}</div>
-                      <div className="text-xs text-gray-600">{setting.description}</div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={preferences.appearance[setting.key as keyof typeof preferences.appearance]}
-                    onCheckedChange={(checked) => updatePreference('appearance', setting.key, checked)}
-                  />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+      const prefData: Record<string, any> = {};
+      updatedPrefs.forEach(pref => {
+        prefData[pref.id] = pref.value;
+      });
 
-        {/* Privacy */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-base">
-              <Shield className="h-4 w-4" />
-              <span>Privacy & Data</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {privacySettings.map(setting => {
-              const Icon = setting.icon;
-              return (
-                <div key={setting.key} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Icon className="h-4 w-4 text-gray-500" />
-                    <div>
-                      <div className="text-sm font-medium">{setting.label}</div>
-                      <div className="text-xs text-gray-600">{setting.description}</div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={preferences.privacy[setting.key as keyof typeof preferences.privacy]}
-                    onCheckedChange={(checked) => updatePreference('privacy', setting.key, checked)}
-                  />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+      await userPreferencesService.updateGeneralPreferences(prefData);
+      
+      toast({
+        title: "Preferences Updated",
+        description: "Your system preferences have been saved",
+      });
+    } catch (error) {
+      console.error('Error updating preference:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update preferences",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(null);
+    }
+  };
 
-        {/* Accessibility */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-base">
-              <Bell className="h-4 w-4" />
-              <span>Accessibility</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {accessibilitySettings.map(setting => {
-              const Icon = setting.icon;
-              return (
-                <div key={setting.key} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Icon className="h-4 w-4 text-gray-500" />
-                    <div>
-                      <div className="text-sm font-medium">{setting.label}</div>
-                      <div className="text-xs text-gray-600">{setting.description}</div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={preferences.accessibility[setting.key as keyof typeof preferences.accessibility]}
-                    onCheckedChange={(checked) => updatePreference('accessibility', setting.key, checked)}
-                  />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+  const exportPreferences = () => {
+    const dataStr = JSON.stringify(preferences, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'system-preferences.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const resetPreferences = async () => {
+    if (confirm('Are you sure you want to reset all preferences to default values?')) {
+      try {
+        const defaultPrefs = preferences.map(pref => ({
+          ...pref,
+          value: getDefaultValue(pref.type)
+        }));
+        
+        setPreferences(defaultPrefs);
+        
+        const prefData: Record<string, any> = {};
+        defaultPrefs.forEach(pref => {
+          prefData[pref.id] = pref.value;
+        });
+
+        await userPreferencesService.updateGeneralPreferences(prefData);
+        
+        toast({
+          title: "Preferences Reset",
+          description: "All preferences have been reset to default values",
+        });
+      } catch (error) {
+        console.error('Error resetting preferences:', error);
+        toast({
+          title: "Error",
+          description: "Failed to reset preferences",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const getDefaultValue = (type: string) => {
+    switch (type) {
+      case 'boolean': return true;
+      case 'select': return '';
+      case 'number': return 0;
+      default: return '';
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'Notifications': return Bell;
+      case 'Appearance': return Palette;
+      case 'Localization': return Globe;
+      case 'Security': return Shield;
+      case 'Data': return Database;
+      default: return Settings;
+    }
+  };
+
+  const groupedPreferences = preferences.reduce((groups, pref) => {
+    if (!groups[pref.category]) {
+      groups[pref.category] = [];
+    }
+    groups[pref.category].push(pref);
+    return groups;
+  }, {} as Record<string, SystemPreference[]>);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">System Preferences</h2>
+          <p className="text-gray-600">Customize your system settings and preferences</p>
+        </div>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={exportPreferences}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button variant="outline" onClick={resetPreferences}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Reset All
+          </Button>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="mt-6 flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" onClick={resetPreferences}>
-          Reset to Defaults
-        </Button>
-        <Button variant="outline" size="sm">
-          Export Settings
-        </Button>
-        <Button variant="outline" size="sm">
-          Import Settings
-        </Button>
-        <Badge variant="secondary" className="ml-auto">
-          Auto-saved
-        </Badge>
-      </div>
+      {Object.entries(groupedPreferences).map(([category, prefs]) => {
+        const IconComponent = getCategoryIcon(category);
+        
+        return (
+          <Card key={category}>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <IconComponent className="h-5 w-5" />
+                <span>{category}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {prefs.map((pref, index) => (
+                <div key={pref.id}>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor={pref.id} className="text-sm font-medium">
+                        {pref.name}
+                      </Label>
+                      <p className="text-sm text-gray-600">{pref.description}</p>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      {saving === pref.id && (
+                        <Clock className="h-4 w-4 animate-spin text-gray-400" />
+                      )}
+                      
+                      {pref.type === 'boolean' && (
+                        <Switch
+                          id={pref.id}
+                          checked={Boolean(pref.value)}
+                          onCheckedChange={(checked) => updatePreference(pref.id, checked)}
+                          disabled={saving === pref.id}
+                        />
+                      )}
+                      
+                      {pref.type === 'select' && (
+                        <Select
+                          value={pref.value}
+                          onValueChange={(value) => updatePreference(pref.id, value)}
+                          disabled={saving === pref.id}
+                        >
+                          <SelectTrigger className="w-48">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {pref.options?.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {index < prefs.length - 1 && <Separator className="mt-6" />}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 };
