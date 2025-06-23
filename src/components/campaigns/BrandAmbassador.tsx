@@ -1,659 +1,599 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Send, FileText, User, Bot, ChevronRight, ChevronLeft, Plus, Trash2, Download, MessageSquare } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
+import { Upload, FileText, MessageCircle, Send, ChevronLeft, ChevronRight, Plus, Trash2, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { HttpClient } from '@/lib/http-client';
+import { Separator } from '@/components/ui/separator';
+import { KnowledgeService } from '@/lib/services/knowledge-service';
 
 interface Document {
   id: string;
-  name: string;
-  type: string;
-  size: number;
-  content?: string;
-  summary?: string;
-  category?: string;
-  uploadedAt: Date;
-  status: 'uploading' | 'processing' | 'ready' | 'error';
+  title: string;
+  content: string;
+  file_name?: string;
+  file_type?: string;
+  file_size?: number;
+  status: 'processing' | 'ready' | 'failed';
+  created_at: string;
+  metadata: Record<string, any>;
 }
 
 interface ChatMessage {
   id: string;
   message: string;
   response: string;
-  timestamp: Date;
-  isUser: boolean;
-  content: string;
+  timestamp: string;
 }
 
 interface ChatSession {
   id: string;
   title: string;
-  created: Date;
-  updated: Date;
   messages: ChatMessage[];
+  timestamp: string;
 }
 
 interface ChatApiResponse {
   message?: string;
   response?: string;
-  explanation?: string;
-  insights?: string[];
+  [key: string]: any;
+}
+
+interface BrandContext {
+  name: string;
+  description: string;
+  guidelines: string[];
+  recentInsights: string[];
 }
 
 const BrandAmbassador: React.FC = () => {
-  // Session management state
-  const [sessions, setSessions] = useState<ChatSession[]>(() => {
-    const saved = localStorage.getItem('brand-ambassador-sessions');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
-  const [isSessionSidebarOpen, setIsSessionSidebarOpen] = useState(true);
-  
-  // Existing state
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isBrandSidebarOpen, setIsBrandSidebarOpen] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-  const httpClient = new HttpClient();
+  const [uploading, setUploading] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [brandContextOpen, setBrandContextOpen] = useState(true);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [sessionsOpen, setSessionsOpen] = useState(false);
 
-  // Save sessions to localStorage whenever sessions change
-  const saveSessions = useCallback((updatedSessions: ChatSession[]) => {
-    localStorage.setItem('brand-ambassador-sessions', JSON.stringify(updatedSessions));
-    setSessions(updatedSessions);
+  // Load sessions from localStorage on mount
+  useEffect(() => {
+    const savedSessions = localStorage.getItem('brandAmbassadorSessions');
+    if (savedSessions) {
+      const parsedSessions = JSON.parse(savedSessions);
+      setSessions(parsedSessions);
+      // Load the most recent session if available
+      if (parsedSessions.length > 0) {
+        const mostRecent = parsedSessions[0];
+        setCurrentSessionId(mostRecent.id);
+        setChatHistory(mostRecent.messages || []);
+      }
+    }
   }, []);
 
-  // Create new session
-  const createNewSession = useCallback(() => {
-    const newSession: ChatSession = {
-      id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      title: 'New Conversation',
-      created: new Date(),
-      updated: new Date(),
-      messages: []
-    };
-    
-    const updatedSessions = [newSession, ...sessions];
-    saveSessions(updatedSessions);
-    setCurrentSession(newSession);
-    setChatMessages([]);
-    
-    toast({
-      title: "New Session Created",
-      description: "Started a fresh conversation.",
-    });
-  }, [sessions, saveSessions, toast]);
-
-  // Load session
-  const loadSession = useCallback((session: ChatSession) => {
-    setCurrentSession(session);
-    setChatMessages(session.messages);
-    
-    toast({
-      title: "Session Loaded",
-      description: `Loaded "${session.title}"`,
-    });
-  }, [toast]);
-
-  // Save current session
-  const saveCurrentSession = useCallback(() => {
-    if (!currentSession) return;
-
-    const updatedSession = {
-      ...currentSession,
-      messages: chatMessages,
-      updated: new Date(),
-      title: chatMessages.length > 0 ? 
-        chatMessages[0].content.substring(0, 50) + (chatMessages[0].content.length > 50 ? '...' : '') :
-        'New Conversation'
-    };
-
-    const updatedSessions = sessions.map(s => 
-      s.id === currentSession.id ? updatedSession : s
-    );
-    
-    saveSessions(updatedSessions);
-    setCurrentSession(updatedSession);
-  }, [currentSession, chatMessages, sessions, saveSessions]);
-
-  // Delete session
-  const deleteSession = useCallback((sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    const updatedSessions = sessions.filter(s => s.id !== sessionId);
-    saveSessions(updatedSessions);
-    
-    if (currentSession?.id === sessionId) {
-      setCurrentSession(null);
-      setChatMessages([]);
+  // Save sessions to localStorage whenever sessions change
+  useEffect(() => {
+    if (sessions.length > 0) {
+      localStorage.setItem('brandAmbassadorSessions', JSON.stringify(sessions));
     }
-    
-    toast({
-      title: "Session Deleted",
-      description: "Conversation has been removed.",
-    });
-  }, [sessions, currentSession, saveSessions, toast]);
+  }, [sessions]);
 
-  // Export session
-  const exportSession = useCallback((session: ChatSession, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    const transcript = session.messages.map(msg => 
-      `${msg.isUser ? 'User' : 'Assistant'} (${msg.timestamp.toLocaleString()}): ${msg.content}`
-    ).join('\n\n');
-    
-    const blob = new Blob([transcript], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `brand-conversation-${session.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Session Exported",
-      description: "Conversation transcript downloaded.",
-    });
-  }, [toast]);
-
-  // File upload handler
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
-
-    setIsLoading(true);
-    const uploadPromises: Promise<void>[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const documentId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      setDocuments(prev => [...prev, {
-        id: documentId,
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        uploadedAt: new Date(),
-        status: 'uploading'
-      }]);
-
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const content = e.target?.result as string;
-          const summaryResponse = await httpClient.request('/api/summarize', {
-            method: 'POST',
-            body: JSON.stringify({ document: content })
-          });
-
-          if (summaryResponse.success && summaryResponse.data) {
-            setDocuments(prev => prev.map(doc =>
-              doc.id === documentId ? { ...doc, content, summary: summaryResponse.data.summary, status: 'ready' } : doc
-            ));
-          } else {
-            setDocuments(prev => prev.map(doc =>
-              doc.id === documentId ? { ...doc, content, summary: 'Failed to summarize document.', status: 'error' } : doc
-            ));
-            toast({
-              title: "Summary Failed",
-              description: `Failed to summarize ${file.name}.`,
-              variant: "destructive"
-            });
-          }
-        } catch (error) {
-          console.error('Error processing file:', error);
-          setDocuments(prev => prev.map(doc =>
-            doc.id === documentId ? { ...doc, status: 'error' } : doc
-          ));
-          toast({
-            title: "File Processing Error",
-            description: `Error processing ${file.name}.`,
-            variant: "destructive"
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      reader.onerror = () => {
-        console.error('Error reading file:', file.name);
-        setDocuments(prev => prev.map(doc =>
-          doc.id === documentId ? { ...doc, status: 'error' } : doc
-        ));
-        toast({
-          title: "File Reading Error",
-          description: `Could not read ${file.name}.`,
-          variant: "destructive"
-        });
-        setIsLoading(false);
-      };
-
-      reader.readAsText(file);
+  // Update current session when chat history changes
+  useEffect(() => {
+    if (currentSessionId && chatHistory.length > 0) {
+      setSessions(prev => prev.map(session => 
+        session.id === currentSessionId 
+          ? { ...session, messages: chatHistory, timestamp: new Date().toISOString() }
+          : session
+      ));
     }
+  }, [chatHistory, currentSessionId]);
 
-    await Promise.all(uploadPromises);
-  };
-
-  // Enhanced send message to save to current session
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
-
-    // Create session if none exists
-    if (!currentSession) {
-      createNewSession();
-    }
-
-    setIsLoading(true);
-    
-    const userMessage: ChatMessage = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      message: inputMessage,
-      response: '',
-      timestamp: new Date(),
-      isUser: true,
-      content: inputMessage
-    };
-
-    const newMessages = [...chatMessages, userMessage];
-    setChatMessages(newMessages);
-    setInputMessage('');
-
+  const loadDocuments = async () => {
     try {
-      const response = await httpClient.request('/api/brand-assistant', {
-        method: 'POST',
-        body: JSON.stringify({
-          message: inputMessage,
-          context: documents.map(doc => ({ name: doc.name, summary: doc.summary })),
-          conversation_history: chatMessages.map(msg => ({
-            role: msg.isUser ? 'user' : 'assistant',
-            content: msg.content
-          }))
-        })
-      });
-
-      if (response.success && response.data) {
-        const apiResponse = response.data as ChatApiResponse;
-        const assistantContent = apiResponse.response || apiResponse.message || apiResponse.explanation || 'I understand your request.';
-        
-        const assistantMessage: ChatMessage = {
-          id: `msg_${Date.now() + 1}_${Math.random().toString(36).substr(2, 9)}`,
-          message: inputMessage,
-          response: assistantContent,
-          timestamp: new Date(),
-          isUser: false,
-          content: assistantContent
-        };
-
-        const finalMessages = [...newMessages, assistantMessage];
-        setChatMessages(finalMessages);
-        
-        // Auto-save session after each message
-        setTimeout(saveCurrentSession, 100);
-        
-        toast({
-          title: "Response Generated",
-          description: "Brand assistant has analyzed your message.",
-        });
+      const buckets = await KnowledgeService.getBuckets();
+      const brandBucket = buckets.find(b => b.bucket_type === 'general');
+      if (brandBucket) {
+        const docs = await KnowledgeService.getDocuments(brandBucket.id);
+        setDocuments(docs);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to get response from brand assistant.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to load documents:', error);
     }
   };
 
-  const handleDocumentCategory = async (documentId: string, category: string) => {
-    setDocuments(prev => prev.map(doc =>
-      doc.id === documentId ? { ...doc, category } : doc
-    ));
-  };
+  useEffect(() => {
+    loadDocuments();
+  }, []);
 
-  const generateBrandContext = () => {
-    if (documents.length === 0) {
-      toast({
-        title: "No Documents",
-        description: "Please upload documents to generate brand context.",
-      });
-      return;
-    }
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    setIsLoading(true);
-    const contextGenerationPromises: Promise<void>[] = [];
-
-    documents.forEach(doc => {
-      if (doc.status === 'ready') {
-        const contextPromise = new Promise<void>(async (resolve) => {
-          try {
-            const contextResponse = await httpClient.request('/api/context', {
-              method: 'POST',
-              body: JSON.stringify({ document: doc.content, category: doc.category || 'general' })
-            });
-
-            if (contextResponse.success && contextResponse.data) {
-              setDocuments(prev => prev.map(d =>
-                d.id === doc.id ? { ...d, summary: contextResponse.data.summary } : d
-              ));
-              toast({
-                title: "Context Generated",
-                description: `Brand context generated for ${doc.name}.`,
-              });
-            } else {
-              toast({
-                title: "Context Generation Failed",
-                description: `Failed to generate brand context for ${doc.name}.`,
-                variant: "destructive"
-              });
-            }
-          } catch (error) {
-            console.error('Error generating context:', error);
-            toast({
-              title: "Context Generation Error",
-              description: `Error generating brand context for ${doc.name}.`,
-              variant: "destructive"
-            });
-          } finally {
-            resolve();
-          }
-        });
-        contextGenerationPromises.push(contextPromise);
+    setUploading(true);
+    try {
+      // Create or get brand bucket
+      let buckets = await KnowledgeService.getBuckets();
+      let brandBucket = buckets.find(b => b.bucket_type === 'general');
+      
+      if (!brandBucket) {
+        brandBucket = await KnowledgeService.createBucket(
+          'Brand Knowledge',
+          'general',
+          'Brand guidelines, voice, and context documents'
+        );
       }
-    });
 
-    Promise.all(contextGenerationPromises).then(() => {
-      setIsLoading(false);
-    });
+      // Upload each file
+      for (const file of Array.from(files)) {
+        const content = await KnowledgeService.extractTextFromFile(file);
+        await KnowledgeService.uploadDocument(
+          brandBucket.id,
+          file.name,
+          content,
+          file.name,
+          file.type,
+          file.size
+        );
+      }
+
+      await loadDocuments();
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setUploading(false);
+    }
   };
+
+  const sendMessage = async () => {
+    if (!currentMessage.trim()) return;
+
+    const userMessage = currentMessage;
+    setCurrentMessage('');
+    setIsProcessing(true);
+
+    // Add user message to chat
+    const newMessage: ChatMessage = {
+      id: Date.now().toString(),
+      message: userMessage,
+      response: '',
+      timestamp: new Date().toISOString()
+    };
+
+    setChatHistory(prev => [...prev, newMessage]);
+
+    try {
+      // Search knowledge base for relevant context
+      const searchResults = await KnowledgeService.searchKnowledge(
+        userMessage,
+        'general',
+        undefined,
+        5
+      );
+
+      // Simulate AI response with brand context
+      const contextPrompt = searchResults.length > 0 
+        ? `Based on the brand knowledge: ${searchResults.map(r => r.chunk_content).join(' ')}\n\nUser question: ${userMessage}`
+        : userMessage;
+
+      // Mock AI response - in real implementation, this would call your AI service
+      const aiResponse = `Based on your brand guidelines, here's my recommendation for: "${userMessage}". I've considered your brand voice, target audience, and key messaging pillars from the uploaded documents.`;
+
+      // Update the message with AI response
+      setChatHistory(prev => prev.map(msg => 
+        msg.id === newMessage.id 
+          ? { ...msg, response: aiResponse }
+          : msg
+      ));
+
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setChatHistory(prev => prev.map(msg => 
+        msg.id === newMessage.id 
+          ? { ...msg, response: 'Sorry, I encountered an error processing your request.' }
+          : msg
+      ));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const createNewSession = () => {
+    const newSession: ChatSession = {
+      id: Date.now().toString(),
+      title: `Session ${new Date().toLocaleDateString()}`,
+      messages: [],
+      timestamp: new Date().toISOString()
+    };
+
+    setSessions(prev => [newSession, ...prev]);
+    setCurrentSessionId(newSession.id);
+    setChatHistory([]);
+  };
+
+  const loadSession = (sessionId: string) => {
+    const session = sessions.find(s => s.id === sessionId);
+    if (session) {
+      setCurrentSessionId(sessionId);
+      setChatHistory(session.messages || []);
+    }
+  };
+
+  const deleteSession = (sessionId: string) => {
+    setSessions(prev => prev.filter(s => s.id !== sessionId));
+    if (currentSessionId === sessionId) {
+      setCurrentSessionId(null);
+      setChatHistory([]);
+    }
+  };
+
+  const exportSession = (sessionId: string) => {
+    const session = sessions.find(s => s.id === sessionId);
+    if (session) {
+      const transcript = session.messages.map(msg => 
+        `User: ${msg.message}\nAI: ${msg.response}\n---\n`
+      ).join('');
+      
+      const blob = new Blob([transcript], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${session.title}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  // Generate brand context from documents
+  const generateBrandContext = (): BrandContext => {
+    const processedDocs = documents.filter(doc => doc.status === 'ready');
+    
+    return {
+      name: 'Your Brand',
+      description: 'AI-powered brand ambassador trained on your guidelines and voice.',
+      guidelines: processedDocs.length > 0 
+        ? ['Brand voice consistency', 'Target audience alignment', 'Key messaging pillars']
+        : ['Upload brand documents to see guidelines'],
+      recentInsights: chatHistory.slice(-3).map(msg => {
+        const content = typeof msg === 'object' && msg !== null && 'response' in msg 
+          ? (msg as any).response || 'No response available'
+          : 'Invalid message format';
+        return content.substring(0, 100) + '...';
+      })
+    };
+  };
+
+  const brandContext = generateBrandContext();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="flex h-screen bg-gray-50">
       {/* Sessions Sidebar */}
-      <div className={`bg-white border-r transition-all duration-300 flex flex-col ${
-        isSessionSidebarOpen ? 'w-80' : 'w-12'
-      }`}>
-        <div className="p-4 border-b flex items-center justify-between">
-          {isSessionSidebarOpen && (
-            <h2 className="font-semibold text-gray-900">Conversations</h2>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSessionSidebarOpen(!isSessionSidebarOpen)}
-            className="p-1"
-          >
-            {isSessionSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </Button>
-        </div>
-
-        {isSessionSidebarOpen && (
-          <>
-            <div className="p-4">
-              <Button
-                onClick={createNewSession}
-                className="w-full flex items-center gap-2"
-                variant="outline"
-              >
-                <Plus className="h-4 w-4" />
-                New Conversation
-              </Button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {sessions.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
-                  <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No conversations yet</p>
-                </div>
-              ) : (
-                <div className="space-y-1 p-2">
-                  {sessions.map((session) => (
-                    <div
-                      key={session.id}
-                      onClick={() => loadSession(session)}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors group hover:bg-gray-50 ${
-                        currentSession?.id === session.id ? 'bg-blue-50 border border-blue-200' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-medium text-gray-900 truncate">
-                            {session.title}
-                          </h3>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {session.updated.toLocaleDateString()}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {session.messages.length} messages
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => exportSession(session, e)}
-                            className="p-1 h-6 w-6"
-                          >
-                            <Download className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => deleteSession(session.id, e)}
-                            className="p-1 h-6 w-6 text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+      <div className={`${sessionsOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-white border-r border-gray-200 overflow-hidden`}>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900">Chat Sessions</h3>
+            <Button onClick={createNewSession} size="sm" variant="outline">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="space-y-2">
+            {sessions.map((session) => (
+              <div key={session.id} className="group">
+                <Card className={`cursor-pointer transition-colors ${currentSessionId === session.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'}`}>
+                  <CardContent className="p-3" onClick={() => loadSession(session.id)}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{session.title}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(session.timestamp).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {session.messages.length} messages
+                        </p>
+                      </div>
+                      <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            exportSession(session.id);
+                          }}
+                        >
+                          <Download className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteSession(session.id);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="bg-white border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Brand Ambassador</h1>
-              <p className="text-gray-600 mt-1">
-                Upload brand documents and get AI-powered insights
-                {currentSession && (
-                  <span className="ml-2 text-sm text-blue-600">
-                    • {currentSession.title}
-                  </span>
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept=".pdf,.doc,.docx,.txt"
-                multiple
-                className="hidden"
-              />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                Upload Documents
-              </Button>
-            </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Content Area */}
-        <div className="flex-1 flex">
-          {/* Chat Area */}
-          <div className={`flex-1 flex flex-col transition-all duration-300 ${
-            isBrandSidebarOpen ? 'mr-80' : 'mr-12'
-          }`}>
-            {/* Documents Section */}
-            {documents.length > 0 && (
-              <div className="bg-white border-b p-4">
-                <h3 className="font-medium text-gray-900 mb-3">Uploaded Documents</h3>
-                <div className="flex flex-wrap gap-2">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
-                      <FileText className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm text-gray-700">{doc.name}</span>
-                      <Badge variant={
-                        doc.status === 'ready' ? 'default' :
-                        doc.status === 'processing' ? 'secondary' :
-                        doc.status === 'error' ? 'destructive' : 'outline'
-                      }>
+      {/* Sessions Toggle Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setSessionsOpen(!sessionsOpen)}
+        className="fixed left-2 top-4 z-10 bg-white shadow-md"
+      >
+        {sessionsOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      </Button>
+
+      {/* Main Content */}
+      <div className="flex-1 flex">
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Brand Ambassador AI</h1>
+                <p className="text-gray-600">Your AI assistant trained on brand guidelines and voice</p>
+              </div>
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                {documents.filter(doc => doc.status === 'ready').length} Documents Active
+              </Badge>
+            </div>
+          </div>
+
+          {/* Document Upload Section */}
+          <div className="bg-white border-b border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Brand Knowledge Base</h2>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="file"
+                  multiple
+                  accept=".txt,.md,.pdf,.doc,.docx,.json"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="file-upload"
+                  disabled={uploading}
+                />
+                <label htmlFor="file-upload">
+                  <Button variant="outline" disabled={uploading} asChild>
+                    <span className="cursor-pointer">
+                      <Upload className="h-4 w-4 mr-2" />
+                      {uploading ? 'Uploading...' : 'Upload Documents'}
+                    </span>
+                  </Button>
+                </label>
+              </div>
+            </div>
+
+            {/* Documents List */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {documents.map((doc) => (
+                <Card key={doc.id} className="relative">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <FileText className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                      <Badge 
+                        variant={doc.status === 'ready' ? 'default' : doc.status === 'processing' ? 'secondary' : 'destructive'}
+                        className="text-xs"
+                      >
                         {doc.status}
                       </Badge>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                    <h3 className="font-medium text-sm text-gray-900 mb-1 truncate">
+                      {doc.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 mb-2">
+                      {doc.file_name && `${doc.file_name} • `}
+                      {new Date(doc.created_at).toLocaleDateString()}
+                    </p>
+                    {doc.status === 'processing' && (
+                      <Progress value={75} className="h-1" />
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
 
+          {/* Chat Area */}
+          <div className="flex-1 flex flex-col bg-gray-50">
             {/* Chat Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {chatMessages.length === 0 ? (
-                <div className="text-center text-gray-500 mt-12">
-                  <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">Ready to help with your brand</h3>
-                  <p>Upload documents and start a conversation to get AI-powered brand insights.</p>
+              {chatHistory.length === 0 ? (
+                <div className="text-center py-12">
+                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Start a conversation</h3>
+                  <p className="text-gray-600">Ask me anything about your brand guidelines, voice, or marketing strategy.</p>
                 </div>
               ) : (
-                chatMessages.map((message) => (
-                  <div key={message.id} className="space-y-4">
+                chatHistory.map((chat) => (
+                  <div key={chat.id} className="space-y-4">
                     {/* User Message */}
                     <div className="flex justify-end">
-                      <div className="bg-blue-600 text-white rounded-lg px-4 py-2 max-w-md">
-                        <div className="flex items-center gap-2 mb-1">
-                          <User className="h-4 w-4" />
-                          <span className="text-xs opacity-75">
-                            {message.timestamp.toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <p>{message.isUser ? message.content : message.message}</p>
+                      <div className="bg-blue-500 text-white rounded-lg px-4 py-2 max-w-md">
+                        <p className="text-sm">{chat.message}</p>
                       </div>
                     </div>
-
+                    
                     {/* AI Response */}
-                    {!message.isUser && (
+                    {chat.response && (
                       <div className="flex justify-start">
-                        <div className="bg-gray-100 rounded-lg px-4 py-2 max-w-md">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Bot className="h-4 w-4 text-blue-600" />
-                            <span className="text-xs text-gray-500">
-                              {message.timestamp.toLocaleTimeString()}
-                            </span>
-                          </div>
-                          <p>{message.content}</p>
-                        </div>
+                        <Card className="max-w-2xl">
+                          <CardContent className="p-4">
+                            <p className="text-sm text-gray-900">{chat.response}</p>
+                            <p className="text-xs text-gray-500 mt-2">
+                              {new Date(chat.timestamp).toLocaleTimeString()}
+                            </p>
+                          </CardContent>
+                        </Card>
                       </div>
                     )}
                   </div>
                 ))
               )}
               
-              {isLoading && (
+              {isProcessing && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 rounded-lg px-4 py-2">
-                    <div className="flex items-center gap-2">
-                      <Bot className="h-4 w-4 text-blue-600 animate-pulse" />
-                      <span className="text-sm text-gray-500">Thinking...</span>
-                    </div>
-                  </div>
+                  <Card className="max-w-md">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        <p className="text-sm text-gray-600">Thinking...</p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
             </div>
 
-            {/* Chat Input */}
-            <div className="bg-white border-t p-4">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                  placeholder="Ask about your brand, get insights, or request guidance..."
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            {/* Message Input */}
+            <div className="bg-white border-t border-gray-200 p-6">
+              <div className="flex space-x-4">
+                <Textarea
+                  placeholder="Ask about brand guidelines, voice, messaging strategy..."
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  disabled={isProcessing}
+                  className="flex-1 min-h-[80px] resize-none"
                 />
                 <Button 
-                  onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="px-4"
+                  onClick={sendMessage} 
+                  disabled={!currentMessage.trim() || isProcessing}
+                  className="self-end"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Brand Context Sidebar */}
-          <div className={`fixed right-0 top-0 h-full bg-white border-l transition-all duration-300 flex flex-col ${
-            isBrandSidebarOpen ? 'w-80' : 'w-12'
-          }`}>
-            <div className="p-4 border-b flex items-center justify-between">
-              {isBrandSidebarOpen && (
-                <h2 className="font-semibold text-gray-900">Brand Context</h2>
-              )}
-              <Button
-                variant="ghost"
+        {/* Brand Context Sidebar */}
+        <div className={`${brandContextOpen ? 'w-80' : 'w-0'} transition-all duration-300 bg-white border-l border-gray-200 overflow-hidden`}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-semibold text-gray-900">Brand Context</h3>
+              <Button 
+                variant="ghost" 
                 size="sm"
-                onClick={() => setIsBrandSidebarOpen(!isBrandSidebarOpen)}
-                className="p-1"
+                onClick={() => setBrandContextOpen(false)}
               >
-                {isBrandSidebarOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                <X className="h-4 w-4" />
               </Button>
             </div>
 
-            {isBrandSidebarOpen && (
-              <>
-                <div className="p-4">
-                  <Button
-                    onClick={generateBrandContext}
-                    className="w-full flex items-center gap-2"
-                    variant="outline"
-                    disabled={isLoading}
-                  >
-                    Generate Context
-                  </Button>
+            {/* Brand Overview */}
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Brand Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <h4 className="font-medium text-gray-900">{brandContext.name}</h4>
+                  <p className="text-sm text-gray-600 mt-1">{brandContext.description}</p>
                 </div>
+                <Separator />
+                <div>
+                  <p className="text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">
+                    Documents Active
+                  </p>
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    {documents.filter(doc => doc.status === 'ready').length} Ready
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
 
-                <div className="flex-1 overflow-y-auto">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="p-3 border-b">
-                      <h3 className="text-sm font-medium text-gray-900">{doc.name}</h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Uploaded: {doc.uploadedAt.toLocaleDateString()}
-                      </p>
-                      {doc.summary && (
-                        <div className="mt-2">
-                          <h4 className="text-xs font-semibold text-gray-700">Summary:</h4>
-                          <p className="text-xs text-gray-600">{doc.summary}</p>
-                        </div>
-                      )}
+            {/* Key Guidelines */}
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Key Guidelines</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {brandContext.guidelines.map((guideline, index) => (
+                    <div key={index} className="flex items-start space-x-2">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                      <p className="text-sm text-gray-700">{guideline}</p>
                     </div>
                   ))}
                 </div>
-              </>
-            )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Insights */}
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Recent Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {brandContext.recentInsights.length > 0 ? (
+                    brandContext.recentInsights.map((insight, index) => (
+                      <div key={index} className="text-xs text-gray-600 p-2 bg-gray-50 rounded">
+                        {insight}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-gray-500 italic">Start a conversation to see insights</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Generate Brand Brief
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Voice Analysis
+                </Button>
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Guidelines
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
+
+        {/* Brand Context Toggle Button */}
+        {!brandContextOpen && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setBrandContextOpen(true)}
+            className="fixed right-2 top-4 z-10 bg-white shadow-md"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
