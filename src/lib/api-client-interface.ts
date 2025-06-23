@@ -239,3 +239,72 @@ export interface Webhook {
   last_triggered_at?: string;
   last_response_code?: number;
 }
+
+export interface SocialPost {
+  id: string;
+  content: string;
+  platform: string;
+  scheduledTime: string;
+  status: 'draft' | 'scheduled' | 'published' | 'failed';
+  created_at: string;
+  campaignId?: string;
+}
+
+export interface ContentBrief {
+  title: string;
+  content_type: string;
+  target_audience: string;
+  key_messages: string[];
+  platform: string;
+  tone?: string;
+  length?: string;
+  keywords?: string[];
+  cta?: string;
+}
+
+export interface WorkflowAutomation {
+  id: string;
+  name: string;
+  description: string;
+  trigger_type: 'schedule' | 'content_publish' | 'manual';
+  actions: AutomationAction[];
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+export interface AutomationAction {
+  id: string;
+  type: 'social_post' | 'email_excerpt' | 'cross_platform_publish' | 'content_series';
+  platform?: string;
+  template?: string;
+  delay_minutes?: number;
+}
+
+export interface ContentIdea {
+  id: string;
+  title: string;
+  topic: string;
+  trending_score: number;
+  source: string;
+  keywords: string[];
+  created_at: string;
+}
+
+export interface WritingStats {
+  daily_word_count: number;
+  weekly_streak: number;
+  total_posts: number;
+  goals: {
+    daily_words: number;
+    weekly_posts: number;
+  };
+}
+
+export interface PublishingPlatform {
+  id: string;
+  name: string;
+  type: 'blog' | 'social' | 'email' | 'website';
+  connected: boolean;
+  auto_publish: boolean;
+  config: Record<string, any>;
+}
