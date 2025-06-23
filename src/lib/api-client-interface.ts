@@ -165,4 +165,6 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   metadata?: any;
+  query?: string;
+  response?: string;
 }

@@ -48,7 +48,22 @@ const IntelligentContentGenerator: React.FC = () => {
     setLoading(true);
     try {
       console.log('Generating content with brief:', brief);
-      const result = await apiClient.generateContent(brief) as ApiResponse<any>;
+      
+      // Create a proper ContentBrief that matches the interface
+      const contentBrief: ContentBrief = {
+        topic: brief.title || '',
+        audience: brief.target_audience || '',
+        tone: brief.tone || 'professional',
+        platform: brief.platform,
+        length: brief.length,
+        keywords: brief.keywords,
+        title: brief.title,
+        target_audience: brief.target_audience,
+        content_type: brief.content_type,
+        key_messages: brief.key_messages
+      };
+      
+      const result = await apiClient.generateContent(contentBrief) as ApiResponse<any>;
       
       if (result.success && result.data) {
         setGeneratedContent(result.data.content || 'Content generated successfully');
