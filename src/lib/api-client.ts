@@ -76,6 +76,11 @@ export interface WorkflowStep {
   type: string;
   config: any;
   order: number;
+  title?: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  status?: string;
 }
 
 export interface UserPreferences {
@@ -173,10 +178,10 @@ class ApiClient extends BaseApiClient {
         }
       };
     },
-    get: async (): Promise<ApiResponse<any>> => {
+    get: async (): Promise<ApiResponse<UserPreferences>> => {
       return { success: true, data: {} };
     },
-    update: async (data: any): Promise<ApiResponse<any>> => {
+    update: async (data: UserPreferences): Promise<ApiResponse<UserPreferences>> => {
       return { success: true, data };
     }
   };
@@ -217,7 +222,7 @@ class ApiClient extends BaseApiClient {
     testPlatformConnection: async (platformId: string): Promise<ApiResponse<any>> => {
       return { success: true, data: { status: 'connected' } };
     },
-    get: async (): Promise<ApiResponse<any>> => {
+    get: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
       return { success: true, data: [] };
     },
     update: async (data: any): Promise<ApiResponse<any>> => {
@@ -269,7 +274,7 @@ class ApiClient extends BaseApiClient {
     getConnections: async (): Promise<ApiResponse<IntegrationConnection[]>> => {
       return { success: true, data: [] };
     },
-    connectService: async (service: string): Promise<ApiResponse<IntegrationConnection>> => {
+    connectService: async (service: string, apiKey?: string): Promise<ApiResponse<IntegrationConnection>> => {
       return { 
         success: true, 
         data: { 
@@ -288,20 +293,58 @@ class ApiClient extends BaseApiClient {
     },
     syncService: async (serviceId: string): Promise<ApiResponse<any>> => {
       return { success: true, data: {} };
+    },
+    createConnection: async (connectionData: any): Promise<ApiResponse<IntegrationConnection>> => {
+      return { 
+        success: true, 
+        data: { 
+          id: '1', 
+          name: connectionData.name,
+          type: connectionData.type,
+          status: 'connected',
+          service_name: connectionData.service_name,
+          connection_status: 'connected',
+          sync_status: 'idle'
+        } 
+      };
+    },
+    deleteConnection: async (id: string): Promise<ApiResponse<boolean>> => {
+      return { success: true, data: true };
     }
   };
 
   // Conversational Agent methods
   queryAgent = async (message: string, context?: any): Promise<ApiResponse<any>> => {
-    return { success: true, data: { response: 'Mock response', message: 'Mock response', context: {} } };
+    return { success: true, data: { response: 'Mock response', context: {} } };
   };
 
-  callDailyFocusAgent = async (query: string): Promise<ApiResponse<any>> => {
-    return { success: true, data: { focus_summary: 'Daily focus response', explanation: 'Mock explanation' } };
+  callDailyFocusAgent = async (query: string, campaigns?: any[]): Promise<ApiResponse<any>> => {
+    return { success: true, data: { focus_summary: 'Daily focus insights' } };
   };
 
-  callGeneralCampaignAgent = async (query: string): Promise<ApiResponse<any>> => {
-    return { success: true, data: { explanation: 'Campaign analysis response' } };
+  callGeneralCampaignAgent = async (query: string, campaigns?: any[]): Promise<ApiResponse<any>> => {
+    return { success: true, data: { explanation: 'Campaign insights' } };
+  };
+
+  // Content methods
+  createContent = async (contentData: any): Promise<ApiResponse<any>> => {
+    return { success: true, data: { id: '1', ...contentData } };
+  };
+
+  generateContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
+    return { success: true, data: { content: 'Generated content...' } };
+  };
+
+  generateSocialContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
+    return { success: true, data: { content: 'Generated social content...' } };
+  };
+
+  generateEmailContent = async (brief: string): Promise<ApiResponse<{ content: string }>> => {
+    return { success: true, data: { content: 'Generated email content...' } };
+  };
+
+  getSocialPosts = async (): Promise<ApiResponse<any[]>> => {
+    return { success: true, data: [] };
   };
 
   // Blog methods
@@ -326,45 +369,51 @@ class ApiClient extends BaseApiClient {
     return { success: true, data: [] };
   };
 
-  // Content methods
-  generateContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
-    return { success: true, data: { content: 'Generated content...' } };
-  };
-
-  generateSocialContent = async (brief: ContentBrief): Promise<ApiResponse<{ content: string }>> => {
-    return { success: true, data: { content: 'Generated social content...' } };
-  };
-
-  generateEmailContent = async (brief: string): Promise<ApiResponse<{ content: string }>> => {
-    return { success: true, data: { content: 'Generated email content...' } };
-  };
-
   // Social methods
   scheduleSocialPost = async (data: any): Promise<ApiResponse<any>> => {
     return { success: true, data: { id: '1', status: 'scheduled' } };
   };
 
-  getSocialPlatforms = async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
-    return { success: true, data: [] };
-  };
-
-  connectSocialPlatform = async (data: any): Promise<ApiResponse<SocialPlatformConnection>> => {
-    return { 
-      success: true, 
-      data: { 
-        id: '1', 
-        platform: data.platform,
-        platform_name: data.platform,
-        status: 'connected',
-        connection_status: 'connected'
-      } 
-    };
-  };
-
   // Workflow methods
   workflows = {
     getAll: async (): Promise<ApiResponse<Workflow[]>> => {
-      return { success: true, data: [] };
+      return { 
+        success: true, 
+        data: [{
+          id: '1',
+          name: 'Sample Workflow',
+          description: 'A sample workflow',
+          status: 'active',
+          steps: [
+            {
+              id: '1',
+              name: 'Lead Generation',
+              type: 'lead_gen',
+              config: {},
+              order: 1,
+              title: 'Generate Leads',
+              description: 'Find potential customers',
+              icon: 'Target',
+              color: 'blue',
+              status: 'active'
+            },
+            {
+              id: '2',
+              name: 'Email Campaign',
+              type: 'email',
+              config: {},
+              order: 2,
+              title: 'Send Welcome Email',
+              description: 'Send personalized welcome emails',
+              icon: 'Mail',
+              color: 'green',
+              status: 'pending'
+            }
+          ],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]
+      };
     },
     create: async (name: string, description?: string): Promise<ApiResponse<Workflow>> => {
       return { 
@@ -396,12 +445,29 @@ class ApiClient extends BaseApiClient {
     delete: async (id: string): Promise<ApiResponse<boolean>> => {
       return { success: true, data: true };
     },
-    execute: async (id: string): Promise<ApiResponse<any>> => {
-      return { success: true, data: { status: 'executed' } };
+    execute: async (id: string): Promise<ApiResponse<boolean>> => {
+      return { success: true, data: true };
     }
   };
 
   // Metrics methods
+  getRealTimeMetrics = async (): Promise<ApiResponse<any>> => {
+    return { 
+      success: true, 
+      data: {
+        totalSent: 1000,
+        delivered: 950,
+        opened: 380,
+        clicked: 76,
+        bounced: 25,
+        unsubscribed: 5,
+        openRate: 40,
+        clickRate: 8,
+        bounceRate: 2.6
+      }
+    };
+  };
+
   getAnalytics = async (): Promise<ApiResponse<any>> => {
     const analytics = {
       getAnalyticsOverview: async (): Promise<any> => {
@@ -412,12 +478,12 @@ class ApiClient extends BaseApiClient {
   };
 
   getEmailAnalytics = async (): Promise<ApiResponse<any>> => {
-    return { success: true, data: { totalSent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, unsubscribed: 0, openRate: 0, clickRate: 0, bounceRate: 0 } };
+    return { success: true, data: { sent: 0, opened: 0, clicked: 0 } };
   };
 
   // Lead methods
-  scoreLeads = async (): Promise<ApiResponse<boolean>> => {
-    return { success: true, data: true };
+  scoreLeads = async (): Promise<any[]> => {
+    return [];
   };
 
   getLeads = async (): Promise<ApiResponse<Lead[]>> => {
@@ -434,6 +500,21 @@ class ApiClient extends BaseApiClient {
         type: campaignData.type || 'email',
         status: 'draft',
         startDate: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } 
+    };
+  };
+
+  updateCampaign = async (id: string, campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> => {
+    return { 
+      success: true, 
+      data: { 
+        id, 
+        name: campaignData.name || 'Campaign',
+        type: campaignData.type || 'email',
+        status: campaignData.status || 'draft',
+        startDate: campaignData.startDate || new Date().toISOString(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       } 
