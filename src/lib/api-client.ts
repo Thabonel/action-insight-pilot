@@ -1,4 +1,4 @@
-import { ApiResponse, Campaign, Lead, ContentBrief, SocialPlatformConnection, IntegrationConnection, Webhook, UserPreferences, Workflow } from './api-client-interface';
+import { ApiResponse, Campaign, ContentBrief, SocialPlatformConnection, IntegrationConnection, Webhook, UserPreferences, Workflow } from './api-client-interface';
 
 export class ApiClient {
   private token: string = '';
@@ -222,7 +222,9 @@ export class ApiClient {
         name: 'Sample Campaign', 
         type: 'email', 
         status: 'draft',
-        description: 'Sample description' 
+        description: 'Sample description',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       } as Campaign 
     };
   }
@@ -232,6 +234,8 @@ export class ApiClient {
       success: true, 
       data: { 
         id: 'campaign-' + Date.now(), 
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         ...campaignData 
       } as Campaign 
     };
@@ -241,13 +245,26 @@ export class ApiClient {
     return { 
       success: true, 
       data: { 
-        id, 
+        id,
+        updated_at: new Date().toISOString(),
         ...updates 
       } as Campaign 
     };
   }
 
   // Content Methods
+  async createContent(contentData: any): Promise<ApiResponse<any>> {
+    console.log('Creating content:', contentData);
+    return {
+      success: true,
+      data: {
+        id: 'content-' + Date.now(),
+        ...contentData,
+        created_at: new Date().toISOString()
+      }
+    };
+  }
+
   async generateContent(brief: ContentBrief): Promise<ApiResponse<any>> {
     return {
       success: true,
@@ -269,6 +286,43 @@ export class ApiClient {
     };
   }
 
+  // Lead Methods
+  async getLeads(): Promise<ApiResponse<any[]>> {
+    console.log('Getting leads');
+    return {
+      success: true,
+      data: [
+        { id: '1', name: 'John Doe', email: 'john@example.com', score: 85 },
+        { id: '2', name: 'Jane Smith', email: 'jane@example.com', score: 92 }
+      ]
+    };
+  }
+
+  async scoreLeads(): Promise<ApiResponse<any>> {
+    console.log('Scoring leads');
+    return {
+      success: true,
+      data: {
+        scored_count: 150,
+        updated_at: new Date().toISOString()
+      }
+    };
+  }
+
+  // Analytics Methods
+  async getAnalytics(): Promise<ApiResponse<any>> {
+    console.log('Getting analytics');
+    return {
+      success: true,
+      data: {
+        totalUsers: Math.floor(Math.random() * 1000) + 100,
+        totalCampaigns: Math.floor(Math.random() * 50) + 10,
+        activeLeads: Math.floor(Math.random() * 200) + 50,
+        conversionRate: Math.round((Math.random() * 0.1 + 0.05) * 100) / 100
+      }
+    };
+  }
+
   // Connection Methods
   async getConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
     return this.integrations.getConnections();
@@ -279,15 +333,12 @@ export class ApiClient {
       success: true,
       data: {
         id: 'conn-' + Date.now(),
-        service_name: connectionData.name || 'New Connection',
-        connection_status: 'connected',
-        user_id: 'user-1',
-        configuration: connectionData.config || {},
-        created_at: new Date(),
-        updated_at: new Date(),
-        last_sync_at: null,
-        sync_status: 'idle',
-        error_message: null
+        name: connectionData.name || 'New Connection',
+        type: connectionData.type || 'api',
+        status: 'connected',
+        config: connectionData.config || {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
     };
   }
