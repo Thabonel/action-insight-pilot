@@ -1,41 +1,41 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient, ContentBrief } from '@/lib/api-client';
-import { Loader2, Share2 } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
+import { Loader2, Calendar, Clock } from 'lucide-react';
+
+interface PostData {
+  content: string;
+  platform: string;
+  scheduledTime: string;
+  timezone: string;
+}
 
 const IntelligentPostScheduler: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [brief, setBrief] = useState({
-    title: '',
+  const [postData, setPostData] = useState<PostData>({
+    content: '',
     platform: 'twitter',
-    audience: '',
-    tone: 'professional',
-    keywords: []
+    scheduledTime: '',
+    timezone: 'UTC'
   });
-  const [generatedContent, setGeneratedContent] = useState<string>('');
   const { toast } = useToast();
 
-  const handleInputChange = (field: string, value: string | string[]) => {
-    setBrief(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (field: keyof PostData, value: string) => {
+    setPostData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleKeywordsChange = (value: string) => {
-    const keywords = value.split(',').map(k => k.trim()).filter(k => k);
-    setBrief(prev => ({ ...prev, keywords }));
-  };
-
-  const generatePost = async () => {
-    if (!brief.title || !brief.audience) {
+  const schedulePost = async () => {
+    if (!postData.content || !postData.scheduledTime) {
       toast({
         title: "Missing Information",
-        description: "Please provide a title and target audience",
+        description: "Please provide content and scheduled time",
         variant: "destructive",
       });
       return;
@@ -43,36 +43,31 @@ const IntelligentPostScheduler: React.FC = () => {
 
     setLoading(true);
     try {
-      console.log('Generating social post with brief:', brief);
-      
-      // Convert to ContentBrief format
-      const contentBrief: ContentBrief = {
-        title: brief.title,
-        content_type: 'social_media',
-        target_audience: brief.audience,
-        key_messages: [brief.title],
-        platform: brief.platform,
-        tone: brief.tone,
-        keywords: brief.keywords
-      };
-      
-      const result = await apiClient.generateContent(contentBrief);
+      console.log('Scheduling post with data:', postData);
+      const result = await apiClient.scheduleSocialPost(postData) as ApiResponse<any>;
       
       if (result.success && result.data) {
-        setGeneratedContent(result.data.content || 'Social post generated successfully');
         toast({
-          title: "Post Generated",
-          description: "Social media post has been created successfully!",
+          title: "Post Scheduled",
+          description: `Post scheduled for ${postData.platform} at ${postData.scheduledTime}`,
+        });
+        
+        // Reset form
+        setPostData({
+          content: '',
+          platform: 'twitter',
+          scheduledTime: '',
+          timezone: 'UTC'
         });
       } else {
         toast({
-          title: "Generation Failed",
-          description: result.error || "Failed to generate post",
+          title: "Scheduling Failed",
+          description: result.error || "Failed to schedule post",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Post generation error:', error);
+      console.error('Post scheduling error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -88,106 +83,78 @@ const IntelligentPostScheduler: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Share2 className="h-5 w-5" />
+            <Calendar className="h-5 w-5" />
             <span>Intelligent Post Scheduler</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="title">Post Topic</Label>
-              <Input
-                id="title"
-                value={brief.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                placeholder="What's your post about?"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="platform">Platform</Label>
-              <Select value={brief.platform} onValueChange={(value) => handleInputChange('platform', value)}>
+              <label className="block text-sm font-medium mb-1">Platform</label>
+              <Select value={postData.platform} onValueChange={(value) => handleInputChange('platform', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="twitter">Twitter</SelectItem>
-                  <SelectItem value="linkedin">LinkedIn</SelectItem>
                   <SelectItem value="facebook">Facebook</SelectItem>
                   <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">Timezone</label>
+              <Select value={postData.timezone} onValueChange={(value) => handleInputChange('timezone', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UTC">UTC</SelectItem>
+                  <SelectItem value="EST">Eastern Time</SelectItem>
+                  <SelectItem value="PST">Pacific Time</SelectItem>
+                  <SelectItem value="GMT">GMT</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="audience">Target Audience</Label>
-            <Input
-              id="audience"
-              value={brief.audience}
-              onChange={(e) => handleInputChange('audience', e.target.value)}
-              placeholder="Describe your target audience"
+            <label className="block text-sm font-medium mb-1">Content</label>
+            <Textarea
+              rows={4}
+              value={postData.content}
+              onChange={(e) => handleInputChange('content', e.target.value)}
+              placeholder="Write your post content here..."
             />
           </div>
 
           <div>
-            <Label htmlFor="tone">Tone</Label>
-            <Select value={brief.tone} onValueChange={(value) => handleInputChange('tone', value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="professional">Professional</SelectItem>
-                <SelectItem value="casual">Casual</SelectItem>
-                <SelectItem value="friendly">Friendly</SelectItem>
-                <SelectItem value="inspiring">Inspiring</SelectItem>
-                <SelectItem value="humorous">Humorous</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="keywords">Keywords (comma-separated)</Label>
+            <label className="block text-sm font-medium mb-1">Scheduled Time</label>
             <Input
-              id="keywords"
-              value={brief.keywords.join(', ')}
-              onChange={(e) => handleKeywordsChange(e.target.value)}
-              placeholder="Enter relevant keywords"
+              type="datetime-local"
+              value={postData.scheduledTime}
+              onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
             />
           </div>
 
-          <Button onClick={generatePost} disabled={loading} className="w-full">
+          <Button onClick={schedulePost} disabled={loading} className="w-full">
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
+                Scheduling...
               </>
             ) : (
               <>
-                <Share2 className="mr-2 h-4 w-4" />
-                Generate Post
+                <Clock className="mr-2 h-4 w-4" />
+                Schedule Post
               </>
             )}
           </Button>
         </CardContent>
       </Card>
-
-      {generatedContent && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Social Post</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <pre className="whitespace-pre-wrap text-sm">{generatedContent}</pre>
-            </div>
-            <div className="mt-4 flex space-x-2">
-              <Button variant="outline">Edit Post</Button>
-              <Button>Schedule Post</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
