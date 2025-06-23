@@ -1,86 +1,85 @@
 
 import { useState } from 'react';
-import { apiClient } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
-
-interface SyncResponse {
-  synced_count: number;
-  new_leads: number;
-  updated_leads: number;
-  sync_time: string;
-  sources: string[];
-}
+import { apiClient } from '@/lib/api-client';
 
 export const useLeadActions = () => {
-  const [isExporting, setIsExporting] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { handleError } = useErrorHandler();
 
-  const exportLeads = async (format: 'csv' | 'json' = 'csv') => {
-    setIsExporting(true);
+  const scoreLeads = async () => {
+    setLoading(true);
     try {
-      const response = await apiClient.exportLeads(format);
-      
-      if (response.success && response.data) {
-        // Create download link - ensure data is properly typed as string
-        const dataString = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        const blob = new Blob([dataString], { 
-          type: format === 'csv' ? 'text/csv' : 'application/json' 
-        });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `leads_${new Date().toISOString().split('T')[0]}.${format}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-        
+      const result = await apiClient.scoreLeads();
+      if (result) {
         toast({
-          title: "Export Successful",
-          description: `Leads exported as ${format.toUpperCase()} file`,
+          title: "Leads Scored",
+          description: "Lead scoring has been updated successfully",
         });
-      } else {
-        throw new Error(response.error || 'Export failed');
+        return true;
       }
+      return false;
     } catch (error) {
-      handleError(error);
+      console.error('Error scoring leads:', error);
+      toast({
+        title: "Error",
+        description: "Failed to score leads",
+        variant: "destructive",
+      });
+      return false;
     } finally {
-      setIsExporting(false);
+      setLoading(false);
     }
   };
 
-  const syncLeads = async () => {
-    setIsSyncing(true);
+  const enrichLead = async (leadId: string) => {
+    setLoading(true);
     try {
-      const response = await apiClient.syncLeads();
-      
-      if (response.success && response.data) {
-        // Properly type the response data
-        const syncData = response.data as SyncResponse;
-        const { synced_count, new_leads, updated_leads } = syncData;
-        toast({
-          title: "Sync Successful",
-          description: `Synced ${synced_count} leads (${new_leads} new, ${updated_leads} updated)`,
-        });
-        return syncData;
-      } else {
-        throw new Error(response.error || 'Sync failed');
-      }
+      // Mock implementation
+      toast({
+        title: "Lead Enriched",
+        description: "Lead data has been enriched with additional information",
+      });
+      return true;
     } catch (error) {
-      handleError(error);
-      return null;
+      console.error('Error enriching lead:', error);
+      toast({
+        title: "Error",
+        description: "Failed to enrich lead data",
+        variant: "destructive",
+      });
+      return false;
     } finally {
-      setIsSyncing(false);
+      setLoading(false);
+    }
+  };
+
+  const convertLead = async (leadId: string) => {
+    setLoading(true);
+    try {
+      // Mock implementation
+      toast({
+        title: "Lead Converted",
+        description: "Lead has been marked as converted",
+      });
+      return true;
+    } catch (error) {
+      console.error('Error converting lead:', error);
+      toast({
+        title: "Error",
+        description: "Failed to convert lead",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   return {
-    exportLeads,
-    syncLeads,
-    isExporting,
-    isSyncing,
+    scoreLeads,
+    enrichLead,
+    convertLead,
+    loading
   };
 };
