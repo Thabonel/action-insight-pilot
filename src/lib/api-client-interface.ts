@@ -1,3 +1,4 @@
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -71,6 +72,7 @@ export interface Content {
   created_at: string;
   updated_at: string;
   user_id: string;
+  platform?: string;
 }
 
 export interface BlogPost {
@@ -133,6 +135,7 @@ export interface SocialPlatformConnection {
   platform: string;
   account_name: string;
   status: 'connected' | 'disconnected' | 'error';
+  connection_status: 'connected' | 'disconnected' | 'error';
   last_sync: string;
   follower_count?: number;
 }
@@ -140,19 +143,25 @@ export interface SocialPlatformConnection {
 export interface IntegrationConnection {
   id: string;
   name: string;
+  service_name: string;
   type: string;
   status: 'connected' | 'disconnected' | 'pending' | 'error';
+  connection_status: 'connected' | 'disconnected' | 'pending' | 'error';
   last_sync_at?: string;
   config: Record<string, any>;
 }
 
 export interface Webhook {
   id: string;
+  name: string;
   url: string;
   events: string[];
   active: boolean;
+  is_active: boolean;
   created_at: string;
   secret?: string;
+  last_triggered_at?: string;
+  last_response_code?: number;
 }
 
 export interface EmailMetrics {
@@ -165,6 +174,9 @@ export interface EmailMetrics {
   openRate: number;
   clickRate: number;
   bounceRate: number;
+  insights?: any;
+  trends?: any;
+  last_updated?: string;
 }
 
 export interface BlogAnalytics {
@@ -206,40 +218,6 @@ export interface KeywordPerformance {
   ctr: number;
 }
 
-export interface SocialPlatformConnection {
-  id: string;
-  platform: string;
-  account_name: string;
-  status: 'connected' | 'disconnected' | 'error';
-  connection_status: 'connected' | 'disconnected' | 'error';
-  last_sync: string;
-  follower_count?: number;
-}
-
-export interface IntegrationConnection {
-  id: string;
-  name: string;
-  service_name: string;
-  type: string;
-  status: 'connected' | 'disconnected' | 'pending' | 'error';
-  connection_status: 'connected' | 'disconnected' | 'pending' | 'error';
-  last_sync_at?: string;
-  config: Record<string, any>;
-}
-
-export interface Webhook {
-  id: string;
-  name: string;
-  url: string;
-  events: string[];
-  active: boolean;
-  is_active: boolean;
-  created_at: string;
-  secret?: string;
-  last_triggered_at?: string;
-  last_response_code?: number;
-}
-
 export interface SocialPost {
   id: string;
   content: string;
@@ -248,18 +226,6 @@ export interface SocialPost {
   status: 'draft' | 'scheduled' | 'published' | 'failed';
   created_at: string;
   campaignId?: string;
-}
-
-export interface ContentBrief {
-  title: string;
-  content_type: string;
-  target_audience: string;
-  key_messages: string[];
-  platform: string;
-  tone?: string;
-  length?: string;
-  keywords?: string[];
-  cta?: string;
 }
 
 export interface WorkflowAutomation {
@@ -307,4 +273,54 @@ export interface PublishingPlatform {
   connected: boolean;
   auto_publish: boolean;
   config: Record<string, any>;
+}
+
+// Content Repurposing Interfaces
+export interface ContentVariant {
+  id: string;
+  contentId: string;
+  format: string;
+  platform?: string;
+  title?: string;
+  content: string;
+  tone: string;
+  characterCount: number;
+  wordCount: number;
+  characterLimit?: number;
+  wordLimit?: number;
+  tags: string[];
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RepurposingRequest {
+  contentId: string;
+  targetFormat: string;
+  platform?: string;
+  tone?: string;
+  characterLimit?: number;
+  wordLimit?: number;
+  audience?: string;
+  ctaType?: string;
+  options?: Record<string, any>;
+}
+
+export interface RepurposingResponse {
+  success: boolean;
+  data?: {
+    content: string;
+    title?: string;
+    metadata?: Record<string, any>;
+    suggestions?: string[];
+  };
+  error?: string;
+}
+
+export interface OptimizationOptions {
+  targetLength?: number;
+  targetAudience?: string;
+  ctaType?: string;
+  platform?: string;
+  tone?: string;
 }
