@@ -1,3 +1,4 @@
+
 import { HttpClient } from './http-client';
 import { ApiResponse } from './api-response';
 
@@ -11,12 +12,12 @@ export class ApiClient {
 
   setToken(token: string) {
     this.token = token;
-    this.httpClient.setAuthToken(token);
+    this.httpClient.setToken(token);
   }
 
   clearToken() {
     this.token = null;
-    this.httpClient.clearAuthToken();
+    this.httpClient.setToken('');
   }
 
   async getCampaigns(): Promise<ApiResponse<any[]>> {
@@ -53,3 +54,6 @@ export class ApiClient {
     return this.httpClient.request('/api/content/blog');
   }
 }
+
+// Export an instance for convenience
+export const apiClient = new ApiClient();
