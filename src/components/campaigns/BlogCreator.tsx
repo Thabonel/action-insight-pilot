@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { FileText, Wand2, Save, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AIWritingAssistant from '@/components/campaigns/AIWritingAssistant';
+import AIWritingAssistant from '@/components/ai/AIWritingAssistant';
 import BlogAnalyticsDashboard from '@/components/analytics/BlogAnalyticsDashboard';
+import BlogWorkflowAutomation from '@/components/blog/BlogWorkflowAutomation';
 
 const BlogCreator: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -60,9 +61,10 @@ const BlogCreator: React.FC = () => {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="create">Create Content</TabsTrigger>
               <TabsTrigger value="analytics">Analytics Dashboard</TabsTrigger>
+              <TabsTrigger value="automation">Smart Automation</TabsTrigger>
             </TabsList>
 
             <TabsContent value="create" className="space-y-6">
@@ -164,6 +166,10 @@ const BlogCreator: React.FC = () => {
 
             <TabsContent value="analytics" className="space-y-6">
               <BlogAnalyticsDashboard selectedBlogId={generatedPost?.id} />
+            </TabsContent>
+
+            <TabsContent value="automation" className="space-y-6">
+              <BlogWorkflowAutomation />
             </TabsContent>
           </Tabs>
         </div>
