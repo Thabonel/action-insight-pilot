@@ -1,288 +1,229 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import { SocialPlatformConnection } from '@/lib/api-client-interface';
-import { Twitter, Linkedin, Facebook, RefreshCw, Loader2, Link, CheckCircle, AlertTriangle } from 'lucide-react';
+import { SocialPlatformConnection, ApiResponse } from '@/lib/api-client-interface';
+import { Loader2, CheckCircle, XCircle, RefreshCw, TestTube } from 'lucide-react';
 
 const SocialPlatformConnectors: React.FC = () => {
   const [connections, setConnections] = useState<SocialPlatformConnection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [connecting, setConnecting] = useState<string | null>(null);
-  const [disconnecting, setDisconnecting] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState<string | null>(null);
-  const [testing, setTesting] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    fetchConnections();
-  }, []);
 
   const fetchConnections = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.socialPlatforms.getPlatformConnections();
+      const socialPlatforms = await apiClient.socialPlatforms();
+      const result = await socialPlatforms.getPlatformConnections() as ApiResponse<SocialPlatformConnection[]>;
       
-      if (response.success && response.data) {
-        setConnections(response.data);
+      if (result.success && result.data) {
+        setConnections(result.data);
       } else {
-        throw new Error(response.error || 'Failed to fetch connections');
+        setConnections([]);
       }
     } catch (error) {
-      console.error('Failed to fetch social platform connections:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load social platform connections",
-        variant: "destructive",
-      });
+      console.error('Failed to fetch connections:', error);
+      setConnections([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleConnect = async (platform: string) => {
-    setConnecting(platform);
     try {
-      const response = await apiClient.socialPlatforms.initiatePlatformConnection(platform);
-      if (response.success && response.data?.authorization_url) {
-        window.location.href = response.data.authorization_url;
+      setActionLoading(platform);
+      const socialPlatforms = await apiClient.socialPlatforms();
+      const result = await socialPlatforms.initiatePlatformConnection(platform) as ApiResponse<any>;
+      
+      if (result.success) {
+        toast({
+          title: "Platform Connected",
+          description: `Successfully connected to ${platform}`,
+        });
+        await fetchConnections();
       } else {
-        throw new Error(response.error || 'Failed to initiate connection');
+        throw new Error('Connection failed');
       }
     } catch (error) {
-      console.error('Failed to initiate social platform connection:', error);
       toast({
-        title: "Error",
-        description: "Failed to initiate social platform connection",
+        title: "Connection Failed",
+        description: `Failed to connect to ${platform}`,
         variant: "destructive",
       });
     } finally {
-      setConnecting(null);
+      setActionLoading(null);
     }
   };
 
   const handleDisconnect = async (platform: string) => {
-    setDisconnecting(platform);
     try {
-      await apiClient.socialPlatforms.disconnectPlatform(platform);
+      setActionLoading(platform);
+      const socialPlatforms = await apiClient.socialPlatforms();
+      await socialPlatforms.disconnectPlatform(platform);
+      
       toast({
-        title: "Disconnected",
-        description: `Disconnected from ${platform}`,
+        title: "Platform Disconnected",
+        description: `Successfully disconnected from ${platform}`,
       });
       await fetchConnections();
     } catch (error) {
-      console.error('Failed to disconnect social platform:', error);
       toast({
-        title: "Error",
-        description: "Failed to disconnect social platform",
+        title: "Disconnection Failed",
+        description: `Failed to disconnect from ${platform}`,
         variant: "destructive",
       });
     } finally {
-      setDisconnecting(null);
+      setActionLoading(null);
     }
   };
 
   const handleSync = async (platform: string) => {
-    setSyncing(platform);
     try {
-      await apiClient.socialPlatforms.syncPlatformData(platform);
+      setActionLoading(`sync-${platform}`);
+      const socialPlatforms = await apiClient.socialPlatforms();
+      await socialPlatforms.syncPlatformData(platform);
+      
       toast({
-        title: "Syncing",
-        description: `Syncing data from ${platform}`,
+        title: "Sync Complete",
+        description: `Successfully synced data from ${platform}`,
       });
       await fetchConnections();
     } catch (error) {
-      console.error('Failed to sync social platform data:', error);
       toast({
-        title: "Error",
-        description: "Failed to sync social platform data",
+        title: "Sync Failed",
+        description: `Failed to sync data from ${platform}`,
         variant: "destructive",
       });
     } finally {
-      setSyncing(null);
+      setActionLoading(null);
     }
   };
 
   const handleTest = async (platform: string) => {
-    setTesting(platform);
     try {
-      await apiClient.socialPlatforms.testPlatformConnection(platform);
+      setActionLoading(`test-${platform}`);
+      const socialPlatforms = await apiClient.socialPlatforms();
+      await socialPlatforms.testPlatformConnection(platform);
+      
       toast({
-        title: "Testing",
-        description: `Testing connection to ${platform}`,
+        title: "Connection Test Successful",
+        description: `Connection to ${platform} is working properly`,
       });
-      await fetchConnections();
     } catch (error) {
-      console.error('Failed to test social platform connection:', error);
       toast({
-        title: "Error",
-        description: "Failed to test social platform connection",
+        title: "Connection Test Failed",
+        description: `Connection to ${platform} is not working`,
         variant: "destructive",
       });
     } finally {
-      setTesting(null);
+      setActionLoading(null);
     }
   };
 
-  const getStatus = (platform: string) => {
-    const connection = connections.find(conn => conn.platform === platform);
-    if (!connection) return 'disconnected';
-    return connection.connection_status;
-  };
+  useEffect(() => {
+    fetchConnections();
+  }, []);
 
-  const platformConfigs = [
-    {
-      name: 'Twitter',
-      icon: <Twitter className="h-6 w-6" />,
-      description: 'Connect your Twitter account to manage tweets and engagement',
-      isConnected: connections.some(conn => conn.platform === 'twitter' && conn.connection_status === 'connected'),
-      connectHandler: () => handleConnect('twitter'),
-      disconnectHandler: () => handleDisconnect('twitter'),
-      syncHandler: () => handleSync('twitter'),
-      testHandler: () => handleTest('twitter'),
-      connecting: connecting === 'twitter',
-      syncing: syncing === 'twitter',
-      testing: testing === 'twitter',
-      disconnecting: disconnecting === 'twitter',
-    },
-    {
-      name: 'LinkedIn',
-      icon: <Linkedin className="h-6 w-6" />,
-      description: 'Connect your LinkedIn account for professional networking',
-      isConnected: connections.some(conn => conn.platform === 'linkedin' && conn.connection_status === 'connected'),
-      connectHandler: () => handleConnect('linkedin'),
-      disconnectHandler: () => handleDisconnect('linkedin'),
-      syncHandler: () => handleSync('linkedin'),
-      testHandler: () => handleTest('linkedin'),
-      connecting: connecting === 'linkedin',
-      syncing: syncing === 'linkedin',
-      testing: testing === 'linkedin',
-      disconnecting: disconnecting === 'linkedin',
-    },
-    {
-      name: 'Facebook',
-      icon: <Facebook className="h-6 w-6" />,
-      description: 'Connect your Facebook account for social media management',
-      isConnected: connections.some(conn => conn.platform === 'facebook' && conn.connection_status === 'connected'),
-      connectHandler: () => handleConnect('facebook'),
-      disconnectHandler: () => handleDisconnect('facebook'),
-      syncHandler: () => handleSync('facebook'),
-      testHandler: () => handleTest('facebook'),
-      connecting: connecting === 'facebook',
-      syncing: syncing === 'facebook',
-      testing: testing === 'facebook',
-      disconnecting: disconnecting === 'facebook',
-    },
-  ];
-
-  return (
-    <div className="space-y-6">
+  if (loading) {
+    return (
       <Card>
         <CardHeader>
-          <CardTitle>Social Platform Connections</CardTitle>
+          <CardTitle>Social Platform Connectors</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {loading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Loading connections...
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {platformConfigs.map((platform, index) => (
-                <Card key={index}>
-                  <CardContent className="grid grid-cols-3 gap-4 items-center">
-                    <div className="col-span-1 flex items-center space-x-2">
-                      {platform.icon}
-                      <span className="font-semibold">{platform.name}</span>
-                    </div>
-                    <div className="col-span-1 text-sm text-gray-500">{platform.description}</div>
-                    <div className="col-span-1 flex justify-end space-x-2">
-                      {getStatus(platform.name.toLowerCase()) === 'connected' ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={platform.syncHandler}
-                            disabled={platform.syncing}
-                          >
-                            {platform.syncing ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Syncing...
-                              </>
-                            ) : (
-                              <>
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                Sync
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={platform.testHandler}
-                            disabled={platform.testing}
-                          >
-                            {platform.testing ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Testing...
-                              </>
-                            ) : (
-                              <>
-                                <Link className="mr-2 h-4 w-4" />
-                                Test
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={platform.disconnectHandler}
-                            disabled={platform.disconnecting}
-                          >
-                            {platform.disconnecting ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Disconnecting...
-                              </>
-                            ) : (
-                              <>
-                                <AlertTriangle className="mr-2 h-4 w-4" />
-                                Disconnect
-                              </>
-                            )}
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          onClick={platform.connectHandler}
-                          disabled={platform.connecting}
-                        >
-                          {platform.connecting ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Connecting...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Connect
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
         </CardContent>
       </Card>
-    </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Social Platform Connectors</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {connections.map((connection) => (
+          <div key={connection.id} className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center space-x-4">
+              <div>
+                <h3 className="font-medium">{connection.platform}</h3>
+                <p className="text-sm text-gray-500">{connection.account_name}</p>
+              </div>
+              <Badge variant={connection.status === 'connected' ? 'default' : 'destructive'}>
+                {connection.status === 'connected' ? (
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                ) : (
+                  <XCircle className="h-3 w-3 mr-1" />
+                )}
+                {connection.status}
+              </Badge>
+            </div>
+            
+            <div className="flex space-x-2">
+              {connection.status === 'connected' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleTest(connection.platform)}
+                    disabled={actionLoading === `test-${connection.platform}`}
+                  >
+                    {actionLoading === `test-${connection.platform}` ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <TestTube className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSync(connection.platform)}
+                    disabled={actionLoading === `sync-${connection.platform}`}
+                  >
+                    {actionLoading === `sync-${connection.platform}` ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDisconnect(connection.platform)}
+                    disabled={actionLoading === connection.platform}
+                  >
+                    {actionLoading === connection.platform ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Disconnect'
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => handleConnect(connection.platform)}
+                  disabled={actionLoading === connection.platform}
+                  size="sm"
+                >
+                  {actionLoading === connection.platform ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Connect'
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 };
 

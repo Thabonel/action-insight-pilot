@@ -1,150 +1,80 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import { useState, useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import { useAuth } from '@/contexts/AuthContext';
+import { ApiResponse } from '@/lib/api-client-interface';
 
-interface Message {
+interface ChatMessage {
   id: string;
-  text: string;
-  sender: 'user' | 'ai';
+  role: 'user' | 'assistant';
+  content: string;
   timestamp: Date;
-  thinking?: boolean;
-  query?: string;
-  agentType?: string;
-  response?: any;
-}
-
-interface ChatSession {
-  id: string;
-  title: string;
-  created_at: Date;
-  updated_at: Date;
-  messages: Message[];
+  metadata?: any;
 }
 
 export const useEnhancedChat = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [input, setInput] = useState('');
-  const [query, setQuery] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const createNewSession = () => {
-    const newSession: ChatSession = {
+  const sendMessage = useCallback(async (content: string, context?: any) => {
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      title: 'New Chat',
-      created_at: new Date(),
-      updated_at: new Date(),
-      messages: []
-    };
-    setSessions(prev => [newSession, ...prev]);
-    setCurrentSession(newSession);
-    setMessages([]);
-  };
-
-  const switchSession = (session: ChatSession) => {
-    setCurrentSession(session);
-    setMessages(session.messages);
-  };
-
-  const deleteSession = (sessionId: string) => {
-    setSessions(prev => prev.filter(s => s.id !== sessionId));
-    if (currentSession?.id === sessionId) {
-      setCurrentSession(null);
-      setMessages([]);
-    }
-  };
-
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: text.trim(),
-      sender: 'user',
-      timestamp: new Date(),
-      query: text.trim()
+      role: 'user',
+      content,
+      timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-    setIsProcessing(true);
+    setLoading(true);
 
     try {
-      const result = await apiClient.queryAgent(text.trim());
+      const result = await apiClient.queryAgent(content, context) as ApiResponse<any>;
       
       if (result.success && result.data) {
-        const aiResponse = result.data.response || result.data.message || 'I received your message but could not generate a response.';
-        
-        const aiMessage: Message = {
+        const assistantMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
-          text: aiResponse,
-          sender: 'ai',
+          role: 'assistant',
+          content: result.data.message || 'Response received',
           timestamp: new Date(),
-          response: result.data
+          metadata: result.data
         };
 
-        setMessages(prev => [...prev, aiMessage]);
+        setMessages(prev => [...prev, assistantMessage]);
+        return assistantMessage;
       } else {
-        throw new Error(result.error || 'Failed to get AI response');
+        throw new Error('Failed to get response');
       }
     } catch (error) {
-      const errorMessage: Message = {
+      console.error('Chat error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+      
+      const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: 'Sorry, I encountered an error processing your request. Please try again.',
-        sender: 'ai',
+        role: 'assistant',
+        content: 'Sorry, I encountered an error processing your message.',
         timestamp: new Date()
       };
-
+      
       setMessages(prev => [...prev, errorMessage]);
-      console.error('Chat error:', error);
+      return errorMessage;
     } finally {
-      setIsLoading(false);
-      setIsProcessing(false);
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const handleQuerySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      sendMessage(query);
-      setQuery('');
-    }
-  };
-
-  const clearChat = () => {
+  const clearMessages = useCallback(() => {
     setMessages([]);
-  };
+  }, []);
 
   return {
     messages,
-    sessions,
-    currentSession,
-    isLoading,
-    isProcessing,
-    input,
-    query,
-    setInput,
-    setQuery,
+    loading,
     sendMessage,
-    handleQuerySubmit,
-    createNewSession,
-    switchSession,
-    deleteSession,
-    clearChat,
-    messagesEndRef,
-    user
+    clearMessages
   };
 };

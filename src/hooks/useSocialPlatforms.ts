@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
-import { SocialPlatformConnection } from '@/lib/api-client-interface';
+import { SocialPlatformConnection, ApiResponse } from '@/lib/api-client-interface';
 
 export const useSocialPlatforms = () => {
   const [platforms, setPlatforms] = useState<SocialPlatformConnection[]>([]);
@@ -14,13 +14,24 @@ export const useSocialPlatforms = () => {
     try {
       setLoading(true);
       setIsLoading(true);
-      const result = await apiClient.getSocialPlatforms();
+      const result = await apiClient.getSocialPlatforms() as ApiResponse<SocialPlatformConnection[]>;
       
       if (result.success && result.data) {
-        setPlatforms(result.data);
-        setConnections(result.data);
+        // Ensure the data matches the SocialPlatformConnection interface
+        const validatedData: SocialPlatformConnection[] = result.data.map(item => ({
+          ...item,
+          status: (item.status === 'connected' || item.status === 'disconnected' || item.status === 'error') 
+            ? item.status 
+            : 'disconnected' as const,
+          connection_status: (item.connection_status === 'connected' || item.connection_status === 'disconnected' || item.connection_status === 'error') 
+            ? item.connection_status 
+            : 'disconnected' as const
+        }));
+        
+        setPlatforms(validatedData);
+        setConnections(validatedData);
       } else {
-        setError(result.error || 'Failed to fetch social platforms');
+        setError('Failed to fetch social platforms');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -32,13 +43,13 @@ export const useSocialPlatforms = () => {
 
   const connectPlatform = async (platform: string, config: any = {}) => {
     try {
-      const result = await apiClient.connectSocialPlatform({ platform, ...config });
+      const result = await apiClient.connectSocialPlatform({ platform, ...config }) as ApiResponse<any>;
       
       if (result.success) {
         await fetchPlatforms(); // Refresh the list
         return result;
       } else {
-        throw new Error(result.error || 'Failed to connect platform');
+        throw new Error('Failed to connect platform');
       }
     } catch (error) {
       console.error('Failed to connect platform:', error);
