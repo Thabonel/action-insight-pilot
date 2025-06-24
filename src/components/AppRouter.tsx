@@ -11,6 +11,9 @@ import LandingPageBuilder from '@/pages/LandingPageBuilder';
 import Settings from '@/pages/Settings';
 import Tools from '@/pages/Tools';
 import Workflows from '@/pages/Workflows';
+import ConversationalDashboard from '@/pages/ConversationalDashboard';
+import Leads from '@/pages/Leads';
+import Email from '@/pages/Email';
 import { useAuth } from '@/contexts/AuthContext';
 
 const AppRouter: React.FC = () => {
@@ -32,9 +35,12 @@ const AppRouter: React.FC = () => {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
         <Route path="campaign-management" element={<CampaignManagement />} />
+        <Route path="leads" element={<Leads />} />
         <Route path="customer-segmentation" element={<CustomerSegmentation />} />
         <Route path="content" element={<Content />} />
+        <Route path="email" element={<Email />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="workflows" element={<Workflows />} />
         <Route path="landing-page-builder" element={<LandingPageBuilder />} />
