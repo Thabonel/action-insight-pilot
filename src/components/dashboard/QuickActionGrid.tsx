@@ -41,7 +41,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         icon: PlusCircle,
         title: 'Create Campaign',
         description: 'Start new marketing campaign',
-        action: () => navigate('/campaigns'),
+        action: () => navigate('/app/campaign-management'),
         color: 'bg-green-500 hover:bg-green-600',
         priority: 2
       },
@@ -49,7 +49,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         icon: Users,
         title: 'View Leads',
         description: 'Manage lead pipeline',
-        action: () => navigate('/leads'),
+        action: () => navigate('/app/leads'),
         color: 'bg-purple-500 hover:bg-purple-600',
         priority: 3
       },
@@ -57,7 +57,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         icon: BarChart3,
         title: 'Analytics',
         description: 'View performance metrics',
-        action: () => navigate('/analytics'),
+        action: () => navigate('/app/analytics'),
         color: 'bg-orange-500 hover:bg-orange-600',
         priority: 4
       }
@@ -71,7 +71,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         icon: TrendingUp,
         title: 'Continue Work',
         description: 'Resume recent activities',
-        action: () => navigate('/campaigns'),
+        action: () => navigate('/app/campaign-management'),
         color: 'bg-indigo-500 hover:bg-indigo-600',
         priority: 1.5
       });
@@ -96,13 +96,13 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
             <Button
               key={index}
               variant="ghost"
-              className={`quick-action-card ${action.color} hover:text-white text-white border-0`}
+              className={`h-32 p-4 ${action.color} hover:text-white text-white border-0 flex flex-col items-center justify-center text-center space-y-2`}
               onClick={action.action}
             >
-              <action.icon className="h-5 w-5 flex-shrink-0 mb-2" />
-              <div className="text-center w-full">
-                <div className="action-title">{action.title}</div>
-                <div className="action-description">{action.description}</div>
+              <action.icon className="h-6 w-6 flex-shrink-0" />
+              <div className="flex flex-col items-center space-y-1">
+                <div className="text-sm font-medium leading-tight">{action.title}</div>
+                <div className="text-xs opacity-90 leading-tight">{action.description}</div>
               </div>
             </Button>
           ))}
@@ -112,7 +112,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center space-x-2 text-blue-700">
               <Zap className="h-4 w-4 flex-shrink-0" />
-              <span className="text-sm break-words">Actions will personalize as you use the platform</span>
+              <span className="text-sm">Actions will personalize as you use the platform</span>
             </div>
           </div>
         )}

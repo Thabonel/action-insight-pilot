@@ -32,44 +32,37 @@ button span {
   overflow-wrap: break-word !important;
 }
 
-/* Specific fixes for action cards */
-.quick-action-card {
-  min-height: 120px !important;
-  max-height: 140px !important;
+/* Improved Quick Action button styling */
+.quick-action-button {
+  min-height: 128px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
   text-align: center !important;
-  padding: 12px !important;
+  padding: 16px !important;
   overflow: hidden !important;
+  gap: 8px !important;
 }
 
-.quick-action-card .action-title {
+.quick-action-button .action-title {
   font-size: 0.875rem !important;
-  font-weight: 600 !important;
-  line-height: 1.2 !important;
-  margin-bottom: 4px !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
   word-break: break-word !important;
   hyphens: auto !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
+  text-align: center !important;
 }
 
-.quick-action-card .action-description {
+.quick-action-button .action-description {
   font-size: 0.75rem !important;
-  line-height: 1.1 !important;
+  line-height: 1.2 !important;
   opacity: 0.9 !important;
   word-break: break-word !important;
   hyphens: auto !important;
   overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
+  text-align: center !important;
 }
 
 /* System overview cards text fixes */
@@ -101,4 +94,32 @@ p, span, div {
   max-width: 100% !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+}
+
+/* Input field specific fixes */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"] {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #d1d5db !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus {
+  background-color: white !important;
+  color: black !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="search"]::placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
 }
