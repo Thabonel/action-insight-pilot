@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import Dashboard from '@/pages/Dashboard';
 import CampaignManagement from '@/pages/CampaignManagement';
+import CampaignDetails from '@/pages/CampaignDetails';
 import CustomerSegmentation from '@/pages/CustomerSegmentation';
 import Content from '@/pages/Content';
 import Analytics from '@/pages/Analytics';
@@ -40,6 +40,7 @@ const AppRouter: React.FC = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
         <Route path="campaign-management" element={<CampaignManagement />} />
+        <Route path="campaigns/:id" element={<CampaignDetails />} />
         <Route path="leads" element={<Leads />} />
         <Route path="customer-segmentation" element={<CustomerSegmentation />} />
         <Route path="content" element={<Content />} />
