@@ -1,18 +1,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
+import { Campaign as ApiCampaign } from '@/lib/api-client-interface'
 
-interface Campaign {
-  id: string
-  name: string
-  description?: string
-  created_at: string
-  updated_at: string
-  status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled' | 'archived'
-  type?: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other'
-  budget_allocated?: number
-  budget_spent?: number
-  metrics?: any
+interface Campaign extends ApiCampaign {
   channel: string
   created_by: string
   start_date?: string
@@ -66,7 +57,7 @@ export function useCampaigns() {
       // Map database data to our interface
       const mappedCampaigns = (data || []).map(campaign => ({
         ...campaign,
-        type: mapDatabaseTypeToInterface(campaign.type)
+        type: mapDatabaseTypeToInterface(campaign.type) || 'other'
       }))
       
       setCampaigns(mappedCampaigns)

@@ -14,22 +14,22 @@ export class CampaignMethods extends BaseApiClient {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         metrics: {
-          sent: 1000,
-          opened: 250,
-          clicked: 50
+          impressions: 1000,
+          clicks: 250,
+          conversion_rate: 5.0
         }
       },
       {
         id: '2',
         name: 'Social Media Promotion',
         description: 'Cross-platform social media campaign',
-        type: 'social',
+        type: 'social_media',
         status: 'draft',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         metrics: {
           impressions: 5000,
-          engagement: 150
+          engagement_rate: 3.0
         }
       }
     ];
