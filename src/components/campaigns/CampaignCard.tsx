@@ -5,17 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, Target, DollarSign } from 'lucide-react';
-
-interface Campaign {
-  id: string;
-  name: string;
-  type: string;
-  status: string;
-  description?: string;
-  budget_allocated?: number;
-  start_date?: string;
-  end_date?: string;
-}
+import { Campaign } from '@/hooks/useCampaigns';
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -71,7 +61,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
         <div className="absolute top-3 left-3 z-10">
           <Checkbox
             checked={isSelectedForComparison}
-            onCheckedChange={handleCheckboxChange}
+            onCheckedChange={(checked) => handleCheckboxChange(!!checked)}
             disabled={isComparisonDisabled}
             onClick={(e) => e.stopPropagation()}
             className="bg-white border-2"
@@ -84,7 +74,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
           <CardTitle className="text-lg font-semibold text-slate-900 truncate">
             {campaign.name || 'Untitled Campaign'}
           </CardTitle>
-          <Badge className={getStatusColor(campaign.status)}>
+          <Badge className={getStatusColor(campaign.status || 'draft')}>
             {campaign.status || 'Draft'}
           </Badge>
         </div>
