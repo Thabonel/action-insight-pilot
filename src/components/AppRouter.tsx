@@ -3,7 +3,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import Dashboard from '@/pages/Dashboard';
-import Campaigns from '@/pages/Campaigns';
 import CampaignManagement from '@/pages/CampaignManagement';
 import CustomerSegmentation from '@/pages/CustomerSegmentation';
 import Content from '@/pages/Content';
@@ -33,7 +32,6 @@ const AppRouter: React.FC = () => {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="campaigns" element={<Navigate to="/app/campaign-management" replace />} />
         <Route path="campaign-management" element={<CampaignManagement />} />
         <Route path="customer-segmentation" element={<CustomerSegmentation />} />
         <Route path="content" element={<Content />} />
