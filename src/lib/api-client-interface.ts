@@ -1,4 +1,3 @@
-
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -115,6 +114,7 @@ export interface Webhook {
   last_response_code?: number;
 }
 
+// Enhanced Campaign interface with comprehensive fields
 export interface Campaign {
   id: string;
   name: string;
@@ -123,7 +123,90 @@ export interface Campaign {
   status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
   created_at: string;
   updated_at: string;
-  metrics?: any;
+  created_by?: string;
+  
+  // Objectives & Goals
+  primaryObjective?: string;
+  secondaryObjectives?: string[];
+  smartGoals?: string;
+  
+  // KPIs & Targets
+  primaryKPI?: string;
+  kpiTargets?: {
+    revenue?: string;
+    leads?: string;
+    conversion?: string;
+    roi?: string;
+    impressions?: string;
+    clicks?: string;
+  };
+  
+  // Budget & Timeline
+  totalBudget?: number;
+  budgetBreakdown?: {
+    media?: string;
+    content?: string;
+    technology?: string;
+    personnel?: string;
+    contingency?: string;
+  };
+  startDate?: string;
+  endDate?: string;
+  
+  // Legacy budget fields for compatibility
+  budget_allocated?: number;
+  budget_spent?: number;
+  
+  // Target Audience
+  targetAudience?: string;
+  audienceSegments?: string[];
+  buyerPersonas?: Array<{ name: string; description: string }>;
+  demographics?: {
+    ageRange?: string;
+    location?: string;
+    income?: string;
+    interests?: string;
+  };
+  
+  // Messaging & Content
+  valueProposition?: string;
+  keyMessages?: string[];
+  contentStrategy?: string;
+  creativeRequirements?: string;
+  brandGuidelines?: string;
+  
+  // Channels & Distribution
+  channels?: string[];
+  channelStrategy?: string;
+  contentTypes?: string[];
+  
+  // Legal & Compliance
+  complianceChecklist?: {
+    dataProtection?: boolean;
+    advertisingStandards?: boolean;
+    industryRegulations?: boolean;
+    termsOfService?: boolean;
+    privacyPolicy?: boolean;
+  };
+  legalNotes?: string;
+  
+  // Monitoring & Reporting
+  analyticsTools?: string[];
+  reportingFrequency?: string;
+  stakeholders?: string[];
+  successCriteria?: string;
+  
+  // Performance metrics (existing)
+  metrics?: {
+    reach?: number;
+    conversion_rate?: number;
+    impressions?: number;
+    clicks?: number;
+    engagement_rate?: number;
+    cost_per_click?: number;
+    cost_per_acquisition?: number;
+    revenue_generated?: number;
+  };
 }
 
 export interface WorkflowMethods {
