@@ -40,6 +40,7 @@ const AppRouter: React.FC = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
         <Route path="campaign-management" element={<CampaignManagement />} />
+        <Route path="campaigns/new" element={<CampaignDetails />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
         <Route path="leads" element={<Leads />} />
         <Route path="customer-segmentation" element={<CustomerSegmentation />} />

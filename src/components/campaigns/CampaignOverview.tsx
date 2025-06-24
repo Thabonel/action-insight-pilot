@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plus, TrendingUp, Target, DollarSign, BarChart3, RefreshCw, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { useToast } from '@/hooks/use-toast';
 import CampaignCard from './CampaignCard';
@@ -10,11 +11,17 @@ import CampaignPerformanceDashboard from './CampaignPerformanceDashboard';
 import CampaignComparison from './CampaignComparison';
 
 const CampaignOverview: React.FC = () => {
+  const navigate = useNavigate();
   const { campaigns, isLoading, error, reload } = useCampaigns();
   const [selectedCampaignsForComparison, setSelectedCampaignsForComparison] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'campaign-list' | 'performance-dashboard'>('campaign-list');
   const [showComparison, setShowComparison] = useState(false);
   const { toast } = useToast();
+
+  const handleNewCampaign = () => {
+    // Navigate to new campaign creation page
+    navigate('/app/campaigns/new');
+  };
 
   const toggleCampaignComparison = (campaignId: string) => {
     setSelectedCampaignsForComparison(prev => {
@@ -121,7 +128,7 @@ const CampaignOverview: React.FC = () => {
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button>
+          <Button onClick={handleNewCampaign}>
             <Plus className="mr-2 h-4 w-4" />
             New Campaign
           </Button>
@@ -170,12 +177,12 @@ const CampaignOverview: React.FC = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reach</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Budget</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{totalReach.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Audience reached</p>
+            <div className="text-2xl font-bold text-green-600">${totalBudget.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Total allocated</p>
           </CardContent>
         </Card>
 
@@ -253,9 +260,9 @@ const CampaignOverview: React.FC = () => {
                 <BarChart3 className="h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No campaigns found</h3>
                 <p className="text-gray-500 text-center mb-6">
-                  Get started by creating your first marketing campaign.
+                  Get started by creating your first comprehensive marketing campaign with all the professional features you need.
                 </p>
-                <Button>
+                <Button onClick={handleNewCampaign}>
                   <Plus className="mr-2 h-4 w-4" />
                   Create Your First Campaign
                 </Button>
