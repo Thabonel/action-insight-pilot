@@ -63,9 +63,10 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on the dropdown menu
+    // Don't navigate if clicking on the dropdown menu or its trigger
     if ((e.target as HTMLElement).closest('[data-radix-dropdown-menu-trigger]') || 
-        (e.target as HTMLElement).closest('[data-radix-dropdown-menu-content]')) {
+        (e.target as HTMLElement).closest('[data-radix-dropdown-menu-content]') ||
+        (e.target as HTMLElement).closest('button')) {
       return;
     }
     navigate(`/app/campaigns/${campaign.id}`);
@@ -86,6 +87,30 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onEdit?.(campaign);
+  };
+
+  const handleAnalyticsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onViewAnalytics?.(campaign.id);
+  };
+
+  const handleArchiveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowArchiveDialog(true);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteDialog(true);
   };
 
   const handleDelete = () => {
@@ -124,27 +149,27 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-radix-dropdown-menu-trigger>
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit?.(campaign)}>
+              <DropdownMenuContent align="end" className="bg-white border shadow-lg z-50">
+                <DropdownMenuItem onClick={handleEditClick} className="cursor-pointer">
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Campaign
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onViewAnalytics?.(campaign.id)}>
+                <DropdownMenuItem onClick={handleAnalyticsClick} className="cursor-pointer">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   View Analytics
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowArchiveDialog(true)}>
+                <DropdownMenuItem onClick={handleArchiveClick} className="cursor-pointer">
                   <Archive className="h-4 w-4 mr-2" />
                   Archive Campaign
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-red-600 focus:text-red-600"
+                  onClick={handleDeleteClick}
+                  className="text-red-600 focus:text-red-600 cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete Campaign
@@ -199,7 +224,8 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
             <AlertDialogDescription>
               Are you sure you want to delete "{campaign.name}"? This action cannot be undone.
             </AlertDialogDescription>
-          </AlertDialogHeader>
+          </AlertDialog
+
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">

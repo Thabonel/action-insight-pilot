@@ -7,6 +7,7 @@ import CampaignPerformanceDashboard from './CampaignPerformanceDashboard';
 import { Button } from '@/components/ui/button';
 import { Plus, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface Campaign {
   id: string;
@@ -33,29 +34,68 @@ const CampaignOverview: React.FC = () => {
   const { deleteCampaign, archiveCampaign, isLoading: isCrudLoading } = useCampaignCRUD();
   const [view, setView] = useState<'list' | 'dashboard'>('list');
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleEdit = (campaign: Campaign) => {
     console.log('Edit campaign:', campaign);
-    // Navigate to edit form or open modal
+    // Navigate to edit page for the specific campaign
+    navigate(`/app/campaigns/${campaign.id}/edit`);
   };
 
   const handleDelete = async (campaignId: string) => {
-    const result = await deleteCampaign(campaignId);
-    if (!result.error) {
-      reload(); // Refresh the campaign list
+    try {
+      const result = await deleteCampaign(campaignId);
+      if (!result.error) {
+        toast({
+          title: "Success",
+          description: "Campaign deleted successfully",
+        });
+        reload(); // Refresh the campaign list
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to delete campaign",
+        variant: "destructive",
+      });
     }
   };
 
   const handleArchive = async (campaignId: string) => {
-    const result = await archiveCampaign(campaignId);
-    if (!result.error) {
-      reload(); // Refresh the campaign list
+    try {
+      const result = await archiveCampaign(campaignId);
+      if (!result.error) {
+        toast({
+          title: "Success",
+          description: "Campaign archived successfully",
+        });
+        reload(); // Refresh the campaign list
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to archive campaign",
+        variant: "destructive",
+      });
     }
   };
 
   const handleViewAnalytics = (campaignId: string) => {
     console.log('View analytics for campaign:', campaignId);
-    // Navigate to analytics page or open modal
+    // Navigate to analytics page for the specific campaign
+    navigate(`/app/campaigns/${campaignId}/analytics`);
   };
 
   // Calculate metrics from real campaign data
@@ -75,6 +115,9 @@ const CampaignOverview: React.FC = () => {
   }, 0);
 
   const conversionRate = totalReach > 0 ? ((totalConversions / totalReach) * 100).toFixed(2) : '0.00';
+
+  // Calculate ROI metrics
+  const totalROI = totalSpent > 0 ? (((totalConversions * 100) - totalSpent) / totalSpent * 100).toFixed(1) : '0';
 
   if (error) {
     return (
@@ -125,7 +168,7 @@ const CampaignOverview: React.FC = () => {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <h3 className="text-sm font-medium text-slate-600">Total Campaigns</h3>
           <p className="text-2xl font-bold text-slate-900">{totalCampaigns}</p>
@@ -142,7 +185,19 @@ const CampaignOverview: React.FC = () => {
           <h3 className="text-sm font-medium text-slate-600">Conversion Rate</h3>
           <p className="text-2xl font-bold text-purple-600">{conversionRate}%</p>
         </div>
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-sm font-medium text-slate-600">Overall ROI</h3>
+          <p className="text-2xl font-bold text-orange-600">{totalROI}%</p>
+        </div>
       </div>
+
+      {/* Campaign Performance Dashboard - Always show above campaign cards */}
+      {campaigns.length > 0 && (
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Campaign Performance Analytics</h3>
+          <CampaignPerformanceDashboard campaigns={campaigns} />
+        </div>
+      )}
 
       {/* Content based on view */}
       {view === 'list' ? (
@@ -171,7 +226,10 @@ const CampaignOverview: React.FC = () => {
           )}
         </div>
       ) : (
-        <CampaignPerformanceDashboard campaigns={campaigns} />
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Detailed Performance Analytics</h3>
+          <CampaignPerformanceDashboard campaigns={campaigns} />
+        </div>
       )}
     </div>
   );
