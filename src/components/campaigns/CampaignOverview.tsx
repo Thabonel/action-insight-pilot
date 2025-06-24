@@ -13,7 +13,7 @@ const CampaignOverview: React.FC = () => {
 
   const toggleCampaignComparison = (campaignId: string) => {
     setSelectedCampaignsForComparison(prev => {
-      if (prev.includes campaignId)) {
+      if (prev.includes(campaignId)) {
         return prev.filter(id => id !== campaignId);
       } else if (prev.length < 4) {
         return [...prev, campaignId];
