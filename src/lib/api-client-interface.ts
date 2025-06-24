@@ -133,22 +133,22 @@ export interface Campaign {
   // KPIs & Targets
   primaryKPI?: string;
   kpiTargets?: {
-    revenue?: string;
-    leads?: string;
-    conversion?: string;
-    roi?: string;
-    impressions?: string;
-    clicks?: string;
+    revenue?: string | number;
+    leads?: string | number;
+    conversion?: string | number;
+    roi?: string | number;
+    impressions?: string | number;
+    clicks?: string | number;
   };
   
   // Budget & Timeline
   totalBudget?: number;
   budgetBreakdown?: {
-    media?: string;
-    content?: string;
-    technology?: string;
-    personnel?: string;
-    contingency?: string;
+    media?: string | number;
+    content?: string | number;
+    technology?: string | number;
+    personnel?: string | number;
+    contingency?: string | number;
   };
   startDate?: string;
   endDate?: string;
@@ -166,6 +166,7 @@ export interface Campaign {
     location?: string;
     income?: string;
     interests?: string;
+    [key: string]: string | undefined;
   };
   
   // Messaging & Content
@@ -187,6 +188,7 @@ export interface Campaign {
     industryRegulations?: boolean;
     termsOfService?: boolean;
     privacyPolicy?: boolean;
+    [key: string]: boolean | undefined;
   };
   legalNotes?: string;
   
