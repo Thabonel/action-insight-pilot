@@ -51,7 +51,52 @@ const CampaignDetails: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Comprehensive form data state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    type: string;
+    status: Campaign['status'];
+    primaryObjective: string;
+    secondaryObjectives: string[];
+    smartGoals: string;
+    primaryKPI: string;
+    kpiTargets: {
+      revenue: string;
+      leads: string;
+      conversion: string;
+      roi: string;
+      impressions: string;
+      clicks: string;
+    };
+    totalBudget: string;
+    budgetBreakdown: {
+      [key: string]: string;
+    };
+    startDate: string;
+    endDate: string;
+    targetAudience: string;
+    audienceSegments: string[];
+    buyerPersonas: { name: string; description: string }[];
+    demographics: {
+      [key: string]: string;
+    };
+    valueProposition: string;
+    keyMessages: string[];
+    contentStrategy: string;
+    creativeRequirements: string;
+    brandGuidelines: string;
+    channels: string[];
+    channelStrategy: string;
+    contentTypes: string[];
+    complianceChecklist: {
+      [key: string]: boolean;
+    };
+    legalNotes: string;
+    analyticsTools: string[];
+    reportingFrequency: string;
+    stakeholders: string[];
+    successCriteria: string;
+  }>({
     // Basic Information
     name: '',
     description: '',
@@ -82,7 +127,7 @@ const CampaignDetails: React.FC = () => {
       technology: '',
       personnel: '',
       contingency: ''
-    } as { [key: string]: string },
+    },
     startDate: '',
     endDate: '',
     
@@ -95,7 +140,7 @@ const CampaignDetails: React.FC = () => {
       location: '',
       income: '',
       interests: ''
-    } as { [key: string]: string },
+    },
     
     // Messaging & Content
     valueProposition: '',
@@ -116,7 +161,7 @@ const CampaignDetails: React.FC = () => {
       industryRegulations: false,
       termsOfService: false,
       privacyPolicy: false
-    } as { [key: string]: boolean },
+    },
     legalNotes: '',
     
     // Monitoring & Reporting
@@ -176,23 +221,23 @@ const CampaignDetails: React.FC = () => {
             smartGoals: result.data.smartGoals || '',
             
             primaryKPI: result.data.primaryKPI || '',
-            kpiTargets: result.data.kpiTargets || {
-              revenue: '',
-              leads: '',
-              conversion: '',
-              roi: '',
-              impressions: '',
-              clicks: ''
+            kpiTargets: {
+              revenue: (result.data.kpiTargets as any)?.revenue?.toString() || '',
+              leads: (result.data.kpiTargets as any)?.leads?.toString() || '',
+              conversion: (result.data.kpiTargets as any)?.conversion?.toString() || '',
+              roi: (result.data.kpiTargets as any)?.roi?.toString() || '',
+              impressions: (result.data.kpiTargets as any)?.impressions?.toString() || '',
+              clicks: (result.data.kpiTargets as any)?.clicks?.toString() || ''
             },
             
             totalBudget: result.data.totalBudget?.toString() || '',
-            budgetBreakdown: result.data.budgetBreakdown || {
-              media: '',
-              content: '',
-              technology: '',
-              personnel: '',
-              contingency: ''
-            } as { [key: string]: string },
+            budgetBreakdown: {
+              media: (result.data.budgetBreakdown as any)?.media?.toString() || '',
+              content: (result.data.budgetBreakdown as any)?.content?.toString() || '',
+              technology: (result.data.budgetBreakdown as any)?.technology?.toString() || '',
+              personnel: (result.data.budgetBreakdown as any)?.personnel?.toString() || '',
+              contingency: (result.data.budgetBreakdown as any)?.contingency?.toString() || ''
+            },
             startDate: result.data.startDate || '',
             endDate: result.data.endDate || '',
             
@@ -204,7 +249,7 @@ const CampaignDetails: React.FC = () => {
               location: '',
               income: '',
               interests: ''
-            } as { [key: string]: string },
+            },
             
             valueProposition: result.data.valueProposition || '',
             keyMessages: result.data.keyMessages || [],
@@ -222,7 +267,7 @@ const CampaignDetails: React.FC = () => {
               industryRegulations: false,
               termsOfService: false,
               privacyPolicy: false
-            } as { [key: string]: boolean },
+            },
             legalNotes: result.data.legalNotes || '',
             
             analyticsTools: result.data.analyticsTools || [],
@@ -353,7 +398,7 @@ const CampaignDetails: React.FC = () => {
   const updateNestedField = (parent: string, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
-      [parent]: { ...prev[parent] as any, [field]: value }
+      [parent]: { ...prev[parent], [field]: value }
     }));
   };
 
