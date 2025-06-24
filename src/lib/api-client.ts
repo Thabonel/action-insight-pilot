@@ -1,7 +1,7 @@
 
 import { BaseApiClient } from './api/base-api-client';
 import { CampaignMethods } from './api/campaign-methods';
-import { ApiResponse, SocialPlatformConnection, Workflow, UserPreferences, IntegrationConnection, Webhook } from './api-client-interface';
+import { ApiResponse, SocialPlatformConnection, Workflow, UserPreferences, IntegrationConnection, Webhook, Campaign } from './api-client-interface';
 
 class ApiClient extends BaseApiClient {
   campaigns: CampaignMethods;
@@ -16,6 +16,10 @@ class ApiClient extends BaseApiClient {
     return this.campaigns.getCampaigns();
   }
 
+  async getCampaignById(id: string) {
+    return this.campaigns.getCampaignById(id);
+  }
+
   async createCampaign(campaign: any) {
     return this.campaigns.createCampaign(campaign);
   }
@@ -26,6 +30,23 @@ class ApiClient extends BaseApiClient {
 
   async deleteCampaign(id: string) {
     return this.campaigns.deleteCampaign(id);
+  }
+
+  async duplicateCampaign(id: string): Promise<ApiResponse<Campaign>> {
+    const original = await this.getCampaignById(id);
+    if (original.success && original.data) {
+      const duplicate = {
+        ...original.data,
+        name: `${original.data.name} (Copy)`,
+        status: 'draft' as const
+      };
+      return this.createCampaign(duplicate);
+    }
+    return { success: false, error: 'Failed to duplicate campaign' };
+  }
+
+  async archiveCampaign(id: string): Promise<ApiResponse<Campaign>> {
+    return this.updateCampaign(id, { status: 'archived' });
   }
 
   // AI Agent methods
@@ -48,6 +69,82 @@ class ApiClient extends BaseApiClient {
       success: true,
       data: { message: 'Leads scored successfully' }
     };
+  }
+
+  // Content generation methods
+  async generateContent(brief: any): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: {
+        id: 'generated-content-' + Date.now(),
+        title: brief.title || 'Generated Content',
+        content: 'This is AI-generated content based on your brief.',
+        html_content: '<p>This is AI-generated content based on your brief.</p>',
+        cta: 'Learn More',
+        seo_score: 85,
+        readability_score: 90,
+        engagement_prediction: 75,
+        tags: brief.keywords || [],
+        status: 'generated'
+      }
+    };
+  }
+
+  async generateEmailContent(brief: string): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: {
+        content: `Email content generated for: ${brief}`
+      }
+    };
+  }
+
+  async createContent(contentData: any): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: { message: 'Content created successfully', id: 'content-' + Date.now() }
+    };
+  }
+
+  // Analytics methods
+  async getAnalytics(): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: {
+        totalUsers: Math.floor(Math.random() * 1000) + 100,
+        totalCampaigns: Math.floor(Math.random() * 50) + 10,
+        activeLeads: Math.floor(Math.random() * 200) + 50,
+        conversionRate: Math.random() * 10 + 5
+      }
+    };
+  }
+
+  async getLeads(): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: []
+    };
+  }
+
+  async getEmailAnalytics(): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: {
+        totalSent: 1000,
+        delivered: 950,
+        opened: 250,
+        clicked: 50,
+        bounced: 20,
+        unsubscribed: 10,
+        openRate: 0.25,
+        clickRate: 0.05,
+        bounceRate: 0.02
+      }
+    };
+  }
+
+  async getEmailMetrics(): Promise<ApiResponse<any>> {
+    return this.getEmailAnalytics();
   }
 
   // Social Platform methods
@@ -73,6 +170,70 @@ class ApiClient extends BaseApiClient {
         return {
           success: true,
           data: { message: 'Platform connected successfully' }
+        };
+      },
+      getPlatformConnections: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
+        return {
+          success: true,
+          data: [
+            {
+              id: '1',
+              platform: 'twitter',
+              account_name: 'test_account',
+              status: 'connected' as const,
+              connection_status: 'connected' as const,
+              last_sync: new Date().toISOString(),
+              follower_count: 1000
+            }
+          ]
+        };
+      },
+      initiatePlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
+        return {
+          success: true,
+          data: { message: `Connection initiated for ${platform}` }
+        };
+      },
+      disconnectPlatform: async (platform: string): Promise<ApiResponse<any>> => {
+        return {
+          success: true,
+          data: { message: `Disconnected from ${platform}` }
+        };
+      },
+      syncPlatformData: async (platform: string): Promise<ApiResponse<any>> => {
+        return {
+          success: true,
+          data: { message: `Data synced for ${platform}` }
+        };
+      },
+      testPlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
+        return {
+          success: true,
+          data: { message: `Connection test successful for ${platform}` }
+        };
+      },
+      getSocialMediaPosts: async (): Promise<ApiResponse<any[]>> => {
+        return {
+          success: true,
+          data: []
+        };
+      },
+      createSocialPost: async (postData: any): Promise<ApiResponse<any>> => {
+        return {
+          success: true,
+          data: { message: 'Social post created successfully' }
+        };
+      },
+      getSocialAnalytics: async (): Promise<ApiResponse<any>> => {
+        return {
+          success: true,
+          data: { impressions: 1000, engagement: 50 }
+        };
+      },
+      generateSocialContent: async (brief: any): Promise<ApiResponse<any>> => {
+        return {
+          success: true,
+          data: { content: 'Generated social media content' }
         };
       }
     };

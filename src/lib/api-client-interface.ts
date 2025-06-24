@@ -1,3 +1,4 @@
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -119,8 +120,8 @@ export interface Campaign {
   id: string;
   name: string;
   description?: string;
-  type: string;
-  status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
+  type: 'email' | 'social_media' | 'other' | 'seo' | 'content' | 'paid_ads';
+  status: 'draft' | 'active' | 'paused' | 'completed' | 'archived' | 'scheduled';
   created_at: string;
   updated_at: string;
   created_by?: string;
