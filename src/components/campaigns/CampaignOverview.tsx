@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,13 +16,13 @@ import {
 } from 'lucide-react';
 
 const CampaignOverview: React.FC = () => {
-  const { campaigns, loading, error, refetch } = useCampaigns();
+  const { campaigns, isLoading, error, reload } = useCampaigns();
 
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    reload();
+  }, [reload]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -58,7 +57,7 @@ const CampaignOverview: React.FC = () => {
             <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p className="font-medium">Failed to load campaigns</p>
             <p className="text-sm text-gray-600 mt-2">{error}</p>
-            <Button onClick={refetch} className="mt-4" variant="outline">
+            <Button onClick={reload} className="mt-4" variant="outline">
               Try Again
             </Button>
           </div>
