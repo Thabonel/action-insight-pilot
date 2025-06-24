@@ -105,10 +105,10 @@ export const useCampaignCRUD = () => {
         throw new Error('User not authenticated');
       }
 
-      // Prepare data for database
+      // Prepare data for database with proper type casting
       const dbData = {
         ...campaignData,
-        type: mapInterfaceTypeToDatabase(campaignData.type),
+        type: mapInterfaceTypeToDatabase(campaignData.type) as 'email' | 'content' | 'paid_ads' | 'social' | 'partnership',
         created_by: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -116,7 +116,7 @@ export const useCampaignCRUD = () => {
 
       const { data, error } = await supabase
         .from('campaigns')
-        .insert(dbData)
+        .insert([dbData])
         .select()
         .single();
 
