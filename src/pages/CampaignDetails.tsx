@@ -82,7 +82,7 @@ const CampaignDetails: React.FC = () => {
       technology: '',
       personnel: '',
       contingency: ''
-    },
+    } as { [key: string]: string },
     startDate: '',
     endDate: '',
     
@@ -95,7 +95,7 @@ const CampaignDetails: React.FC = () => {
       location: '',
       income: '',
       interests: ''
-    },
+    } as { [key: string]: string },
     
     // Messaging & Content
     valueProposition: '',
@@ -116,7 +116,7 @@ const CampaignDetails: React.FC = () => {
       industryRegulations: false,
       termsOfService: false,
       privacyPolicy: false
-    },
+    } as { [key: string]: boolean },
     legalNotes: '',
     
     // Monitoring & Reporting
@@ -192,7 +192,7 @@ const CampaignDetails: React.FC = () => {
               technology: '',
               personnel: '',
               contingency: ''
-            },
+            } as { [key: string]: string },
             startDate: result.data.startDate || '',
             endDate: result.data.endDate || '',
             
@@ -204,7 +204,7 @@ const CampaignDetails: React.FC = () => {
               location: '',
               income: '',
               interests: ''
-            },
+            } as { [key: string]: string },
             
             valueProposition: result.data.valueProposition || '',
             keyMessages: result.data.keyMessages || [],
@@ -222,7 +222,7 @@ const CampaignDetails: React.FC = () => {
               industryRegulations: false,
               termsOfService: false,
               privacyPolicy: false
-            },
+            } as { [key: string]: boolean },
             legalNotes: result.data.legalNotes || '',
             
             analyticsTools: result.data.analyticsTools || [],
@@ -353,7 +353,7 @@ const CampaignDetails: React.FC = () => {
   const updateNestedField = (parent: string, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
-      [parent]: { ...prev[parent], [field]: value }
+      [parent]: { ...prev[parent] as any, [field]: value }
     }));
   };
 
