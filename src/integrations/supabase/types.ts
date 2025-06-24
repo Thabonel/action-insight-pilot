@@ -405,7 +405,7 @@ export type Database = {
           settings: Json | null
           start_date: string | null
           status: Database["public"]["Enums"]["campaign_status"] | null
-          target_audience: Json | null
+          target_audience: string | null
           type: Database["public"]["Enums"]["campaign_type"]
           updated_at: string | null
         }
@@ -425,7 +425,7 @@ export type Database = {
           settings?: Json | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["campaign_status"] | null
-          target_audience?: Json | null
+          target_audience?: string | null
           type: Database["public"]["Enums"]["campaign_type"]
           updated_at?: string | null
         }
@@ -445,7 +445,7 @@ export type Database = {
           settings?: Json | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["campaign_status"] | null
-          target_audience?: Json | null
+          target_audience?: string | null
           type?: Database["public"]["Enums"]["campaign_type"]
           updated_at?: string | null
         }
@@ -2511,7 +2511,7 @@ export type Database = {
           settings: Json | null
           start_date: string | null
           status: Database["public"]["Enums"]["campaign_status"] | null
-          target_audience: Json | null
+          target_audience: string | null
           type: Database["public"]["Enums"]["campaign_type"] | null
           updated_at: string | null
         }
