@@ -16,6 +16,7 @@ import Leads from '@/pages/Leads';
 import Email from '@/pages/Email';
 import Social from '@/pages/Social';
 import Proposals from '@/pages/Proposals';
+import UserManual from '@/pages/UserManual';
 import { useAuth } from '@/contexts/AuthContext';
 
 const AppRouter: React.FC = () => {
@@ -50,7 +51,7 @@ const AppRouter: React.FC = () => {
         <Route path="landing-page-builder" element={<LandingPageBuilder />} />
         <Route path="settings" element={<Settings />} />
         <Route path="tools" element={<Tools />} />
-        <Route path="user-manual" element={<Tools />} />
+        <Route path="user-manual" element={<UserManual />} />
         <Route path="connect-platforms" element={<Settings />} />
         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
       </Route>
