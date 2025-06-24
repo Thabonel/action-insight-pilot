@@ -6,9 +6,6 @@ button {
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
   hyphens: auto !important;
-  white-space: normal !important;
-  text-overflow: ellipsis !important;
-  overflow: hidden !important;
 }
 
 /* Specific button content wrapping */
@@ -19,6 +16,7 @@ button span {
   overflow-wrap: break-word !important;
   white-space: normal !important;
   line-height: 1.2 !important;
+  hyphens: auto !important;
 }
 
 /* Card content overflow prevention */
@@ -34,7 +32,7 @@ button span {
 
 /* Improved Quick Action button styling */
 .quick-action-button {
-  min-height: 128px !important;
+  min-height: 160px !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -53,6 +51,8 @@ button span {
   hyphens: auto !important;
   overflow: hidden !important;
   text-align: center !important;
+  white-space: normal !important;
+  width: 100% !important;
 }
 
 .quick-action-button .action-description {
@@ -63,6 +63,8 @@ button span {
   hyphens: auto !important;
   overflow: hidden !important;
   text-align: center !important;
+  white-space: normal !important;
+  width: 100% !important;
 }
 
 /* System overview cards text fixes */

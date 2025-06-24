@@ -96,13 +96,17 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
             <Button
               key={index}
               variant="ghost"
-              className={`h-32 p-4 ${action.color} hover:text-white text-white border-0 flex flex-col items-center justify-center text-center space-y-2`}
+              className={`h-40 p-4 ${action.color} hover:text-white text-white border-0 flex flex-col items-center justify-center text-center space-y-2 overflow-hidden`}
               onClick={action.action}
             >
               <action.icon className="h-6 w-6 flex-shrink-0" />
-              <div className="flex flex-col items-center space-y-1">
-                <div className="text-sm font-medium leading-tight">{action.title}</div>
-                <div className="text-xs opacity-90 leading-tight">{action.description}</div>
+              <div className="flex flex-col items-center space-y-1 w-full">
+                <div className="text-sm font-medium leading-tight text-center whitespace-normal break-words hyphens-auto w-full px-1">
+                  {action.title}
+                </div>
+                <div className="text-xs opacity-90 leading-tight text-center whitespace-normal break-words hyphens-auto w-full px-1">
+                  {action.description}
+                </div>
               </div>
             </Button>
           ))}
