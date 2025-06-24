@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,23 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import CampaignCard from './CampaignCard';
 
 const CampaignOverview: React.FC = () => {
-  const { campaigns, isLoading, error, refetch } = useCampaigns();
+  const { campaigns, isLoading, error, reload } = useCampaigns();
+  const [selectedCampaignsForComparison, setSelectedCampaignsForComparison] = useState<string[]>([]);
+
+  const toggleCampaignComparison = (campaignId: string) => {
+    setSelectedCampaignsForComparison(prev => {
+      if (prev.includes campaignId)) {
+        return prev.filter(id => id !== campaignId);
+      } else if (prev.length < 4) {
+        return [...prev, campaignId];
+      }
+      return prev;
+    });
+  };
+
+  const clearComparisonSelection = () => {
+    setSelectedCampaignsForComparison([]);
+  };
 
   if (isLoading) {
     return (
@@ -33,7 +49,7 @@ const CampaignOverview: React.FC = () => {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 mb-4">Failed to load campaigns: {error}</p>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => reload()} variant="outline">
           Try Again
         </Button>
       </div>
@@ -114,13 +130,35 @@ const CampaignOverview: React.FC = () => {
           </Button>
         </div>
 
+        {/* Comparison Controls */}
+        {selectedCampaignsForComparison.length > 0 && (
+          <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <span className="text-sm font-medium text-blue-900">
+              {selectedCampaignsForComparison.length} campaigns selected for comparison
+            </span>
+            <div className="flex gap-2">
+              {selectedCampaignsForComparison.length >= 2 && (
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  Compare Selected
+                </Button>
+              )}
+              <Button size="sm" variant="outline" onClick={clearComparisonSelection}>
+                Clear Selection
+              </Button>
+            </div>
+          </div>
+        )}
+
         {campaigns && campaigns.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {campaigns.map((campaign) => (
               <CampaignCard
                 key={campaign.id}
                 campaign={campaign}
-                onUpdate={refetch}
+                onUpdate={reload}
+                isSelectedForComparison={selectedCampaignsForComparison.includes(campaign.id || '')}
+                onToggleComparison={toggleCampaignComparison}
+                isComparisonDisabled={selectedCampaignsForComparison.length >= 4 && !selectedCampaignsForComparison.includes(campaign.id || '')}
               />
             ))}
           </div>

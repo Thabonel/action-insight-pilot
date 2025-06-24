@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -32,6 +33,9 @@ interface CampaignCardProps {
   onArchive?: (campaignId: string) => Promise<void>;
   onDelete?: (campaignId: string) => Promise<void>;
   onViewAnalytics?: (campaignId: string) => void;
+  isSelectedForComparison?: boolean;
+  onToggleComparison?: (campaignId: string) => void;
+  isComparisonDisabled?: boolean;
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({ 
@@ -40,7 +44,10 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
   onEdit,
   onArchive,
   onDelete,
-  onViewAnalytics 
+  onViewAnalytics,
+  isSelectedForComparison = false,
+  onToggleComparison,
+  isComparisonDisabled = false
 }) => {
   const navigate = useNavigate();
   const { archiveCampaign, deleteCampaign, isLoading } = useCampaignCRUD();
@@ -114,6 +121,13 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
     }
   };
 
+  const handleComparisonToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleComparison && campaign.id) {
+      onToggleComparison(campaign.id);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'active':
@@ -132,8 +146,20 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader>
+    <Card className={`hover:shadow-md transition-shadow relative ${
+      isSelectedForComparison ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+    }`}>
+      {/* Comparison Checkbox */}
+      <div className="absolute top-3 left-3 z-10">
+        <Checkbox
+          checked={isSelectedForComparison}
+          onCheckedChange={handleComparisonToggle}
+          disabled={isComparisonDisabled}
+          className="bg-white border-2 shadow-sm"
+        />
+      </div>
+
+      <CardHeader className="pl-10">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-semibold text-slate-900 truncate">
             {campaign.name || 'Untitled Campaign'}
