@@ -1,14 +1,16 @@
+
 import React from 'react';
-import { MessageSquare, Send, Zap } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Send, Sparkles } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import ChatResponse from '@/components/dashboard/ChatResponse';
 
 interface ChatMessage {
   id: string;
-  query: string;
-  response: any;
+  role: 'user' | 'assistant';
+  content: string;
   timestamp: Date;
+  query?: string;
+  response?: string;
 }
 
 interface ConversationalChatInterfaceProps {
@@ -30,88 +32,50 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   handleSuggestionClick,
   user
 }) => {
-  const getContextualSuggestions = () => {
-    // If there's chat history, provide context-aware suggestions
-    if (chatHistory.length > 0) {
-      const lastChat = chatHistory[chatHistory.length - 1];
-      if (lastChat.response?.type === 'campaign_analysis') {
-        return [
-          "How can I improve this campaign?",
-          "What's the ROI for this campaign?",
-          "Show me similar successful campaigns"
-        ];
-      }
-      if (lastChat.response?.type === 'lead_analysis') {
-        return [
-          "How do I nurture these leads?",
-          "What's the conversion probability?",
-          "Create a follow-up sequence"
-        ];
-      }
-      return [
-        "Tell me more about this",
-        "What should I do next?",
-        "Show me related metrics"
-      ];
-    }
-
-    // Default suggestions for new conversations
-    return [
-      "What should I focus on today?",
-      "Show me my campaign performance",
-      "How are my leads converting?",
-      "What content should I create next?",
-      "Help me optimize my marketing strategy",
-      "Analyze my recent marketing data"
-    ];
-  };
-
-  const suggestions = getContextualSuggestions();
+  const suggestions = [
+    "What should I focus on today?",
+    "Show me my campaign performance",
+    "How are my leads converting?",
+    "What content should I create next?",
+    "Help me optimize my marketing strategy",
+    "Analyze my recent marketing data"
+  ];
 
   return (
-    <Card className="shadow-lg border-0 bg-white/90 backdrop-blur">
-      <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-        <div className="flex items-center space-x-3">
-          <MessageSquare className="h-6 w-6" />
-          <CardTitle>AI Marketing Assistant</CardTitle>
-          <div className="flex items-center text-sm bg-white/20 px-2 py-1 rounded">
-            <div className="w-2 h-2 rounded-full mr-2 bg-green-400 animate-pulse"></div>
-            {user ? 'Online' : 'Login Required'}
+    <Card className="h-[600px] flex flex-col">
+      <CardContent className="p-6 flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Sparkles className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">AI Marketing Assistant</h3>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">Online</span>
+            </div>
           </div>
         </div>
-      </CardHeader>
-      
-      <CardContent className="p-6">
-        {/* Authentication Message */}
-        {!user && (
-          <div className="text-center py-8 mb-6 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="w-16 h-16 bg-amber-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <MessageSquare className="h-8 w-8 text-white" />
-            </div>
-            <h3 className="text-lg font-medium text-amber-800 mb-2">Authentication Required</h3>
-            <p className="text-amber-700">Please log in to start chatting with your AI marketing assistant</p>
-          </div>
-        )}
 
-        {/* Chat History */}
-        <div className="h-96 overflow-y-auto mb-6 space-y-4">
-          {chatHistory.length === 0 && !isProcessing && user && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <Zap className="h-8 w-8 text-white" />
+        {/* Chat Messages */}
+        <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+          {chatHistory.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">Ready to optimize your marketing?</h3>
-              <p className="text-slate-600 mb-4">Ask me anything about your campaigns, leads, or performance</p>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">Ready to optimize your marketing?</h4>
+              <p className="text-gray-600 mb-6">Ask me anything about your campaigns, leads, or performance</p>
               
-              {/* Dynamic Suggestions */}
-              <div className="space-y-2">
-                <p className="text-sm text-slate-500">Try asking:</p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {suggestions.slice(0, 3).map((suggestion, index) => (
+              <div className="text-left">
+                <p className="text-sm font-medium text-gray-700 mb-3">Try asking:</p>
+                <div className="grid grid-cols-1 gap-2">
+                  {suggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-200 transition-colors"
+                      className="text-left px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm text-blue-700 transition-colors"
                     >
                       {suggestion}
                     </button>
@@ -119,81 +83,69 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 </div>
               </div>
             </div>
+          ) : (
+            chatHistory.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    message.role === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  <p className="text-sm">{message.content}</p>
+                  <p className="text-xs mt-1 opacity-70">
+                    {message.timestamp.toLocaleTimeString()}
+                  </p>
+                </div>
+              </div>
+            ))
           )}
           
-          {/* Display messages in chronological order */}
-          {chatHistory.map((chat) => (
-            <div key={chat.id} className="space-y-4">
-              {/* User Query */}
-              <div className="flex justify-end">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg px-4 py-3 max-w-md">
-                  {chat.query}
-                </div>
-              </div>
-              
-              {/* AI Response */}
-              <ChatResponse response={chat.response} />
-            </div>
-          ))}
-          
           {isProcessing && (
-            <div className="space-y-4">
-              {/* Show user's current query */}
-              <div className="flex justify-end">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg px-4 py-3 max-w-md">
-                  {query}
-                </div>
-              </div>
-              
-              {/* Show processing indicator */}
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-white" />
-                </div>
-                <div className="bg-gray-100 rounded-lg px-4 py-3 flex-1">
-                  <div className="flex items-center space-x-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                    <span className="text-sm text-slate-600">Analyzing your marketing data...</span>
-                  </div>
+            <div className="flex justify-start">
+              <div className="bg-gray-100 text-gray-900 p-3 rounded-lg max-w-[80%]">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                  <span className="text-sm">AI is thinking...</span>
                 </div>
               </div>
             </div>
           )}
         </div>
-        
-        {/* Query Input */}
-        <form onSubmit={handleQuerySubmit} className="flex space-x-3">
+
+        {/* Input Form */}
+        <form onSubmit={handleQuerySubmit} className="flex space-x-2">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={user ? "Ask me about your marketing performance..." : "Please log in to chat..."}
+            placeholder={user ? "Ask me about your marketing..." : "Please log in to chat..."}
             disabled={!user || isProcessing}
-            className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+            className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 text-black placeholder-gray-500"
           />
           <Button
             type="submit"
             disabled={!query.trim() || isProcessing || !user}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:opacity-50"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
             <Send className="h-4 w-4" />
           </Button>
         </form>
-        
-        {/* Contextual Suggestions */}
-        {user && chatHistory.length === 0 && !isProcessing && suggestions.length > 3 && (
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-xs text-gray-500 mb-2">More suggestions:</p>
-            <div className="flex flex-wrap gap-1">
-              {suggestions.slice(3).map((suggestion, index) => (
+
+        {/* More Suggestions */}
+        {chatHistory.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm text-gray-600 mb-2">More suggestions:</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.slice(0, 3).map((suggestion, index) => (
                 <button
-                  key={index + 3}
+                  key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200 transition-colors"
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs text-gray-700 transition-colors"
                 >
                   {suggestion}
                 </button>
