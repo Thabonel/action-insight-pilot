@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout';
 import Dashboard from '@/pages/Dashboard';
 import CampaignManagement from '@/pages/CampaignManagement';
 import CampaignDetails from '@/pages/CampaignDetails';
+import CampaignDashboard from '@/components/campaigns/CampaignDashboard';
 import CustomerSegmentation from '@/pages/CustomerSegmentation';
 import Content from '@/pages/Content';
 import Analytics from '@/pages/Analytics';
@@ -42,6 +43,7 @@ const AppRouter: React.FC = () => {
         <Route path="campaign-management" element={<CampaignManagement />} />
         <Route path="campaigns/new" element={<CampaignDetails />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
+        <Route path="campaigns/:id/dashboard" element={<CampaignDashboard />} />
         <Route path="leads" element={<Leads />} />
         <Route path="customer-segmentation" element={<CustomerSegmentation />} />
         <Route path="content" element={<Content />} />

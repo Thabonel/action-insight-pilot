@@ -562,6 +562,10 @@ const CampaignDetails: React.FC = () => {
           <div className="flex items-center gap-2">
             {!isEditing && id && id !== 'new' ? (
               <>
+                <Button variant="outline" onClick={() => navigate(`/app/campaigns/${id}/dashboard`)}>
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  View Dashboard
+                </Button>
                 <Button variant="outline" onClick={handleDuplicate}>
                   <Copy className="mr-2 h-4 w-4" />
                   Duplicate
