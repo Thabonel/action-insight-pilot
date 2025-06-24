@@ -29,15 +29,18 @@ interface Campaign {
   description?: string;
   created_at: string;
   updated_at: string;
-  status?: string;
-  type?: string;
+  status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled' | 'archived';
+  type?: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other';
   budget_allocated?: number;
-  metrics?: {
-    impressions?: number;
-    clicks?: number;
-    conversions?: number;
-    spend?: number;
-  };
+  budget_spent?: number;
+  metrics?: any;
+  channel: string;
+  created_by: string;
+  start_date?: string;
+  end_date?: string;
+  target_audience?: any;
+  content?: any;
+  settings?: any;
 }
 
 interface CampaignCardProps {
@@ -113,7 +116,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
                 </Badge>
                 {campaign.type && (
                   <Badge variant="outline" className="capitalize">
-                    {campaign.type}
+                    {campaign.type.replace('_', ' ')}
                   </Badge>
                 )}
               </div>
