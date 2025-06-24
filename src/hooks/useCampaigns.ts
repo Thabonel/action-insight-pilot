@@ -8,6 +8,18 @@ interface Campaign {
   description?: string
   created_at: string
   updated_at: string
+  status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled' | 'archived'
+  type?: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other'
+  budget_allocated?: number
+  budget_spent?: number
+  metrics?: any
+  channel: string
+  created_by: string
+  start_date?: string
+  end_date?: string
+  target_audience?: any
+  content?: any
+  settings?: any
 }
 
 export function useCampaigns() {
@@ -23,7 +35,7 @@ export function useCampaigns() {
       
       const { data, error } = await supabase
         .from('campaigns')
-        .select('id, name, description, created_at, updated_at')
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (error) {

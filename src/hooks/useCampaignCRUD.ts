@@ -9,10 +9,18 @@ interface Campaign {
   description?: string;
   created_at: string;
   updated_at: string;
-  status?: string;
-  type?: string;
+  status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled' | 'archived';
+  type?: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other';
   budget_allocated?: number;
+  budget_spent?: number;
   metrics?: any;
+  channel: string;
+  created_by: string;
+  start_date?: string;
+  end_date?: string;
+  target_audience?: any;
+  content?: any;
+  settings?: any;
 }
 
 export const useCampaignCRUD = () => {
@@ -86,13 +94,33 @@ export const useCampaignCRUD = () => {
     return updateCampaign(id, { status: 'archived' });
   };
 
-  const createCampaign = async (campaignData: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>) => {
+  const createCampaign = async (campaignData: {
+    name: string;
+    description?: string;
+    type: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other';
+    channel: string;
+    status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled' | 'archived';
+    budget_allocated?: number;
+    start_date?: string;
+    end_date?: string;
+    target_audience?: any;
+    content?: any;
+    settings?: any;
+    metrics?: any;
+  }) => {
     setIsLoading(true);
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('campaigns')
         .insert([{
           ...campaignData,
+          created_by: user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }])
