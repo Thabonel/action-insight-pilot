@@ -22,6 +22,24 @@ interface Campaign {
   settings?: any
 }
 
+// Map database types to our interface types
+const mapDatabaseTypeToInterface = (dbType: string): Campaign['type'] => {
+  switch (dbType) {
+    case 'social': return 'social_media'
+    case 'partnership': return 'other'
+    default: return dbType as Campaign['type']
+  }
+}
+
+// Map our interface types to database types
+const mapInterfaceTypeToDatabase = (interfaceType: Campaign['type']): string => {
+  switch (interfaceType) {
+    case 'social_media': return 'social'
+    case 'seo': return 'other'
+    default: return interfaceType || 'other'
+  }
+}
+
 export function useCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -44,7 +62,14 @@ export function useCampaigns() {
       }
       
       console.log('Campaigns loaded successfully:', data?.length || 0)
-      setCampaigns(data || [])
+      
+      // Map database data to our interface
+      const mappedCampaigns = (data || []).map(campaign => ({
+        ...campaign,
+        type: mapDatabaseTypeToInterface(campaign.type)
+      }))
+      
+      setCampaigns(mappedCampaigns)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load campaigns'
       console.error('Error loading campaigns:', err)
@@ -62,6 +87,10 @@ export function useCampaigns() {
     campaigns,
     isLoading,
     error,
-    reload: loadCampaigns
+    reload: loadCampaigns,
+    mapInterfaceTypeToDatabase
   }
 }
+
+export type { Campaign }
+export { mapDatabaseTypeToInterface, mapInterfaceTypeToDatabase }
