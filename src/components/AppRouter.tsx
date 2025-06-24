@@ -14,6 +14,8 @@ import Workflows from '@/pages/Workflows';
 import ConversationalDashboard from '@/pages/ConversationalDashboard';
 import Leads from '@/pages/Leads';
 import Email from '@/pages/Email';
+import Social from '@/pages/Social';
+import Proposals from '@/pages/Proposals';
 import { useAuth } from '@/contexts/AuthContext';
 
 const AppRouter: React.FC = () => {
@@ -40,12 +42,16 @@ const AppRouter: React.FC = () => {
         <Route path="leads" element={<Leads />} />
         <Route path="customer-segmentation" element={<CustomerSegmentation />} />
         <Route path="content" element={<Content />} />
+        <Route path="social" element={<Social />} />
         <Route path="email" element={<Email />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="workflows" element={<Workflows />} />
+        <Route path="proposals" element={<Proposals />} />
         <Route path="landing-page-builder" element={<LandingPageBuilder />} />
         <Route path="settings" element={<Settings />} />
         <Route path="tools" element={<Tools />} />
+        <Route path="user-manual" element={<Tools />} />
+        <Route path="connect-platforms" element={<Settings />} />
         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
       </Route>
     </Routes>
