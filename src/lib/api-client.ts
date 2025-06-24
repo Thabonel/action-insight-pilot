@@ -53,7 +53,7 @@ export class ApiClient {
     }
   ];
 
-  setToken(token: string) {
+  setToken(token: string): void {
     this.token = token;
   }
 
@@ -217,7 +217,7 @@ export class ApiClient {
     }
 
     // Update campaign
-    const updatedCampaign = {
+    const updatedCampaign: Campaign = {
       ...this.mockCampaigns[campaignIndex],
       ...updates,
       updated_at: new Date().toISOString()
@@ -317,7 +317,7 @@ export class ApiClient {
     if (!campaign.budget_allocated || campaign.budget_allocated === 0) {
       return 0;
     }
-    return (campaign.budget_spent || 0) / campaign.budget_allocated * 100;
+    return ((campaign.budget_spent || 0) / campaign.budget_allocated) * 100;
   }
 
   // Performance calculation helper
@@ -423,9 +423,13 @@ export class ApiClient {
         return { 
           success: true, 
           data: { 
-            id: 'webhook-' + Date.now(), 
+            id: 'webhook-' + Date.now(),
+            name: webhookData.name || 'New Webhook',
             url: webhookData.url || '', 
             events: webhookData.events || [],
+            active: webhookData.active || true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             ...webhookData 
           } as Webhook 
         };
@@ -492,6 +496,11 @@ export class ApiClient {
           data: { 
             id: 'workflow-' + Date.now(), 
             name: workflow.name || 'New Workflow',
+            description: workflow.description || '',
+            steps: workflow.steps || [],
+            status: workflow.status || 'draft',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             ...workflow 
           } as Workflow 
         };
@@ -504,7 +513,16 @@ export class ApiClient {
       update: async (id: string, updates: Partial<Workflow>): Promise<ApiResponse<Workflow>> => {
         return { 
           success: true, 
-          data: { id, ...updates } as Workflow 
+          data: { 
+            id, 
+            name: 'Updated Workflow',
+            description: '',
+            steps: [],
+            status: 'draft',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            ...updates 
+          } as Workflow 
         };
       },
 
@@ -547,13 +565,13 @@ export class ApiClient {
     return {
       success: true,
       data: {
-        content: `Generated content for ${brief.title}`,
+        content: `Generated content for ${brief.title || brief.topic}`,
         suggestions: ['Use more engaging headlines', 'Add call-to-action']
       }
     };
   }
 
-  async generateEmailContent(brief: any): Promise<ApiResponse<any>> => {
+  async generateEmailContent(brief: any): Promise<ApiResponse<any>> {
     return {
       success: true,
       data: {
