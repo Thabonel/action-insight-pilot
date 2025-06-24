@@ -48,6 +48,7 @@ const CampaignDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Comprehensive form data state
   const [formData, setFormData] = useState({
@@ -125,10 +126,34 @@ const CampaignDetails: React.FC = () => {
     successCriteria: ''
   });
 
+  // Form validation
+  const validateForm = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Campaign name is required';
+    }
+
+    if (!formData.type) {
+      newErrors.type = 'Campaign type is required';
+    }
+
+    if (formData.totalBudget && isNaN(Number(formData.totalBudget))) {
+      newErrors.totalBudget = 'Budget must be a valid number';
+    }
+
+    if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
+      newErrors.endDate = 'End date must be after start date';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   useEffect(() => {
     const fetchCampaign = async () => {
-      if (!id) {
-        setIsEditing(true); // New campaign mode
+      if (!id || id === 'new') {
+        setIsEditing(true);
         setLoading(false);
         return;
       }
@@ -140,17 +165,75 @@ const CampaignDetails: React.FC = () => {
         if (result.success && result.data) {
           setCampaign(result.data);
           // Map existing campaign data to comprehensive form
-          setFormData(prev => ({
-            ...prev,
-            name: result.data.name,
+          setFormData({
+            name: result.data.name || '',
             description: result.data.description || '',
-            type: result.data.type,
-            status: result.data.status
-          }));
+            type: result.data.type || 'email',
+            status: result.data.status || 'draft',
+            
+            primaryObjective: result.data.primaryObjective || '',
+            secondaryObjectives: result.data.secondaryObjectives || [],
+            smartGoals: result.data.smartGoals || '',
+            
+            primaryKPI: result.data.primaryKPI || '',
+            kpiTargets: result.data.kpiTargets || {
+              revenue: '',
+              leads: '',
+              conversion: '',
+              roi: '',
+              impressions: '',
+              clicks: ''
+            },
+            
+            totalBudget: result.data.totalBudget?.toString() || '',
+            budgetBreakdown: result.data.budgetBreakdown || {
+              media: '',
+              content: '',
+              technology: '',
+              personnel: '',
+              contingency: ''
+            },
+            startDate: result.data.startDate || '',
+            endDate: result.data.endDate || '',
+            
+            targetAudience: result.data.targetAudience || '',
+            audienceSegments: result.data.audienceSegments || [],
+            buyerPersonas: result.data.buyerPersonas || [],
+            demographics: result.data.demographics || {
+              ageRange: '',
+              location: '',
+              income: '',
+              interests: ''
+            },
+            
+            valueProposition: result.data.valueProposition || '',
+            keyMessages: result.data.keyMessages || [],
+            contentStrategy: result.data.contentStrategy || '',
+            creativeRequirements: result.data.creativeRequirements || '',
+            brandGuidelines: result.data.brandGuidelines || '',
+            
+            channels: result.data.channels || [],
+            channelStrategy: result.data.channelStrategy || '',
+            contentTypes: result.data.contentTypes || [],
+            
+            complianceChecklist: result.data.complianceChecklist || {
+              dataProtection: false,
+              advertisingStandards: false,
+              industryRegulations: false,
+              termsOfService: false,
+              privacyPolicy: false
+            },
+            legalNotes: result.data.legalNotes || '',
+            
+            analyticsTools: result.data.analyticsTools || [],
+            reportingFrequency: result.data.reportingFrequency || '',
+            stakeholders: result.data.stakeholders || [],
+            successCriteria: result.data.successCriteria || ''
+          });
         } else {
           toast({
             title: "Error",
-            description: "Failed to load campaign details",
+            description: result.message || "Failed to load campaign details",
             variant: "destructive",
           });
         }
@@ -172,6 +255,15 @@ const CampaignDetails: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors and try again",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       setSaving(true);
       
@@ -180,11 +272,45 @@ const CampaignDetails: React.FC = () => {
         description: formData.description,
         type: formData.type,
         status: formData.status,
-        // Add more fields as your API supports them
+        
+        primaryObjective: formData.primaryObjective,
+        secondaryObjectives: formData.secondaryObjectives,
+        smartGoals: formData.smartGoals,
+        
+        primaryKPI: formData.primaryKPI,
+        kpiTargets: formData.kpiTargets,
+        
+        totalBudget: formData.totalBudget ? Number(formData.totalBudget) : 0,
+        budgetBreakdown: formData.budgetBreakdown,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        
+        targetAudience: formData.targetAudience,
+        audienceSegments: formData.audienceSegments,
+        buyerPersonas: formData.buyerPersonas,
+        demographics: formData.demographics,
+        
+        valueProposition: formData.valueProposition,
+        keyMessages: formData.keyMessages,
+        contentStrategy: formData.contentStrategy,
+        creativeRequirements: formData.creativeRequirements,
+        brandGuidelines: formData.brandGuidelines,
+        
+        channels: formData.channels,
+        channelStrategy: formData.channelStrategy,
+        contentTypes: formData.contentTypes,
+        
+        complianceChecklist: formData.complianceChecklist,
+        legalNotes: formData.legalNotes,
+        
+        analyticsTools: formData.analyticsTools,
+        reportingFrequency: formData.reportingFrequency,
+        stakeholders: formData.stakeholders,
+        successCriteria: formData.successCriteria
       };
 
       let result;
-      if (id) {
+      if (id && id !== 'new') {
         result = await apiClient.updateCampaign(id, campaignData) as ApiResponse<Campaign>;
       } else {
         result = await apiClient.createCampaign(campaignData) as ApiResponse<Campaign>;
@@ -195,20 +321,20 @@ const CampaignDetails: React.FC = () => {
         setIsEditing(false);
         toast({
           title: "Success",
-          description: id ? "Campaign updated successfully" : "Campaign created successfully",
+          description: id && id !== 'new' ? "Campaign updated successfully" : "Campaign created successfully",
         });
         
-        if (!id && result.data?.id) {
+        if ((!id || id === 'new') && result.data?.id) {
           navigate(`/app/campaigns/${result.data.id}`, { replace: true });
         }
       } else {
-        throw new Error('Operation failed');
+        throw new Error(result.message || 'Operation failed');
       }
     } catch (error) {
       console.error('Error saving campaign:', error);
       toast({
         title: "Error",
-        description: id ? "Failed to update campaign" : "Failed to create campaign",
+        description: id && id !== 'new' ? "Failed to update campaign" : "Failed to create campaign",
         variant: "destructive",
       });
     } finally {
@@ -218,6 +344,10 @@ const CampaignDetails: React.FC = () => {
 
   const updateField = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when field is updated
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
   const updateNestedField = (parent: string, field: string, value: any) => {
@@ -243,31 +373,142 @@ const CampaignDetails: React.FC = () => {
     }));
   };
 
-  const handleDuplicate = () => {
-    toast({
-      title: "Campaign Duplicated",
-      description: `"${formData.name}" has been duplicated.`,
-    });
-  };
-
-  const handleArchive = () => {
-    if (confirm('Are you sure you want to archive this campaign?')) {
+  const handleDuplicate = async () => {
+    if (!campaign?.id) return;
+    
+    try {
+      const result = await apiClient.duplicateCampaign(campaign.id);
+      if (result.success) {
+        toast({
+          title: "Campaign Duplicated",
+          description: `"${campaign.name}" has been duplicated successfully.`,
+        });
+        navigate('/app/campaign-management');
+      } else {
+        throw new Error(result.message || 'Duplication failed');
+      }
+    } catch (error) {
       toast({
-        title: "Campaign Archived",
-        description: `"${formData.name}" has been archived.`,
-      });
-    }
-  };
-
-  const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
-      toast({
-        title: "Campaign Deleted",
-        description: `"${formData.name}" has been deleted.`,
+        title: "Error",
+        description: "Failed to duplicate campaign",
         variant: "destructive",
       });
-      navigate('/app/campaign-management');
     }
+  };
+
+  const handleArchive = async () => {
+    if (!campaign?.id) return;
+    
+    if (confirm('Are you sure you want to archive this campaign?')) {
+      try {
+        const result = await apiClient.archiveCampaign(campaign.id);
+        if (result.success) {
+          toast({
+            title: "Campaign Archived",
+            description: `"${campaign.name}" has been archived.`,
+          });
+          navigate('/app/campaign-management');
+        } else {
+          throw new Error(result.message || 'Archive failed');
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to archive campaign",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!campaign?.id) return;
+    
+    if (confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
+      try {
+        const result = await apiClient.deleteCampaign(campaign.id);
+        if (result.success) {
+          toast({
+            title: "Campaign Deleted",
+            description: `"${campaign.name}" has been deleted.`,
+            variant: "destructive",
+          });
+          navigate('/app/campaign-management');
+        } else {
+          throw new Error(result.message || 'Delete failed');
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete campaign",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // Array management components
+  const ArrayManager = ({ 
+    label, 
+    items, 
+    onAdd, 
+    onRemove, 
+    placeholder,
+    disabled = false 
+  }: {
+    label: string;
+    items: string[];
+    onAdd: (item: string) => void;
+    onRemove: (index: number) => void;
+    placeholder: string;
+    disabled?: boolean;
+  }) => {
+    const [newItem, setNewItem] = useState('');
+
+    const handleAdd = () => {
+      if (newItem.trim()) {
+        onAdd(newItem);
+        setNewItem('');
+      }
+    };
+
+    return (
+      <div>
+        <Label>{label}</Label>
+        <div className="space-y-2 mt-2">
+          {items.map((item, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex-1">{item}</Badge>
+              {!disabled && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onRemove(index)}
+                  className="h-6 w-6 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          ))}
+          {!disabled && (
+            <div className="flex gap-2">
+              <Input
+                value={newItem}
+                onChange={(e) => setNewItem(e.target.value)}
+                placeholder={placeholder}
+                className="bg-white"
+                onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
+              />
+              <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -282,7 +523,18 @@ const CampaignDetails: React.FC = () => {
   }
 
   const budgetUsed = formData.totalBudget ? 
-    (Number(formData.budgetBreakdown.media) + Number(formData.budgetBreakdown.content)) / Number(formData.totalBudget) * 100 : 0;
+    (Number(formData.budgetBreakdown.media || 0) + Number(formData.budgetBreakdown.content || 0)) / Number(formData.totalBudget) * 100 : 0;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800 border-green-200';
+      case 'draft': return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'paused': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'archived': return 'bg-purple-100 text-purple-800 border-purple-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -299,16 +551,16 @@ const CampaignDetails: React.FC = () => {
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {id ? 'Campaign Details' : 'Create New Campaign'}
+                {(!id || id === 'new') ? 'Create New Campaign' : 'Campaign Details'}
               </h1>
               <p className="text-gray-600">
-                {id ? 'View and edit campaign information' : 'Set up your comprehensive marketing campaign'}
+                {(!id || id === 'new') ? 'Set up your comprehensive marketing campaign' : 'View and edit campaign information'}
               </p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            {!isEditing && id ? (
+            {!isEditing && id && id !== 'new' ? (
               <>
                 <Button variant="outline" onClick={handleDuplicate}>
                   <Copy className="mr-2 h-4 w-4" />
@@ -329,7 +581,7 @@ const CampaignDetails: React.FC = () => {
               </>
             ) : (
               <>
-                {id && (
+                {id && id !== 'new' && (
                   <Button variant="outline" onClick={() => setIsEditing(false)}>
                     Cancel
                   </Button>
@@ -343,7 +595,7 @@ const CampaignDetails: React.FC = () => {
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      {id ? 'Save Changes' : 'Create Campaign'}
+                      {(!id || id === 'new') ? 'Create Campaign' : 'Save Changes'}
                     </>
                   )}
                 </Button>
@@ -384,9 +636,10 @@ const CampaignDetails: React.FC = () => {
                         onChange={(e) => updateField('name', e.target.value)}
                         placeholder="Enter campaign name"
                         required
-                        disabled={!isEditing && id}
-                        className="bg-white"
+                        disabled={!isEditing && id && id !== 'new'}
+                        className={`bg-white ${errors.name ? 'border-red-500' : ''}`}
                       />
+                      {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                     </div>
                     
                     <div>
@@ -397,7 +650,7 @@ const CampaignDetails: React.FC = () => {
                         onChange={(e) => updateField('description', e.target.value)}
                         placeholder="Describe your campaign"
                         rows={4}
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                         className="bg-white"
                       />
                     </div>
@@ -408,9 +661,9 @@ const CampaignDetails: React.FC = () => {
                         <Select
                           value={formData.type}
                           onValueChange={(value) => updateField('type', value)}
-                          disabled={!isEditing && id}
+                          disabled={!isEditing && id && id !== 'new'}
                         >
-                          <SelectTrigger className="bg-white">
+                          <SelectTrigger className={`bg-white ${errors.type ? 'border-red-500' : ''}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -423,6 +676,7 @@ const CampaignDetails: React.FC = () => {
                             <SelectItem value="product_launch">Product Launch</SelectItem>
                           </SelectContent>
                         </Select>
+                        {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
                       </div>
                       
                       <div>
@@ -430,7 +684,7 @@ const CampaignDetails: React.FC = () => {
                         <Select
                           value={formData.status}
                           onValueChange={(value) => updateField('status', value)}
-                          disabled={!isEditing && id}
+                          disabled={!isEditing && id && id !== 'new'}
                         >
                           <SelectTrigger className="bg-white">
                             <SelectValue />
@@ -454,7 +708,7 @@ const CampaignDetails: React.FC = () => {
                           type="date"
                           value={formData.startDate}
                           onChange={(e) => updateField('startDate', e.target.value)}
-                          disabled={!isEditing && id}
+                          disabled={!isEditing && id && id !== 'new'}
                           className="bg-white"
                         />
                       </div>
@@ -466,9 +720,10 @@ const CampaignDetails: React.FC = () => {
                           type="date"
                           value={formData.endDate}
                           onChange={(e) => updateField('endDate', e.target.value)}
-                          disabled={!isEditing && id}
-                          className="bg-white"
+                          disabled={!isEditing && id && id !== 'new'}
+                          className={`bg-white ${errors.endDate ? 'border-red-500' : ''}`}
                         />
+                        {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate}</p>}
                       </div>
                     </div>
                   </CardContent>
@@ -515,7 +770,7 @@ const CampaignDetails: React.FC = () => {
                       <p className="text-sm font-medium">Key Information:</p>
                       <div className="space-y-1 text-sm text-gray-600">
                         <p>• Type: {formData.type.replace('_', ' ')}</p>
-                        <p>• Status: {formData.status}</p>
+                        <p>• Status: <Badge className={`ml-1 ${getStatusColor(formData.status)}`}>{formData.status}</Badge></p>
                         <p>• Objectives: {formData.secondaryObjectives.length} defined</p>
                         <p>• Channels: {formData.channels.length} selected</p>
                       </div>
@@ -541,7 +796,7 @@ const CampaignDetails: React.FC = () => {
                       <Select
                         value={formData.primaryObjective}
                         onValueChange={(value) => updateField('primaryObjective', value)}
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                       >
                         <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Select primary objective" />
@@ -557,6 +812,15 @@ const CampaignDetails: React.FC = () => {
                       </Select>
                     </div>
 
+                    <ArrayManager
+                      label="Secondary Objectives"
+                      items={formData.secondaryObjectives}
+                      onAdd={(item) => addArrayItem('secondaryObjectives', item)}
+                      onRemove={(index) => removeArrayItem('secondaryObjectives', index)}
+                      placeholder="Add secondary objective"
+                      disabled={!isEditing && id && id !== 'new'}
+                    />
+
                     <div>
                       <Label htmlFor="smartGoals">SMART Goals</Label>
                       <Textarea
@@ -565,7 +829,7 @@ const CampaignDetails: React.FC = () => {
                         onChange={(e) => updateField('smartGoals', e.target.value)}
                         placeholder="Define Specific, Measurable, Achievable, Relevant, Time-bound goals"
                         rows={4}
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                         className="bg-white"
                       />
                     </div>
@@ -585,7 +849,7 @@ const CampaignDetails: React.FC = () => {
                       <Select
                         value={formData.primaryKPI}
                         onValueChange={(value) => updateField('primaryKPI', value)}
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                       >
                         <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Select primary KPI" />
@@ -610,7 +874,7 @@ const CampaignDetails: React.FC = () => {
                           value={formData.kpiTargets.revenue}
                           onChange={(e) => updateNestedField('kpiTargets', 'revenue', e.target.value)}
                           placeholder="0"
-                          disabled={!isEditing && id}
+                          disabled={!isEditing && id && id !== 'new'}
                           className="bg-white"
                         />
                       </div>
@@ -622,7 +886,7 @@ const CampaignDetails: React.FC = () => {
                           value={formData.kpiTargets.leads}
                           onChange={(e) => updateNestedField('kpiTargets', 'leads', e.target.value)}
                           placeholder="0"
-                          disabled={!isEditing && id}
+                          disabled={!isEditing && id && id !== 'new'}
                           className="bg-white"
                         />
                       </div>
@@ -634,7 +898,7 @@ const CampaignDetails: React.FC = () => {
                           value={formData.kpiTargets.conversion}
                           onChange={(e) => updateNestedField('kpiTargets', 'conversion', e.target.value)}
                           placeholder="0"
-                          disabled={!isEditing && id}
+                          disabled={!isEditing && id && id !== 'new'}
                           className="bg-white"
                         />
                       </div>
@@ -646,7 +910,7 @@ const CampaignDetails: React.FC = () => {
                           value={formData.kpiTargets.roi}
                           onChange={(e) => updateNestedField('kpiTargets', 'roi', e.target.value)}
                           placeholder="0"
-                          disabled={!isEditing && id}
+                          disabled={!isEditing && id && id !== 'new'}
                           className="bg-white"
                         />
                       </div>
@@ -674,7 +938,7 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('targetAudience', e.target.value)}
                       placeholder="Describe your target audience in detail"
                       rows={3}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
@@ -687,7 +951,7 @@ const CampaignDetails: React.FC = () => {
                         value={formData.demographics.ageRange}
                         onChange={(e) => updateNestedField('demographics', 'ageRange', e.target.value)}
                         placeholder="e.g., 25-45"
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                         className="bg-white"
                       />
                     </div>
@@ -698,7 +962,7 @@ const CampaignDetails: React.FC = () => {
                         value={formData.demographics.location}
                         onChange={(e) => updateNestedField('demographics', 'location', e.target.value)}
                         placeholder="e.g., North America, Urban areas"
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                         className="bg-white"
                       />
                     </div>
@@ -709,7 +973,7 @@ const CampaignDetails: React.FC = () => {
                         value={formData.demographics.income}
                         onChange={(e) => updateNestedField('demographics', 'income', e.target.value)}
                         placeholder="e.g., $50k-$100k annually"
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                         className="bg-white"
                       />
                     </div>
@@ -720,11 +984,20 @@ const CampaignDetails: React.FC = () => {
                         value={formData.demographics.interests}
                         onChange={(e) => updateNestedField('demographics', 'interests', e.target.value)}
                         placeholder="e.g., Technology, Fitness, Travel"
-                        disabled={!isEditing && id}
+                        disabled={!isEditing && id && id !== 'new'}
                         className="bg-white"
                       />
                     </div>
                   </div>
+
+                  <ArrayManager
+                    label="Audience Segments"
+                    items={formData.audienceSegments}
+                    onAdd={(item) => addArrayItem('audienceSegments', item)}
+                    onRemove={(index) => removeArrayItem('audienceSegments', index)}
+                    placeholder="Add audience segment"
+                    disabled={!isEditing && id && id !== 'new'}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -748,9 +1021,10 @@ const CampaignDetails: React.FC = () => {
                         value={formData.totalBudget}
                         onChange={(e) => updateField('totalBudget', e.target.value)}
                         placeholder="0"
-                        disabled={!isEditing && id}
-                        className="bg-white"
+                        disabled={!isEditing && id && id !== 'new'}
+                        className={`bg-white ${errors.totalBudget ? 'border-red-500' : ''}`}
                       />
+                      {errors.totalBudget && <p className="text-red-500 text-sm mt-1">{errors.totalBudget}</p>}
                     </div>
 
                     <div className="space-y-3">
@@ -764,7 +1038,7 @@ const CampaignDetails: React.FC = () => {
                             value={formData.budgetBreakdown.media}
                             onChange={(e) => updateNestedField('budgetBreakdown', 'media', e.target.value)}
                             placeholder="0"
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                             className="bg-white"
                           />
                         </div>
@@ -776,7 +1050,7 @@ const CampaignDetails: React.FC = () => {
                             value={formData.budgetBreakdown.content}
                             onChange={(e) => updateNestedField('budgetBreakdown', 'content', e.target.value)}
                             placeholder="0"
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                             className="bg-white"
                           />
                         </div>
@@ -788,7 +1062,7 @@ const CampaignDetails: React.FC = () => {
                             value={formData.budgetBreakdown.technology}
                             onChange={(e) => updateNestedField('budgetBreakdown', 'technology', e.target.value)}
                             placeholder="0"
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                             className="bg-white"
                           />
                         </div>
@@ -800,7 +1074,7 @@ const CampaignDetails: React.FC = () => {
                             value={formData.budgetBreakdown.personnel}
                             onChange={(e) => updateNestedField('budgetBreakdown', 'personnel', e.target.value)}
                             placeholder="0"
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                             className="bg-white"
                           />
                         </div>
@@ -812,7 +1086,7 @@ const CampaignDetails: React.FC = () => {
                             value={formData.budgetBreakdown.contingency}
                             onChange={(e) => updateNestedField('budgetBreakdown', 'contingency', e.target.value)}
                             placeholder="0"
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                             className="bg-white"
                           />
                         </div>
@@ -825,7 +1099,7 @@ const CampaignDetails: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="h-5 w-5" />
-                      Timeline & Milestones
+                      Timeline & Summary
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -904,10 +1178,19 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('valueProposition', e.target.value)}
                       placeholder="What unique value does your campaign offer to customers?"
                       rows={3}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
+
+                  <ArrayManager
+                    label="Key Messages"
+                    items={formData.keyMessages}
+                    onAdd={(item) => addArrayItem('keyMessages', item)}
+                    onRemove={(index) => removeArrayItem('keyMessages', index)}
+                    placeholder="Add key message"
+                    disabled={!isEditing && id && id !== 'new'}
+                  />
 
                   <div>
                     <Label htmlFor="contentStrategy">Content Strategy</Label>
@@ -917,7 +1200,7 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('contentStrategy', e.target.value)}
                       placeholder="Describe your overall content approach and strategy"
                       rows={4}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
@@ -930,7 +1213,7 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('creativeRequirements', e.target.value)}
                       placeholder="Specify creative assets needed (videos, images, copy, etc.)"
                       rows={3}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
@@ -943,7 +1226,7 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('brandGuidelines', e.target.value)}
                       placeholder="Key brand guidelines and requirements for this campaign"
                       rows={3}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
@@ -975,7 +1258,7 @@ const CampaignDetails: React.FC = () => {
                                 updateField('channels', formData.channels.filter(c => c !== channel));
                               }
                             }}
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                           />
                           <label className="text-sm">{channel}</label>
                         </div>
@@ -991,7 +1274,7 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('channelStrategy', e.target.value)}
                       placeholder="Explain how you'll use each selected channel"
                       rows={4}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
@@ -1010,7 +1293,7 @@ const CampaignDetails: React.FC = () => {
                                 updateField('contentTypes', formData.contentTypes.filter(t => t !== type));
                               }
                             }}
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                           />
                           <label className="text-sm">{type}</label>
                         </div>
@@ -1047,7 +1330,7 @@ const CampaignDetails: React.FC = () => {
                             onCheckedChange={(checked) => 
                               updateNestedField('complianceChecklist', item.key, checked)
                             }
-                            disabled={!isEditing && id}
+                            disabled={!isEditing && id && id !== 'new'}
                           />
                           <label className="text-sm">{item.label}</label>
                         </div>
@@ -1063,7 +1346,7 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('legalNotes', e.target.value)}
                       placeholder="Any specific legal requirements or notes for this campaign"
                       rows={4}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
@@ -1076,10 +1359,19 @@ const CampaignDetails: React.FC = () => {
                       onChange={(e) => updateField('successCriteria', e.target.value)}
                       placeholder="Define what success looks like and how it will be measured"
                       rows={3}
-                      disabled={!isEditing && id}
+                      disabled={!isEditing && id && id !== 'new'}
                       className="bg-white"
                     />
                   </div>
+
+                  <ArrayManager
+                    label="Stakeholders"
+                    items={formData.stakeholders}
+                    onAdd={(item) => addArrayItem('stakeholders', item)}
+                    onRemove={(index) => removeArrayItem('stakeholders', index)}
+                    placeholder="Add stakeholder email"
+                    disabled={!isEditing && id && id !== 'new'}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>

@@ -2,9 +2,330 @@ import { ApiResponse, Campaign, ContentBrief, SocialPlatformConnection, Integrat
 
 export class ApiClient {
   private token: string = '';
+  private mockCampaigns: Campaign[] = [
+    {
+      id: '1',
+      name: 'Summer Email Campaign',
+      description: 'Comprehensive email marketing campaign for summer product launch',
+      type: 'email',
+      status: 'active',
+      created_at: '2024-06-01T10:00:00Z',
+      updated_at: '2024-06-20T15:30:00Z',
+      created_by: 'user@example.com',
+      primaryObjective: 'lead_generation',
+      secondaryObjectives: ['Increase brand awareness', 'Drive website traffic'],
+      totalBudget: 50000,
+      budget_allocated: 50000,
+      budget_spent: 15000,
+      budgetBreakdown: {
+        media: '25000',
+        content: '10000',
+        technology: '5000',
+        personnel: '8000',
+        contingency: '2000'
+      },
+      startDate: '2024-06-15',
+      endDate: '2024-08-15',
+      channels: ['Email Marketing', 'Social Media', 'Paid Search'],
+      contentTypes: ['Email Newsletters', 'Blog Posts', 'Social Posts'],
+      metrics: {
+        reach: 25000,
+        conversion_rate: 3.8,
+        impressions: 120000,
+        clicks: 4500
+      }
+    },
+    {
+      id: '2',
+      name: 'test',
+      description: 'Test campaign for development',
+      type: 'Email',
+      status: 'draft',
+      created_at: '2024-06-23T00:00:00Z',
+      updated_at: '2024-06-23T00:00:00Z',
+      created_by: '9eb79e1b-54c0-4893-bd36-501b09c6b30d',
+      budget_allocated: 0,
+      budget_spent: 0,
+      metrics: {
+        reach: 2919,
+        conversion_rate: 4.66
+      }
+    }
+  ];
 
   setToken(token: string) {
     this.token = token;
+  }
+
+  // Enhanced Campaign Methods
+  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { 
+      success: true, 
+      data: this.mockCampaigns 
+    };
+  }
+
+  async getCampaignById(id: string): Promise<ApiResponse<Campaign>> {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const campaign = this.mockCampaigns.find(c => c.id === id);
+    if (campaign) {
+      return { success: true, data: campaign };
+    }
+    
+    return { 
+      success: false, 
+      error: 'Campaign not found',
+      message: `Campaign with ID ${id} does not exist`
+    };
+  }
+
+  async createCampaign(campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Validation
+    if (!campaignData.name || campaignData.name.trim() === '') {
+      return {
+        success: false,
+        error: 'Validation failed',
+        message: 'Campaign name is required'
+      };
+    }
+
+    const newCampaign: Campaign = {
+      id: 'campaign-' + Date.now(),
+      name: campaignData.name,
+      description: campaignData.description || '',
+      type: campaignData.type || 'email',
+      status: campaignData.status || 'draft',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      created_by: 'current-user@example.com',
+      
+      // Objectives & Goals
+      primaryObjective: campaignData.primaryObjective || '',
+      secondaryObjectives: campaignData.secondaryObjectives || [],
+      smartGoals: campaignData.smartGoals || '',
+      
+      // KPIs & Targets
+      primaryKPI: campaignData.primaryKPI || '',
+      kpiTargets: campaignData.kpiTargets || {
+        revenue: '',
+        leads: '',
+        conversion: '',
+        roi: '',
+        impressions: '',
+        clicks: ''
+      },
+      
+      // Budget & Timeline
+      totalBudget: campaignData.totalBudget || 0,
+      budget_allocated: campaignData.totalBudget || 0,
+      budget_spent: 0,
+      budgetBreakdown: campaignData.budgetBreakdown || {
+        media: '',
+        content: '',
+        technology: '',
+        personnel: '',
+        contingency: ''
+      },
+      startDate: campaignData.startDate || '',
+      endDate: campaignData.endDate || '',
+      
+      // Target Audience
+      targetAudience: campaignData.targetAudience || '',
+      audienceSegments: campaignData.audienceSegments || [],
+      buyerPersonas: campaignData.buyerPersonas || [],
+      demographics: campaignData.demographics || {
+        ageRange: '',
+        location: '',
+        income: '',
+        interests: ''
+      },
+      
+      // Messaging & Content
+      valueProposition: campaignData.valueProposition || '',
+      keyMessages: campaignData.keyMessages || [],
+      contentStrategy: campaignData.contentStrategy || '',
+      creativeRequirements: campaignData.creativeRequirements || '',
+      brandGuidelines: campaignData.brandGuidelines || '',
+      
+      // Channels & Distribution
+      channels: campaignData.channels || [],
+      channelStrategy: campaignData.channelStrategy || '',
+      contentTypes: campaignData.contentTypes || [],
+      
+      // Legal & Compliance
+      complianceChecklist: campaignData.complianceChecklist || {
+        dataProtection: false,
+        advertisingStandards: false,
+        industryRegulations: false,
+        termsOfService: false,
+        privacyPolicy: false
+      },
+      legalNotes: campaignData.legalNotes || '',
+      
+      // Monitoring & Reporting
+      analyticsTools: campaignData.analyticsTools || [],
+      reportingFrequency: campaignData.reportingFrequency || '',
+      stakeholders: campaignData.stakeholders || [],
+      successCriteria: campaignData.successCriteria || '',
+      
+      // Default metrics
+      metrics: {
+        reach: 0,
+        conversion_rate: 0,
+        impressions: 0,
+        clicks: 0,
+        engagement_rate: 0,
+        cost_per_click: 0,
+        cost_per_acquisition: 0,
+        revenue_generated: 0
+      }
+    };
+
+    // Add to mock data
+    this.mockCampaigns.push(newCampaign);
+    
+    return { 
+      success: true, 
+      data: newCampaign 
+    };
+  }
+
+  async updateCampaign(id: string, updates: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    const campaignIndex = this.mockCampaigns.findIndex(c => c.id === id);
+    if (campaignIndex === -1) {
+      return {
+        success: false,
+        error: 'Campaign not found',
+        message: `Campaign with ID ${id} does not exist`
+      };
+    }
+
+    // Validation
+    if (updates.name && updates.name.trim() === '') {
+      return {
+        success: false,
+        error: 'Validation failed',
+        message: 'Campaign name cannot be empty'
+      };
+    }
+
+    // Update campaign
+    const updatedCampaign = {
+      ...this.mockCampaigns[campaignIndex],
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    this.mockCampaigns[campaignIndex] = updatedCampaign;
+
+    return { 
+      success: true, 
+      data: updatedCampaign 
+    };
+  }
+
+  async duplicateCampaign(id: string): Promise<ApiResponse<Campaign>> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const originalCampaign = this.mockCampaigns.find(c => c.id === id);
+    if (!originalCampaign) {
+      return {
+        success: false,
+        error: 'Campaign not found',
+        message: `Campaign with ID ${id} does not exist`
+      };
+    }
+
+    const duplicatedCampaign: Campaign = {
+      ...originalCampaign,
+      id: 'campaign-' + Date.now(),
+      name: `${originalCampaign.name} (Copy)`,
+      status: 'draft',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      budget_spent: 0,
+      metrics: {
+        reach: 0,
+        conversion_rate: 0,
+        impressions: 0,
+        clicks: 0,
+        engagement_rate: 0,
+        cost_per_click: 0,
+        cost_per_acquisition: 0,
+        revenue_generated: 0
+      }
+    };
+
+    this.mockCampaigns.push(duplicatedCampaign);
+
+    return {
+      success: true,
+      data: duplicatedCampaign
+    };
+  }
+
+  async archiveCampaign(id: string): Promise<ApiResponse<Campaign>> {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    const campaign = this.mockCampaigns.find(c => c.id === id);
+    if (!campaign) {
+      return {
+        success: false,
+        error: 'Campaign not found',
+        message: `Campaign with ID ${id} does not exist`
+      };
+    }
+
+    campaign.status = 'archived';
+    campaign.updated_at = new Date().toISOString();
+
+    return {
+      success: true,
+      data: campaign
+    };
+  }
+
+  async deleteCampaign(id: string): Promise<ApiResponse<void>> {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const campaignIndex = this.mockCampaigns.findIndex(c => c.id === id);
+    if (campaignIndex === -1) {
+      return {
+        success: false,
+        error: 'Campaign not found',
+        message: `Campaign with ID ${id} does not exist`
+      };
+    }
+
+    this.mockCampaigns.splice(campaignIndex, 1);
+
+    return {
+      success: true,
+      data: undefined
+    };
+  }
+
+  // Budget calculation helper
+  calculateBudgetUsage(campaign: Campaign): number {
+    if (!campaign.budget_allocated || campaign.budget_allocated === 0) {
+      return 0;
+    }
+    return (campaign.budget_spent || 0) / campaign.budget_allocated * 100;
+  }
+
+  // Performance calculation helper
+  calculateROI(campaign: Campaign): number {
+    const revenue = campaign.metrics?.revenue_generated || 0;
+    const spent = campaign.budget_spent || 0;
+    if (spent === 0) return 0;
+    return ((revenue - spent) / spent) * 100;
   }
 
   // Social Platforms Methods
@@ -209,49 +530,6 @@ export class ApiClient {
     };
   }
 
-  // Campaign Methods
-  async getCampaigns(): Promise<ApiResponse<Campaign[]>> {
-    return { success: true, data: [] };
-  }
-
-  async getCampaignById(id: string): Promise<ApiResponse<Campaign>> {
-    return { 
-      success: true, 
-      data: { 
-        id, 
-        name: 'Sample Campaign', 
-        type: 'email', 
-        status: 'draft',
-        description: 'Sample description',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as Campaign 
-    };
-  }
-
-  async createCampaign(campaignData: any): Promise<ApiResponse<Campaign>> {
-    return { 
-      success: true, 
-      data: { 
-        id: 'campaign-' + Date.now(), 
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        ...campaignData 
-      } as Campaign 
-    };
-  }
-
-  async updateCampaign(id: string, updates: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
-    return { 
-      success: true, 
-      data: { 
-        id,
-        updated_at: new Date().toISOString(),
-        ...updates 
-      } as Campaign 
-    };
-  }
-
   // Content Methods
   async createContent(contentData: any): Promise<ApiResponse<any>> {
     console.log('Creating content:', contentData);
@@ -275,7 +553,7 @@ export class ApiClient {
     };
   }
 
-  async generateEmailContent(brief: any): Promise<ApiResponse<any>> {
+  async generateEmailContent(brief: any): Promise<ApiResponse<any>> => {
     return {
       success: true,
       data: {
