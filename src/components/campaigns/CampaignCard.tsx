@@ -19,22 +19,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Calendar, Target, DollarSign, MoreVertical, Edit, BarChart3, Archive, Trash2 } from 'lucide-react';
 import { useCampaignCRUD } from '@/hooks/useCampaignCRUD';
 import { useToast } from '@/hooks/use-toast';
-
-interface Campaign {
-  id: string;
-  name: string;
-  type: string;
-  status: string;
-  description?: string;
-  budget_allocated?: number;
-  start_date?: string;
-  end_date?: string;
-}
+import { Campaign } from '@/hooks/useCampaigns';
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -103,7 +92,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onUpdate }) => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'active':
         return 'bg-green-100 text-green-800';
       case 'draft':
@@ -127,7 +116,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onUpdate }) => {
             {campaign.name || 'Untitled Campaign'}
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Badge className={getStatusColor(campaign.status)}>
+            <Badge className={getStatusColor(campaign.status || 'draft')}>
               {campaign.status || 'Draft'}
             </Badge>
             <DropdownMenu>
