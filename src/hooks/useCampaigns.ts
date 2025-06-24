@@ -18,7 +18,24 @@ const mapDatabaseTypeToInterface = (dbType: string): Campaign['type'] => {
   switch (dbType) {
     case 'social': return 'social_media'
     case 'partnership': return 'other'
-    default: return dbType as Campaign['type']
+    case 'content': return 'content'
+    case 'paid_ads': return 'paid_ads'
+    case 'seo': return 'seo'
+    case 'email': return 'email'
+    default: return 'other'
+  }
+}
+
+// Map database status to our interface status
+const mapDatabaseStatusToInterface = (dbStatus: string): Campaign['status'] => {
+  switch (dbStatus) {
+    case 'active': return 'active'
+    case 'draft': return 'draft'
+    case 'paused': return 'paused'
+    case 'completed': return 'completed'
+    case 'archived': return 'archived'
+    case 'scheduled': return 'scheduled'
+    default: return 'draft'
   }
 }
 
@@ -26,8 +43,11 @@ const mapDatabaseTypeToInterface = (dbType: string): Campaign['type'] => {
 const mapInterfaceTypeToDatabase = (interfaceType: Campaign['type']): string => {
   switch (interfaceType) {
     case 'social_media': return 'social'
-    case 'seo': return 'other'
-    default: return interfaceType || 'other'
+    case 'content': return 'content'
+    case 'paid_ads': return 'paid_ads'
+    case 'seo': return 'seo'  
+    case 'email': return 'email'
+    default: return 'other'
   }
 }
 
@@ -54,10 +74,16 @@ export function useCampaigns() {
       
       console.log('Campaigns loaded successfully:', data?.length || 0)
       
-      // Map database data to our interface
-      const mappedCampaigns = (data || []).map(campaign => ({
+      // Map database data to our interface with proper type conversion
+      const mappedCampaigns: Campaign[] = (data || []).map(campaign => ({
         ...campaign,
-        type: mapDatabaseTypeToInterface(campaign.type) || 'other'
+        type: mapDatabaseTypeToInterface(campaign.type),
+        status: mapDatabaseStatusToInterface(campaign.status),
+        // Ensure all required fields are present
+        created_at: campaign.created_at || new Date().toISOString(),
+        updated_at: campaign.updated_at || new Date().toISOString(),
+        created_by: campaign.created_by || '',
+        channel: campaign.channel || 'general'
       }))
       
       setCampaigns(mappedCampaigns)
