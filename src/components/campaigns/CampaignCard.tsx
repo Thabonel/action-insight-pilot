@@ -28,9 +28,20 @@ import { Campaign } from '@/hooks/useCampaigns';
 interface CampaignCardProps {
   campaign: Campaign;
   onUpdate?: () => void;
+  onEdit?: (campaign: Campaign) => void;
+  onArchive?: (campaignId: string) => Promise<void>;
+  onDelete?: (campaignId: string) => Promise<void>;
+  onViewAnalytics?: (campaignId: string) => void;
 }
 
-const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onUpdate }) => {
+const CampaignCard: React.FC<CampaignCardProps> = ({ 
+  campaign, 
+  onUpdate,
+  onEdit,
+  onArchive,
+  onDelete,
+  onViewAnalytics 
+}) => {
   const navigate = useNavigate();
   const { archiveCampaign, deleteCampaign, isLoading } = useCampaignCRUD();
   const { toast } = useToast();
@@ -45,20 +56,28 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onUpdate }) => {
   };
 
   const handleEditCampaign = () => {
-    if (campaign.id) {
+    if (onEdit) {
+      onEdit(campaign);
+    } else if (campaign.id) {
       navigate(`/campaigns/${campaign.id}/edit`);
     }
   };
 
   const handleViewAnalytics = () => {
-    if (campaign.id) {
+    if (onViewAnalytics && campaign.id) {
+      onViewAnalytics(campaign.id);
+    } else if (campaign.id) {
       navigate(`/campaigns/${campaign.id}/analytics`);
     }
   };
 
   const handleArchiveCampaign = async () => {
     try {
-      await archiveCampaign(campaign.id);
+      if (onArchive && campaign.id) {
+        await onArchive(campaign.id);
+      } else {
+        await archiveCampaign(campaign.id);
+      }
       toast({
         title: "Success",
         description: "Campaign archived successfully",
@@ -75,7 +94,11 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onUpdate }) => {
 
   const handleDeleteCampaign = async () => {
     try {
-      await deleteCampaign(campaign.id);
+      if (onDelete && campaign.id) {
+        await onDelete(campaign.id);
+      } else {
+        await deleteCampaign(campaign.id);
+      }
       toast({
         title: "Success",
         description: "Campaign deleted successfully",
