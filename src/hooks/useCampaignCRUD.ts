@@ -2,26 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface Campaign {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-  status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled' | 'archived';
-  type?: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other';
-  budget_allocated?: number;
-  budget_spent?: number;
-  metrics?: any;
-  channel: string;
-  created_by: string;
-  start_date?: string;
-  end_date?: string;
-  target_audience?: any;
-  content?: any;
-  settings?: any;
-}
+import { Campaign, mapInterfaceTypeToDatabase } from './useCampaigns';
 
 export const useCampaignCRUD = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -30,12 +11,20 @@ export const useCampaignCRUD = () => {
   const updateCampaign = async (id: string, updates: Partial<Campaign>) => {
     setIsLoading(true);
     try {
+      // Prepare updates for database
+      const dbUpdates: any = {
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+
+      // Map interface type to database type if type is being updated
+      if (updates.type) {
+        dbUpdates.type = mapInterfaceTypeToDatabase(updates.type);
+      }
+
       const { data, error } = await supabase
         .from('campaigns')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
@@ -97,9 +86,9 @@ export const useCampaignCRUD = () => {
   const createCampaign = async (campaignData: {
     name: string;
     description?: string;
-    type: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other';
+    type: Campaign['type'];
     channel: string;
-    status?: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled' | 'archived';
+    status?: Campaign['status'];
     budget_allocated?: number;
     start_date?: string;
     end_date?: string;
@@ -116,14 +105,18 @@ export const useCampaignCRUD = () => {
         throw new Error('User not authenticated');
       }
 
+      // Prepare data for database
+      const dbData = {
+        ...campaignData,
+        type: mapInterfaceTypeToDatabase(campaignData.type),
+        created_by: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('campaigns')
-        .insert([{
-          ...campaignData,
-          created_by: user.id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
+        .insert(dbData)
         .select()
         .single();
 
