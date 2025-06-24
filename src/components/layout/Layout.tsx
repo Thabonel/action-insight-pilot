@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import { 
@@ -14,7 +15,8 @@ import {
   BookOpen,
   Link,
   LogOut,
-  User
+  User,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -49,15 +51,15 @@ const Layout: React.FC = () => {
   const navItems = [
     { 
       name: 'AI Dashboard', 
-      href: '/app/conversational-dashboard', 
-      icon: LayoutDashboard,
-      description: 'AI-powered insights'
-    },
-    { 
-      name: 'Dashboard', 
       href: '/app/dashboard', 
       icon: LayoutDashboard,
-      description: 'Traditional view'
+      description: 'AI-powered insights & chat'
+    },
+    { 
+      name: 'Admin Dashboard', 
+      href: '/app/admin', 
+      icon: Shield,
+      description: 'Business metrics & system'
     },
     { 
       name: 'Campaign Management', 
