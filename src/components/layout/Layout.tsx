@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import { 
@@ -59,12 +58,6 @@ const Layout: React.FC = () => {
       href: '/app/dashboard', 
       icon: LayoutDashboard,
       description: 'Traditional view'
-    },
-    { 
-      name: 'Campaigns', 
-      href: '/app/campaigns', 
-      icon: Zap,
-      description: 'Marketing campaigns'
     },
     { 
       name: 'Campaign Management', 
