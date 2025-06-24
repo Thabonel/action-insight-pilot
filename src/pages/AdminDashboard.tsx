@@ -1,268 +1,182 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Users, 
-  TrendingUp, 
-  Mail, 
-  BarChart3, 
-  Calendar,
-  DollarSign,
-  Target,
-  Shield,
-  Settings,
-  Activity
-} from 'lucide-react';
-import { useEmailMetrics } from '@/hooks/useEmailMetrics';
-import { useRealTimeMetrics } from '@/hooks/useRealTimeMetrics';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useCampaigns } from '@/hooks/useCampaigns';
+import { TrendingUp, Users, Mail, DollarSign, Activity, AlertCircle } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
-  const { metrics: emailMetrics, loading: emailLoading } = useEmailMetrics();
-  const { metrics: realTimeMetrics, loading: realTimeLoading } = useRealTimeMetrics();
-  const { campaigns, loading: campaignsLoading } = useCampaigns();
+  const { campaigns, isLoading, error } = useCampaigns();
 
-  // System-wide metrics (admin-level data)
-  const totalRevenue = 45231.89;
-  const activeCampaigns = campaigns?.length || 12;
-  const totalUsers = 2350;
-  const systemUptime = 99.8;
+  // Sample data for admin metrics - in a real app, this would come from actual API calls
+  const businessMetrics = {
+    totalRevenue: 125000,
+    revenueGrowth: 12.5,
+    totalUsers: 2847,
+    userGrowth: 8.3,
+    emailsSent: 45632,
+    emailGrowth: 15.7,
+    activeCampaigns: campaigns.filter(c => c.status === 'active').length
+  };
 
-  const revenueChange = 20.1;
-  const campaignsChange = 2;
-  const usersChange = 180;
+  const revenueData = [
+    { month: 'Jan', revenue: 98000, users: 2200 },
+    { month: 'Feb', revenue: 105000, users: 2350 },
+    { month: 'Mar', revenue: 112000, users: 2500 },
+    { month: 'Apr', revenue: 118000, users: 2650 },
+    { month: 'May', revenue: 122000, users: 2750 },
+    { month: 'Jun', revenue: 125000, users: 2847 }
+  ];
+
+  const systemHealth = [
+    { name: 'API Response Time', value: 95, status: 'good' },
+    { name: 'Database Performance', value: 87, status: 'good' },
+    { name: 'Email Delivery Rate', value: 98, status: 'excellent' },
+    { name: 'User Satisfaction', value: 92, status: 'excellent' }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center space-x-2">
-              <Shield className="h-8 w-8 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-gray-600 mt-2">Business metrics and system overview</p>
+        </div>
+
+        {/* Key Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-2xl font-bold text-gray-900">${businessMetrics.totalRevenue.toLocaleString()}</p>
+                <p className="text-sm text-green-600">+{businessMetrics.revenueGrowth}% from last month</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-green-600" />
             </div>
-            <p className="text-gray-600 mt-1">System overview and business metrics</p>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="outline">
-              <Calendar className="h-4 w-4 mr-2" />
-              Last 30 days
-            </Button>
-            <Button>
-              <Settings className="h-4 w-4 mr-2" />
-              System Settings
-            </Button>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Users</p>
+                <p className="text-2xl font-bold text-gray-900">{businessMetrics.totalUsers.toLocaleString()}</p>
+                <p className="text-sm text-green-600">+{businessMetrics.userGrowth}% from last month</p>
+              </div>
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Emails Sent</p>
+                <p className="text-2xl font-bold text-gray-900">{businessMetrics.emailsSent.toLocaleString()}</p>
+                <p className="text-sm text-green-600">+{businessMetrics.emailGrowth}% from last month</p>
+              </div>
+              <Mail className="h-8 w-8 text-purple-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
+                <p className="text-2xl font-bold text-gray-900">{businessMetrics.activeCampaigns}</p>
+                <p className="text-sm text-gray-500">Across all users</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-orange-600" />
+            </div>
           </div>
         </div>
 
-        {/* Key Business Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                +{revenueChange}% from last month
-              </p>
-            </CardContent>
-          </Card>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Revenue & User Growth</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#059669" strokeWidth={2} />
+                <Line yAxisId="right" type="monotone" dataKey="users" stroke="#2563eb" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {campaignsLoading ? '...' : activeCampaigns}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                +{campaignsChange} from last week
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">System Emails Sent</CardTitle>
-              <Mail className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {emailLoading ? '...' : emailMetrics?.totalSent || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                +19% from last month
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalUsers}</div>
-              <p className="text-xs text-muted-foreground">
-                +{usersChange} from last month
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">System Health</h3>
+            <div className="space-y-4">
+              {systemHealth.map((metric, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">{metric.name}</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${
+                          metric.status === 'excellent' ? 'bg-green-600' : 
+                          metric.status === 'good' ? 'bg-blue-600' : 'bg-yellow-600'
+                        }`}
+                        style={{ width: `${metric.value}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{metric.value}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* System Health */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Activity className="h-5 w-5 mr-2" />
-              System Health
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{systemUptime}%</div>
-                <p className="text-sm text-gray-600">Uptime</p>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {emailMetrics?.openRate ? (emailMetrics.openRate * 100).toFixed(1) : '25.0'}%
-                </div>
-                <p className="text-sm text-gray-600">Avg Email Open Rate</p>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {emailMetrics?.clickRate ? (emailMetrics.clickRate * 100).toFixed(1) : '5.0'}%
-                </div>
-                <p className="text-sm text-gray-600">Avg Email Click Rate</p>
+        {/* Recent Activity */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent System Activity</h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <Activity className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">New user registration spike</p>
+                <p className="text-xs text-gray-500">15 new users in the last hour</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Detailed Analytics Tabs */}
-        <Tabs defaultValue="campaigns" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="email">Email Analytics</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="campaigns">
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Total Active Campaigns:</span>
-                    <Badge variant="secondary">{activeCampaigns}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Draft Campaigns:</span>
-                    <Badge variant="outline">
-                      {campaigns?.filter(c => c.status === 'draft').length || 0}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Completed Campaigns:</span>
-                    <Badge variant="default">
-                      {campaigns?.filter(c => c.status === 'completed').length || 0}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Total Registered Users:</span>
-                    <Badge variant="secondary">{totalUsers}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Active This Month:</span>
-                    <Badge variant="default">{Math.floor(totalUsers * 0.7)}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>New Users This Month:</span>
-                    <Badge variant="outline">{usersChange}</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="email">
-            <Card>
-              <CardHeader>
-                <CardTitle>Email System Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {emailLoading ? (
-                    <p>Loading email metrics...</p>
-                  ) : (
-                    <>
-                      <div className="flex justify-between items-center">
-                        <span>Total Emails Sent:</span>
-                        <Badge variant="secondary">{emailMetrics?.totalSent || 0}</Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Delivered:</span>
-                        <Badge variant="default">{emailMetrics?.delivered || 0}</Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Bounced:</span>
-                        <Badge variant="destructive">{emailMetrics?.bounced || 0}</Badge>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="system">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Configuration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>System Status:</span>
-                    <Badge variant="default">Operational</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Uptime:</span>
-                    <Badge variant="secondary">{systemUptime}%</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Last Backup:</span>
-                    <Badge variant="outline">2 hours ago</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <Mail className="h-5 w-5 text-purple-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Email campaign completed</p>
+                <p className="text-xs text-gray-500">Summer Sale campaign reached 25K recipients</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Revenue milestone reached</p>
+                <p className="text-xs text-gray-500">Monthly revenue exceeded $125K target</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
