@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,10 +18,6 @@ import {
 
 const CampaignOverview: React.FC = () => {
   const { campaigns, isLoading, error, reload } = useCampaigns();
-
-  useEffect(() => {
-    reload();
-  }, [reload]);
 
   if (isLoading) {
     return (

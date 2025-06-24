@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 
 interface Campaign {
@@ -15,29 +15,36 @@ export function useCampaigns() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadCampaigns = async () => {
+  const loadCampaigns = useCallback(async () => {
     try {
       setIsLoading(true)
+      setError(null)
+      console.log('Loading campaigns...')
+      
       const { data, error } = await supabase
         .from('campaigns')
         .select('id, name, description, created_at, updated_at')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
+      
+      console.log('Campaigns loaded successfully:', data?.length || 0)
       setCampaigns(data || [])
-      setError(null)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load campaigns'
-      setError(errorMessage)
       console.error('Error loading campaigns:', err)
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadCampaigns()
-  }, [])
+  }, [loadCampaigns])
 
   return {
     campaigns,
