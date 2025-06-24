@@ -51,6 +51,26 @@ const mapInterfaceTypeToDatabase = (interfaceType: Campaign['type']): string => 
   }
 }
 
+// Helper function to safely parse metrics from database Json type
+const parseMetrics = (metrics: any): Campaign['metrics'] => {
+  if (!metrics) return undefined
+  
+  if (typeof metrics === 'string') {
+    try {
+      const parsed = JSON.parse(metrics)
+      return parsed && typeof parsed === 'object' ? parsed : undefined
+    } catch {
+      return undefined
+    }
+  }
+  
+  if (typeof metrics === 'object' && metrics !== null) {
+    return metrics
+  }
+  
+  return undefined
+}
+
 export function useCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -79,6 +99,7 @@ export function useCampaigns() {
         ...campaign,
         type: mapDatabaseTypeToInterface(campaign.type),
         status: mapDatabaseStatusToInterface(campaign.status),
+        metrics: parseMetrics(campaign.metrics),
         // Ensure all required fields are present
         created_at: campaign.created_at || new Date().toISOString(),
         updated_at: campaign.updated_at || new Date().toISOString(),
