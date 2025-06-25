@@ -15,18 +15,28 @@ export class ApiClient {
       name: record.name,
       description: record.description,
       type: record.type,
-      status: record.status,
+      status: record.status || 'draft',
       created_at: record.created_at,
       updated_at: record.updated_at,
       created_by: record.created_by,
       
-      // Objectives & Goals
-      primaryObjective: record.primary_objective,
-      secondaryObjectives: record.secondary_objectives || [],
-      smartGoals: record.smart_goals,
+      // Basic fields that exist in your database
+      primaryObjective: record.primary_objective || '',
+      totalBudget: record.total_budget || 0,
+      budget_allocated: record.budget_allocated || 0,
+      budget_spent: record.budget_spent || 0,
+      startDate: record.start_date,
+      endDate: record.end_date,
+      targetAudience: record.target_audience || '',
+      channels: record.channels || [],
       
-      // KPIs & Targets
-      primaryKPI: record.primary_kpi,
+      // JSONB fields with defaults
+      demographics: record.demographics || {
+        ageRange: '',
+        location: '',
+        income: '',
+        interests: ''
+      },
       kpiTargets: record.kpi_targets || {
         revenue: '',
         leads: '',
@@ -35,11 +45,6 @@ export class ApiClient {
         impressions: '',
         clicks: ''
       },
-      
-      // Budget & Timeline
-      totalBudget: record.total_budget,
-      budget_allocated: record.budget_allocated,
-      budget_spent: record.budget_spent,
       budgetBreakdown: record.budget_breakdown || {
         media: '',
         content: '',
@@ -47,33 +52,6 @@ export class ApiClient {
         personnel: '',
         contingency: ''
       },
-      startDate: record.start_date,
-      endDate: record.end_date,
-      
-      // Target Audience
-      targetAudience: record.target_audience,
-      audienceSegments: record.audience_segments || [],
-      buyerPersonas: record.buyer_personas || [],
-      demographics: record.demographics || {
-        ageRange: '',
-        location: '',
-        income: '',
-        interests: ''
-      },
-      
-      // Messaging & Content
-      valueProposition: record.value_proposition,
-      keyMessages: record.key_messages || [],
-      contentStrategy: record.content_strategy,
-      creativeRequirements: record.creative_requirements,
-      brandGuidelines: record.brand_guidelines,
-      
-      // Channels & Distribution
-      channels: record.channels || [],
-      channelStrategy: record.channel_strategy,
-      contentTypes: record.content_types || [],
-      
-      // Legal & Compliance
       complianceChecklist: record.compliance_checklist || {
         dataProtection: false,
         advertisingStandards: false,
@@ -81,15 +59,29 @@ export class ApiClient {
         termsOfService: false,
         privacyPolicy: false
       },
-      legalNotes: record.legal_notes,
       
-      // Monitoring & Reporting
-      analyticsTools: record.analytics_tools || [],
-      reportingFrequency: record.reporting_frequency,
-      stakeholders: record.stakeholders || [],
-      successCriteria: record.success_criteria,
+      // Extract from content JSONB field
+      valueProposition: record.content?.valueProposition || '',
+      keyMessages: record.content?.keyMessages || [],
+      contentStrategy: record.content?.contentStrategy || '',
+      creativeRequirements: record.content?.creativeRequirements || '',
+      brandGuidelines: record.content?.brandGuidelines || '',
       
-      // Performance metrics
+      // Extract from settings JSONB field
+      secondaryObjectives: record.settings?.secondaryObjectives || [],
+      smartGoals: record.settings?.smartGoals || '',
+      primaryKPI: record.settings?.primaryKPI || '',
+      audienceSegments: record.settings?.audienceSegments || [],
+      buyerPersonas: record.settings?.buyerPersonas || [],
+      channelStrategy: record.settings?.channelStrategy || '',
+      contentTypes: record.settings?.contentTypes || [],
+      legalNotes: record.settings?.legalNotes || '',
+      analyticsTools: record.settings?.analyticsTools || [],
+      reportingFrequency: record.settings?.reportingFrequency || '',
+      stakeholders: record.settings?.stakeholders || [],
+      successCriteria: record.settings?.successCriteria || '',
+      
+      // Performance metrics from existing metrics JSONB
       metrics: record.metrics || {
         reach: 0,
         conversion_rate: 0,
@@ -109,51 +101,54 @@ export class ApiClient {
       name: campaign.name,
       description: campaign.description,
       type: campaign.type,
-      status: campaign.status,
+      status: campaign.status || 'draft',
+      channel: campaign.channels?.[0] || campaign.type || 'other', // Use first channel or type as main channel
       
-      // Objectives & Goals
-      primary_objective: campaign.primaryObjective,
-      secondary_objectives: campaign.secondaryObjectives,
-      smart_goals: campaign.smartGoals,
+      // Budget fields
+      total_budget: campaign.totalBudget || 0,
+      budget_allocated: campaign.totalBudget || 0, // Set allocated to total when creating
+      budget_spent: campaign.budget_spent || 0,
       
-      // KPIs & Targets
-      primary_kpi: campaign.primaryKPI,
-      kpi_targets: campaign.kpiTargets,
-      
-      // Budget & Timeline
-      total_budget: campaign.totalBudget,
-      budget_allocated: campaign.totalBudget, // Set allocated to total when creating
-      budget_breakdown: campaign.budgetBreakdown,
+      // Dates
       start_date: campaign.startDate,
       end_date: campaign.endDate,
       
-      // Target Audience
+      // Text fields
       target_audience: campaign.targetAudience,
-      audience_segments: campaign.audienceSegments,
-      buyer_personas: campaign.buyerPersonas,
-      demographics: campaign.demographics,
+      primary_objective: campaign.primaryObjective,
       
-      // Messaging & Content
-      value_proposition: campaign.valueProposition,
-      key_messages: campaign.keyMessages,
-      content_strategy: campaign.contentStrategy,
-      creative_requirements: campaign.creativeRequirements,
-      brand_guidelines: campaign.brandGuidelines,
+      // JSONB fields
+      channels: campaign.channels || [],
+      demographics: campaign.demographics || {},
+      kpi_targets: campaign.kpiTargets || {},
+      budget_breakdown: campaign.budgetBreakdown || {},
+      compliance_checklist: campaign.complianceChecklist || {},
       
-      // Channels & Distribution
-      channels: campaign.channels,
-      channel_strategy: campaign.channelStrategy,
-      content_types: campaign.contentTypes,
+      // Store other campaign data in existing JSONB fields
+      content: {
+        valueProposition: campaign.valueProposition,
+        keyMessages: campaign.keyMessages,
+        contentStrategy: campaign.contentStrategy,
+        creativeRequirements: campaign.creativeRequirements,
+        brandGuidelines: campaign.brandGuidelines
+      },
+      settings: {
+        secondaryObjectives: campaign.secondaryObjectives,
+        smartGoals: campaign.smartGoals,
+        primaryKPI: campaign.primaryKPI,
+        audienceSegments: campaign.audienceSegments,
+        buyerPersonas: campaign.buyerPersonas,
+        channelStrategy: campaign.channelStrategy,
+        contentTypes: campaign.contentTypes,
+        analyticsTools: campaign.analyticsTools,
+        reportingFrequency: campaign.reportingFrequency,
+        stakeholders: campaign.stakeholders,
+        successCriteria: campaign.successCriteria,
+        legalNotes: campaign.legalNotes
+      },
       
-      // Legal & Compliance
-      compliance_checklist: campaign.complianceChecklist,
-      legal_notes: campaign.legalNotes,
-      
-      // Monitoring & Reporting
-      analytics_tools: campaign.analyticsTools,
-      reporting_frequency: campaign.reportingFrequency,
-      stakeholders: campaign.stakeholders,
-      success_criteria: campaign.successCriteria
+      // Keep existing metrics structure
+      metrics: campaign.metrics || {}
     };
   }
 
@@ -271,6 +266,8 @@ export class ApiClient {
       const dbRecord = this.campaignToDb(campaignData);
       dbRecord.created_by = user.id;
 
+      console.log('Sending to database:', dbRecord);
+
       const { data, error } = await supabase
         .from('campaigns')
         .insert([dbRecord])
@@ -278,6 +275,7 @@ export class ApiClient {
         .single();
 
       if (error) {
+        console.error('Database insertion error:', error);
         return {
           success: false,
           error: 'Database error',
@@ -545,7 +543,7 @@ export class ApiClient {
     return ((revenue - spent) / spent) * 100;
   }
 
-  // AI Chat Methods - THIS IS THE MISSING PIECE!
+  // AI Chat Methods
   async queryAgent(query: string, context?: any): Promise<ApiResponse<any>> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -591,8 +589,6 @@ export class ApiClient {
       };
     }
   }
-
-  // Keep all other existing methods unchanged for other services...
 
   // Content Methods
   async createContent(contentData: any): Promise<ApiResponse<any>> {
