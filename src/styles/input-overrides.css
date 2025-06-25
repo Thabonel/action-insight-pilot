@@ -1,19 +1,31 @@
 
 /* Input Field Overrides - Ensuring White Backgrounds and Black Text */
 
-/* Global input field styling */
+/* Global input field styling with higher specificity */
 input,
 textarea,
-select {
+select,
+.bg-background input,
+.bg-background textarea,
+.bg-background select,
+[class*="bg-"] input,
+[class*="bg-"] textarea,
+[class*="bg-"] select {
   background-color: white !important;
   color: black !important;
   border: 1px solid #d1d5db !important;
 }
 
-/* Focus states */
+/* Focus states with higher specificity */
 input:focus,
 textarea:focus,
-select:focus {
+select:focus,
+.bg-background input:focus,
+.bg-background textarea:focus,
+.bg-background select:focus,
+[class*="bg-"] input:focus,
+[class*="bg-"] textarea:focus,
+[class*="bg-"] select:focus {
   background-color: white !important;
   color: black !important;
   border-color: #2563eb !important;
@@ -21,9 +33,13 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
 }
 
-/* Placeholder text */
+/* Placeholder text with higher specificity */
 input::placeholder,
-textarea::placeholder {
+textarea::placeholder,
+.bg-background input::placeholder,
+.bg-background textarea::placeholder,
+[class*="bg-"] input::placeholder,
+[class*="bg-"] textarea::placeholder {
   color: #6b7280 !important;
   opacity: 1 !important;
 }
@@ -97,4 +113,45 @@ select option {
 .react-select__option--is-focused {
   background-color: #f3f4f6 !important;
   color: black !important;
+}
+
+/* Additional overrides for component library inputs */
+.form-control,
+.form-input,
+.input-field,
+[role="textbox"],
+[role="combobox"] {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* Override any inherited dark theme styling */
+* input,
+* textarea,
+* select {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Ensure buttons in dark containers have proper text color */
+.bg-gray-900 button,
+.bg-slate-900 button,
+.bg-black button {
+  color: white !important;
+}
+
+/* But inputs in dark containers should remain light */
+.bg-gray-900 input,
+.bg-gray-900 textarea,
+.bg-gray-900 select,
+.bg-slate-900 input,
+.bg-slate-900 textarea,
+.bg-slate-900 select,
+.bg-black input,
+.bg-black textarea,
+.bg-black select {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #d1d5db !important;
 }
