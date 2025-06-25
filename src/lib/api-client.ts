@@ -96,58 +96,38 @@ export class ApiClient {
   }
 
   // Helper function to convert Campaign interface to database record
-  private campaignToDb(campaign: Partial<Campaign>): any {
+  private campaignToDb(campaign: any): any {
     return {
+      // Required fields
       name: campaign.name,
-      description: campaign.description,
       type: campaign.type,
+      channel: campaign.channel || campaign.type || 'email', // Required field
+      
+      // Optional text fields
+      description: campaign.description || null,
+      target_audience: campaign.target_audience || null, // Note: snake_case
       status: campaign.status || 'draft',
-      channel: campaign.channels?.[0] || campaign.type || 'other', // Use first channel or type as main channel
       
       // Budget fields
-      total_budget: campaign.totalBudget || 0,
-      budget_allocated: campaign.totalBudget || 0, // Set allocated to total when creating
+      total_budget: campaign.total_budget || 0,
+      budget_allocated: campaign.budget_allocated || 0,
       budget_spent: campaign.budget_spent || 0,
       
-      // Dates - handle properly to avoid empty strings
-      start_date: campaign.startDate ? campaign.startDate : null,
-      end_date: campaign.endDate ? campaign.endDate : null,
+      // Dates - proper null handling for timestamps
+      start_date: campaign.start_date || null,
+      end_date: campaign.end_date || null,
       
       // Text fields
-      target_audience: campaign.targetAudience,
-      primary_objective: campaign.primaryObjective,
+      primary_objective: campaign.primary_objective || null,
       
-      // JSONB fields
+      // JSONB fields - always provide objects, never undefined
       channels: campaign.channels || [],
       demographics: campaign.demographics || {},
-      kpi_targets: campaign.kpiTargets || {},
-      budget_breakdown: campaign.budgetBreakdown || {},
-      compliance_checklist: campaign.complianceChecklist || {},
-      
-      // Store other campaign data in existing JSONB fields
-      content: {
-        valueProposition: campaign.valueProposition,
-        keyMessages: campaign.keyMessages,
-        contentStrategy: campaign.contentStrategy,
-        creativeRequirements: campaign.creativeRequirements,
-        brandGuidelines: campaign.brandGuidelines
-      },
-      settings: {
-        secondaryObjectives: campaign.secondaryObjectives,
-        smartGoals: campaign.smartGoals,
-        primaryKPI: campaign.primaryKPI,
-        audienceSegments: campaign.audienceSegments,
-        buyerPersonas: campaign.buyerPersonas,
-        channelStrategy: campaign.channelStrategy,
-        contentTypes: campaign.contentTypes,
-        analyticsTools: campaign.analyticsTools,
-        reportingFrequency: campaign.reportingFrequency,
-        stakeholders: campaign.stakeholders,
-        successCriteria: campaign.successCriteria,
-        legalNotes: campaign.legalNotes
-      },
-      
-      // Keep existing metrics structure
+      kpi_targets: campaign.kpi_targets || {},
+      budget_breakdown: campaign.budget_breakdown || {},
+      compliance_checklist: campaign.compliance_checklist || {},
+      content: campaign.content || {},
+      settings: campaign.settings || {},
       metrics: campaign.metrics || {}
     };
   }
@@ -243,7 +223,7 @@ export class ApiClient {
     }
   }
 
-  async createCampaign(campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
+  async createCampaign(campaignData: any): Promise<ApiResponse<Campaign>> {
     try {
       // Validation
       if (!campaignData.name || campaignData.name.trim() === '') {
