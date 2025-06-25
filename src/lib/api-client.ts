@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 
 export class ApiClient {
   private token: string = '';
+  private openaiKey: string = 'sk-proj-mNlPTuTqE8QcD7qNaRKNsHDTyPZ3wNVEQBdXdqBPdXmHkJZQKcGvCYBdrwA'; // Your OpenAI key
 
   setToken(token: string): void {
     this.token = token;
@@ -523,51 +524,126 @@ export class ApiClient {
     return ((revenue - spent) / spent) * 100;
   }
 
-  // AI Chat Methods
+  // Direct OpenAI Integration - FAST AND RELIABLE
   async queryAgent(query: string, context?: any): Promise<ApiResponse<any>> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        return {
-          success: false,
-          error: 'Authentication required',
-          message: 'User must be logged in to use AI chat'
-        };
-      }
+      console.log('Calling OpenAI directly with query:', query);
 
-      const { data, error } = await supabase.functions.invoke('chat-agent', {
-        body: {
-          query,
-          context,
-          user_id: user.id
-        }
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.openaiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are PAM, an intelligent AI marketing assistant for a comprehensive marketing automation platform. You help users with campaign strategy, content creation, lead management, email marketing, social media management, and analytics. Always provide actionable, specific marketing advice. Be friendly but professional. Focus on practical marketing solutions.'
+            },
+            {
+              role: 'user',
+              content: query
+            }
+          ],
+          max_tokens: 400,
+          temperature: 0.7,
+        }),
       });
 
-      if (error) {
-        console.error('Edge function error:', error);
-        return {
-          success: false,
-          error: 'AI service error',
-          message: error.message || 'Failed to get AI response'
-        };
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI API error:', response.status, errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
+
+      const data = await response.json();
+      const aiResponse = data.choices?.[0]?.message?.content || 'I apologize, but I could not generate a response at this time.';
+
+      console.log('OpenAI response received successfully');
+
+      // Generate relevant suggestions based on query
+      const suggestions = this.generateSuggestions(query);
 
       return {
         success: true,
         data: {
-          message: data.response || data.message,
-          suggestions: data.suggestions || [],
-          followUp: data.followUp || []
+          message: aiResponse,
+          suggestions,
+          followUp: [
+            "Would you like me to elaborate on any specific point?",
+            "Should I help you create a detailed plan for this?",
+            "Do you need specific examples or templates?"
+          ]
         }
       };
     } catch (error) {
-      console.error('Error calling AI agent:', error);
+      console.error('Error calling OpenAI directly:', error);
       return {
         success: false,
-        error: 'Unexpected error',
-        message: 'Failed to connect to AI service'
+        error: 'AI service error',
+        message: error instanceof Error ? error.message : 'Failed to connect to AI service'
       };
     }
+  }
+
+  // Helper method to generate relevant suggestions
+  private generateSuggestions(query: string): string[] {
+    const queryLower = query.toLowerCase();
+
+    if (queryLower.includes('campaign')) {
+      return [
+        "How can I improve my campaign ROI?",
+        "What are the best practices for campaign targeting?",
+        "Show me campaign performance metrics",
+        "Help me optimize my campaign budget"
+      ];
+    }
+
+    if (queryLower.includes('email')) {
+      return [
+        "How can I improve my email open rates?",
+        "What subject lines work best?",
+        "Help me create an email sequence",
+        "Show me email automation workflows"
+      ];
+    }
+
+    if (queryLower.includes('content')) {
+      return [
+        "Generate content ideas for my industry",
+        "Help me create a content calendar",
+        "What content performs best on social media?",
+        "Show me content optimization tips"
+      ];
+    }
+
+    if (queryLower.includes('lead')) {
+      return [
+        "How can I improve lead quality?",
+        "What's the best lead scoring strategy?",
+        "Help me create lead nurturing campaigns",
+        "Show me lead conversion tactics"
+      ];
+    }
+
+    if (queryLower.includes('social')) {
+      return [
+        "What's the best posting schedule?",
+        "Help me create engaging social content",
+        "How can I increase social engagement?",
+        "Show me social media analytics"
+      ];
+    }
+
+    // Default suggestions
+    return [
+      "Tell me more about marketing automation",
+      "How can I improve my overall marketing performance?",
+      "What metrics should I be tracking?",
+      "Help me create a marketing strategy"
+    ];
   }
 
   // Content Methods
