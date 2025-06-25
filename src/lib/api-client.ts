@@ -109,9 +109,9 @@ export class ApiClient {
       budget_allocated: campaign.totalBudget || 0, // Set allocated to total when creating
       budget_spent: campaign.budget_spent || 0,
       
-      // Dates
-      start_date: campaign.startDate,
-      end_date: campaign.endDate,
+      // Dates - handle properly to avoid empty strings
+      start_date: campaign.startDate ? campaign.startDate : null,
+      end_date: campaign.endDate ? campaign.endDate : null,
       
       // Text fields
       target_audience: campaign.targetAudience,
