@@ -315,7 +315,7 @@ const CampaignDetails: React.FC = () => {
       const campaignData = {
         name: formData.name,
         description: formData.description,
-        type: formData.type,
+        type: formData.type as 'email' | 'social_media' | 'other' | 'seo' | 'content' | 'paid_ads',
         status: formData.status,
         
         primaryObjective: formData.primaryObjective,

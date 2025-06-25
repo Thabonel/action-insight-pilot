@@ -47,7 +47,7 @@ export class UserPreferencesService {
         timezone: 'UTC'
       };
       
-      await apiClient.userPreferences.update(defaultPrefs);
+      await apiClient.userPreferences.update('general', defaultPrefs);
       
       return {
         success: true,
