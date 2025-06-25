@@ -593,73 +593,6 @@ export class ApiClient {
   }
 
   // Keep all other existing methods unchanged for other services...
-  // Social Platforms Methods
-  get socialPlatforms() {
-    return {
-      getPlatformConnections: async (): Promise<ApiResponse<SocialPlatformConnection[]>> => {
-        console.log('Getting platform connections');
-        const mockConnections: SocialPlatformConnection[] = [
-          {
-            id: '1',
-            platform: 'twitter',
-            account_name: '@example',
-            status: 'connected',
-            connection_status: 'connected',
-            last_sync: new Date().toISOString(),
-            follower_count: 1000
-          }
-        ];
-        return { success: true, data: mockConnections };
-      },
-
-      initiatePlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
-        console.log('Initiating platform connection for:', platform);
-        return {
-          success: true,
-          data: {
-            platform,
-            status: 'connected',
-            connected_at: new Date().toISOString()
-          }
-        };
-      },
-
-      disconnectPlatform: async (platform: string): Promise<ApiResponse<void>> => {
-        console.log('Disconnecting platform:', platform);
-        return { success: true, data: undefined };
-      },
-
-      syncPlatformData: async (platform: string): Promise<ApiResponse<any>> => {
-        console.log('Syncing platform data for:', platform);
-        return { success: true, data: { synced_at: new Date().toISOString() } };
-      },
-
-      testPlatformConnection: async (platform: string): Promise<ApiResponse<any>> => {
-        console.log('Testing platform connection for:', platform);
-        return { success: true, data: { status: 'connected', tested_at: new Date().toISOString() } };
-      },
-
-      getSocialMediaPosts: async (): Promise<ApiResponse<any[]>> => {
-        console.log('Getting social media posts');
-        return { success: true, data: [] };
-      },
-
-      createSocialPost: async (postData: any): Promise<ApiResponse<any>> => {
-        console.log('Creating social post:', postData);
-        return { success: true, data: { id: 'post-1', ...postData } };
-      },
-
-      getSocialAnalytics: async (): Promise<ApiResponse<any>> => {
-        console.log('Getting social analytics');
-        return { success: true, data: { views: 100, engagement: 50 } };
-      },
-
-      generateSocialContent: async (brief: any): Promise<ApiResponse<any>> => {
-        console.log('Generating social content:', brief);
-        return { success: true, data: { content: 'Generated content', suggestions: [] } };
-      }
-    };
-  }
 
   // Content Methods
   async createContent(contentData: any): Promise<ApiResponse<any>> {
@@ -756,6 +689,210 @@ export class ApiClient {
 
   async getEmailAnalytics(): Promise<ApiResponse<any>> {
     return this.getEmailMetrics();
+  }
+
+  // User Preferences methods
+  async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences>> {
+    let query = supabase.from('user_preferences').select('*');
+    
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: data || {} };
+  }
+
+  async updateUserPreferences(category: string, preferences: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .upsert({
+        category,
+        preference_data: preferences,
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: data || {} };
+  }
+
+  // Integration methods
+  async getConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
+    const { data, error } = await supabase
+      .from('integration_connections')
+      .select('*');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  }
+
+  async createConnection(connection: Partial<IntegrationConnection>): Promise<ApiResponse<IntegrationConnection>> {
+    const { data, error } = await supabase
+      .from('integration_connections')
+      .insert(connection)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  }
+
+  async deleteConnection(id: string): Promise<ApiResponse<void>> {
+    const { error } = await supabase
+      .from('integration_connections')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: undefined };
+  }
+
+  // Workflow methods
+  async getWorkflows(): Promise<ApiResponse<Workflow[]>> {
+    return {
+      success: true,
+      data: []
+    };
+  }
+
+  async createWorkflow(workflow: Partial<Workflow>): Promise<ApiResponse<Workflow>> {
+    return {
+      success: true,
+      data: { id: '1', name: 'Mock Workflow', ...workflow } as Workflow
+    };
+  }
+
+  async updateWorkflow(id: string, workflow: Partial<Workflow>): Promise<ApiResponse<Workflow>> {
+    return {
+      success: true,
+      data: { id, name: 'Updated Workflow', ...workflow } as Workflow
+    };
+  }
+
+  async deleteWorkflow(id: string): Promise<ApiResponse<void>> {
+    return { success: true, data: undefined };
+  }
+
+  async executeWorkflow(id: string, data?: any): Promise<ApiResponse<any>> {
+    return { success: true, data: { executed: true } };
+  }
+
+  // Social media methods
+  async scheduleSocialPost(postData: any): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: { id: '1', status: 'scheduled', ...postData }
+    };
+  }
+
+  async getSocialPlatforms(): Promise<ApiResponse<SocialPlatformConnection[]>> {
+    const { data, error } = await supabase
+      .from('social_platform_connections')
+      .select('*');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  }
+
+  async connectSocialPlatform(platform: Partial<SocialPlatformConnection>): Promise<ApiResponse<SocialPlatformConnection>> {
+    const { data, error } = await supabase
+      .from('social_platform_connections')
+      .insert(platform)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  }
+
+  // Chat/Agent methods
+  async callGeneralCampaignAgent(message: string, context?: any): Promise<ApiResponse<any>> {
+    return {
+      success: true,
+      data: {
+        response: "This is a mock response from the campaign agent",
+        suggestions: ["Suggestion 1", "Suggestion 2"],
+        context
+      }
+    };
+  }
+
+  // Expose properties for backward compatibility
+  get userPreferences() {
+    return {
+      get: (category?: string) => this.getUserPreferences(category),
+      update: (category: string, prefs: Partial<UserPreferences>) => this.updateUserPreferences(category, prefs),
+      getUserPreferences: (category?: string) => this.getUserPreferences(category),
+      updateUserPreferences: (category: string, prefs: Partial<UserPreferences>) => this.updateUserPreferences(category, prefs)
+    };
+  }
+
+  get integrations() {
+    return {
+      getConnections: () => this.getConnections(),
+      createConnection: (conn: Partial<IntegrationConnection>) => this.createConnection(conn),
+      deleteConnection: (id: string) => this.deleteConnection(id),
+      getWebhooks: () => Promise.resolve({ success: true, data: [] }),
+      connectService: (service: string, apiKey?: string) => this.createConnection({ service_name: service }),
+      syncService: (id: string) => Promise.resolve({ success: true, data: { synced_at: new Date().toISOString() } }),
+      disconnectService: (id: string) => this.deleteConnection(id),
+      createWebhook: (webhook: any) => Promise.resolve({ success: true, data: { id: '1', ...webhook } }),
+      deleteWebhook: (id: string) => Promise.resolve({ success: true, data: undefined }),
+      testWebhook: (id: string) => Promise.resolve({ success: true, data: { status: 'ok' } })
+    };
+  }
+
+  get workflows() {
+    return {
+      getAll: () => this.getWorkflows(),
+      create: (workflow: Partial<Workflow>) => this.createWorkflow(workflow),
+      update: (id: string, workflow: Partial<Workflow>) => this.updateWorkflow(id, workflow),
+      delete: (id: string) => this.deleteWorkflow(id),
+      execute: (id: string, data?: any) => this.executeWorkflow(id, data)
+    };
+  }
+
+  get socialPlatforms() {
+    return {
+      getAll: () => this.getSocialPlatforms(),
+      connect: (platform: Partial<SocialPlatformConnection>) => this.connectSocialPlatform(platform),
+      getSocialPlatforms: () => this.getSocialPlatforms(),
+      connectSocialPlatform: (platform: Partial<SocialPlatformConnection>) => this.connectSocialPlatform(platform),
+      getPlatformConnections: () => this.getSocialPlatforms(),
+      initiatePlatformConnection: (platform: string) => this.connectSocialPlatform({ platform: platform }),
+      disconnectPlatform: (platform: string) => Promise.resolve({ success: true, data: undefined }),
+      syncPlatformData: (platform: string) => Promise.resolve({ success: true, data: { synced_at: new Date().toISOString() } }),
+      testPlatformConnection: (platform: string) => Promise.resolve({ success: true, data: { status: 'connected' } }),
+      getSocialMediaPosts: () => Promise.resolve({ success: true, data: [] }),
+      createSocialPost: (postData: any) => this.scheduleSocialPost(postData),
+      getSocialAnalytics: () => Promise.resolve({ success: true, data: { followers: 100, engagement: 5.2 } }),
+      generateSocialContent: (brief: any) => Promise.resolve({ success: true, data: { content: 'Generated content', hashtags: [] } })
+    };
   }
 }
 

@@ -43,7 +43,7 @@ const IntelligentCampaignCreator: React.FC = () => {
       // Convert budget to number and create campaign object
       const campaignData = {
         name: formData.name,
-        type: formData.type,
+        type: formData.type as 'email' | 'social_media' | 'other' | 'seo' | 'content' | 'paid_ads',
         description: formData.description,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
         target_audience: formData.targetAudience,
@@ -115,8 +115,11 @@ const IntelligentCampaignCreator: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="email">Email Campaign</SelectItem>
-                  <SelectItem value="social">Social Media</SelectItem>
-                  <SelectItem value="mixed">Multi-Channel</SelectItem>
+                  <SelectItem value="social_media">Social Media</SelectItem>
+                  <SelectItem value="content">Content Marketing</SelectItem>
+                  <SelectItem value="paid_ads">Paid Advertising</SelectItem>
+                  <SelectItem value="seo">SEO Campaign</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
