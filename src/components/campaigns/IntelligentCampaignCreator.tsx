@@ -9,11 +9,14 @@ import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 import { Loader2, Sparkles, Target } from 'lucide-react';
 
+// Valid campaign types that match database enum exactly
+type ValidCampaignType = 'email' | 'social' | 'content' | 'paid_ads' | 'partnership';
+
 const IntelligentCampaignCreator: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'email',
+    type: 'email' as ValidCampaignType,
     description: '',
     budget: '',
     targetAudience: '',
@@ -26,10 +29,20 @@ const IntelligentCampaignCreator: React.FC = () => {
   };
 
   const createCampaign = async () => {
-    if (!formData.name || !formData.description) {
+    // Validation
+    if (!formData.name?.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please provide campaign name and description",
+        description: "Campaign name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.description?.trim()) {
+      toast({
+        title: "Missing Information", 
+        description: "Campaign description is required",
         variant: "destructive",
       });
       return;
@@ -37,50 +50,59 @@ const IntelligentCampaignCreator: React.FC = () => {
 
     setLoading(true);
     try {
-      console.log('Creating campaign with data:', formData);
+      console.log('Creating campaign with form data:', formData);
       
-      // Convert data to match your database schema properly
+      // Calculate timeline dates
+      const startDate = new Date();
+      const endDate = new Date();
+      
+      switch(formData.timeline) {
+        case '1_week':
+          endDate.setDate(endDate.getDate() + 7);
+          break;
+        case '1_month':
+          endDate.setMonth(endDate.getMonth() + 1);
+          break;
+        case '3_months':
+          endDate.setMonth(endDate.getMonth() + 3);
+          break;
+        case '6_months':
+          endDate.setMonth(endDate.getMonth() + 6);
+          break;
+        default:
+          endDate.setMonth(endDate.getMonth() + 1);
+      }
+
+      // Create campaign data object that matches database schema exactly
       const campaignData = {
-        name: formData.name,
-        type: formData.type as 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other',
-        description: formData.description,
+        // Required fields
+        name: formData.name.trim(),
+        type: formData.type, // This now matches database enum exactly
+        
+        // Optional fields
+        description: formData.description.trim(),
+        target_audience: formData.targetAudience?.trim() || null, // Maps to snake_case column
         status: 'draft' as const,
         
-        // Budget fields that match your database
-        totalBudget: formData.budget ? parseFloat(formData.budget) : 0,
+        // Budget fields
+        total_budget: formData.budget ? parseFloat(formData.budget) : 0,
+        budget_allocated: formData.budget ? parseFloat(formData.budget) : 0,
+        budget_spent: 0,
         
-        // Target Audience that matches your database
-        targetAudience: formData.targetAudience,
+        // Channel fields - set both required channel and channels array
+        channel: formData.type, // Required single channel field
+        channels: [formData.type], // JSONB array field
         
-        // Additional required fields for your database schema
-        primaryObjective: `Campaign objective: ${formData.description}`,
-        channels: [formData.type], // Convert type to channels array
+        // Dates as proper ISO strings
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
         
-        // Set timeline as proper start/end dates
-        startDate: new Date().toISOString(),
-        endDate: (() => {
-          const endDate = new Date();
-          switch(formData.timeline) {
-            case '1_week':
-              endDate.setDate(endDate.getDate() + 7);
-              break;
-            case '1_month':
-              endDate.setMonth(endDate.getMonth() + 1);
-              break;
-            case '3_months':
-              endDate.setMonth(endDate.getMonth() + 3);
-              break;
-            case '6_months':
-              endDate.setMonth(endDate.getMonth() + 6);
-              break;
-            default:
-              endDate.setMonth(endDate.getMonth() + 1);
-          }
-          return endDate.toISOString();
-        })(),
+        // Additional fields with proper defaults
+        primary_objective: `${formData.type} campaign: ${formData.description}`,
         
-        // Initialize other required fields with defaults
-        kpiTargets: {
+        // JSONB fields with proper structure
+        demographics: {},
+        kpi_targets: {
           revenue: '',
           leads: '',
           conversion: '',
@@ -88,32 +110,26 @@ const IntelligentCampaignCreator: React.FC = () => {
           impressions: '',
           clicks: ''
         },
-        
-        budgetBreakdown: {
+        budget_breakdown: {
           media: '',
           content: '',
           technology: '',
           personnel: '',
           contingency: ''
         },
-        
-        demographics: {
-          ageRange: '',
-          location: '',
-          income: '',
-          interests: ''
-        },
-        
-        complianceChecklist: {
+        compliance_checklist: {
           dataProtection: false,
           advertisingStandards: false,
           industryRegulations: false,
           termsOfService: false,
           privacyPolicy: false
-        }
+        },
+        content: {},
+        settings: {},
+        metrics: {}
       };
       
-      console.log('Sending campaign data to API:', campaignData);
+      console.log('Sending to API:', campaignData);
       
       const result = await apiClient.createCampaign(campaignData) as ApiResponse<any>;
       
@@ -121,8 +137,8 @@ const IntelligentCampaignCreator: React.FC = () => {
       
       if (result.success && result.data) {
         toast({
-          title: "Campaign Created Successfully!",
-          description: `Campaign "${formData.name}" has been created and saved to your database.`,
+          title: "Success!",
+          description: `Campaign "${formData.name}" created successfully!`,
         });
         
         // Reset form
@@ -135,11 +151,6 @@ const IntelligentCampaignCreator: React.FC = () => {
           timeline: '1_month'
         });
         
-        // Log success for debugging
-        console.log('Campaign created successfully:', result.data);
-        
-        // Optionally refresh the page or redirect
-        // window.location.reload();
       } else {
         console.error('Campaign creation failed:', result);
         toast({
@@ -152,7 +163,7 @@ const IntelligentCampaignCreator: React.FC = () => {
       console.error('Campaign creation error:', error);
       toast({
         title: "Error",
-        description: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -166,7 +177,7 @@ const IntelligentCampaignCreator: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Sparkles className="h-5 w-5" />
-            <span>Intelligent Campaign Creator</span>
+            <span>Campaign Creator</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -183,18 +194,20 @@ const IntelligentCampaignCreator: React.FC = () => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">Campaign Type</label>
-              <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
+              <label className="block text-sm font-medium mb-1">Campaign Type *</label>
+              <Select 
+                value={formData.type} 
+                onValueChange={(value: ValidCampaignType) => handleInputChange('type', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="email">Email Campaign</SelectItem>
-                  <SelectItem value="social_media">Social Media</SelectItem>
+                  <SelectItem value="social">Social Media</SelectItem>
                   <SelectItem value="content">Content Marketing</SelectItem>
                   <SelectItem value="paid_ads">Paid Advertising</SelectItem>
-                  <SelectItem value="seo">SEO Campaign</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="partnership">Partnership</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -259,7 +272,7 @@ const IntelligentCampaignCreator: React.FC = () => {
             ) : (
               <>
                 <Target className="mr-2 h-4 w-4" />
-                Create Intelligent Campaign
+                Create Campaign
               </>
             )}
           </Button>
