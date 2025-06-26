@@ -57,3 +57,7 @@ supabase_client = SupabaseClient()
 def get_supabase() -> Client:
     """Get Supabase client instance"""
     return supabase_client.client
+
+def get_supabase_client() -> Client:
+    """Get Supabase client instance (alias for compatibility)"""
+    return supabase_client.client
