@@ -1,8 +1,10 @@
 
-import React from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Send, Sparkles, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { parseCampaignFromConversation } from '@/lib/campaign-parser';
+import { apiClient } from '@/lib/api-client';
 
 interface ChatMessage {
   id: string;
@@ -32,6 +34,71 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   handleSuggestionClick,
   user
 }) => {
+  const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
+  const [campaignCreated, setCampaignCreated] = useState(false);
+
+  // Function to detect if conversation contains enough campaign information
+  const detectCampaignReady = (messages: ChatMessage[]) => {
+    const conversationText = messages
+      .filter(m => m.role === 'assistant')
+      .map(m => m.content)
+      .join(' ')
+      .toLowerCase();
+
+    // Keywords that indicate campaign creation readiness
+    const readyPhrases = [
+      'ready to create',
+      'create the campaign',
+      'enough information',
+      'build your campaign',
+      'create your campaign now',
+      'shall we create',
+      'let\'s create the campaign'
+    ];
+
+    return readyPhrases.some(phrase => conversationText.includes(phrase));
+  };
+
+  // Function to create campaign from conversation
+  const createCampaignFromConversation = async () => {
+    if (!user || isCreatingCampaign) return;
+
+    setIsCreatingCampaign(true);
+    try {
+      // Extract conversation text for parsing
+      const conversationText = chatHistory
+        .map(m => `${m.role}: ${m.content}`)
+        .join('\n');
+
+      // Parse campaign data from conversation
+      const parsedCampaign = parseCampaignFromConversation(conversationText);
+
+      // Create campaign in database
+      const result = await apiClient.createCampaignFromAI(parsedCampaign);
+
+      if (result.success) {
+        setCampaignCreated(true);
+        console.log('Campaign created successfully:', result.data);
+      } else {
+        console.error('Failed to create campaign:', result.error);
+      }
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+    } finally {
+      setIsCreatingCampaign(false);
+    }
+  };
+
+  // Check if campaign should be created when chat history updates
+  useEffect(() => {
+    if (chatHistory.length > 0 && !campaignCreated && !isCreatingCampaign) {
+      const shouldCreate = detectCampaignReady(chatHistory);
+      if (shouldCreate) {
+        createCampaignFromConversation();
+      }
+    }
+  }, [chatHistory, campaignCreated, isCreatingCampaign]);
+
   const suggestions = [
     "I want to create a new marketing campaign",
     "Help me plan a campaign strategy",
@@ -111,6 +178,28 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
                   <span className="text-sm">AI is thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isCreatingCampaign && (
+            <div className="flex justify-start">
+              <div className="bg-green-100 text-green-900 p-3 rounded-lg max-w-[80%]">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="animate-spin w-4 h-4 text-green-600" />
+                  <span className="text-sm">Creating your campaign...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {campaignCreated && (
+            <div className="flex justify-start">
+              <div className="bg-green-100 text-green-900 p-3 rounded-lg max-w-[80%]">
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4 text-green-600" />
+                  <span className="text-sm">Campaign created successfully! 🎉</span>
                 </div>
               </div>
             </div>
