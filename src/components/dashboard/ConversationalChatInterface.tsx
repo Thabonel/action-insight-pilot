@@ -187,13 +187,26 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
     }, 3000);
   };
 
-  // Function to create campaign from parsed data
+  // Function to create campaign from parsed data with brief generation
   const createCampaignFromData = async (campaignData: any) => {
     setIsCreatingCampaign(true);
     setCampaignError(null);
     
     try {
-      const result = await apiClient.createCampaignFromAI(campaignData);
+      // Generate campaign brief
+      const { generateCampaignBrief } = await import('@/lib/campaign-brief-generator');
+      const brief = generateCampaignBrief(campaignData);
+      
+      // Add brief to campaign content
+      const updatedCampaignData = {
+        ...campaignData,
+        content: {
+          ...campaignData.content,
+          brief: brief
+        }
+      };
+
+      const result = await apiClient.createCampaignFromAI(updatedCampaignData);
 
       if (result.success) {
         setCampaignCreated(true);
