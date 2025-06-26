@@ -69,18 +69,34 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
       .join(' ')
       .toLowerCase();
 
-    // Keywords that indicate campaign creation readiness
+    // Enhanced detection for campaign readiness
     const readyPhrases = [
       'ready to create',
       'create the campaign',
+      'create your campaign',
       'enough information',
       'build your campaign',
       'create your campaign now',
       'shall we create',
-      "let's create the campaign"
+      "let's create the campaign",
+      'generate a complete campaign plan',
+      'comprehensive campaign plan',
+      'ready to create your multi-channel campaign'
     ];
 
-    return readyPhrases.some(phrase => conversationText.includes(phrase));
+    // Also check if user explicitly confirms
+    const userConfirmations = messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content.toLowerCase());
+    
+    const hasUserConfirmation = userConfirmations.some(msg => 
+      msg.includes('yes, create') || 
+      msg.includes('create the campaign') ||
+      msg.includes('go ahead') ||
+      msg.includes('proceed')
+    );
+
+    return readyPhrases.some(phrase => conversationText.includes(phrase)) || hasUserConfirmation;
   };
 
   // Show campaign preview instead of creating immediately
@@ -280,10 +296,22 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
     setSuggestedTemplates([]); // Clear suggestions after selection
   };
 
-  // Format campaign preview
+  // Enhanced campaign preview formatting
   const formatCampaignPreview = (campaign: any) => {
     const formatBudget = (amount: number) => `$${amount.toLocaleString()}`;
     const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString();
+    const formatKPITargets = (kpiTargets: Record<string, any>) => {
+      if (!kpiTargets || Object.keys(kpiTargets).length === 0) return 'Not specified';
+      
+      const formattedTargets = [];
+      if (kpiTargets.leads) formattedTargets.push(`${kpiTargets.leads} leads ${kpiTargets.leads_period ? `per ${kpiTargets.leads_period}` : ''}`);
+      if (kpiTargets.conversion_rate) formattedTargets.push(`${kpiTargets.conversion_rate}% conversion rate`);
+      if (kpiTargets.engagement_rate) formattedTargets.push(`${kpiTargets.engagement_rate}% engagement rate`);
+      if (kpiTargets.email_open_rate) formattedTargets.push(`${kpiTargets.email_open_rate}% email open rate`);
+      if (kpiTargets.email_click_rate) formattedTargets.push(`${kpiTargets.email_click_rate}% email click rate`);
+      
+      return formattedTargets.length > 0 ? formattedTargets.join(', ') : 'Not specified';
+    };
 
     return {
       name: campaign.name || 'Untitled Campaign',
@@ -293,7 +321,10 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
       endDate: campaign.end_date ? formatDate(campaign.end_date) : 'Not specified',
       targetAudience: campaign.target_audience || 'Not specified',
       objective: campaign.primary_objective || 'Not specified',
-      channel: campaign.channel || 'Not specified'
+      channel: campaign.channel || 'Not specified',
+      channels: Array.isArray(campaign.channels) ? campaign.channels.join(', ') : campaign.channel || 'Not specified',
+      kpiTargets: formatKPITargets(campaign.kpi_targets),
+      isMultiChannel: Array.isArray(campaign.channels) && campaign.channels.length > 1
     };
   };
 
@@ -412,36 +443,49 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 {(() => {
                   const preview = formatCampaignPreview(previewCampaignData);
                   return (
-                    <div className="space-y-3 mb-4">
-                      <div>
-                        <span className="font-medium text-blue-800">Campaign Name:</span>
-                        <span className="ml-2 text-blue-700">{preview.name}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-blue-800">Type:</span>
-                        <span className="ml-2 text-blue-700 capitalize">{preview.type.replace('_', ' ')}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-blue-800">Channel:</span>
-                        <span className="ml-2 text-blue-700">{preview.channel}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-blue-800">Budget:</span>
-                        <span className="ml-2 text-blue-700">{preview.budget}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-blue-800">Duration:</span>
-                        <span className="ml-2 text-blue-700">{preview.startDate} - {preview.endDate}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-blue-800">Target Audience:</span>
-                        <span className="ml-2 text-blue-700">{preview.targetAudience}</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-blue-800">Objective:</span>
-                        <span className="ml-2 text-blue-700">{preview.objective}</span>
-                      </div>
-                    </div>
+                     <div className="space-y-3 mb-4">
+                       <div>
+                         <span className="font-medium text-blue-800">Campaign Name:</span>
+                         <span className="ml-2 text-blue-700">{preview.name}</span>
+                       </div>
+                       <div>
+                         <span className="font-medium text-blue-800">Type:</span>
+                         <span className="ml-2 text-blue-700 capitalize">{preview.type.replace('_', ' ')}</span>
+                         {preview.isMultiChannel && (
+                           <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                             Multi-Channel
+                           </span>
+                         )}
+                       </div>
+                       <div>
+                         <span className="font-medium text-blue-800">
+                           {preview.isMultiChannel ? 'Channels:' : 'Channel:'}
+                         </span>
+                         <span className="ml-2 text-blue-700 capitalize">{preview.channels}</span>
+                       </div>
+                       <div>
+                         <span className="font-medium text-blue-800">Budget:</span>
+                         <span className="ml-2 text-blue-700">{preview.budget}</span>
+                       </div>
+                       <div>
+                         <span className="font-medium text-blue-800">Duration:</span>
+                         <span className="ml-2 text-blue-700">{preview.startDate} - {preview.endDate}</span>
+                       </div>
+                       <div>
+                         <span className="font-medium text-blue-800">Target Audience:</span>
+                         <span className="ml-2 text-blue-700">{preview.targetAudience}</span>
+                       </div>
+                       <div>
+                         <span className="font-medium text-blue-800">Objective:</span>
+                         <span className="ml-2 text-blue-700">{preview.objective}</span>
+                       </div>
+                       {preview.kpiTargets !== 'Not specified' && (
+                         <div>
+                           <span className="font-medium text-blue-800">KPI Targets:</span>
+                           <span className="ml-2 text-blue-700">{preview.kpiTargets}</span>
+                         </div>
+                       )}
+                     </div>
                   );
                 })()}
                 
