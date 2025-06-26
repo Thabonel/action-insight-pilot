@@ -391,61 +391,79 @@ export type Database = {
       campaigns: {
         Row: {
           budget_allocated: number | null
+          budget_breakdown: Json | null
           budget_spent: number | null
           channel: string
+          channels: Json | null
+          compliance_checklist: Json | null
           content: Json | null
           created_at: string | null
           created_by: string
+          demographics: Json | null
           description: string | null
           end_date: string | null
           id: string
+          kpi_targets: Json | null
           metrics: Json | null
           name: string
-          new_column_name: string | null
+          primary_objective: string | null
           settings: Json | null
           start_date: string | null
           status: Database["public"]["Enums"]["campaign_status"] | null
           target_audience: string | null
+          total_budget: number | null
           type: Database["public"]["Enums"]["campaign_type"]
           updated_at: string | null
         }
         Insert: {
           budget_allocated?: number | null
+          budget_breakdown?: Json | null
           budget_spent?: number | null
           channel: string
+          channels?: Json | null
+          compliance_checklist?: Json | null
           content?: Json | null
           created_at?: string | null
           created_by: string
+          demographics?: Json | null
           description?: string | null
           end_date?: string | null
           id?: string
+          kpi_targets?: Json | null
           metrics?: Json | null
           name: string
-          new_column_name?: string | null
+          primary_objective?: string | null
           settings?: Json | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["campaign_status"] | null
           target_audience?: string | null
+          total_budget?: number | null
           type: Database["public"]["Enums"]["campaign_type"]
           updated_at?: string | null
         }
         Update: {
           budget_allocated?: number | null
+          budget_breakdown?: Json | null
           budget_spent?: number | null
           channel?: string
+          channels?: Json | null
+          compliance_checklist?: Json | null
           content?: Json | null
           created_at?: string | null
           created_by?: string
+          demographics?: Json | null
           description?: string | null
           end_date?: string | null
           id?: string
+          kpi_targets?: Json | null
           metrics?: Json | null
           name?: string
-          new_column_name?: string | null
+          primary_objective?: string | null
           settings?: Json | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["campaign_status"] | null
           target_audience?: string | null
+          total_budget?: number | null
           type?: Database["public"]["Enums"]["campaign_type"]
           updated_at?: string | null
         }
@@ -491,25 +509,40 @@ export type Database = {
       }
       chat_sessions: {
         Row: {
+          content: string
           created_at: string
           id: string
+          message_type: string | null
           metadata: Json | null
+          query: string | null
+          response: string | null
+          session_id: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          content: string
           created_at?: string
           id?: string
+          message_type?: string | null
           metadata?: Json | null
+          query?: string | null
+          response?: string | null
+          session_id?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          content?: string
           created_at?: string
           id?: string
+          message_type?: string | null
           metadata?: Json | null
+          query?: string | null
+          response?: string | null
+          session_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
