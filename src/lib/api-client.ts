@@ -508,6 +508,51 @@ export class ApiClient {
     }
   }
 
+  async createCampaignFromAI(parsedCampaignData: any): Promise<ApiResponse<Campaign>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return {
+          success: false,
+          error: 'Authentication required',
+          message: 'User must be logged in to create campaign'
+        };
+      }
+
+      const dbRecord = this.campaignToDb(parsedCampaignData);
+      dbRecord.created_by = user.id;
+
+      const { data, error } = await supabase
+        .from('campaigns')
+        .insert([dbRecord])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Database insertion error:', error);
+        return {
+          success: false,
+          error: 'Database error',
+          message: error.message
+        };
+      }
+
+      const campaign = this.dbToCampaign(data);
+
+      return {
+        success: true,
+        data: campaign
+      };
+    } catch (error) {
+      console.error('Error creating campaign from AI:', error);
+      return {
+        success: false,
+        error: 'Unexpected error',
+        message: 'Failed to create campaign from AI'
+      };
+    }
+  }
+
   // Budget calculation helper
   calculateBudgetUsage(campaign: Campaign): number {
     if (!campaign.budget_allocated || campaign.budget_allocated === 0) {
