@@ -68,20 +68,42 @@ serve(async (req) => {
       }
     }
 
-    // Prepare the system prompt for marketing context
-    const systemPrompt = `You are PAM, an intelligent AI marketing assistant for a comprehensive marketing automation platform. You help users with:
+    // Prepare the system prompt for campaign creation specialist
+    const systemPrompt = `You are PAM, a specialized Campaign Creation Assistant. Your primary goal is to guide users through creating comprehensive marketing campaigns by asking strategic questions and enhancing their answers.
 
-1. Campaign strategy and optimization
-2. Content creation and marketing copy
-3. Lead management and scoring
-4. Email marketing campaigns
-5. Social media management
-6. Analytics and performance insights
-7. Marketing automation workflows
+CORE RESPONSIBILITIES:
+1. Ask strategic marketing questions ONE AT A TIME in a conversational manner
+2. Enhance simple user answers into professional marketing language 
+3. Track which campaign elements have been gathered
+4. Know when enough information exists to create a campaign
+
+QUESTION SEQUENCE TO FOLLOW:
+1. Industry/Business Context
+2. Target Audience (demographics, behaviors, pain points)
+3. Budget (total marketing budget)
+4. Goals/Objectives (what they want to achieve)
+5. Timeline (campaign duration)
+6. Marketing Channels (preferred platforms)
+7. Key Messages (value propositions, unique selling points)
+8. Success Metrics (how they'll measure results)
+
+CONVERSATION STYLE:
+- Ask ONE question at a time, never multiple
+- Acknowledge their previous answer before asking the next question
+- Enhance their simple answers into professional marketing language
+- Show enthusiasm and expertise
+- Be conversational, not robotic
+- When you have enough info (6+ key elements), offer to create the campaign
+
+RESPONSE FORMAT:
+- Acknowledge their answer professionally
+- Ask the next strategic question
+- Keep responses concise but engaging
+- Use marketing terminology appropriately
 
 ${userContext ? `User Context: ${userContext}` : ''}
 
-Always provide actionable, specific advice. Be friendly but professional. Focus on practical marketing solutions.`
+Remember: You are building a campaign step-by-step. Stay focused on the questionnaire until you have comprehensive campaign details.`
 
     // Call OpenAI API
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -172,57 +194,57 @@ function generateSuggestions(query: string, response: string): string[] {
   const queryLower = query.toLowerCase()
   const responseLower = response.toLowerCase()
 
-  // Marketing-focused suggestions based on query content
-  if (queryLower.includes('campaign')) {
+  // Campaign creation focused suggestions
+  if (queryLower.includes('industry') || queryLower.includes('business')) {
     return [
-      "How can I improve my campaign ROI?",
-      "What are the best practices for campaign targeting?",
-      "Show me campaign performance metrics",
-      "Help me optimize my campaign budget"
+      "Tell me about your target audience",
+      "What's your marketing budget?",
+      "What are your main campaign goals?",
+      "I want to create a new campaign"
     ]
   }
 
-  if (queryLower.includes('email')) {
+  if (queryLower.includes('audience') || queryLower.includes('target')) {
     return [
-      "How can I improve my email open rates?",
-      "What subject lines work best?",
-      "Help me create an email sequence",
-      "Show me email automation workflows"
+      "What's your budget for this campaign?",
+      "What goals do you want to achieve?",
+      "Which marketing channels interest you?",
+      "How long should this campaign run?"
     ]
   }
 
-  if (queryLower.includes('content')) {
+  if (queryLower.includes('budget') || queryLower.includes('spend')) {
     return [
-      "Generate content ideas for my industry",
-      "Help me create a content calendar",
-      "What content performs best on social media?",
-      "Show me content optimization tips"
+      "What are your campaign objectives?",
+      "How long should the campaign run?",
+      "Which marketing channels do you prefer?",
+      "What's your key message?"
     ]
   }
 
-  if (queryLower.includes('lead')) {
+  if (queryLower.includes('goal') || queryLower.includes('objective')) {
     return [
-      "How can I improve lead quality?",
-      "What's the best lead scoring strategy?",
-      "Help me create lead nurturing campaigns",
-      "Show me lead conversion tactics"
+      "How long should this campaign run?",
+      "Which marketing channels work best for you?",
+      "What's your unique value proposition?",
+      "How will you measure success?"
     ]
   }
 
-  if (queryLower.includes('social')) {
+  if (queryLower.includes('channel') || queryLower.includes('platform')) {
     return [
-      "What's the best posting schedule?",
-      "Help me create engaging social content",
-      "How can I increase social engagement?",
-      "Show me social media analytics"
+      "What's your key marketing message?",
+      "How will you measure campaign success?",
+      "What makes your offering unique?",
+      "Create the campaign now"
     ]
   }
 
-  // Default suggestions
+  // Default campaign creation suggestions
   return [
-    "Tell me more about marketing automation",
-    "How can I improve my overall marketing performance?",
-    "What metrics should I be tracking?",
-    "Help me create a marketing strategy"
+    "I want to create a new marketing campaign",
+    "Help me plan a campaign strategy",
+    "What industry are you in?",
+    "Let's start building your campaign"
   ]
 }
