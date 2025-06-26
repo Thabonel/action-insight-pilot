@@ -263,6 +263,212 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
     result.content = content;
   }
 
+  // Extract dates
+  const datePatterns = [
+    /start[:\s]+([^.\n]+)/i,
+    /begin[:\s]+([^.\n]+)/i,
+    /launch[:\s]+([^.\n]+)/i,
+    /starting[:\s]+([^.\n]+)/i
+  ];
+  
+  for (const pattern of datePatterns) {
+    const match = conversationText.match(pattern);
+    if (match && match[1]) {
+      try {
+        const dateStr = match[1].trim();
+        const parsedDate = new Date(dateStr);
+        if (!isNaN(parsedDate.getTime())) {
+          result.start_date = parsedDate.toISOString();
+        }
+      } catch {
+        // Invalid date, continue
+      }
+      break;
+    }
+  }
+
+  const endDatePatterns = [
+    /end[:\s]+([^.\n]+)/i,
+    /finish[:\s]+([^.\n]+)/i,
+    /until[:\s]+([^.\n]+)/i,
+    /through[:\s]+([^.\n]+)/i
+  ];
+  
+  for (const pattern of endDatePatterns) {
+    const match = conversationText.match(pattern);
+    if (match && match[1]) {
+      try {
+        const dateStr = match[1].trim();
+        const parsedDate = new Date(dateStr);
+        if (!isNaN(parsedDate.getTime())) {
+          result.end_date = parsedDate.toISOString();
+        }
+      } catch {
+        // Invalid date, continue
+      }
+      break;
+    }
+  }
+
+  // Apply smart defaults
+  return applySmartDefaults(result);
+}
+
+export function applySmartDefaults(campaign: ParsedCampaign): ParsedCampaign {
+  const result = { ...campaign };
+
+  // Smart default for campaign name
+  if (!result.name) {
+    const typeLabel = result.type === 'social_media' ? 'Social Media' : 
+                     result.type === 'paid_ads' ? 'Paid Advertising' :
+                     result.type ? result.type.charAt(0).toUpperCase() + result.type.slice(1) : 'Marketing';
+    result.name = `${typeLabel} Campaign ${new Date().getFullYear()}`;
+  }
+
+  // Smart default for start date (today if not specified)
+  if (!result.start_date) {
+    result.start_date = new Date().toISOString();
+  }
+
+  // Smart default for end date (30 days from start date)
+  if (!result.end_date && result.start_date) {
+    const startDate = new Date(result.start_date);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 30);
+    result.end_date = endDate.toISOString();
+  }
+
+  // Smart default for budget based on campaign type
+  if (!result.budget_allocated && !result.total_budget) {
+    const defaultBudgets: Record<string, number> = {
+      'email': 2000,
+      'social_media': 3000,
+      'content': 4000,
+      'seo': 5000,
+      'paid_ads': 8000,
+      'other': 3000
+    };
+    
+    const suggestedBudget = defaultBudgets[result.type || 'other'];
+    result.budget_allocated = suggestedBudget;
+    result.total_budget = suggestedBudget;
+  }
+
+  // Smart default for target audience if not specified
+  if (!result.target_audience) {
+    const defaultAudiences: Record<string, string> = {
+      'email': 'existing customers and qualified leads interested in company updates and offers',
+      'social_media': 'engaged social media users aged 25-45 who follow industry-related content',
+      'content': 'professionals seeking educational resources and industry insights',
+      'seo': 'organic searchers looking for solutions in the relevant industry',
+      'paid_ads': 'high-intent prospects actively researching products or services',
+      'other': 'target demographics aligned with business objectives'
+    };
+    
+    result.target_audience = defaultAudiences[result.type || 'other'];
+  }
+
+  // Smart default for primary objective
+  if (!result.primary_objective) {
+    const defaultObjectives: Record<string, string> = {
+      'email': 'increase customer engagement and drive repeat purchases through targeted email communications',
+      'social_media': 'build brand awareness and community engagement across social platforms',
+      'content': 'establish thought leadership and generate qualified leads through valuable content',
+      'seo': 'improve organic search visibility and drive qualified website traffic',
+      'paid_ads': 'generate immediate leads and conversions through targeted advertising',
+      'other': 'achieve measurable business growth through strategic marketing initiatives'
+    };
+    
+    result.primary_objective = defaultObjectives[result.type || 'other'];
+  }
+
+  // Smart default for KPI targets based on campaign type
+  if (!result.kpi_targets || Object.keys(result.kpi_targets).length === 0) {
+    const defaultKPIs: Record<string, Record<string, any>> = {
+      'email': {
+        open_rate: 25,
+        click_through_rate: 3.5,
+        conversion_rate: 2.1
+      },
+      'social_media': {
+        engagement_rate: 4.2,
+        reach: 10000,
+        follower_growth: 5
+      },
+      'content': {
+        page_views: 5000,
+        time_on_page: 180,
+        lead_generation: 100
+      },
+      'seo': {
+        organic_traffic_increase: 20,
+        keyword_rankings: 10,
+        conversion_rate: 2.5
+      },
+      'paid_ads': {
+        click_through_rate: 2.8,
+        cost_per_acquisition: 50,
+        return_on_ad_spend: 4
+      },
+      'other': {
+        traffic_increase: 15,
+        conversion_rate: 2.0,
+        lead_generation: 75
+      }
+    };
+    
+    result.kpi_targets = defaultKPIs[result.type || 'other'];
+  }
+
+  // Smart default for budget breakdown
+  if (!result.budget_breakdown && result.total_budget) {
+    const totalBudget = result.total_budget;
+    const defaultBreakdowns: Record<string, Record<string, number>> = {
+      'email': {
+        platform_costs: Math.round(totalBudget * 0.3),
+        design_content: Math.round(totalBudget * 0.4),
+        tools_automation: Math.round(totalBudget * 0.3)
+      },
+      'social_media': {
+        ad_spend: Math.round(totalBudget * 0.6),
+        content_creation: Math.round(totalBudget * 0.25),
+        management_tools: Math.round(totalBudget * 0.15)
+      },
+      'content': {
+        content_creation: Math.round(totalBudget * 0.5),
+        promotion: Math.round(totalBudget * 0.3),
+        tools_software: Math.round(totalBudget * 0.2)
+      },
+      'seo': {
+        tools_software: Math.round(totalBudget * 0.4),
+        content_optimization: Math.round(totalBudget * 0.35),
+        technical_seo: Math.round(totalBudget * 0.25)
+      },
+      'paid_ads': {
+        ad_spend: Math.round(totalBudget * 0.7),
+        creative_development: Math.round(totalBudget * 0.2),
+        management_fees: Math.round(totalBudget * 0.1)
+      },
+      'other': {
+        execution: Math.round(totalBudget * 0.6),
+        creative: Math.round(totalBudget * 0.25),
+        tools: Math.round(totalBudget * 0.15)
+      }
+    };
+    
+    result.budget_breakdown = defaultBreakdowns[result.type || 'other'];
+  }
+
+  // Smart default for settings
+  if (!result.settings) {
+    result.settings = {
+      auto_optimization: true,
+      frequency_capping: result.type === 'email' ? { daily: 1, weekly: 3 } : { daily: 3, weekly: 10 },
+      a_b_testing: true,
+      reporting_frequency: 'weekly'
+    };
+  }
+
   return result;
 }
 
