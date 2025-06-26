@@ -277,3 +277,175 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
 
   return result;
 }
+
+export function enhanceUserAnswer(userInput: string, questionKey: string): string {
+  const input = userInput.toLowerCase().trim();
+  
+  // Industry enhancement patterns
+  if (questionKey === 'industry') {
+    const industryMap: Record<string, string> = {
+      'restaurants': 'restaurant industry focusing on operational efficiency and customer experience enhancement',
+      'restaurant': 'restaurant industry focusing on operational efficiency and customer experience enhancement',
+      'retail': 'retail sector emphasizing customer engagement and omnichannel commerce optimization',
+      'tech': 'technology sector driving innovation and digital transformation solutions',
+      'healthcare': 'healthcare industry prioritizing patient care improvement and operational excellence',
+      'finance': 'financial services sector focusing on customer trust and digital banking innovation',
+      'education': 'education sector enhancing learning outcomes and institutional effectiveness',
+      'manufacturing': 'manufacturing industry optimizing production efficiency and supply chain management',
+      'real estate': 'real estate market focusing on property value optimization and client relationship management',
+      'fitness': 'fitness and wellness industry promoting healthy lifestyle transformation',
+      'beauty': 'beauty and cosmetics sector emphasizing personal care and aesthetic enhancement',
+      'automotive': 'automotive industry driving mobility innovation and customer satisfaction',
+      'travel': 'travel and hospitality sector creating memorable experiences and seamless journeys',
+      'legal': 'legal services industry providing comprehensive counsel and regulatory compliance',
+      'consulting': 'professional consulting services delivering strategic insights and business transformation'
+    };
+
+    for (const [key, enhancement] of Object.entries(industryMap)) {
+      if (input.includes(key)) {
+        return enhancement;
+      }
+    }
+    
+    // Generic industry enhancement
+    return `${input} industry focused on growth, customer satisfaction, and market leadership`;
+  }
+
+  // Target audience enhancement patterns
+  if (questionKey === 'target_audience') {
+    if (input.includes('young') || input.includes('millennials') || input.includes('gen z')) {
+      return `digitally-native consumers aged 18-35 who value authenticity, social responsibility, and seamless digital experiences`;
+    }
+    if (input.includes('business') || input.includes('b2b') || input.includes('companies')) {
+      return `decision-makers at growing businesses seeking efficiency improvements and competitive advantages`;
+    }
+    if (input.includes('families') || input.includes('parents')) {
+      return `family-oriented consumers prioritizing value, convenience, and products that enhance their quality of life`;
+    }
+    if (input.includes('professionals') || input.includes('working')) {
+      return `career-focused professionals seeking solutions that optimize their productivity and work-life balance`;
+    }
+    
+    // Generic audience enhancement
+    return `engaged consumers who value quality, trust, and meaningful brand relationships in the ${input} demographic`;
+  }
+
+  // Goals/objectives enhancement patterns
+  if (questionKey === 'goals') {
+    const goalMap: Record<string, string> = {
+      'awareness': 'comprehensive brand awareness expansion through strategic multi-channel visibility campaigns',
+      'leads': 'qualified lead generation with optimized conversion funnels and nurturing sequences',
+      'sales': 'revenue growth acceleration through targeted customer acquisition and retention strategies',
+      'engagement': 'enhanced customer engagement fostering long-term brand loyalty and community building',
+      'traffic': 'strategic website traffic growth with focus on high-intent visitors and conversion optimization',
+      'retention': 'customer retention improvement through personalized experiences and value-driven communications'
+    };
+
+    for (const [key, enhancement] of Object.entries(goalMap)) {
+      if (input.includes(key)) {
+        return enhancement;
+      }
+    }
+    
+    return `strategic business growth through ${input} optimization and performance enhancement`;
+  }
+
+  // Channels enhancement patterns
+  if (questionKey === 'channels') {
+    const channelMap: Record<string, string> = {
+      'social': 'integrated social media marketing across platforms with engaging content and community management',
+      'email': 'sophisticated email marketing campaigns with personalized messaging and automation workflows',
+      'google': 'comprehensive Google Ads strategy including search, display, and shopping campaigns',
+      'content': 'strategic content marketing featuring valuable resources, SEO optimization, and thought leadership',
+      'influencer': 'authentic influencer partnerships driving brand credibility and audience expansion'
+    };
+
+    for (const [key, enhancement] of Object.entries(channelMap)) {
+      if (input.includes(key)) {
+        return enhancement;
+      }
+    }
+    
+    return `strategic ${input} marketing approach with integrated campaigns and performance tracking`;
+  }
+
+  // Key messages enhancement patterns
+  if (questionKey === 'key_messages') {
+    if (input.includes('quality') || input.includes('best')) {
+      return `premium quality solutions delivering exceptional value and unmatched customer satisfaction`;
+    }
+    if (input.includes('affordable') || input.includes('cheap') || input.includes('budget')) {
+      return `cost-effective solutions providing maximum value without compromising on quality or service`;
+    }
+    if (input.includes('fast') || input.includes('quick') || input.includes('speed')) {
+      return `rapid service delivery and efficient solutions that respect your time and urgent needs`;
+    }
+    if (input.includes('reliable') || input.includes('trust')) {
+      return `dependable partnership built on trust, transparency, and consistent delivery excellence`;
+    }
+    
+    return `compelling value proposition emphasizing ${input} as a key differentiator in the marketplace`;
+  }
+
+  // Budget enhancement patterns
+  if (questionKey === 'budget') {
+    const amount = input.match(/(\d+)/)?.[1];
+    if (amount) {
+      const numAmount = parseInt(amount);
+      if (numAmount < 1000) {
+        return `strategic budget allocation of $${amount} focused on high-impact, cost-effective marketing channels`;
+      } else if (numAmount < 10000) {
+        return `comprehensive marketing investment of $${amount} enabling multi-channel campaigns with measurable ROI`;
+      } else {
+        return `substantial marketing budget of $${amount} supporting enterprise-level campaigns across all major channels`;
+      }
+    }
+    
+    return `optimized budget allocation ensuring maximum return on marketing investment through ${input}`;
+  }
+
+  // Timeline enhancement patterns
+  if (questionKey === 'timeline') {
+    if (input.includes('week')) {
+      return `intensive short-term campaign designed for immediate impact and rapid market response`;
+    }
+    if (input.includes('month')) {
+      return `focused monthly campaign strategy with weekly optimization and performance tracking`;
+    }
+    if (input.includes('quarter') || input.includes('3 month')) {
+      return `comprehensive quarterly campaign with progressive objectives and milestone-based optimization`;
+    }
+    if (input.includes('ongoing') || input.includes('continuous')) {
+      return `sustainable long-term marketing strategy with continuous optimization and audience development`;
+    }
+    
+    return `strategically planned ${input} campaign timeline with phased implementation and regular performance reviews`;
+  }
+
+  // Success metrics enhancement patterns
+  if (questionKey === 'success_metrics') {
+    const metricsMap: Record<string, string> = {
+      'revenue': 'comprehensive revenue tracking with attribution modeling and customer lifetime value analysis',
+      'leads': 'qualified lead generation metrics including lead quality scores and conversion funnel performance',
+      'traffic': 'website traffic analysis featuring user engagement, session quality, and conversion pathways',
+      'awareness': 'brand awareness measurement through reach, frequency, and sentiment analysis across channels',
+      'engagement': 'multi-platform engagement tracking including interaction rates, shares, and community growth'
+    };
+
+    for (const [key, enhancement] of Object.entries(metricsMap)) {
+      if (input.includes(key)) {
+        return enhancement;
+      }
+    }
+    
+    return `comprehensive performance measurement framework tracking ${input} with detailed analytics and insights`;
+  }
+
+  // Generic enhancement for any unmatched input
+  if (input.length < 20) {
+    return `professionally optimized ${input} strategy aligned with industry best practices and performance objectives`;
+  }
+  
+  // If input is already detailed, enhance with professional language
+  return `${input.charAt(0).toUpperCase() + input.slice(1)} with strategic focus on measurable outcomes and sustainable growth`;
+}
