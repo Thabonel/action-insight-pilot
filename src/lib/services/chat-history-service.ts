@@ -28,6 +28,7 @@ export class ChatHistoryService {
         .insert({
           user_id: userId,
           title,
+          content: title, // content is required, using title as default content
           metadata: metadata || {}
         })
         .select()
