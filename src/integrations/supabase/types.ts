@@ -393,7 +393,9 @@ export type Database = {
           budget_allocated: number | null
           budget_breakdown: Json | null
           budget_spent: number | null
+          campaign_group_id: string | null
           channel: string
+          channel_budget_allocation: Json | null
           channels: Json | null
           compliance_checklist: Json | null
           content: Json | null
@@ -406,6 +408,7 @@ export type Database = {
           kpi_targets: Json | null
           metrics: Json | null
           name: string
+          parent_campaign_id: string | null
           primary_objective: string | null
           settings: Json | null
           start_date: string | null
@@ -419,7 +422,9 @@ export type Database = {
           budget_allocated?: number | null
           budget_breakdown?: Json | null
           budget_spent?: number | null
+          campaign_group_id?: string | null
           channel: string
+          channel_budget_allocation?: Json | null
           channels?: Json | null
           compliance_checklist?: Json | null
           content?: Json | null
@@ -432,6 +437,7 @@ export type Database = {
           kpi_targets?: Json | null
           metrics?: Json | null
           name: string
+          parent_campaign_id?: string | null
           primary_objective?: string | null
           settings?: Json | null
           start_date?: string | null
@@ -445,7 +451,9 @@ export type Database = {
           budget_allocated?: number | null
           budget_breakdown?: Json | null
           budget_spent?: number | null
+          campaign_group_id?: string | null
           channel?: string
+          channel_budget_allocation?: Json | null
           channels?: Json | null
           compliance_checklist?: Json | null
           content?: Json | null
@@ -458,6 +466,7 @@ export type Database = {
           kpi_targets?: Json | null
           metrics?: Json | null
           name?: string
+          parent_campaign_id?: string | null
           primary_objective?: string | null
           settings?: Json | null
           start_date?: string | null
@@ -467,7 +476,22 @@ export type Database = {
           type?: Database["public"]["Enums"]["campaign_type"]
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_parent_campaign_id_fkey"
+            columns: ["parent_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "active_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_parent_campaign_id_fkey"
+            columns: ["parent_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
@@ -2547,6 +2571,20 @@ export type Database = {
           target_audience: string | null
           type: Database["public"]["Enums"]["campaign_type"] | null
           updated_at: string | null
+        }
+        Relationships: []
+      }
+      campaign_groups: {
+        Row: {
+          campaign_group_id: string | null
+          campaign_ids: string[] | null
+          channel_count: number | null
+          channels: string[] | null
+          created_at: string | null
+          end_date: string | null
+          group_name: string | null
+          start_date: string | null
+          total_budget: number | null
         }
         Relationships: []
       }

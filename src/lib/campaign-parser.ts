@@ -205,24 +205,92 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
   // Extract KPI targets
   const kpiTargets: Record<string, any> = {};
   
+  // Lead generation targets
+  const leadsMatch = text.match(/([0-9,]+)\s*(?:qualified\s+)?leads?\s*(?:per\s+month|monthly|per\s+week|weekly)?/i);
+  if (leadsMatch) {
+    kpiTargets.leads = parseInt(leadsMatch[1].replace(/,/g, ''));
+    
+    // Extract period if specified
+    const periodMatch = text.match(/leads?\s*(?:per\s+)?(month|monthly|week|weekly|quarter|quarterly)/i);
+    if (periodMatch) {
+      kpiTargets.leads_period = periodMatch[1].toLowerCase().replace('ly', '');
+    } else {
+      kpiTargets.leads_period = 'month'; // default
+    }
+  }
+
+  // Conversion rate targets
+  const conversionRateMatch = text.match(/([0-9.]+)%?\s*conversion\s+rate/i);
+  if (conversionRateMatch) {
+    kpiTargets.conversion_rate = parseFloat(conversionRateMatch[1]);
+  }
+
+  // Engagement rate targets
+  const engagementRateMatch = text.match(/([0-9.]+)%?\s*engagement\s+rate/i);
+  if (engagementRateMatch) {
+    kpiTargets.engagement_rate = parseFloat(engagementRateMatch[1]);
+  }
+
+  // Email specific targets
+  const openRateMatch = text.match(/([0-9.]+)%?\s*(?:email\s+)?open\s+rate/i);
+  if (openRateMatch) {
+    kpiTargets.email_open_rate = parseFloat(openRateMatch[1]);
+  }
+
+  const clickRateMatch = text.match(/([0-9.]+)%?\s*(?:email\s+)?click\s+rate/i);
+  if (clickRateMatch) {
+    kpiTargets.email_click_rate = parseFloat(clickRateMatch[1]);
+  }
+
+  // Generic conversions
+  const conversionsMatch = text.match(/([0-9,]+)\s*conversions?\s*(?:per\s+month|monthly|per\s+week|weekly)?/i);
+  if (conversionsMatch) {
+    kpiTargets.conversions = parseInt(conversionsMatch[1].replace(/,/g, ''));
+    
+    const periodMatch = text.match(/conversions?\s*(?:per\s+)?(month|monthly|week|weekly|quarter|quarterly)/i);
+    if (periodMatch) {
+      kpiTargets.conversions_period = periodMatch[1].toLowerCase().replace('ly', '');
+    } else {
+      kpiTargets.conversions_period = 'month';
+    }
+  }
+
+  // CTR for ads
+  const ctrMatch = text.match(/([0-9.]+)%?\s*(?:ctr|click.through.rate)/i);
+  if (ctrMatch) {
+    kpiTargets.click_through_rate = parseFloat(ctrMatch[1]);
+  }
+
+  // ROAS (Return on Ad Spend)
+  const roasMatch = text.match(/([0-9.]+)(?:x|:1)?\s*(?:roas|return\s+on\s+ad\s+spend)/i);
+  if (roasMatch) {
+    kpiTargets.return_on_ad_spend = parseFloat(roasMatch[1]);
+  }
+
+  // Cost per acquisition
+  const cpaMatch = text.match(/\$?([0-9,]+)\s*(?:cpa|cost\s+per\s+acquisition|cost\s+per\s+lead)/i);
+  if (cpaMatch) {
+    kpiTargets.cost_per_acquisition = parseFloat(cpaMatch[1].replace(/,/g, ''));
+  }
+
+  // Social media specific
+  const reachMatch = text.match(/([0-9,]+)\s*reach/i);
+  if (reachMatch) {
+    kpiTargets.reach = parseInt(reachMatch[1].replace(/,/g, ''));
+  }
+
   const impressionsMatch = text.match(/([0-9,]+)\s*impressions/i);
   if (impressionsMatch) {
     kpiTargets.impressions = parseInt(impressionsMatch[1].replace(/,/g, ''));
   }
 
-  const clicksMatch = text.match(/([0-9,]+)\s*clicks/i);
-  if (clicksMatch) {
-    kpiTargets.clicks = parseInt(clicksMatch[1].replace(/,/g, ''));
-  }
-
-  const conversionsMatch = text.match(/([0-9,]+)\s*conversions?/i);
-  if (conversionsMatch) {
-    kpiTargets.conversions = parseInt(conversionsMatch[1].replace(/,/g, ''));
-  }
-
-  const ctrMatch = text.match(/([0-9.]+)%?\s*(?:ctr|click.through.rate)/i);
-  if (ctrMatch) {
-    kpiTargets.ctr = parseFloat(ctrMatch[1]);
+  // Measurement period (general)
+  const measurementPeriodMatch = text.match(/(?:measure|track|report)\s*(?:over|for)\s*([0-9]+)\s*(day|week|month|quarter)s?/i) ||
+                                text.match(/(?:monthly|weekly|quarterly|daily)\s*(?:targets|goals|measurement)/i);
+  if (measurementPeriodMatch) {
+    kpiTargets.measurement_period = measurementPeriodMatch[1] ? 
+      `${measurementPeriodMatch[1]} ${measurementPeriodMatch[2]}s` : 
+      measurementPeriodMatch[0].split(' ')[0];
   }
 
   if (Object.keys(kpiTargets).length > 0) {
