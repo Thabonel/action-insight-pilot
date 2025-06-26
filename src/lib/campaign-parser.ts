@@ -43,19 +43,7 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
   }
 
   // Extract campaign type
-  if (text.includes('email') || text.includes('newsletter') || text.includes('drip')) {
-    result.type = 'email';
-  } else if (text.includes('social') || text.includes('instagram') || text.includes('facebook') || text.includes('twitter') || text.includes('linkedin')) {
-    result.type = 'social_media';
-  } else if (text.includes('seo') || text.includes('search engine') || text.includes('organic')) {
-    result.type = 'seo';
-  } else if (text.includes('content') || text.includes('blog') || text.includes('article')) {
-    result.type = 'content';
-  } else if (text.includes('paid') || text.includes('ads') || text.includes('ppc') || text.includes('advertising')) {
-    result.type = 'paid_ads';
-  } else {
-    result.type = 'other';
-  }
+  result.type = detectCampaignType(text);
 
   // Extract channel
   const channelPatterns = [
@@ -276,6 +264,56 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
   }
 
   return result;
+}
+
+export function detectCampaignType(userInput: string): 'email' | 'social_media' | 'other' | 'seo' | 'content' | 'paid_ads' {
+  const text = userInput.toLowerCase();
+  
+  // Email campaign detection
+  if (text.includes('email blast') || text.includes('email campaign') || 
+      text.includes('newsletter') || text.includes('drip campaign') ||
+      text.includes('email marketing') || text.includes('email automation')) {
+    return 'email';
+  }
+  
+  // Social media campaign detection  
+  if (text.includes('social media') || text.includes('social campaign') ||
+      text.includes('instagram') || text.includes('facebook') || 
+      text.includes('twitter') || text.includes('linkedin') ||
+      text.includes('tiktok') || text.includes('social post')) {
+    return 'social_media';
+  }
+  
+  // Content campaign detection
+  if (text.includes('content marketing') || text.includes('blog campaign') ||
+      text.includes('article series') || text.includes('content creation') ||
+      text.includes('editorial calendar') || text.includes('content strategy')) {
+    return 'content';
+  }
+  
+  // SEO campaign detection
+  if (text.includes('seo campaign') || text.includes('search engine') ||
+      text.includes('organic search') || text.includes('keyword optimization') ||
+      text.includes('search ranking') || text.includes('google ranking')) {
+    return 'seo';
+  }
+  
+  // Paid ads campaign detection
+  if (text.includes('paid ads') || text.includes('ppc campaign') ||
+      text.includes('google ads') || text.includes('facebook ads') ||
+      text.includes('advertising campaign') || text.includes('sponsored posts') ||
+      text.includes('paid advertising') || text.includes('ad campaign')) {
+    return 'paid_ads';
+  }
+  
+  // Fallback to broader category detection
+  if (text.includes('email')) return 'email';
+  if (text.includes('social')) return 'social_media';  
+  if (text.includes('content') || text.includes('blog')) return 'content';
+  if (text.includes('seo') || text.includes('search')) return 'seo';
+  if (text.includes('ads') || text.includes('advertising')) return 'paid_ads';
+  
+  return 'other';
 }
 
 export function enhanceUserAnswer(userInput: string, questionKey: string): string {
