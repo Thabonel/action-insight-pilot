@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Send, Sparkles, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Loader2, AlertTriangle, RotateCcw, Save } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { parseCampaignFromConversation } from '@/lib/campaign-parser';
@@ -52,6 +52,8 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
 }) => {
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
   const [campaignCreated, setCampaignCreated] = useState(false);
+  const [campaignError, setCampaignError] = useState<string | null>(null);
+  const [failedCampaignData, setFailedCampaignData] = useState<any>(null);
 
   // Function to detect if conversation contains enough campaign information
   const detectCampaignReady = (messages: ChatMessage[]) => {
@@ -75,11 +77,78 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
     return readyPhrases.some(phrase => conversationText.includes(phrase));
   };
 
+  // Save failed campaign data to localStorage
+  const saveFailedCampaignToStorage = (campaignData: any, conversationText: string) => {
+    const failedAttempt = {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      campaignData,
+      conversationText,
+      userId: user?.id
+    };
+
+    const existingAttempts = JSON.parse(localStorage.getItem('failedCampaignAttempts') || '[]');
+    existingAttempts.push(failedAttempt);
+    
+    // Keep only the last 5 attempts to avoid storage bloat
+    if (existingAttempts.length > 5) {
+      existingAttempts.splice(0, existingAttempts.length - 5);
+    }
+    
+    localStorage.setItem('failedCampaignAttempts', JSON.stringify(existingAttempts));
+  };
+
+  // Retry campaign creation
+  const retryCampaignCreation = async () => {
+    if (!failedCampaignData) return;
+    
+    setCampaignError(null);
+    setIsCreatingCampaign(true);
+    
+    try {
+      const result = await apiClient.createCampaignFromAI(failedCampaignData);
+      
+      if (result.success) {
+        setCampaignCreated(true);
+        setFailedCampaignData(null);
+        console.log('Campaign created successfully on retry:', result.data);
+      } else {
+        setCampaignError(result.error || 'Failed to create campaign. Please try again.');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setCampaignError(errorMessage);
+      console.error('Error retrying campaign creation:', error);
+    } finally {
+      setIsCreatingCampaign(false);
+    }
+  };
+
+  // Save answers for later
+  const saveAnswersForLater = () => {
+    if (!failedCampaignData) return;
+    
+    const conversationText = chatHistory
+      .map(m => `${m.role}: ${m.content}`)
+      .join('\n');
+    
+    saveFailedCampaignToStorage(failedCampaignData, conversationText);
+    setCampaignError(null);
+    setFailedCampaignData(null);
+    
+    // Show success message temporarily
+    setTimeout(() => {
+      setCampaignCreated(false);
+    }, 3000);
+  };
+
   // Function to create campaign from conversation
   const createCampaignFromConversation = async () => {
     if (!user || isCreatingCampaign) return;
 
     setIsCreatingCampaign(true);
+    setCampaignError(null);
+    
     try {
       // Extract conversation text for parsing
       const conversationText = chatHistory
@@ -96,9 +165,27 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
         setCampaignCreated(true);
         console.log('Campaign created successfully:', result.data);
       } else {
-        console.error('Failed to create campaign:', result.error);
+        const errorMessage = result.error || 'Failed to create campaign. Please try again.';
+        setCampaignError(errorMessage);
+        setFailedCampaignData(parsedCampaign);
+        saveFailedCampaignToStorage(parsedCampaign, conversationText);
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while creating the campaign.';
+      setCampaignError(errorMessage);
+      
+      // Try to parse campaign data for potential retry
+      try {
+        const conversationText = chatHistory
+          .map(m => `${m.role}: ${m.content}`)
+          .join('\n');
+        const parsedCampaign = parseCampaignFromConversation(conversationText);
+        setFailedCampaignData(parsedCampaign);
+        saveFailedCampaignToStorage(parsedCampaign, conversationText);
+      } catch (parseError) {
+        console.error('Error parsing campaign data:', parseError);
+      }
+      
       console.error('Error creating campaign:', error);
     } finally {
       setIsCreatingCampaign(false);
@@ -225,6 +312,39 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 <div className="flex items-center space-x-2">
                   <Loader2 className="animate-spin w-4 h-4 text-green-600" />
                   <span className="text-sm">Creating your campaign...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {campaignError && (
+            <div className="flex justify-start">
+              <div className="bg-red-100 text-red-900 p-3 rounded-lg max-w-[80%]">
+                <div className="flex items-center space-x-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  <span className="text-sm font-medium">Campaign Creation Failed</span>
+                </div>
+                <p className="text-sm mb-3">{campaignError}</p>
+                <div className="flex space-x-2">
+                  <Button 
+                    onClick={retryCampaignCreation}
+                    disabled={isCreatingCampaign}
+                    size="sm"
+                    variant="outline"
+                    className="text-red-700 border-red-300 hover:bg-red-50"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Retry
+                  </Button>
+                  <Button 
+                    onClick={saveAnswersForLater}
+                    size="sm"
+                    variant="outline"
+                    className="text-red-700 border-red-300 hover:bg-red-50"
+                  >
+                    <Save className="w-3 h-3 mr-1" />
+                    Save for Later
+                  </Button>
                 </div>
               </div>
             </div>
