@@ -100,6 +100,27 @@ export function useCampaigns() {
         type: mapDatabaseTypeToInterface(campaign.type),
         status: mapDatabaseStatusToInterface(campaign.status),
         metrics: parseMetrics(campaign.metrics),
+        // Properly parse demographics JSON field
+        demographics: typeof campaign.demographics === 'object' && campaign.demographics !== null 
+          ? campaign.demographics as any
+          : {},
+        // Properly parse other JSONB fields
+        kpi_targets: typeof campaign.kpi_targets === 'object' && campaign.kpi_targets !== null
+          ? campaign.kpi_targets as any
+          : {},
+        budget_breakdown: typeof campaign.budget_breakdown === 'object' && campaign.budget_breakdown !== null
+          ? campaign.budget_breakdown as any
+          : {},
+        channels: Array.isArray(campaign.channels) ? campaign.channels.map(c => String(c)) : [],
+        content: typeof campaign.content === 'object' && campaign.content !== null
+          ? campaign.content as any
+          : {},
+        settings: typeof campaign.settings === 'object' && campaign.settings !== null
+          ? campaign.settings as any
+          : {},
+        compliance_checklist: typeof campaign.compliance_checklist === 'object' && campaign.compliance_checklist !== null
+          ? campaign.compliance_checklist as any
+          : {},
         // Ensure all required fields are present
         created_at: campaign.created_at || new Date().toISOString(),
         updated_at: campaign.updated_at || new Date().toISOString(),
