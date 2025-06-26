@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 export class ApiClient {
   private token: string = '';
-  private openaiKey: string = 'sk-proj-mNlPTuTqE8QcD7qNaRKNsHDTyPZ3wNVEQBdXdqBPdXmHkJZQKcGvCYBdrwA'; // Your OpenAI key
+  private renderBackendUrl: string = 'https://your-render-backend.onrender.com'; // Update with your actual Render backend URL
 
   setToken(token: string): void {
     this.token = token;
@@ -524,44 +524,33 @@ export class ApiClient {
     return ((revenue - spent) / spent) * 100;
   }
 
-  // Direct OpenAI Integration - FAST AND RELIABLE
+  // Render Backend AI Integration
   async queryAgent(query: string, context?: any): Promise<ApiResponse<any>> {
     try {
-      console.log('Calling OpenAI directly with query:', query);
+      console.log('Calling Render backend with query:', query);
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`${this.renderBackendUrl}/api/ai/chat`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.openaiKey}`,
           'Content-Type': 'application/json',
+          ...(this.token && { 'Authorization': `Bearer ${this.token}` })
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are PAM, an intelligent AI marketing assistant for a comprehensive marketing automation platform. You help users with campaign strategy, content creation, lead management, email marketing, social media management, and analytics. Always provide actionable, specific marketing advice. Be friendly but professional. Focus on practical marketing solutions.'
-            },
-            {
-              role: 'user',
-              content: query
-            }
-          ],
-          max_tokens: 400,
-          temperature: 0.7,
+          query,
+          context
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('OpenAI API error:', response.status, errorText);
-        throw new Error(`OpenAI API error: ${response.status}`);
+        console.error('Render backend API error:', response.status, errorText);
+        throw new Error(`Backend API error: ${response.status}`);
       }
 
       const data = await response.json();
-      const aiResponse = data.choices?.[0]?.message?.content || 'I apologize, but I could not generate a response at this time.';
+      const aiResponse = data.message || data.response || 'I apologize, but I could not generate a response at this time.';
 
-      console.log('OpenAI response received successfully');
+      console.log('Render backend response received successfully');
 
       // Generate relevant suggestions based on query
       const suggestions = this.generateSuggestions(query);
