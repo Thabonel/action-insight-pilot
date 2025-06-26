@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useConversationalDashboard } from '@/hooks/useConversationalDashboard';
 import ConversationalChatInterface from '@/components/dashboard/ConversationalChatInterface';
 import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
@@ -7,6 +7,7 @@ import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
 import { RealInsights } from '@/types/insights';
+import { CAMPAIGN_QUESTIONS, CampaignQuestion } from '@/lib/campaign-questions';
 
 const ConversationalDashboard: React.FC = () => {
   const {
@@ -19,6 +20,82 @@ const ConversationalDashboard: React.FC = () => {
     handleQuerySubmit,
     handleSuggestionClick
   } = useConversationalDashboard();
+
+  // Campaign creation flow state management
+  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
+  const [collectedAnswers, setCollectedAnswers] = useState<Record<string, any>>({});
+  const [campaignCreationStatus, setCampaignCreationStatus] = useState<'idle' | 'in_progress' | 'creating' | 'completed' | 'error'>('idle');
+  const [isCampaignFlow, setIsCampaignFlow] = useState<boolean>(false);
+
+  // Function to start campaign creation flow
+  const startCampaignFlow = () => {
+    setIsCampaignFlow(true);
+    setCampaignCreationStatus('in_progress');
+    setCurrentQuestion(0);
+    setCollectedAnswers({});
+  };
+
+  // Function to process user answer and move to next question
+  const processAnswer = (answer: string) => {
+    if (!isCampaignFlow || campaignCreationStatus !== 'in_progress') return;
+
+    const currentQuestionKey = CAMPAIGN_QUESTIONS[currentQuestion]?.key;
+    if (currentQuestionKey) {
+      setCollectedAnswers(prev => ({
+        ...prev,
+        [currentQuestionKey]: answer
+      }));
+
+      // Move to next question or complete flow
+      if (currentQuestion < CAMPAIGN_QUESTIONS.length - 1) {
+        setCurrentQuestion(prev => prev + 1);
+      } else {
+        setCampaignCreationStatus('creating');
+        // All questions answered, trigger campaign creation
+      }
+    }
+  };
+
+  // Function to get current question prompt
+  const getCurrentQuestionPrompt = (): string => {
+    if (!isCampaignFlow || campaignCreationStatus !== 'in_progress') {
+      return '';
+    }
+    return CAMPAIGN_QUESTIONS[currentQuestion]?.prompt || '';
+  };
+
+  // Function to get progress information
+  const getProgress = () => {
+    if (!isCampaignFlow) return { current: 0, total: 0, percentage: 0 };
+    
+    const total = CAMPAIGN_QUESTIONS.length;
+    const current = currentQuestion + 1;
+    const percentage = Math.round((current / total) * 100);
+    
+    return { current, total, percentage };
+  };
+
+  // Detect if user wants to start campaign creation
+  useEffect(() => {
+    if (chatHistory.length > 0 && !isCampaignFlow) {
+      const lastMessage = chatHistory[chatHistory.length - 1];
+      if (lastMessage.role === 'user') {
+        const userMessage = lastMessage.content.toLowerCase();
+        const campaignTriggers = [
+          'create campaign',
+          'new campaign', 
+          'build campaign',
+          'campaign creation',
+          'start campaign',
+          'make campaign'
+        ];
+        
+        if (campaignTriggers.some(trigger => userMessage.includes(trigger))) {
+          startCampaignFlow();
+        }
+      }
+    }
+  }, [chatHistory, isCampaignFlow]);
 
   // Convert insights array to proper RealInsights format
   const insights: RealInsights = React.useMemo(() => {
@@ -85,6 +162,19 @@ const ConversationalDashboard: React.FC = () => {
               handleQuerySubmit={handleQuerySubmit}
               handleSuggestionClick={handleSuggestionClick}
               user={user}
+              // Campaign flow specific props
+              isCampaignFlow={isCampaignFlow}
+              currentQuestion={getCurrentQuestionPrompt()}
+              progress={getProgress()}
+              campaignCreationStatus={campaignCreationStatus}
+              collectedAnswers={collectedAnswers}
+              onAnswerProvided={processAnswer}
+              onCampaignFlowReset={() => {
+                setIsCampaignFlow(false);
+                setCampaignCreationStatus('idle');
+                setCurrentQuestion(0);
+                setCollectedAnswers({});
+              }}
             />
           </div>
 

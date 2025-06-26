@@ -23,6 +23,14 @@ interface ConversationalChatInterfaceProps {
   handleQuerySubmit: (e: React.FormEvent) => void;
   handleSuggestionClick: (suggestion: string) => void;
   user: any;
+  // Campaign flow props
+  isCampaignFlow?: boolean;
+  currentQuestion?: string;
+  progress?: { current: number; total: number; percentage: number };
+  campaignCreationStatus?: 'idle' | 'in_progress' | 'creating' | 'completed' | 'error';
+  collectedAnswers?: Record<string, any>;
+  onAnswerProvided?: (answer: string) => void;
+  onCampaignFlowReset?: () => void;
 }
 
 const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = ({
@@ -32,7 +40,15 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   setQuery,
   handleQuerySubmit,
   handleSuggestionClick,
-  user
+  user,
+  // Campaign flow props
+  isCampaignFlow = false,
+  currentQuestion = '',
+  progress = { current: 0, total: 0, percentage: 0 },
+  campaignCreationStatus = 'idle',
+  collectedAnswers = {},
+  onAnswerProvided,
+  onCampaignFlowReset
 }) => {
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
   const [campaignCreated, setCampaignCreated] = useState(false);
