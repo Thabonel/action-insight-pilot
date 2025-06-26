@@ -10,3 +10,43 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// OAuth and social media helper functions
+export const oauthService = {
+  async initiateOAuth(platform: string) {
+    const { data, error } = await supabase.functions.invoke('oauth-initiate', {
+      body: { platform }
+    })
+    
+    if (error) throw error
+    return data
+  },
+
+  async getConnections() {
+    const { data, error } = await supabase.functions.invoke('social-connections', {
+      method: 'GET'
+    })
+    
+    if (error) throw error
+    return data
+  },
+
+  async disconnectPlatform(platform: string) {
+    const { data, error } = await supabase.functions.invoke('social-connections', {
+      method: 'DELETE',
+      body: { platform }
+    })
+    
+    if (error) throw error
+    return data
+  },
+
+  async postToSocial(platforms: string[], content: any) {
+    const { data, error } = await supabase.functions.invoke('social-post', {
+      body: { platforms, content }
+    })
+    
+    if (error) throw error
+    return data
+  }
+}
