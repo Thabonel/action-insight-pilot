@@ -64,7 +64,7 @@ export const useConversationalDashboard = () => {
 
       setChatHistory(prev => [...prev, userMessage]);
 
-      const result = await conversationalService.generateResponse(question);
+      const result = await conversationalService.generateResponse(question, { chatHistory });
       
       if (result.success && result.data) {
         const assistantMessage: ChatMessage = {
