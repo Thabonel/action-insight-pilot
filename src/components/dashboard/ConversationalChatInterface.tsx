@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { parseCampaignFromConversation } from '@/lib/campaign-parser';
 import { apiClient } from '@/lib/api-client';
+import { findRelevantTemplates, applyCampaignTemplate, type CampaignTemplate } from '@/lib/campaign-templates';
 import { Link } from 'react-router-dom';
 
 interface ChatMessage {
@@ -58,6 +59,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   const [failedCampaignData, setFailedCampaignData] = useState<any>(null);
   const [showCampaignPreview, setShowCampaignPreview] = useState(false);
   const [previewCampaignData, setPreviewCampaignData] = useState<any>(null);
+  const [suggestedTemplates, setSuggestedTemplates] = useState<CampaignTemplate[]>([]);
 
   // Function to detect if conversation contains enough campaign information
   const detectCampaignReady = (messages: ChatMessage[]) => {
@@ -233,6 +235,20 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
     showCampaignPreviewForApproval();
   };
 
+  // Check for template suggestions when user input changes
+  useEffect(() => {
+    if (chatHistory.length > 0) {
+      const latestUserMessage = chatHistory
+        .filter(m => m.role === 'user')
+        .slice(-1)[0]?.content || '';
+      
+      if (latestUserMessage.length > 10) {
+        const templates = findRelevantTemplates(latestUserMessage);
+        setSuggestedTemplates(templates);
+      }
+    }
+  }, [chatHistory]);
+
   // Check if campaign should be created when chat history updates
   useEffect(() => {
     if (chatHistory.length > 0 && !campaignCreated && !isCreatingCampaign && !showCampaignPreview) {
@@ -242,6 +258,14 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
       }
     }
   }, [chatHistory, campaignCreated, isCreatingCampaign, showCampaignPreview]);
+
+  // Handle template selection
+  const handleTemplateSelection = (template: CampaignTemplate) => {
+    const templateCampaign = applyCampaignTemplate(template);
+    setPreviewCampaignData(templateCampaign);
+    setShowCampaignPreview(true);
+    setSuggestedTemplates([]); // Clear suggestions after selection
+  };
 
   // Format campaign preview
   const formatCampaignPreview = (campaign: any) => {
@@ -259,14 +283,6 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
       channel: campaign.channel || 'Not specified'
     };
   };
-  useEffect(() => {
-    if (chatHistory.length > 0 && !campaignCreated && !isCreatingCampaign && !showCampaignPreview) {
-      const shouldCreate = detectCampaignReady(chatHistory);
-      if (shouldCreate) {
-        createCampaignFromConversation();
-      }
-    }
-  }, [chatHistory, campaignCreated, isCreatingCampaign, showCampaignPreview]);
 
   const suggestions = [
     "I want to create a new marketing campaign",
@@ -526,6 +542,55 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                       View All Campaigns
                     </Button>
                   </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Template Suggestions */}
+          {suggestedTemplates.length > 0 && !showCampaignPreview && !campaignCreated && (
+            <div className="flex justify-start">
+              <div className="bg-purple-50 border border-purple-200 text-purple-900 p-4 rounded-lg max-w-[90%]">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <span className="text-lg font-semibold">Suggested Campaign Templates</span>
+                </div>
+                <p className="text-sm text-purple-800 mb-4">
+                  Based on your requirements, here are some pre-built templates that might work for you:
+                </p>
+                <div className="space-y-3">
+                  {suggestedTemplates.map((template) => (
+                    <div key={template.id} className="bg-white border border-purple-200 rounded-lg p-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-purple-900 mb-1">{template.name}</h4>
+                          <p className="text-sm text-purple-700 mb-2">{template.description}</p>
+                          <div className="flex items-center space-x-4 text-xs text-purple-600">
+                            <span>Type: {template.template.type.replace('_', ' ')}</span>
+                            <span>Duration: {template.template.duration_days} days</span>
+                            <span>Budget: ${template.template.budget_range.min.toLocaleString()} - ${template.template.budget_range.max.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => handleTemplateSelection(template)}
+                          size="sm"
+                          className="bg-purple-600 hover:bg-purple-700 text-white ml-3"
+                        >
+                          Use Template
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 pt-3 border-t border-purple-200">
+                  <Button
+                    onClick={() => setSuggestedTemplates([])}
+                    size="sm"
+                    variant="outline"
+                    className="text-purple-700 border-purple-300 hover:bg-purple-50"
+                  >
+                    Continue Custom Campaign
+                  </Button>
                 </div>
               </div>
             </div>
