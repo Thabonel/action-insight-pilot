@@ -138,6 +138,7 @@ export class ConversationalService {
     const hasBasicInfo = this.hasBasicCampaignInfo(chatHistory);
     const hasKPITargets = this.hasKPITargets(chatHistory);
     const hasBudget = this.hasBudgetInfo(chatHistory);
+    const isMultiChannel = this.detectMultiChannel(chatHistory);
     
     let response = '';
     let suggestions: string[] = [];
@@ -152,34 +153,79 @@ What type of campaign are you looking to create? For example:
 - Product launch campaign
 - Lead generation campaign
 - Content marketing campaign
+- **Multi-channel campaign** (combining email + social, paid + organic, etc.)
 
 Also, what's your primary goal for this campaign?`;
       
       suggestions = [
         "I want to create an email campaign",
-        "Social media campaign for brand awareness",
-        "Product launch campaign",
-        "Lead generation campaign"
+        "Social media campaign for brand awareness", 
+        "Multi-channel campaign with email and social media",
+        "Product launch across multiple channels"
       ];
     } else if (!hasBudget) {
-      // Ask for budget information
-      response = `Great! Now let's talk about budget. Having a clear budget helps me recommend the best strategies and tactics for your campaign.
+      // Ask for budget information with multi-channel considerations
+      if (isMultiChannel) {
+        response = `Great! I see you're planning a multi-channel campaign. This is excellent for maximizing reach and impact.
+
+For multi-channel campaigns, budget allocation is crucial. What's your total budget, and do you have preferences for how to split it across channels?
+
+For example:
+- "$10,000 total - 60% for social ads, 40% for email marketing"
+- "$5,000 budget split equally between channels"
+- "I need help determining the optimal budget allocation"`;
+        
+        suggestions = [
+          "$10,000 total, 60% social media, 40% email",
+          "$5,000 split equally between channels",
+          "I need help with budget allocation",
+          "$15,000 for comprehensive multi-channel approach"
+        ];
+      } else {
+        response = `Great! Now let's talk about budget. Having a clear budget helps me recommend the best strategies and tactics for your campaign.
 
 What budget range are you working with for this campaign? Please include:
 - Total campaign budget
 - Preferred budget allocation (if you have preferences)
 
 For example: "$5,000 total budget" or "$10,000 with $7,000 for ads and $3,000 for creative"`;
-      
-      suggestions = [
-        "$5,000 total budget",
-        "$10,000 budget, mostly for advertising",
-        "$2,000 for a small campaign",
-        "I need help determining budget"
-      ];
+        
+        suggestions = [
+          "$5,000 total budget",
+          "$10,000 budget, mostly for advertising",
+          "$2,000 for a small campaign",
+          "I need help determining budget"
+        ];
+      }
     } else if (!hasKPITargets) {
-      // Ask for KPI targets - this is the new part!
-      response = `Excellent! Now let's set some specific KPI targets to measure your campaign's success. This will help us track performance and optimize as we go.
+      // Ask for KPI targets with multi-channel considerations
+      if (isMultiChannel) {
+        response = `Perfect! For your multi-channel campaign, let's set specific KPI targets for each channel to measure success effectively.
+
+What are your key performance targets? Please specify goals for:
+
+📈 **Overall Campaign Goals:**
+- Total leads or conversions you want to achieve
+- Timeline for these results
+
+📊 **Channel-Specific Targets:**
+- Email: Open rates, click rates, conversions
+- Social Media: Engagement rates, reach, follower growth  
+- Paid Ads: CTR, CPA, ROAS
+
+⏱️ **Measurement Period:**
+- Monthly, quarterly, or campaign duration targets
+
+For example: "Generate 200 total leads in 3 months - 120 from email (25% open rate) and 80 from social media (5% engagement rate)"`;
+        
+        suggestions = [
+          "200 total leads: 120 from email, 80 from social",
+          "5% engagement on social, 25% email open rate",
+          "100 conversions per month across all channels",
+          "$50 CPA for paid ads, 3% email conversion rate"
+        ];
+      } else {
+        response = `Excellent! Now let's set some specific KPI targets to measure your campaign's success. This will help us track performance and optimize as we go.
 
 What are your key performance targets? Please let me know your goals for:
 
@@ -196,16 +242,33 @@ What are your key performance targets? Please let me know your goals for:
 - When do you want to achieve these targets?
 
 For example: "Generate 100 qualified leads per month with a 3% conversion rate" or "Achieve 5% email open rate and 25% click rate"`;
-      
-      suggestions = [
-        "Generate 100 leads per month",
-        "Achieve 5% engagement rate on social media",
-        "Get 25% email open rate and 3% click rate",
-        "I need 50 conversions with 2% conversion rate"
-      ];
+        
+        suggestions = [
+          "Generate 100 leads per month",
+          "Achieve 5% engagement rate on social media",
+          "Get 25% email open rate and 3% click rate",
+          "I need 50 conversions with 2% conversion rate"
+        ];
+      }
     } else {
       // All information gathered, ready to create campaign
-      response = `Perfect! I have all the information I need to create your campaign:
+      if (isMultiChannel) {
+        response = `Excellent! I have all the information needed for your multi-channel campaign:
+
+✅ Campaign strategy across multiple channels
+✅ Budget allocation for each channel
+✅ Channel-specific KPI targets and measurement
+
+I'll create a comprehensive multi-channel campaign that includes:
+- **Linked campaigns** for each channel with shared messaging
+- **Budget distribution** optimized for your goals
+- **Unified tracking** across all channels
+- **Cross-channel optimization** opportunities
+- **Coordinated launch timeline** for maximum impact
+
+This approach will maximize your reach while maintaining consistent messaging across all touchpoints. Ready to create your multi-channel campaign?`;
+      } else {
+        response = `Perfect! I have all the information I need to create your campaign:
 
 ✅ Campaign type and objectives
 ✅ Budget allocation  
@@ -218,6 +281,7 @@ Based on our conversation, I'll create a comprehensive campaign plan with:
 - Timeline for achieving your target metrics
 
 Ready to create the campaign? I'll generate a complete campaign plan that includes tracking for all your specified KPI targets.`;
+      }
       
       suggestions = [
         "Yes, create the campaign",
@@ -240,10 +304,21 @@ Ready to create the campaign? I'll generate a complete campaign plan that includ
           isCampaignFlow: true,
           hasBasicInfo,
           hasKPITargets,
-          hasBudget
+          hasBudget,
+          isMultiChannel
         }
       }
     };
+  }
+
+  private detectMultiChannel(chatHistory: any[]): boolean {
+    const text = chatHistory.map((msg: any) => msg.content).join(' ').toLowerCase();
+    return text.includes('multi-channel') || 
+           text.includes('multiple channels') ||
+           text.includes('cross-channel') ||
+           (text.includes('email') && text.includes('social')) ||
+           (text.includes('paid') && text.includes('organic')) ||
+           (text.split('campaign').length > 2); // Multiple mentions of different campaign types
   }
 
   private hasBasicCampaignInfo(chatHistory: any[]): boolean {

@@ -19,6 +19,9 @@ export interface ParsedCampaign {
   budget_breakdown?: Record<string, any>;
   content?: Record<string, any>;
   settings?: Record<string, any>;
+  channel_budget_allocation?: Record<string, number>;
+  parent_campaign_id?: string;
+  campaign_group_id?: string;
 }
 
 export function parseCampaignFromConversation(conversationText: string): ParsedCampaign {
@@ -188,7 +191,7 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
     result.demographics = demographics;
   }
 
-  // Extract channels array
+  // Extract channels array and detect multi-channel campaigns
   const channels: string[] = [];
   const channelKeywords = ['instagram', 'facebook', 'twitter', 'linkedin', 'youtube', 'tiktok', 'email', 'google', 'bing'];
   
@@ -198,8 +201,34 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
     }
   }
   
+  // Check for multi-channel indicators
+  const isMultiChannel = channels.length > 1 || 
+    text.includes('multi-channel') || 
+    text.includes('multiple channels') ||
+    text.includes('cross-channel') ||
+    (text.includes('email') && text.includes('social')) ||
+    (text.includes('paid') && text.includes('organic'));
+  
   if (channels.length > 0) {
     result.channels = channels;
+  }
+
+  // Set up channel budget allocation for multi-channel campaigns
+  if (isMultiChannel && result.total_budget) {
+    const channelBudgetAllocation: Record<string, number> = {};
+    const budgetPerChannel = Math.floor(result.total_budget / channels.length);
+    
+    channels.forEach(channel => {
+      channelBudgetAllocation[channel] = budgetPerChannel;
+    });
+    
+    // Adjust for any remainder
+    const remainder = result.total_budget - (budgetPerChannel * channels.length);
+    if (remainder > 0 && channels.length > 0) {
+      channelBudgetAllocation[channels[0]] += remainder;
+    }
+    
+    result.channel_budget_allocation = channelBudgetAllocation;
   }
 
   // Extract KPI targets
@@ -662,102 +691,128 @@ export function enhanceUserAnswer(userInput: string, questionKey: string): strin
     return `strategic business growth through ${input} optimization and performance enhancement`;
   }
 
-  // Channels enhancement patterns
-  if (questionKey === 'channels') {
-    const channelMap: Record<string, string> = {
-      'social': 'integrated social media marketing across platforms with engaging content and community management',
-      'email': 'sophisticated email marketing campaigns with personalized messaging and automation workflows',
-      'google': 'comprehensive Google Ads strategy including search, display, and shopping campaigns',
-      'content': 'strategic content marketing featuring valuable resources, SEO optimization, and thought leadership',
-      'influencer': 'authentic influencer partnerships driving brand credibility and audience expansion'
+  // Default fallback
+  return userInput;
+}
+export function createMultiChannelCampaigns(baseCampaign: ParsedCampaign): ParsedCampaign[] {
+  if (!baseCampaign.channels || baseCampaign.channels.length <= 1) {
+    return [baseCampaign];
+  }
+
+  const campaigns: ParsedCampaign[] = [];
+  const campaignGroupId = crypto.randomUUID();
+  
+  // Create parent campaign
+  const parentCampaign = {
+    ...baseCampaign,
+    campaign_group_id: campaignGroupId,
+    name: baseCampaign.name || 'Multi-Channel Campaign',
+    channel: 'multi-channel'
+  };
+  campaigns.push(parentCampaign);
+
+  // Create linked campaigns for each channel
+  baseCampaign.channels.forEach((channel, index) => {
+    const channelBudget = baseCampaign.channel_budget_allocation?.[channel] || 
+                         Math.floor((baseCampaign.total_budget || 0) / baseCampaign.channels!.length);
+    
+    const linkedCampaign: ParsedCampaign = {
+      ...baseCampaign,
+      name: `${baseCampaign.name || 'Campaign'} - ${channel.charAt(0).toUpperCase() + channel.slice(1)}`,
+      channel: channel,
+      channels: [channel], // Single channel for this linked campaign
+      campaign_group_id: campaignGroupId,
+      parent_campaign_id: 'placeholder', // Will be set after parent is created
+      budget_allocated: channelBudget,
+      total_budget: channelBudget,
+      type: getChannelType(channel),
+      // Inherit shared settings but customize for channel
+      target_audience: baseCampaign.target_audience,
+      primary_objective: baseCampaign.primary_objective,
+      kpi_targets: filterKPITargetsForChannel(baseCampaign.kpi_targets, channel),
+      content: customizeContentForChannel(baseCampaign.content, channel)
     };
-
-    for (const [key, enhancement] of Object.entries(channelMap)) {
-      if (input.includes(key)) {
-        return enhancement;
-      }
-    }
     
-    return `strategic ${input} marketing approach with integrated campaigns and performance tracking`;
-  }
+    campaigns.push(linkedCampaign);
+  });
 
-  // Key messages enhancement patterns
-  if (questionKey === 'key_messages') {
-    if (input.includes('quality') || input.includes('best')) {
-      return `premium quality solutions delivering exceptional value and unmatched customer satisfaction`;
-    }
-    if (input.includes('affordable') || input.includes('cheap') || input.includes('budget')) {
-      return `cost-effective solutions providing maximum value without compromising on quality or service`;
-    }
-    if (input.includes('fast') || input.includes('quick') || input.includes('speed')) {
-      return `rapid service delivery and efficient solutions that respect your time and urgent needs`;
-    }
-    if (input.includes('reliable') || input.includes('trust')) {
-      return `dependable partnership built on trust, transparency, and consistent delivery excellence`;
-    }
-    
-    return `compelling value proposition emphasizing ${input} as a key differentiator in the marketplace`;
-  }
+  return campaigns;
+}
 
-  // Budget enhancement patterns
-  if (questionKey === 'budget') {
-    const amount = input.match(/(\d+)/)?.[1];
-    if (amount) {
-      const numAmount = parseInt(amount);
-      if (numAmount < 1000) {
-        return `strategic budget allocation of $${amount} focused on high-impact, cost-effective marketing channels`;
-      } else if (numAmount < 10000) {
-        return `comprehensive marketing investment of $${amount} enabling multi-channel campaigns with measurable ROI`;
-      } else {
-        return `substantial marketing budget of $${amount} supporting enterprise-level campaigns across all major channels`;
-      }
-    }
-    
-    return `optimized budget allocation ensuring maximum return on marketing investment through ${input}`;
-  }
+function getChannelType(channel: string): 'email' | 'social_media' | 'other' | 'seo' | 'content' | 'paid_ads' {
+  const channelTypeMap: Record<string, 'email' | 'social_media' | 'other' | 'seo' | 'content' | 'paid_ads'> = {
+    'email': 'email',
+    'instagram': 'social_media',
+    'facebook': 'social_media', 
+    'twitter': 'social_media',
+    'linkedin': 'social_media',
+    'youtube': 'social_media',
+    'tiktok': 'social_media',
+    'google': 'paid_ads',
+    'bing': 'paid_ads'
+  };
+  
+  return channelTypeMap[channel] || 'other';
+}
 
-  // Timeline enhancement patterns
-  if (questionKey === 'timeline') {
-    if (input.includes('week')) {
-      return `intensive short-term campaign designed for immediate impact and rapid market response`;
-    }
-    if (input.includes('month')) {
-      return `focused monthly campaign strategy with weekly optimization and performance tracking`;
-    }
-    if (input.includes('quarter') || input.includes('3 month')) {
-      return `comprehensive quarterly campaign with progressive objectives and milestone-based optimization`;
-    }
-    if (input.includes('ongoing') || input.includes('continuous')) {
-      return `sustainable long-term marketing strategy with continuous optimization and audience development`;
-    }
-    
-    return `strategically planned ${input} campaign timeline with phased implementation and regular performance reviews`;
-  }
-
-  // Success metrics enhancement patterns
-  if (questionKey === 'success_metrics') {
-    const metricsMap: Record<string, string> = {
-      'revenue': 'comprehensive revenue tracking with attribution modeling and customer lifetime value analysis',
-      'leads': 'qualified lead generation metrics including lead quality scores and conversion funnel performance',
-      'traffic': 'website traffic analysis featuring user engagement, session quality, and conversion pathways',
-      'awareness': 'brand awareness measurement through reach, frequency, and sentiment analysis across channels',
-      'engagement': 'multi-platform engagement tracking including interaction rates, shares, and community growth'
-    };
-
-    for (const [key, enhancement] of Object.entries(metricsMap)) {
-      if (input.includes(key)) {
-        return enhancement;
-      }
-    }
-    
-    return `comprehensive performance measurement framework tracking ${input} with detailed analytics and insights`;
-  }
-
-  // Generic enhancement for any unmatched input
-  if (input.length < 20) {
-    return `professionally optimized ${input} strategy aligned with industry best practices and performance objectives`;
+function filterKPITargetsForChannel(kpiTargets: Record<string, any> | undefined, channel: string): Record<string, any> {
+  if (!kpiTargets) return {};
+  
+  const filtered: Record<string, any> = {};
+  
+  // Include universal targets
+  if (kpiTargets.leads) filtered.leads = kpiTargets.leads;
+  if (kpiTargets.conversions) filtered.conversions = kpiTargets.conversions;
+  if (kpiTargets.conversion_rate) filtered.conversion_rate = kpiTargets.conversion_rate;
+  
+  // Channel-specific targets
+  if (channel === 'email') {
+    if (kpiTargets.email_open_rate) filtered.open_rate = kpiTargets.email_open_rate;
+    if (kpiTargets.email_click_rate) filtered.click_rate = kpiTargets.email_click_rate;
+  } else if (['instagram', 'facebook', 'twitter', 'linkedin', 'youtube', 'tiktok'].includes(channel)) {
+    if (kpiTargets.engagement_rate) filtered.engagement_rate = kpiTargets.engagement_rate;
+    if (kpiTargets.reach) filtered.reach = kpiTargets.reach;
+    if (kpiTargets.impressions) filtered.impressions = kpiTargets.impressions;
+  } else if (['google', 'bing'].includes(channel)) {
+    if (kpiTargets.click_through_rate) filtered.click_through_rate = kpiTargets.click_through_rate;
+    if (kpiTargets.cost_per_acquisition) filtered.cost_per_acquisition = kpiTargets.cost_per_acquisition;
+    if (kpiTargets.return_on_ad_spend) filtered.return_on_ad_spend = kpiTargets.return_on_ad_spend;
   }
   
-  // If input is already detailed, enhance with professional language
-  return `${input.charAt(0).toUpperCase() + input.slice(1)} with strategic focus on measurable outcomes and sustainable growth`;
+  return filtered;
+}
+
+function customizeContentForChannel(content: Record<string, any> | undefined, channel: string): Record<string, any> {
+  if (!content) return {};
+  
+  const customized = { ...content };
+  
+  // Add channel-specific content adaptations
+  if (channel === 'email') {
+    customized.format = 'email';
+    customized.subject_line_variants = 3;
+  } else if (['instagram', 'facebook', 'twitter', 'linkedin', 'youtube', 'tiktok'].includes(channel)) {
+    customized.format = 'social_post';
+    customized.visual_required = true;
+    customized.character_limit = getCharacterLimitForChannel(channel);
+  } else if (['google', 'bing'].includes(channel)) {
+    customized.format = 'ad_copy';
+    customized.headlines = 3;
+    customized.descriptions = 2;
+  }
+  
+  return customized;
+}
+
+function getCharacterLimitForChannel(channel: string): number {
+  const limits: Record<string, number> = {
+    'twitter': 280,
+    'instagram': 2200,
+    'facebook': 500,
+    'linkedin': 3000,
+    'youtube': 5000,
+    'tiktok': 2200
+  };
+  
+  return limits[channel] || 500;
 }
