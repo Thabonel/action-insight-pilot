@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Send, Sparkles, Loader2, AlertTriangle, RotateCcw, Save } from 'lucide-react';
+import { Send, Sparkles, Loader2, AlertTriangle, RotateCcw, Save, CheckCircle, Edit, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { parseCampaignFromConversation } from '@/lib/campaign-parser';
@@ -54,6 +54,8 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   const [campaignCreated, setCampaignCreated] = useState(false);
   const [campaignError, setCampaignError] = useState<string | null>(null);
   const [failedCampaignData, setFailedCampaignData] = useState<any>(null);
+  const [showCampaignPreview, setShowCampaignPreview] = useState(false);
+  const [previewCampaignData, setPreviewCampaignData] = useState<any>(null);
 
   // Function to detect if conversation contains enough campaign information
   const detectCampaignReady = (messages: ChatMessage[]) => {
@@ -71,10 +73,49 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
       'build your campaign',
       'create your campaign now',
       'shall we create',
-      'let\'s create the campaign'
+      "let's create the campaign"
     ];
 
     return readyPhrases.some(phrase => conversationText.includes(phrase));
+  };
+
+  // Show campaign preview instead of creating immediately
+  const showCampaignPreviewForApproval = () => {
+    if (!user) return;
+
+    try {
+      // Extract conversation text for parsing
+      const conversationText = chatHistory
+        .map(m => `${m.role}: ${m.content}`)
+        .join('\n');
+
+      // Parse campaign data from conversation
+      const parsedCampaign = parseCampaignFromConversation(conversationText);
+      setPreviewCampaignData(parsedCampaign);
+      setShowCampaignPreview(true);
+    } catch (error) {
+      console.error('Error parsing campaign data for preview:', error);
+    }
+  };
+
+  // Handle campaign approval actions
+  const handleCampaignApproval = (action: 'yes' | 'edit' | 'cancel') => {
+    switch (action) {
+      case 'yes':
+        if (previewCampaignData) {
+          createCampaignFromData(previewCampaignData);
+        }
+        setShowCampaignPreview(false);
+        break;
+      case 'edit':
+        setShowCampaignPreview(false);
+        // Keep the conversation going for edits
+        break;
+      case 'cancel':
+        setShowCampaignPreview(false);
+        setPreviewCampaignData(null);
+        break;
+    }
   };
 
   // Save failed campaign data to localStorage
@@ -142,24 +183,13 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
     }, 3000);
   };
 
-  // Function to create campaign from conversation
-  const createCampaignFromConversation = async () => {
-    if (!user || isCreatingCampaign) return;
-
+  // Function to create campaign from parsed data
+  const createCampaignFromData = async (campaignData: any) => {
     setIsCreatingCampaign(true);
     setCampaignError(null);
     
     try {
-      // Extract conversation text for parsing
-      const conversationText = chatHistory
-        .map(m => `${m.role}: ${m.content}`)
-        .join('\n');
-
-      // Parse campaign data from conversation
-      const parsedCampaign = parseCampaignFromConversation(conversationText);
-
-      // Create campaign in database
-      const result = await apiClient.createCampaignFromAI(parsedCampaign);
+      const result = await apiClient.createCampaignFromAI(campaignData);
 
       if (result.success) {
         setCampaignCreated(true);
@@ -167,24 +197,22 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
       } else {
         const errorMessage = result.error || 'Failed to create campaign. Please try again.';
         setCampaignError(errorMessage);
-        setFailedCampaignData(parsedCampaign);
-        saveFailedCampaignToStorage(parsedCampaign, conversationText);
+        setFailedCampaignData(campaignData);
+        
+        const conversationText = chatHistory
+          .map(m => `${m.role}: ${m.content}`)
+          .join('\n');
+        saveFailedCampaignToStorage(campaignData, conversationText);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while creating the campaign.';
       setCampaignError(errorMessage);
+      setFailedCampaignData(campaignData);
       
-      // Try to parse campaign data for potential retry
-      try {
-        const conversationText = chatHistory
-          .map(m => `${m.role}: ${m.content}`)
-          .join('\n');
-        const parsedCampaign = parseCampaignFromConversation(conversationText);
-        setFailedCampaignData(parsedCampaign);
-        saveFailedCampaignToStorage(parsedCampaign, conversationText);
-      } catch (parseError) {
-        console.error('Error parsing campaign data:', parseError);
-      }
+      const conversationText = chatHistory
+        .map(m => `${m.role}: ${m.content}`)
+        .join('\n');
+      saveFailedCampaignToStorage(campaignData, conversationText);
       
       console.error('Error creating campaign:', error);
     } finally {
@@ -192,15 +220,46 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
     }
   };
 
+  // Function to create campaign from conversation
+  const createCampaignFromConversation = async () => {
+    // Show preview instead of creating immediately
+    showCampaignPreviewForApproval();
+  };
+
   // Check if campaign should be created when chat history updates
   useEffect(() => {
-    if (chatHistory.length > 0 && !campaignCreated && !isCreatingCampaign) {
+    if (chatHistory.length > 0 && !campaignCreated && !isCreatingCampaign && !showCampaignPreview) {
       const shouldCreate = detectCampaignReady(chatHistory);
       if (shouldCreate) {
         createCampaignFromConversation();
       }
     }
-  }, [chatHistory, campaignCreated, isCreatingCampaign]);
+  }, [chatHistory, campaignCreated, isCreatingCampaign, showCampaignPreview]);
+
+  // Format campaign preview
+  const formatCampaignPreview = (campaign: any) => {
+    const formatBudget = (amount: number) => `$${amount.toLocaleString()}`;
+    const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString();
+
+    return {
+      name: campaign.name || 'Untitled Campaign',
+      type: campaign.type || 'other',
+      budget: campaign.total_budget ? formatBudget(campaign.total_budget) : 'Not specified',
+      startDate: campaign.start_date ? formatDate(campaign.start_date) : 'Not specified',
+      endDate: campaign.end_date ? formatDate(campaign.end_date) : 'Not specified',
+      targetAudience: campaign.target_audience || 'Not specified',
+      objective: campaign.primary_objective || 'Not specified',
+      channel: campaign.channel || 'Not specified'
+    };
+  };
+  useEffect(() => {
+    if (chatHistory.length > 0 && !campaignCreated && !isCreatingCampaign && !showCampaignPreview) {
+      const shouldCreate = detectCampaignReady(chatHistory);
+      if (shouldCreate) {
+        createCampaignFromConversation();
+      }
+    }
+  }, [chatHistory, campaignCreated, isCreatingCampaign, showCampaignPreview]);
 
   const suggestions = [
     "I want to create a new marketing campaign",
@@ -301,6 +360,85 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
                   <span className="text-sm">AI is thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showCampaignPreview && previewCampaignData && (
+            <div className="flex justify-start">
+              <div className="bg-blue-50 border border-blue-200 text-blue-900 p-4 rounded-lg max-w-[90%]">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-blue-600" />
+                  <span className="text-lg font-semibold">Campaign Preview</span>
+                </div>
+                
+                {(() => {
+                  const preview = formatCampaignPreview(previewCampaignData);
+                  return (
+                    <div className="space-y-3 mb-4">
+                      <div>
+                        <span className="font-medium text-blue-800">Campaign Name:</span>
+                        <span className="ml-2 text-blue-700">{preview.name}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Type:</span>
+                        <span className="ml-2 text-blue-700 capitalize">{preview.type.replace('_', ' ')}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Channel:</span>
+                        <span className="ml-2 text-blue-700">{preview.channel}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Budget:</span>
+                        <span className="ml-2 text-blue-700">{preview.budget}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Duration:</span>
+                        <span className="ml-2 text-blue-700">{preview.startDate} - {preview.endDate}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Target Audience:</span>
+                        <span className="ml-2 text-blue-700">{preview.targetAudience}</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-blue-800">Objective:</span>
+                        <span className="ml-2 text-blue-700">{preview.objective}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+                
+                <div className="border-t border-blue-200 pt-3">
+                  <p className="text-blue-800 font-medium mb-3">Shall I create this campaign for you?</p>
+                  <div className="flex space-x-2">
+                    <Button 
+                      onClick={() => handleCampaignApproval('yes')}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Yes, Create It
+                    </Button>
+                    <Button 
+                      onClick={() => handleCampaignApproval('edit')}
+                      size="sm"
+                      variant="outline"
+                      className="text-blue-700 border-blue-300 hover:bg-blue-50"
+                    >
+                      <Edit className="w-3 h-3 mr-1" />
+                      Edit Details
+                    </Button>
+                    <Button 
+                      onClick={() => handleCampaignApproval('cancel')}
+                      size="sm"
+                      variant="outline"
+                      className="text-red-700 border-red-300 hover:bg-red-50"
+                    >
+                      <X className="w-3 h-3 mr-1" />
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
