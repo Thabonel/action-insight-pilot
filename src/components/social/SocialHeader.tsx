@@ -24,7 +24,7 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({ onCreatePost, onSchedulePos
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate('/app/settings')}
+          onClick={() => navigate('/app/connect-platforms')}
         >
           <Settings className="h-4 w-4 mr-2" />
           Manage Platforms
