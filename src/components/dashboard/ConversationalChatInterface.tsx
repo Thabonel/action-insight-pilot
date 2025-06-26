@@ -127,6 +127,26 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   return (
     <Card className="h-[600px] flex flex-col">
       <CardContent className="p-6 flex flex-col h-full">
+        {/* Progress Bar */}
+        {isCampaignFlow && progress.total > 0 && (
+          <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-blue-800">
+                Campaign Creation Progress
+              </span>
+              <span className="text-sm text-blue-600">
+                {progress.current}/{progress.total} questions completed
+              </span>
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progress.percentage}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-blue-100 rounded-lg">
