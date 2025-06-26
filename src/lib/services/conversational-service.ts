@@ -144,24 +144,27 @@ export class ConversationalService {
     let suggestions: string[] = [];
     
     if (!hasBasicInfo) {
-      // Ask for basic campaign information
-      response = `I'd be happy to help you create a marketing campaign! Let me gather some key information first.
+      // Ask for basic campaign information with warm, conversational tone
+      response = `Hello! I'm excited to help you create an amazing marketing campaign! 🚀
 
-What type of campaign are you looking to create? For example:
-- Email marketing campaign
-- Social media campaign  
-- Product launch campaign
-- Lead generation campaign
-- Content marketing campaign
-- **Multi-channel campaign** (combining email + social, paid + organic, etc.)
+Let's start by understanding what you're looking to achieve. What type of campaign would you like to create?
 
-Also, what's your primary goal for this campaign?`;
+**Popular options:**
+✉️ **Email Marketing** - Nurture leads and drive conversions
+📱 **Social Media** - Build awareness and engagement  
+🚀 **Product Launch** - Generate buzz for new offerings
+🎯 **Lead Generation** - Capture and qualify prospects
+📝 **Content Marketing** - Establish thought leadership
+🌟 **Multi-Channel** - Combine multiple channels for maximum impact
+
+What's your main goal with this campaign? (e.g., "increase sales," "build brand awareness," "generate leads")`;
       
       suggestions = [
-        "I want to create an email campaign",
+        "Email campaign to increase customer retention",
         "Social media campaign for brand awareness", 
-        "Multi-channel campaign with email and social media",
-        "Product launch across multiple channels"
+        "Multi-channel product launch campaign",
+        "Lead generation campaign for B2B prospects",
+        "Content campaign to establish thought leadership"
       ];
     } else if (!hasBudget) {
       // Ask for budget information with multi-channel considerations
