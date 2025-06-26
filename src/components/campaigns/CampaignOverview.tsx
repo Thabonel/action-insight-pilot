@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,15 @@ const CampaignOverview: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'campaign-list' | 'performance-dashboard'>('campaign-list');
   const [showComparison, setShowComparison] = useState(false);
   const { toast } = useToast();
+
+  // Check for refresh flag and reload campaigns if needed
+  useEffect(() => {
+    const refreshFlag = localStorage.getItem('campaignsListNeedsRefresh');
+    if (refreshFlag === 'true') {
+      reload();
+      localStorage.removeItem('campaignsListNeedsRefresh');
+    }
+  }, [reload]);
 
   const handleNewCampaign = () => {
     // Navigate to new campaign creation page

@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Send, Sparkles, Loader2, AlertTriangle, RotateCcw, Save, CheckCircle, Edit, X } from 'lucide-react';
+import { Send, Sparkles, Loader2, AlertTriangle, RotateCcw, Save, CheckCircle, Edit, X, ExternalLink } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { parseCampaignFromConversation } from '@/lib/campaign-parser';
 import { apiClient } from '@/lib/api-client';
+import { Link } from 'react-router-dom';
 
 interface ChatMessage {
   id: string;
@@ -52,6 +53,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
 }) => {
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false);
   const [campaignCreated, setCampaignCreated] = useState(false);
+  const [createdCampaignId, setCreatedCampaignId] = useState<string | null>(null);
   const [campaignError, setCampaignError] = useState<string | null>(null);
   const [failedCampaignData, setFailedCampaignData] = useState<any>(null);
   const [showCampaignPreview, setShowCampaignPreview] = useState(false);
@@ -193,6 +195,11 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
 
       if (result.success) {
         setCampaignCreated(true);
+        setCreatedCampaignId(result.data?.id || null);
+        
+        // Trigger campaigns list refresh by setting a refresh flag in localStorage
+        localStorage.setItem('campaignsListNeedsRefresh', 'true');
+        
         console.log('Campaign created successfully:', result.data);
       } else {
         const errorMessage = result.error || 'Failed to create campaign. Please try again.';
@@ -490,10 +497,35 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
 
           {campaignCreated && (
             <div className="flex justify-start">
-              <div className="bg-green-100 text-green-900 p-3 rounded-lg max-w-[80%]">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-green-600" />
-                  <span className="text-sm">Campaign created successfully! 🎉</span>
+              <div className="bg-green-100 text-green-900 p-4 rounded-lg max-w-[80%]">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-green-600" />
+                  <span className="text-lg font-semibold">Campaign Created Successfully! 🎉</span>
+                </div>
+                <p className="text-sm text-green-800 mb-3">
+                  Your campaign has been created and is ready to launch. You can now view and manage it from your campaigns dashboard.
+                </p>
+                <div className="flex space-x-2">
+                  {createdCampaignId && (
+                    <Link to={`/app/campaigns/${createdCampaignId}`}>
+                      <Button 
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        View Campaign
+                      </Button>
+                    </Link>
+                  )}
+                  <Link to="/app/campaign-management">
+                    <Button 
+                      size="sm"
+                      variant="outline"
+                      className="text-green-700 border-green-300 hover:bg-green-50"
+                    >
+                      View All Campaigns
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
