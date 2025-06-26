@@ -33,12 +33,12 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   user
 }) => {
   const suggestions = [
-    "What should I focus on today?",
-    "Show me my campaign performance",
-    "How are my leads converting?",
-    "What content should I create next?",
-    "Help me optimize my marketing strategy",
-    "Analyze my recent marketing data"
+    "I want to create a new marketing campaign",
+    "Help me plan a campaign strategy",
+    "What industry are you in?",
+    "Let's start building your campaign",
+    "Guide me through campaign creation",
+    "I need help with my marketing campaign"
   ];
 
   return (
@@ -50,10 +50,10 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             <Sparkles className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">AI Marketing Assistant</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Campaign Creation Assistant</h3>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Online</span>
+              <span className="text-sm text-gray-600">Ready to build your campaign</span>
             </div>
           </div>
         </div>
@@ -65,8 +65,8 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="h-8 w-8 text-blue-600" />
               </div>
-              <h4 className="text-lg font-medium text-gray-900 mb-2">Ready to optimize your marketing?</h4>
-              <p className="text-gray-600 mb-6">Ask me anything about your campaigns, leads, or performance</p>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">Ready to create your marketing campaign?</h4>
+              <p className="text-gray-600 mb-6">I'll guide you through building a comprehensive campaign step-by-step</p>
               
               <div className="text-left">
                 <p className="text-sm font-medium text-gray-700 mb-3">Try asking:</p>
@@ -123,7 +123,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={user ? "Ask me about your marketing..." : "Please log in to chat..."}
+            placeholder={user ? "Tell me about your campaign needs..." : "Please log in to chat..."}
             disabled={!user || isProcessing}
             className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 text-black placeholder-gray-500"
           />
