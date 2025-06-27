@@ -30,17 +30,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock authentication check
-    const mockUser = {
-      id: '1',
-      email: 'user@example.com',
-      name: 'Test User'
-    };
-    
-    // Set mock token
-    apiClient.setToken('mock-jwt-token');
-    
-    setUser(mockUser);
+    // Check for existing authentication (no auto-login for demo)
     setLoading(false);
   }, []);
 

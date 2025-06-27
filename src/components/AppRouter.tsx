@@ -76,9 +76,7 @@ const AppRouter: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/" element={!user ? <LandingPage /> : <Navigate to="/app/dashboard" replace />} />
-      <Route path="/oauth/callback" element={<OAuthCallback />} />
-      <Route path="/app" element={<Layout />}>
+      <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="campaigns" element={<Campaigns />} />
