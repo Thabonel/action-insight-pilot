@@ -29,7 +29,7 @@ const RateLimitMonitor: React.FC = () => {
 
   const getStatusColor = (status: any) => {
     if (status.blocked) return 'destructive';
-    if (status.remainingRequests < status.maxRequests * 0.2) return 'warning';
+    if (status.remainingRequests < status.maxRequests * 0.2) return 'outline';
     return 'default';
   };
 

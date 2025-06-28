@@ -16,7 +16,7 @@ interface SecurityContextType {
     encryptStorage: boolean;
     sessionTimeout: number;
   };
-  updateSecuritySettings: (settings: Partial<typeof securitySettings>) => void;
+  updateSecuritySettings: (settings: Partial<SecurityContextType['securitySettings']>) => void;
 }
 
 const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
