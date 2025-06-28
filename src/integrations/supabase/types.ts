@@ -1464,6 +1464,7 @@ export type Database = {
           activity_data: Json | null
           activity_type: string
           created_at: string | null
+          created_by: string | null
           id: string
           lead_id: string | null
           occurred_at: string | null
@@ -1473,6 +1474,7 @@ export type Database = {
           activity_data?: Json | null
           activity_type: string
           created_at?: string | null
+          created_by?: string | null
           id?: string
           lead_id?: string | null
           occurred_at?: string | null
@@ -1482,6 +1484,7 @@ export type Database = {
           activity_data?: Json | null
           activity_type?: string
           created_at?: string | null
+          created_by?: string | null
           id?: string
           lead_id?: string | null
           occurred_at?: string | null
@@ -1534,6 +1537,7 @@ export type Database = {
           company_size: Database["public"]["Enums"]["company_size"] | null
           country: string | null
           created_at: string | null
+          created_by: string | null
           email: string | null
           enriched_data: Json | null
           first_name: string | null
@@ -1555,6 +1559,7 @@ export type Database = {
           company_size?: Database["public"]["Enums"]["company_size"] | null
           country?: string | null
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
           enriched_data?: Json | null
           first_name?: string | null
@@ -1576,6 +1581,7 @@ export type Database = {
           company_size?: Database["public"]["Enums"]["company_size"] | null
           country?: string | null
           created_at?: string | null
+          created_by?: string | null
           email?: string | null
           enriched_data?: Json | null
           first_name?: string | null
