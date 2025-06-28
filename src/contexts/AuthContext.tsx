@@ -1,9 +1,10 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { apiClient } from '@/lib/api-client';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
+  session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signUp: (email: string, password: string) => Promise<{ error?: any }>;
@@ -26,61 +27,85 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing authentication (no auto-login for demo)
-    setLoading(false);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string): Promise<{ error?: any }> => {
     setLoading(true);
     try {
-      // Mock sign in
-      const mockUser = {
-        id: '1',
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        name: 'Test User'
-      };
-      
-      apiClient.setToken('mock-jwt-token');
-      setUser(mockUser);
+        password
+      });
+
+      if (error) {
+        setLoading(false);
+        return { error };
+      }
+
       return {};
     } catch (error) {
       console.error('Sign in error:', error);
-      return { error };
-    } finally {
       setLoading(false);
+      return { error };
     }
   };
 
   const signUp = async (email: string, password: string): Promise<{ error?: any }> => {
     setLoading(true);
     try {
-      // Mock sign up
-      const mockUser = {
-        id: '1',
-        email,
-        name: 'Test User'
-      };
+      const redirectUrl = `${window.location.origin}/`;
       
-      apiClient.setToken('mock-jwt-token');
-      setUser(mockUser);
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
+
+      if (error) {
+        setLoading(false);
+        return { error };
+      }
+
       return {};
     } catch (error) {
       console.error('Sign up error:', error);
-      return { error };
-    } finally {
       setLoading(false);
+      return { error };
     }
   };
 
   const signOut = async () => {
     setLoading(true);
     try {
-      apiClient.setToken('');
-      setUser(null);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        throw error;
+      }
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;
@@ -91,6 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value = {
     user,
+    session,
     loading,
     signIn,
     signUp,
