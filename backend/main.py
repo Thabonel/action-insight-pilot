@@ -41,19 +41,17 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
 )
 
-from routes.user_aware_agents import router as user_aware_router
+from routes.unified_agents import router as unified_agents_router
 from routes.system_health import router as system_health_router
 from routes.email import router as email_router
 from routes.workflows import router as workflows_router
-from routes.ai_agents import router as ai_agents_router
 from routes.brand import router as brand_router
 
-# Add all routers
-app.include_router(user_aware_router)
+# Add unified router (replaces ai_agents and user_aware_agents)
+app.include_router(unified_agents_router)
 app.include_router(system_health_router)
 app.include_router(email_router)
 app.include_router(workflows_router)
-app.include_router(ai_agents_router)
 app.include_router(brand_router)
 
 @app.get("/")

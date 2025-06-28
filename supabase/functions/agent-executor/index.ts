@@ -19,14 +19,28 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication required
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Authorization header required');
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Verify user authentication
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      throw new Error('Invalid authentication token');
+    }
+
     const { agent_type, task_type, input_data }: AgentRequest = await req.json();
 
-    console.log(`Executing ${task_type} for agent ${agent_type}`, input_data);
+    console.log(`🚀 User ${user.id} executing ${task_type} for agent ${agent_type}`, input_data);
 
     // Get AI API keys from secrets
     const openaiKey = Deno.env.get('OPENAI_API_KEY');
