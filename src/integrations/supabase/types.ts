@@ -2691,6 +2691,10 @@ export type Database = {
           metadata: Json
         }[]
       }
+      seed_demo_data: {
+        Args: { demo_user_id?: string }
+        Returns: undefined
+      }
       sparsevec_out: {
         Args: { "": unknown }
         Returns: unknown
