@@ -2,11 +2,20 @@ import { ApiResponse, Campaign, ContentBrief, SocialPlatformConnection, Integrat
 import { supabase } from './supabase';
 
 export class ApiClient {
-  private token: string = '';
   private renderBackendUrl: string = 'https://your-render-backend.onrender.com'; // Update with your actual Render backend URL
 
+  private async getAuthToken(): Promise<string> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error('No valid authentication token found');
+    }
+    return session.access_token;
+  }
+
+  // Legacy method for backward compatibility - now gets token from Supabase
   setToken(token: string): void {
-    this.token = token;
+    // This method is now deprecated - tokens are automatically retrieved from Supabase
+    console.warn('setToken is deprecated. Tokens are now automatically retrieved from Supabase auth.');
   }
 
   // Helper function to convert database record to Campaign interface
@@ -574,11 +583,14 @@ export class ApiClient {
     try {
       console.log('Calling Render backend with query:', query);
 
+      // Get auth token from Supabase
+      const authToken = await this.getAuthToken();
+      
       const response = await fetch(`${this.renderBackendUrl}/api/ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(this.token && { 'Authorization': `Bearer ${this.token}` })
+          'Authorization': `Bearer ${authToken}`
         },
         body: JSON.stringify({
           query,
