@@ -888,6 +888,72 @@ export type Database = {
           },
         ]
       }
+      data_deletion_requests: {
+        Row: {
+          completed_at: string | null
+          confirmation_required: boolean
+          created_at: string
+          id: string
+          request_id: string
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          confirmation_required?: boolean
+          created_at?: string
+          id?: string
+          request_id: string
+          requested_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          confirmation_required?: boolean
+          created_at?: string
+          id?: string
+          request_id?: string
+          requested_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      data_export_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          download_url: string | null
+          id: string
+          request_id: string
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          request_id: string
+          requested_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          request_id?: string
+          requested_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       digital_assets: {
         Row: {
           asset_type: Database["public"]["Enums"]["asset_type"]
@@ -1892,6 +1958,39 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_audit_log: {
+        Row: {
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          ip_address: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -2398,6 +2497,45 @@ export type Database = {
           preference_category?: string
           preference_data?: Json
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_privacy_settings: {
+        Row: {
+          analytics_consent: boolean
+          created_at: string
+          data_processing_consent: boolean
+          data_retention_days: number
+          id: string
+          marketing_consent: boolean
+          right_to_be_deleted_requested: boolean
+          third_party_consent: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analytics_consent?: boolean
+          created_at?: string
+          data_processing_consent?: boolean
+          data_retention_days?: number
+          id?: string
+          marketing_consent?: boolean
+          right_to_be_deleted_requested?: boolean
+          third_party_consent?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analytics_consent?: boolean
+          created_at?: string
+          data_processing_consent?: boolean
+          data_retention_days?: number
+          id?: string
+          marketing_consent?: boolean
+          right_to_be_deleted_requested?: boolean
+          third_party_consent?: boolean
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

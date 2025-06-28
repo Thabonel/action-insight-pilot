@@ -47,7 +47,7 @@ export const useSecureOAuth = () => {
         return { success: false, error: error.message };
       }
 
-      return { success: true, session: data.session };
+      return { success: true };
     } catch (error) {
       console.error('OAuth sign-in failed:', error);
       return { 
