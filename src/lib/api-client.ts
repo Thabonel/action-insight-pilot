@@ -2,7 +2,7 @@ import { ApiResponse, Campaign, ContentBrief, SocialPlatformConnection, Integrat
 import { supabase } from './supabase';
 
 export class ApiClient {
-  private renderBackendUrl: string = 'https://your-render-backend.onrender.com'; // Update with your actual Render backend URL
+  private renderBackendUrl: string = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
   private async getAuthToken(): Promise<string> {
     const { data: { session } } = await supabase.auth.getSession();
