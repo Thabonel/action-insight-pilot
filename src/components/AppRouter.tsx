@@ -17,6 +17,7 @@ import Proposals from '@/pages/Proposals'
 import UserManual from '@/pages/UserManual'
 import ConnectPlatforms from '@/pages/ConnectPlatforms'
 import LandingPageBuilder from '@/pages/LandingPageBuilder'
+import { KeywordResearch } from '@/pages/KeywordResearch'
 import { useAuth } from '@/contexts/AuthContext'
 
 const AppRouter: React.FC = () => {
@@ -40,6 +41,7 @@ const AppRouter: React.FC = () => {
         <Route path="user-manual" element={<UserManual />} />
         <Route path="connect-platforms" element={<ConnectPlatforms />} />
         <Route path="landing-page-builder" element={<LandingPageBuilder />} />
+        <Route path="keyword-research" element={<KeywordResearch />} />
         <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
       </Route>
     </Routes>

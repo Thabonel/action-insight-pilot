@@ -110,6 +110,12 @@ class AgentManager:
                 'module': 'agents.mcp_agent',
                 'class': 'MCPAgent',
                 'description': 'Multi-channel publishing coordination'
+            },
+            {
+                'name': 'keyword_research_agent',
+                'module': 'agents.seo.keyword_research_agent',
+                'class': 'KeywordResearchAgent',
+                'description': 'SEO keyword research and analysis'
             }
         ]
         
