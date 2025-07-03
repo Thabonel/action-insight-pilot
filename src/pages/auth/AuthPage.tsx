@@ -26,12 +26,12 @@ const AuthPage: React.FC = () => {
         const { error } = await signIn(email, password);
         if (error) throw error;
         toast({ title: "Success", description: "Signed in successfully!" });
-        navigate('/app/dashboard');
+        navigate('/app/conversational-dashboard');
       } else {
         const { error } = await signUp(email, password);
         if (error) throw error;
         toast({ title: "Success", description: "Account created successfully!" });
-        navigate('/app/dashboard');
+        navigate('/app/conversational-dashboard');
       }
     } catch (error: any) {
       toast({
