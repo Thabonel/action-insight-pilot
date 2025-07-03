@@ -36,7 +36,7 @@ const Login: React.FC = () => {
           title: "Success",
           description: isLogin ? "Logged in successfully" : "Account created successfully",
         });
-        navigate('/app/dashboard');
+        navigate('/app/conversational-dashboard');
       }
     } catch (error) {
       toast({
