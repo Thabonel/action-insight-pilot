@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowRight, BarChart3, Users, Target, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import Dashboard from '@/pages/Dashboard'
 import ConversationalDashboard from '@/pages/ConversationalDashboard'
 import Campaigns from '@/pages/Campaigns'
 import Leads from '@/pages/Leads'
@@ -30,7 +29,6 @@ const AppRouter: React.FC = () => {
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="conversational-dashboard" replace />} />
         <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
-        <Route path="dashboard" element={<Dashboard />} />
         <Route path="campaigns" element={<Campaigns />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
         <Route path="leads" element={<Leads />} />

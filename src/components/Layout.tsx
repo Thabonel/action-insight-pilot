@@ -54,12 +54,6 @@ const Layout: React.FC = () => {
       description: 'AI-powered insights'
     },
     { 
-      name: 'Dashboard', 
-      href: '/app/dashboard', 
-      icon: LayoutDashboard,
-      description: 'Traditional view'
-    },
-    { 
       name: 'Campaigns', 
       href: '/app/campaigns', 
       icon: Zap,
