@@ -69,18 +69,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     setIsActive(false);
   };
 
-  useEffect(() => {
-    // Check if user has completed or skipped onboarding
-    const hasCompleted = localStorage.getItem('onboarding_completed');
-    const hasSkipped = localStorage.getItem('onboarding_skipped');
-    
-    if (!hasCompleted && !hasSkipped) {
-      // Auto-start onboarding for new users
-      setTimeout(() => {
-        startDefaultOnboarding();
-      }, 1000);
-    }
-  }, []);
+  // Removed auto-starting onboarding that was causing overlay issues
 
   const startDefaultOnboarding = () => {
     const defaultSteps: OnboardingStep[] = [
