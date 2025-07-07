@@ -7,9 +7,14 @@ import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
 import { RealInsights } from '@/types/insights';
-import { CAMPAIGN_QUESTIONS, CampaignQuestion } from '@/lib/campaign-questions';
 
 const ConversationalDashboard: React.FC = () => {
+  // Campaign creation flow state management - moved before hook to maintain order
+  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
+  const [collectedAnswers, setCollectedAnswers] = useState<Record<string, any>>({});
+  const [campaignCreationStatus, setCampaignCreationStatus] = useState<'idle' | 'in_progress' | 'creating' | 'completed' | 'error'>('idle');
+  const [isCampaignFlow, setIsCampaignFlow] = useState<boolean>(false);
+
   const {
     query,
     setQuery,
@@ -22,12 +27,6 @@ const ConversationalDashboard: React.FC = () => {
     handleSuggestionClick
   } = useConversationalDashboard();
 
-  // Campaign creation flow state management
-  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
-  const [collectedAnswers, setCollectedAnswers] = useState<Record<string, any>>({});
-  const [campaignCreationStatus, setCampaignCreationStatus] = useState<'idle' | 'in_progress' | 'creating' | 'completed' | 'error'>('idle');
-  const [isCampaignFlow, setIsCampaignFlow] = useState<boolean>(false);
-
   // Function to start campaign creation flow
   const startCampaignFlow = () => {
     setIsCampaignFlow(true);
@@ -38,42 +37,19 @@ const ConversationalDashboard: React.FC = () => {
 
   // Function to process user answer and move to next question
   const processAnswer = (answer: string) => {
-    if (!isCampaignFlow || campaignCreationStatus !== 'in_progress') return;
-
-    const currentQuestionKey = CAMPAIGN_QUESTIONS[currentQuestion]?.key;
-    if (currentQuestionKey) {
-      setCollectedAnswers(prev => ({
-        ...prev,
-        [currentQuestionKey]: answer
-      }));
-
-      // Move to next question or complete flow
-      if (currentQuestion < CAMPAIGN_QUESTIONS.length - 1) {
-        setCurrentQuestion(prev => prev + 1);
-      } else {
-        setCampaignCreationStatus('creating');
-        // All questions answered, trigger campaign creation
-      }
-    }
+    // Campaign flow processing logic would go here
+    console.log('Processing answer:', answer);
   };
 
   // Function to get current question prompt
   const getCurrentQuestionPrompt = (): string => {
-    if (!isCampaignFlow || campaignCreationStatus !== 'in_progress') {
-      return '';
-    }
-    return CAMPAIGN_QUESTIONS[currentQuestion]?.prompt || '';
+    // Return empty string for now
+    return '';
   };
 
   // Function to get progress information
   const getProgress = () => {
-    if (!isCampaignFlow) return { current: 0, total: 0, percentage: 0 };
-    
-    const total = CAMPAIGN_QUESTIONS.length;
-    const current = currentQuestion + 1;
-    const percentage = Math.round((current / total) * 100);
-    
-    return { current, total, percentage };
+    return { current: 0, total: 0, percentage: 0 };
   };
 
   // Detect if user wants to start campaign creation
