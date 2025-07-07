@@ -25,6 +25,7 @@ interface ConversationalChatInterfaceProps {
   handleQuerySubmit: (e: React.FormEvent) => void;
   handleSuggestionClick: (suggestion: string) => void;
   user: any;
+  latestMetadata?: any;
   // Campaign flow props
   isCampaignFlow?: boolean;
   currentQuestion?: string;
@@ -43,6 +44,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   handleQuerySubmit,
   handleSuggestionClick,
   user,
+  latestMetadata,
   // Campaign flow props
   isCampaignFlow = false,
   currentQuestion = '',
@@ -405,18 +407,37 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 key={message.id}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                  <p className="text-xs mt-1 opacity-70">
-                    {message.timestamp.toLocaleTimeString()}
-                  </p>
-                </div>
+                 <div
+                   className={`max-w-[80%] p-3 rounded-lg ${
+                     message.role === 'user'
+                       ? 'bg-blue-600 text-white'
+                       : 'bg-gray-100 text-gray-900'
+                   }`}
+                 >
+                   <p className="text-sm">{message.content}</p>
+                   <p className="text-xs mt-1 opacity-70">
+                     {message.timestamp.toLocaleTimeString()}
+                   </p>
+                   
+                   {/* Campaign Type Selection Buttons */}
+                   {message.role === 'assistant' && latestMetadata?.campaignTypeOptions && (
+                     <div className="mt-3 pt-3 border-t border-gray-200">
+                       <p className="text-xs font-medium text-gray-700 mb-2">Select a campaign type:</p>
+                       <div className="grid grid-cols-2 gap-2">
+                         {latestMetadata.campaignTypeOptions.map((option: any) => (
+                           <button
+                             key={option.value}
+                             onClick={() => handleSuggestionClick(`${option.label} campaign - ${option.description}`)}
+                             className="text-left p-2 bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 rounded-lg text-xs transition-colors"
+                           >
+                             <div className="font-medium text-gray-800">{option.label}</div>
+                             <div className="text-gray-600 text-xs">{option.description}</div>
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+                 </div>
               </div>
             ))
           )}

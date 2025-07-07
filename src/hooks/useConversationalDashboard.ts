@@ -21,6 +21,7 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  metadata?: any;
 }
 
 export const useConversationalDashboard = () => {
@@ -35,6 +36,7 @@ export const useConversationalDashboard = () => {
   const [query, setQuery] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [latestMetadata, setLatestMetadata] = useState<any>(null);
 
   const user = { id: 'user-1', name: 'User' };
 
@@ -71,10 +73,12 @@ export const useConversationalDashboard = () => {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
           content: result.data.response,
-          timestamp: new Date()
+          timestamp: new Date(),
+          metadata: result.data.metadata
         };
         
         setChatHistory(prev => [...prev, assistantMessage]);
+        setLatestMetadata(result.data.metadata);
         return result.data;
       }
     } catch (err) {
@@ -115,6 +119,7 @@ export const useConversationalDashboard = () => {
     chatHistory,
     isProcessing,
     user,
+    latestMetadata,
     askQuestion,
     handleQuerySubmit,
     handleSuggestionClick,
