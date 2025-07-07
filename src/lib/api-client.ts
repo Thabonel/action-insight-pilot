@@ -200,20 +200,21 @@ export class ApiClient {
         .select('*')
         .eq('id', id)
         .eq('created_by', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          return {
-            success: false,
-            error: 'Campaign not found',
-            message: `Campaign with ID ${id} does not exist`
-          };
-        }
         return {
           success: false,
           error: 'Database error',
           message: error.message
+        };
+      }
+
+      if (!data) {
+        return {
+          success: false,
+          error: 'Campaign not found',
+          message: `Campaign with ID ${id} does not exist or you don't have access to it`
         };
       }
 
@@ -317,20 +318,21 @@ export class ApiClient {
         .eq('id', id)
         .eq('created_by', user.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          return {
-            success: false,
-            error: 'Campaign not found',
-            message: `Campaign with ID ${id} does not exist`
-          };
-        }
         return {
           success: false,
           error: 'Database error',
           message: error.message
+        };
+      }
+
+      if (!data) {
+        return {
+          success: false,
+          error: 'Campaign not found',
+          message: `Campaign with ID ${id} does not exist or you don't have access to it`
         };
       }
 
@@ -367,13 +369,21 @@ export class ApiClient {
         .select('*')
         .eq('id', id)
         .eq('created_by', user.id)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
         return {
           success: false,
+          error: 'Database error',
+          message: fetchError.message
+        };
+      }
+
+      if (!originalData) {
+        return {
+          success: false,
           error: 'Campaign not found',
-          message: `Campaign with ID ${id} does not exist`
+          message: `Campaign with ID ${id} does not exist or you don't have access to it`
         };
       }
 
@@ -445,20 +455,21 @@ export class ApiClient {
         .eq('id', id)
         .eq('created_by', user.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          return {
-            success: false,
-            error: 'Campaign not found',
-            message: `Campaign with ID ${id} does not exist`
-          };
-        }
         return {
           success: false,
           error: 'Database error',
           message: error.message
+        };
+      }
+
+      if (!data) {
+        return {
+          success: false,
+          error: 'Campaign not found',
+          message: `Campaign with ID ${id} does not exist or you don't have access to it`
         };
       }
 
