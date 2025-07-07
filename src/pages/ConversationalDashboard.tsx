@@ -17,6 +17,7 @@ const ConversationalDashboard: React.FC = () => {
     isProcessing,
     insights: rawInsights,
     user,
+    latestMetadata,
     handleQuerySubmit,
     handleSuggestionClick
   } = useConversationalDashboard();
@@ -162,6 +163,7 @@ const ConversationalDashboard: React.FC = () => {
               handleQuerySubmit={handleQuerySubmit}
               handleSuggestionClick={handleSuggestionClick}
               user={user}
+              latestMetadata={latestMetadata}
               // Campaign flow specific props
               isCampaignFlow={isCampaignFlow}
               currentQuestion={getCurrentQuestionPrompt()}

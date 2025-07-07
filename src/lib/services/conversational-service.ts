@@ -144,18 +144,18 @@ export class ConversationalService {
     let suggestions: string[] = [];
     
     if (!hasBasicInfo) {
-      // Ask for basic campaign information with warm, conversational tone
-      response = `Hello! I'm excited to help you create an amazing marketing campaign! 🚀
+      // Ask for basic campaign information with structured options
+      response = `Hello! I'm excited to help you create an amazing marketing campaign!
 
 Let's start by understanding what you're looking to achieve. What type of campaign would you like to create?
 
 **Popular options:**
-✉️ **Email Marketing** - Nurture leads and drive conversions
-📱 **Social Media** - Build awareness and engagement  
-🚀 **Product Launch** - Generate buzz for new offerings
-🎯 **Lead Generation** - Capture and qualify prospects
-📝 **Content Marketing** - Establish thought leadership
-🌟 **Multi-Channel** - Combine multiple channels for maximum impact
+**Email Marketing** - Nurture leads and drive conversions
+**Social Media** - Build awareness and engagement  
+**Product Launch** - Generate buzz for new offerings
+**Lead Generation** - Capture and qualify prospects
+**Content Marketing** - Establish thought leadership
+**Multi-Channel** - Combine multiple channels for maximum impact
 
 What's your main goal with this campaign? (e.g., "increase sales," "build brand awareness," "generate leads")`;
       
@@ -207,16 +207,16 @@ For example: "$5,000 total budget" or "$10,000 with $7,000 for ads and $3,000 fo
 
 What are your key performance targets? Please specify goals for:
 
-📈 **Overall Campaign Goals:**
+**Overall Campaign Goals:**
 - Total leads or conversions you want to achieve
 - Timeline for these results
 
-📊 **Channel-Specific Targets:**
+**Channel-Specific Targets:**
 - Email: Open rates, click rates, conversions
 - Social Media: Engagement rates, reach, follower growth  
 - Paid Ads: CTR, CPA, ROAS
 
-⏱️ **Measurement Period:**
+**Measurement Period:**
 - Monthly, quarterly, or campaign duration targets
 
 For example: "Generate 200 total leads in 3 months - 120 from email (25% open rate) and 80 from social media (5% engagement rate)"`;
@@ -232,15 +232,15 @@ For example: "Generate 200 total leads in 3 months - 120 from email (25% open ra
 
 What are your key performance targets? Please let me know your goals for:
 
-📈 **Lead Generation Goals:**
+**Lead Generation Goals:**
 - How many new leads do you want to generate?
 - Target conversion rate (if known)?
 
-📊 **Engagement Targets:**
+**Engagement Targets:**
 - Expected engagement rate (for social campaigns)?
 - Email open/click rates (for email campaigns)?
 
-⏱️ **Timeline:**
+**Timeline:**
 - What's your measurement period? (e.g., monthly, quarterly)
 - When do you want to achieve these targets?
 
@@ -258,9 +258,9 @@ For example: "Generate 100 qualified leads per month with a 3% conversion rate" 
       if (isMultiChannel) {
         response = `Excellent! I have all the information needed for your multi-channel campaign:
 
-✅ Campaign strategy across multiple channels
-✅ Budget allocation for each channel
-✅ Channel-specific KPI targets and measurement
+Campaign strategy across multiple channels
+Budget allocation for each channel
+Channel-specific KPI targets and measurement
 
 I'll create a comprehensive multi-channel campaign that includes:
 - **Linked campaigns** for each channel with shared messaging
@@ -273,9 +273,9 @@ This approach will maximize your reach while maintaining consistent messaging ac
       } else {
         response = `Perfect! I have all the information I need to create your campaign:
 
-✅ Campaign type and objectives
-✅ Budget allocation  
-✅ KPI targets and measurement goals
+Campaign type and objectives
+Budget allocation  
+KPI targets and measurement goals
 
 Based on our conversation, I'll create a comprehensive campaign plan with:
 - Detailed strategy aligned with your KPI targets
@@ -308,7 +308,15 @@ Ready to create the campaign? I'll generate a complete campaign plan that includ
           hasBasicInfo,
           hasKPITargets,
           hasBudget,
-          isMultiChannel
+          isMultiChannel,
+          campaignTypeOptions: !hasBasicInfo ? [
+            { label: "Email Marketing", value: "email", description: "Nurture leads and drive conversions" },
+            { label: "Social Media", value: "social", description: "Build awareness and engagement" },
+            { label: "Product Launch", value: "product_launch", description: "Generate buzz for new offerings" },
+            { label: "Lead Generation", value: "lead_generation", description: "Capture and qualify prospects" },
+            { label: "Content Marketing", value: "content", description: "Establish thought leadership" },
+            { label: "Multi-Channel", value: "multi_channel", description: "Combine multiple channels for maximum impact" }
+          ] : undefined
         }
       }
     };
