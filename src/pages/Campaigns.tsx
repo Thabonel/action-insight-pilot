@@ -79,7 +79,7 @@ const Campaigns: React.FC = () => {
             <p className="text-gray-600 mt-1">Manage your marketing campaigns</p>
           </div>
           <Button asChild>
-            <Link to="/campaigns/new">
+            <Link to="/app/campaigns/new">
               <PlusIcon className="h-4 w-4 mr-2" />
               New Campaign
             </Link>
@@ -140,7 +140,7 @@ const Campaigns: React.FC = () => {
                 </p>
                 {campaigns.length === 0 && (
                   <Button asChild>
-                    <Link to="/campaigns/new">
+                    <Link to="/app/campaigns/new">
                       <PlusIcon className="h-4 w-4 mr-2" />
                       Create Campaign
                     </Link>
@@ -181,7 +181,7 @@ const Campaigns: React.FC = () => {
                     
                     <div className="pt-3 border-t">
                       <Button asChild variant="outline" className="w-full">
-                        <Link to={`/campaigns/${campaign.id}`}>
+                        <Link to={`/app/campaigns/${campaign.id}`}>
                           View Details
                         </Link>
                       </Button>
