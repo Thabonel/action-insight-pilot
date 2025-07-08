@@ -14,7 +14,8 @@ import {
   BookOpen,
   Link,
   LogOut,
-  User
+  User,
+  Brain
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -106,6 +107,12 @@ const Layout: React.FC = () => {
       href: '/app/proposals', 
       icon: FileCheck,
       description: 'Proposal generation'
+    },
+    { 
+      name: 'Knowledge', 
+      href: '/app/knowledge', 
+      icon: Brain,
+      description: 'AI knowledge base'
     },
     { 
       name: 'Settings', 
