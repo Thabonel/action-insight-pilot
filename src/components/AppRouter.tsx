@@ -19,6 +19,7 @@ import ConnectPlatforms from '@/pages/ConnectPlatforms'
 import LandingPageBuilder from '@/pages/LandingPageBuilder'
 import { KeywordResearch } from '@/pages/KeywordResearch'
 import { useAuth } from '@/contexts/AuthContext'
+import KnowledgeManagement from '@/components/knowledge/KnowledgeManagement'
 
 const AppRouter: React.FC = () => {
   const { user } = useAuth()
@@ -37,6 +38,7 @@ const AppRouter: React.FC = () => {
         <Route path="social" element={<Social />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="proposals" element={<Proposals />} />
+        <Route path="knowledge" element={<KnowledgeManagement />} />
         <Route path="settings" element={<Settings />} />
         <Route path="tools" element={<Tools />} />
         <Route path="user-manual" element={<UserManual />} />
