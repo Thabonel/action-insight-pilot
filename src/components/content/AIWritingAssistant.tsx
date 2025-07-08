@@ -32,39 +32,82 @@ export const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
   const { toast } = useToast();
 
   const analyzeSuggestions = async () => {
+    if (!content.trim()) {
+      toast({
+        title: "No content to analyze",
+        description: "Please add some content before analyzing",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     try {
-      // Simulate AI analysis
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Real content analysis based on actual content
+      const newSuggestions = [];
       
-      const mockSuggestions = [
-        {
+      // Word count analysis
+      const wordCount = content.split(' ').length;
+      if (wordCount < 300) {
+        newSuggestions.push({
           type: 'improvement',
-          title: 'Add more specific examples',
-          description: 'Consider adding concrete examples to illustrate your points',
-          location: 'Paragraph 2',
-          confidence: 85
-        },
-        {
-          type: 'seo',
-          title: 'Include target keyword',
-          description: 'Add your target keyword 2-3 more times throughout the content',
-          location: 'Throughout',
-          confidence: 92
-        },
-        {
+          title: 'Expand content length',
+          description: `Content is ${wordCount} words. Consider expanding to 300+ words for better SEO`,
+          location: 'Overall',
+          confidence: 90
+        });
+      }
+
+      // Sentence length analysis
+      const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      const longSentences = sentences.filter(s => s.split(' ').length > 20);
+      if (longSentences.length > 0) {
+        newSuggestions.push({
           type: 'readability',
           title: 'Shorten long sentences',
-          description: 'Break down sentences longer than 20 words for better readability',
-          location: 'Paragraph 4',
-          confidence: 78
-        }
-      ];
+          description: `Found ${longSentences.length} sentences longer than 20 words`,
+          location: 'Various paragraphs',
+          confidence: 85
+        });
+      }
+
+      // Paragraph structure
+      const paragraphs = content.split('\n\n').filter(p => p.trim().length > 0);
+      if (paragraphs.length === 1 && wordCount > 150) {
+        newSuggestions.push({
+          type: 'improvement',
+          title: 'Break into paragraphs',
+          description: 'Consider breaking your content into multiple paragraphs for better readability',
+          location: 'Document structure',
+          confidence: 80
+        });
+      }
+
+      // Keyword density (basic check for repetition)
+      const words = content.toLowerCase().split(/\W+/);
+      const wordFreq = words.reduce((acc, word) => {
+        if (word.length > 3) acc[word] = (acc[word] || 0) + 1;
+        return acc;
+      }, {});
       
-      setSuggestions(mockSuggestions);
+      const totalWords = words.filter(w => w.length > 3).length;
+      Object.entries(wordFreq).forEach(([word, count]) => {
+        const density = ((count as number) / totalWords) * 100;
+        if (density > 3) {
+          newSuggestions.push({
+            type: 'seo',
+            title: `Reduce keyword density for "${word}"`,
+            description: `Word "${word}" appears ${count} times (${density.toFixed(1)}% density). Consider varying your language.`,
+            location: 'Throughout',
+            confidence: 75
+          });
+        }
+      });
+
+      setSuggestions(newSuggestions);
       toast({
         title: "Analysis complete",
-        description: `Found ${mockSuggestions.length} suggestions for improvement`
+        description: `Found ${newSuggestions.length} suggestions for improvement`
       });
     } catch (error) {
       toast({

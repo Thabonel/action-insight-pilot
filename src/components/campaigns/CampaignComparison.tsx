@@ -106,10 +106,10 @@ const CampaignComparison: React.FC<CampaignComparisonProps> = ({
     
     return {
       budgetUsage: budgetUsage.toFixed(1),
-      conversionRate: (Math.random() * 5 + 1).toFixed(2), // Mock data
-      reach: Math.floor(Math.random() * 10000 + 1000), // Mock data
-      cpa: Math.floor(Math.random() * 50 + 10), // Mock data (Cost Per Acquisition)
-      roi: Math.floor(Math.random() * 200 + 50), // Mock data (Return on Investment)
+      conversionRate: (campaign.metrics?.conversion_rate || 0).toFixed(2),
+      reach: campaign.metrics?.reach || 0,
+      cpa: campaign.metrics?.cost_per_acquisition || 0,
+      roi: campaign.metrics?.return_on_investment || 0,
     };
   };
 

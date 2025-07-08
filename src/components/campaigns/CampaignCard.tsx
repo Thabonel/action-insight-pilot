@@ -138,8 +138,8 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
     ? ((campaign.budget_spent || 0) / campaign.budget_allocated) * 100 
     : 0;
 
-  const conversionRate = campaign.metrics?.conversion_rate || Math.random() * 5; // Mock data
-  const reach = campaign.metrics?.reach || Math.floor(Math.random() * 10000); // Mock data
+  const conversionRate = campaign.metrics?.conversion_rate || 0;
+  const reach = campaign.metrics?.reach || 0;
 
   return (
     <Card className={`transition-all duration-200 hover:shadow-md ${
