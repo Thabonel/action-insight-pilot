@@ -257,7 +257,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ask me anything..."
+                placeholder="Type your question here..."
                 disabled={isProcessing}
                 className="pr-20"
               />

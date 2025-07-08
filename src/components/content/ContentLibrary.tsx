@@ -23,26 +23,39 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
 
-  const mockPosts = [
-    {
-      id: '1',
-      title: 'Getting Started with AI Content Creation',
-      category: 'tutorial',
-      tags: ['AI', 'content', 'beginner'],
-      performance: 'high',
-      publishDate: '2024-01-15',
-      status: 'published'
-    },
-    {
-      id: '2', 
-      title: 'Advanced Marketing Automation Strategies',
-      category: 'strategy',
-      tags: ['automation', 'marketing', 'advanced'],
-      performance: 'medium',
-      publishDate: '2024-01-10',
-      status: 'published'
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    loadContentPosts();
+  }, []);
+
+  const loadContentPosts = async () => {
+    setLoading(true);
+    try {
+      // This would fetch from your content database
+      // For now, return empty array since no content system is implemented yet
+      setPosts([]);
+    } catch (error) {
+      console.error('Failed to load content posts:', error);
+      setPosts([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const filteredPosts = posts.filter(post => {
+    if (selectedFilter === 'all') return true;
+    if (selectedFilter === 'published') return post.status === 'published';
+    if (selectedFilter === 'draft') return post.status === 'draft';
+    if (selectedFilter === 'high-performance') return post.performance === 'high';
+    if (selectedFilter === 'needs-update') return post.needsUpdate;
+    return true;
+  }).filter(post => 
+    searchTerm === '' || 
+    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    post.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const getPerformanceBadge = (performance: string) => {
     switch (performance) {
@@ -95,7 +108,18 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
 
           {/* Content List */}
           <div className="space-y-3">
-            {mockPosts.map((post) => (
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                <p className="mt-2 text-gray-500">Loading content...</p>
+              </div>
+            ) : filteredPosts.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>No content found. Start creating content to build your library.</p>
+              </div>
+            ) : (
+              filteredPosts.map((post) => (
               <div
                 key={post.id}
                 className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
@@ -126,7 +150,8 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
                   ))}
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
 
           {/* Knowledge Extraction Section */}

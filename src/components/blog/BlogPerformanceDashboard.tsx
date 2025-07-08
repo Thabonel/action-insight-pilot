@@ -114,122 +114,90 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
     try {
       setLoading(true);
       
-      // Mock data - in real implementation, these would be separate API calls
-      const mockStats: BlogStats = {
-        totalBlogs: 47,
-        blogsThisMonth: 12,
-        blogsLastMonth: 8,
-        averageSeoScore: 87,
-        topPerformer: {
-          title: "Complete Guide to Content Marketing",
-          views: 2450,
-          engagement: 8.2
-        },
-        streak: 7,
-        weeklyGoal: 3,
-        weeklyProgress: 2
-      };
+      // Load real data from content calendar and campaigns
+      const response = await apiClient.getContentCalendar();
+      if (response.success) {
+        const contentItems = response.data || [];
+        
+        // Calculate real stats from actual content
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
+        const thisMonthContent = contentItems.filter(item => {
+          const itemDate = new Date(item.created_at);
+          return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+        });
+        
+        const lastMonthContent = contentItems.filter(item => {
+          const itemDate = new Date(item.created_at);
+          const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+          const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+          return itemDate.getMonth() === lastMonth && itemDate.getFullYear() === lastMonthYear;
+        });
 
-      const mockContentHealth: ContentHealth = {
-        needsUpdate: [
-          {
-            id: '1',
-            title: 'SEO Best Practices 2023',
-            reason: 'Outdated information',
-            lastUpdated: '2023-12-15'
+        const realStats: BlogStats = {
+          totalBlogs: contentItems.length,
+          blogsThisMonth: thisMonthContent.length,
+          blogsLastMonth: lastMonthContent.length,
+          averageSeoScore: 0, // Would need SEO analysis integration
+          topPerformer: {
+            title: contentItems.length > 0 ? contentItems[0].title : "No content yet",
+            views: 0, // Would need analytics integration
+            engagement: 0
           },
-          {
-            id: '2',
-            title: 'Social Media Trends',
-            reason: 'Broken external links',
-            lastUpdated: '2024-01-10'
-          }
-        ],
-        contentGaps: [
-          {
-            topic: 'AI Content Creation Tools',
-            difficulty: 'medium',
-            searchVolume: 8900
-          },
-          {
-            topic: 'Video Marketing ROI',
-            difficulty: 'easy',
-            searchVolume: 5400
-          }
-        ],
-        keywordOpportunities: [
-          {
-            keyword: 'content automation strategies',
-            competition: 'low',
-            potential: 92
-          },
-          {
-            keyword: 'blog monetization methods',
-            competition: 'medium',
-            potential: 78
-          }
-        ],
-        seasonalSuggestions: [
-          {
-            topic: 'Holiday Email Campaigns',
-            timing: 'Next 2 weeks',
-            priority: 'high'
-          },
-          {
-            topic: 'Year-End Marketing Review',
-            timing: 'December',
-            priority: 'medium'
-          }
-        ]
-      };
+          streak: 0, // Would need to calculate writing streak
+          weeklyGoal: 3,
+          weeklyProgress: 0 // Would need weekly tracking
+        };
 
-      const mockQuickActions: QuickActions = {
-        drafts: [
-          {
-            id: 'draft1',
-            title: 'Advanced Email Segmentation',
-            lastModified: '2024-01-20',
-            progress: 65
-          },
-          {
-            id: 'draft2',
-            title: 'Customer Journey Mapping',
-            lastModified: '2024-01-19',
-            progress: 30
-          }
-        ],
-        bestPerformers: [
-          {
-            id: 'best1',
-            title: 'Complete Guide to Content Marketing',
-            score: 95
-          },
-          {
-            id: 'best2',
-            title: 'Email Marketing Automation',
-            score: 89
-          }
-        ],
-        updateSuggestions: [
-          {
-            id: 'update1',
-            title: 'Social Media Analytics Tools',
-            reason: 'Low recent traffic',
-            priority: 85
-          }
-        ],
-        seriesOpportunities: [
-          {
-            id: 'series1',
-            title: 'Content Marketing Fundamentals',
-            suggestedSeries: 'Advanced Content Marketing'
-          }
-        ]
-      };
+        const realContentHealth: ContentHealth = {
+          needsUpdate: [], // Would need content analysis
+          contentGaps: [], // Would need topic analysis
+          keywordOpportunities: [], // Would need SEO tool integration
+          seasonalSuggestions: [] // Would need trending topic analysis
+        };
 
-      setStats(mockStats);
-      setContentHealth(mockContentHealth);
-      setQuickActions(mockQuickActions);
+        const realQuickActions: QuickActions = {
+          drafts: contentItems.filter(item => item.status === 'draft').map(item => ({
+            id: item.id,
+            title: item.title,
+            lastModified: item.updated_at,
+            progress: 50 // Would need progress tracking
+          })),
+          bestPerformers: [], // Would need performance metrics
+          updateSuggestions: [], // Would need content analysis
+          seriesOpportunities: [] // Would need content relationship analysis
+        };
+
+        setStats(realStats);
+        setContentHealth(realContentHealth);
+        setQuickActions(realQuickActions);
+      } else {
+        // Fallback to empty state
+        setStats({
+          totalBlogs: 0,
+          blogsThisMonth: 0,
+          blogsLastMonth: 0,
+          averageSeoScore: 0,
+          topPerformer: { title: "No content yet", views: 0, engagement: 0 },
+          streak: 0,
+          weeklyGoal: 3,
+          weeklyProgress: 0
+        });
+        setContentHealth({
+          needsUpdate: [],
+          contentGaps: [],
+          keywordOpportunities: [],
+          seasonalSuggestions: []
+        });
+        setQuickActions({
+          drafts: [],
+          bestPerformers: [],
+          updateSuggestions: [],
+          seriesOpportunities: []
+        });
+      }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {

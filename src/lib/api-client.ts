@@ -737,6 +737,44 @@ export class ApiClient {
     };
   }
 
+  async getContentCalendar(): Promise<ApiResponse<any>> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return {
+          success: false,
+          error: 'Authentication required',
+          message: 'User not authenticated'
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('content_calendar')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        return {
+          success: false,
+          error: 'Database error',
+          message: error.message
+        };
+      }
+
+      return {
+        success: true,
+        data: data || []
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Server error',
+        message: error instanceof Error ? error.message : 'Failed to fetch content calendar'
+      };
+    }
+  }
+
   // Lead Methods
   async getLeads(): Promise<ApiResponse<any[]>> {
     console.log('Getting leads');

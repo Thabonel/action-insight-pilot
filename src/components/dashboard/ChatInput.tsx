@@ -22,7 +22,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         type="text"
         value={chatMessage}
         onChange={(e) => setChatMessage(e.target.value)}
-        placeholder={user ? "Ask your AI assistant..." : "Please log in to chat..."}
+        placeholder={user ? "What can I help you with today?" : "Please log in to chat..."}
         disabled={!user || isTyping}
         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
       />

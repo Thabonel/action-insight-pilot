@@ -681,7 +681,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={user ? "Tell me about your campaign needs..." : "Please log in to chat..."}
+            placeholder={user ? "How can I help optimize your marketing today?" : "Please log in to chat..."}
             disabled={!user || isProcessing}
             className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 text-black placeholder-gray-500"
           />

@@ -36,77 +36,71 @@ import {
   Zap
 } from 'lucide-react';
 
-// Mock analytics data generator
+// Real analytics data generator based on campaign metrics
 const generateAnalyticsData = (campaign: Campaign) => {
   const daysRunning = campaign.startDate ? 
     Math.floor((new Date().getTime() - new Date(campaign.startDate).getTime()) / (1000 * 3600 * 24)) : 0;
   
+  // Use real metrics from campaign if available, otherwise use defaults
   const baseMetrics = {
-    impressions: Math.floor(Math.random() * 500000) + 100000,
-    clicks: Math.floor(Math.random() * 25000) + 5000,
-    conversions: Math.floor(Math.random() * 1000) + 200,
-    revenue: Math.floor(Math.random() * 50000) + 10000,
-    cost: campaign.budget_spent || Math.floor(Math.random() * 15000) + 3000,
+    impressions: campaign.metrics?.impressions || 0,
+    clicks: campaign.metrics?.clicks || 0,
+    conversions: campaign.metrics?.reach || 0, // Using reach as a proxy since conversions doesn't exist in the interface
+    revenue: campaign.metrics?.revenue_generated || 0,
+    cost: campaign.budget_spent || 0,
   };
+
+  // Calculate derived metrics
+  const ctr = baseMetrics.impressions > 0 ? (baseMetrics.clicks / baseMetrics.impressions) * 100 : 0;
+  const conversionRate = baseMetrics.clicks > 0 ? (baseMetrics.conversions / baseMetrics.clicks) * 100 : 0;
+  const cpc = baseMetrics.clicks > 0 ? baseMetrics.cost / baseMetrics.clicks : 0;
+  const cpa = baseMetrics.conversions > 0 ? baseMetrics.cost / baseMetrics.conversions : 0;
+  const roas = baseMetrics.cost > 0 ? baseMetrics.revenue / baseMetrics.cost : 0;
+  const roi = baseMetrics.cost > 0 ? ((baseMetrics.revenue - baseMetrics.cost) / baseMetrics.cost) * 100 : 0;
 
   return {
     ...baseMetrics,
-    ctr: Number(((baseMetrics.clicks / baseMetrics.impressions) * 100).toFixed(2)),
-    conversionRate: Number(((baseMetrics.conversions / baseMetrics.clicks) * 100).toFixed(2)),
-    cpc: Number((baseMetrics.cost / baseMetrics.clicks).toFixed(2)),
-    cpa: Number((baseMetrics.cost / baseMetrics.conversions).toFixed(2)),
-    roas: Number((baseMetrics.revenue / baseMetrics.cost).toFixed(2)),
-    roi: Number((((baseMetrics.revenue - baseMetrics.cost) / baseMetrics.cost) * 100).toFixed(1)),
+    ctr: Number(ctr.toFixed(2)),
+    conversionRate: Number(conversionRate.toFixed(2)),
+    cpc: Number(cpc.toFixed(2)),
+    cpa: Number(cpa.toFixed(2)),
+    roas: Number(roas.toFixed(2)),
+    roi: Number(roi.toFixed(1)),
     
-    // Time series data for charts
-    dailyData: Array.from({ length: Math.min(daysRunning + 1, 30) }, (_, i) => ({
+    // Time series data - would need real daily tracking
+    dailyData: daysRunning > 0 ? Array.from({ length: Math.min(daysRunning + 1, 30) }, (_, i) => ({
       date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      impressions: Math.floor(Math.random() * 20000) + 5000,
-      clicks: Math.floor(Math.random() * 1000) + 200,
-      conversions: Math.floor(Math.random() * 50) + 10,
-      cost: Math.floor(Math.random() * 500) + 100,
-      revenue: Math.floor(Math.random() * 2000) + 500
-    })),
+      impressions: Math.floor(baseMetrics.impressions / Math.max(daysRunning, 1)),
+      clicks: Math.floor(baseMetrics.clicks / Math.max(daysRunning, 1)),
+      conversions: Math.floor(baseMetrics.conversions / Math.max(daysRunning, 1)),
+      cost: Math.floor(baseMetrics.cost / Math.max(daysRunning, 1)),
+      revenue: Math.floor(baseMetrics.revenue / Math.max(daysRunning, 1))
+    })) : [],
     
-    // Channel breakdown
-    channelPerformance: [
-      { channel: 'Email', impressions: Math.floor(baseMetrics.impressions * 0.4), clicks: Math.floor(baseMetrics.clicks * 0.45), conversions: Math.floor(baseMetrics.conversions * 0.5) },
-      { channel: 'Social Media', impressions: Math.floor(baseMetrics.impressions * 0.3), clicks: Math.floor(baseMetrics.clicks * 0.25), conversions: Math.floor(baseMetrics.conversions * 0.2) },
-      { channel: 'Paid Search', impressions: Math.floor(baseMetrics.impressions * 0.2), clicks: Math.floor(baseMetrics.clicks * 0.2), conversions: Math.floor(baseMetrics.conversions * 0.2) },
-      { channel: 'Display', impressions: Math.floor(baseMetrics.impressions * 0.1), clicks: Math.floor(baseMetrics.clicks * 0.1), conversions: Math.floor(baseMetrics.conversions * 0.1) }
-    ],
+    // Channel breakdown based on actual campaign channels
+    channelPerformance: Array.isArray(campaign.channels) ? campaign.channels.map((channel, index) => {
+      const weight = 1 / (campaign.channels?.length || 1);
+      return {
+        channel: typeof channel === 'string' ? channel : 'Unknown Channel',
+        impressions: Math.floor(baseMetrics.impressions * weight),
+        clicks: Math.floor(baseMetrics.clicks * weight),
+        conversions: Math.floor(baseMetrics.conversions * weight)
+      };
+    }) : [],
     
-    // Audience insights
+    // Audience insights - would need real analytics integration
     audienceData: {
-      demographics: [
-        { segment: '25-34', percentage: 35, conversions: Math.floor(baseMetrics.conversions * 0.35) },
-        { segment: '35-44', percentage: 28, conversions: Math.floor(baseMetrics.conversions * 0.28) },
-        { segment: '45-54', percentage: 22, conversions: Math.floor(baseMetrics.conversions * 0.22) },
-        { segment: '55+', percentage: 15, conversions: Math.floor(baseMetrics.conversions * 0.15) }
-      ],
-      locations: [
-        { location: 'United States', percentage: 45, revenue: Math.floor(baseMetrics.revenue * 0.45) },
-        { location: 'Canada', percentage: 20, revenue: Math.floor(baseMetrics.revenue * 0.20) },
-        { location: 'United Kingdom', percentage: 15, revenue: Math.floor(baseMetrics.revenue * 0.15) },
-        { location: 'Australia', percentage: 12, revenue: Math.floor(baseMetrics.revenue * 0.12) },
-        { location: 'Other', percentage: 8, revenue: Math.floor(baseMetrics.revenue * 0.08) }
-      ]
+      demographics: campaign.demographics ? [
+        { segment: 'Primary Target', percentage: 100, conversions: baseMetrics.conversions }
+      ] : [],
+      locations: []
     },
     
-    // Recent activities
-    recentActivities: [
-      { type: 'optimization', message: 'Budget increased by 15% due to strong performance', timestamp: '2 hours ago', impact: 'positive' },
-      { type: 'alert', message: 'CTR below target in Display channel', timestamp: '6 hours ago', impact: 'negative' },
-      { type: 'milestone', message: 'Reached 75% of conversion goal', timestamp: '1 day ago', impact: 'positive' },
-      { type: 'update', message: 'New creative assets deployed', timestamp: '2 days ago', impact: 'neutral' }
-    ],
+    // Recent activities - would need activity tracking
+    recentActivities: [],
     
-    // Recommendations
-    recommendations: [
-      { type: 'optimization', title: 'Increase Email Budget', description: 'Email channel showing 40% higher conversion rate', priority: 'high' },
-      { type: 'alert', title: 'Monitor Display Performance', description: 'Display ads underperforming vs other channels', priority: 'medium' },
-      { type: 'opportunity', title: 'Expand to Mobile', description: '60% of traffic from mobile devices', priority: 'low' }
-    ]
+    // Recommendations - would need AI analysis
+    recommendations: []
   };
 };
 

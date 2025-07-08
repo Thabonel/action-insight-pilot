@@ -60,7 +60,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({
               onChange={(e) => setNewCampaign(prev => ({ ...prev, name: e.target.value }))}
               required
               disabled={loading}
-              placeholder="Enter campaign name"
+              placeholder="Campaign name"
               className="bg-white text-black border-gray-300"
             />
             {!newCampaign.name.trim() && (
@@ -98,7 +98,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({
               onChange={(e) => setNewCampaign(prev => ({ ...prev, description: e.target.value }))}
               rows={3}
               disabled={loading}
-              placeholder="Describe your campaign objectives..."
+              placeholder="Campaign description and objectives"
               className="bg-white text-black border-gray-300"
             />
           </div>
