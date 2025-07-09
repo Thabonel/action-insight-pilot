@@ -15,7 +15,8 @@ import {
   Link,
   LogOut,
   User,
-  Brain
+  Brain,
+  Video
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -97,10 +98,10 @@ const Layout: React.FC = () => {
       description: 'Performance metrics'
     },
     { 
-      name: 'Workflows', 
-      href: '/app/workflows', 
-      icon: Workflow,
-      description: 'Automation workflows'
+      name: 'Viral Video Marketing', 
+      href: '/app/viral-video-marketing', 
+      icon: Video,
+      description: 'Video content automation'
     },
     { 
       name: 'Proposals', 
