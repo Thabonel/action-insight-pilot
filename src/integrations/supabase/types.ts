@@ -1533,6 +1533,45 @@ export type Database = {
           },
         ]
       }
+      gtm_strategies: {
+        Row: {
+          created_at: string | null
+          id: string
+          inputs: Json
+          product_name: string
+          research_data: Json | null
+          session_id: string | null
+          status: string | null
+          strategy_content: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          inputs?: Json
+          product_name: string
+          research_data?: Json | null
+          session_id?: string | null
+          status?: string | null
+          strategy_content: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          inputs?: Json
+          product_name?: string
+          research_data?: Json | null
+          session_id?: string | null
+          status?: string | null
+          strategy_content?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       integration_connections: {
         Row: {
           configuration: Json | null

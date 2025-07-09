@@ -43,6 +43,7 @@ const AppRouter: React.FC = () => {
         <Route path="content" element={<Content />} />
         <Route path="social" element={<Social />} />
         <Route path="analytics" element={<Analytics />} />
+        <Route path="workflows" element={<Tools />} />
         <Route path="proposals" element={<Proposals />} />
         <Route path="knowledge" element={<KnowledgeManagement />} />
         <Route path="settings" element={<Settings />} />
