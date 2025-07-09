@@ -6,6 +6,7 @@ import { ArrowRight, BarChart3, Users, Target, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import ConversationalDashboard from '@/pages/ConversationalDashboard'
 import Campaigns from '@/pages/Campaigns'
+import CampaignManagement from '@/pages/CampaignManagement'
 import Leads from '@/pages/Leads'
 import Content from '@/pages/Content'
 import Analytics from '@/pages/Analytics'
@@ -31,6 +32,7 @@ const AppRouter: React.FC = () => {
         <Route index element={<Navigate to="conversational-dashboard" replace />} />
         <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
         <Route path="campaigns" element={<Campaigns />} />
+        <Route path="campaign-management" element={<CampaignManagement />} />
         <Route path="campaigns/new" element={<CampaignDetails />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
         <Route path="leads" element={<Leads />} />
