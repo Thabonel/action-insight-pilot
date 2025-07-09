@@ -58,7 +58,7 @@ const CampaignBriefGenerator: React.FC = () => {
       mode: 'ai-generated'
     });
     
-    navigate(`/app/campaigns/new?${searchParams.toString()}`);
+    navigate(`/app/campaigns/copilot?${searchParams.toString()}`);
     
     toast({
       title: "AI Campaign Generated",
@@ -80,7 +80,7 @@ const CampaignBriefGenerator: React.FC = () => {
         </p>
         <Badge variant="secondary" className="bg-purple-100 text-purple-700">
           <Sparkles className="h-3 w-3 mr-1" />
-          Phase 0: Quick Win Implementation
+          Launches AI Co-pilot Experience
         </Badge>
       </div>
 
