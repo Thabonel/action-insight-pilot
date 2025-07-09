@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_learning_data: {
+        Row: {
+          agent_type: string
+          confidence_score: number | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          pattern_data: Json
+          success_rate: number | null
+          usage_count: number | null
+        }
+        Insert: {
+          agent_type: string
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          pattern_data: Json
+          success_rate?: number | null
+          usage_count?: number | null
+        }
+        Update: {
+          agent_type?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          pattern_data?: Json
+          success_rate?: number | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       agent_logs: {
         Row: {
           agent_id: number | null
@@ -127,6 +160,45 @@ export type Database = {
           recommendations?: Json | null
           timestamp?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      ai_interaction_feedback: {
+        Row: {
+          context_data: Json
+          created_at: string | null
+          feedback_score: number | null
+          id: string
+          interaction_type: string
+          original_suggestion: Json
+          session_id: string | null
+          timestamp: string | null
+          user_id: string
+          user_modification: Json | null
+        }
+        Insert: {
+          context_data: Json
+          created_at?: string | null
+          feedback_score?: number | null
+          id?: string
+          interaction_type: string
+          original_suggestion: Json
+          session_id?: string | null
+          timestamp?: string | null
+          user_id: string
+          user_modification?: Json | null
+        }
+        Update: {
+          context_data?: Json
+          created_at?: string | null
+          feedback_score?: number | null
+          id?: string
+          interaction_type?: string
+          original_suggestion?: Json
+          session_id?: string | null
+          timestamp?: string | null
+          user_id?: string
+          user_modification?: Json | null
         }
         Relationships: []
       }
@@ -276,6 +348,39 @@ export type Database = {
           name?: string
           type?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      campaign_copilot_sessions: {
+        Row: {
+          brief_data: Json
+          created_at: string | null
+          generated_campaign: Json | null
+          id: string
+          interaction_history: Json | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          brief_data: Json
+          created_at?: string | null
+          generated_campaign?: Json | null
+          id?: string
+          interaction_history?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          brief_data?: Json
+          created_at?: string | null
+          generated_campaign?: Json | null
+          id?: string
+          interaction_history?: Json | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
