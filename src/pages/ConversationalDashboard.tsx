@@ -8,8 +8,11 @@ import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
 import AiVideoCreatorCard from '@/components/dashboard/AiVideoCreatorCard';
 import { RealInsights } from '@/types/insights';
+import { useContentIdeas } from '@/contexts/ContentIdeasContext';
 
 const ConversationalDashboard: React.FC = () => {
+  const { getRecentIdeas } = useContentIdeas();
+  
   // Campaign creation flow state management - moved before hook to maintain order
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
   const [collectedAnswers, setCollectedAnswers] = useState<Record<string, any>>({});
@@ -126,7 +129,7 @@ const ConversationalDashboard: React.FC = () => {
         <AIGreeting insights={insights} />
 
         {/* AI Video Creator */}
-        <AiVideoCreatorCard />
+        <AiVideoCreatorCard contentIdeas={getRecentIdeas(7)} />
 
         {/* System Overview Cards */}
         <SystemOverviewCards />

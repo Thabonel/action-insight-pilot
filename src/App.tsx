@@ -9,19 +9,22 @@ import HelpPage from '@/pages/HelpPage';
 import { Toaster } from "@/components/ui/toaster";
 import { OnboardingProvider } from '@/contexts/OnboardingContext';
 import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
+import { ContentIdeasProvider } from '@/contexts/ContentIdeasContext';
 
 function App() {
   return (
     <OnboardingProvider>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/oauth/callback" element={<OAuthCallback />} />
-        <Route path="/help" element={<HelpPage />} />
-        <Route path="/app/*" element={<AppRouter />} />
-      </Routes>
-      <OnboardingOverlay />
-      <Toaster />
+      <ContentIdeasProvider>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/app/*" element={<AppRouter />} />
+        </Routes>
+        <OnboardingOverlay />
+        <Toaster />
+      </ContentIdeasProvider>
     </OnboardingProvider>
   );
 }

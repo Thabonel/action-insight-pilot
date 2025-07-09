@@ -6,28 +6,23 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { 
-  FileText, 
-  TrendingUp, 
-  Target, 
-  Lightbulb,
   Calendar,
-  BarChart3,
-  Zap,
-  Clock,
-  ArrowUp,
-  Heart,
-  Share,
-  Eye
+  Zap
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import ContentAIAssistant from '@/components/content/ContentAIAssistant';
 import IntelligentContentGenerator from '@/components/content/IntelligentContentGenerator';
 import ContentPerformanceDashboard from '@/components/content/ContentPerformanceDashboard';
 import ContentOptimizationPanel from '@/components/content/ContentOptimizationPanel';
 import ContentWorkflowFeatures from '@/components/content/ContentWorkflowFeatures';
 import ContentTemplates from '@/components/content/ContentTemplates';
+import ContentIdeasManager from '@/components/content/ContentIdeasManager';
+import ContentSchedulingDialog from '@/components/content/ContentSchedulingDialog';
 
 const Content: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [contentIdeas, setContentIdeas] = useState([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     const trackingId = behaviorTracker.trackFeatureStart('content_page');
@@ -44,6 +39,21 @@ const Content: React.FC = () => {
     });
   };
 
+  const handleVideoGenerate = (ideas: any[]) => {
+    toast({
+      title: "Video Generation Started", 
+      description: `Generating video from ${ideas.length} content ideas`,
+    });
+  };
+
+  const handleCreateContent = () => {
+    setActiveTab('generator');
+    toast({
+      title: "Content Creator",
+      description: "Navigate to the Create tab to generate new content",
+    });
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -54,74 +64,21 @@ const Content: React.FC = () => {
         </div>
         
         <div className="flex space-x-3">
-          <Button variant="outline" size="sm">
-            <Calendar className="h-4 w-4 mr-2" />
-            Schedule Content
-          </Button>
-          <Button size="sm">
+          <ContentSchedulingDialog>
+            <Button variant="outline" size="sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              Schedule Content
+            </Button>
+          </ContentSchedulingDialog>
+          <Button size="sm" onClick={handleCreateContent}>
             <Zap className="h-4 w-4 mr-2" />
             Create Content
           </Button>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">Content Pieces</p>
-                <p className="text-2xl font-bold">142</p>
-                <p className="text-xs text-green-600 flex items-center">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  +18% this month
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Eye className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-gray-600">Total Views</p>
-                <p className="text-2xl font-bold">24.7K</p>
-                <p className="text-xs text-purple-600">Avg: 174 per piece</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Heart className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="text-sm text-gray-600">Engagement Rate</p>
-                <p className="text-2xl font-bold">6.8%</p>
-                <p className="text-xs text-green-600">Above industry avg</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Share className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Top Performer</p>
-                <p className="text-2xl font-bold">2.1K</p>
-                <p className="text-xs text-green-600">views this week</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Content Ideas Manager */}
+      <ContentIdeasManager onVideoGenerate={handleVideoGenerate} />
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
