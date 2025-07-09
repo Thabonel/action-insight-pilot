@@ -78,12 +78,26 @@ const Campaigns: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">Campaigns</h1>
             <p className="text-gray-600 mt-1">Manage your marketing campaigns</p>
           </div>
-          <Button asChild>
-            <Link to="/app/campaigns/new">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              New Campaign
-            </Link>
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" asChild>
+              <Link to="/app/campaigns/ai-generator">
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Quick Generator
+              </Link>
+            </Button>
+            <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600">
+              <Link to="/app/campaigns/copilot">
+                <PlusIcon className="h-4 w-4 mr-2" />
+                AI Co-pilot
+              </Link>
+            </Button>
+            <Button variant="secondary" asChild>
+              <Link to="/app/campaigns/new">
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Manual
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
