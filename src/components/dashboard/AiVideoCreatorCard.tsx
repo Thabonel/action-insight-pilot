@@ -1,20 +1,56 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Video } from 'lucide-react';
 
-const AiVideoCreatorCard: React.FC = () => {
+interface ContentIdea {
+  id: string;
+  title: string;
+  description: string;
+  source: string;
+  trending: number;
+  tags: string[];
+  createdAt: Date;
+}
+
+interface AiVideoCreatorCardProps {
+  contentIdeas?: ContentIdea[];
+}
+
+const AiVideoCreatorCard: React.FC<AiVideoCreatorCardProps> = ({ contentIdeas = [] }) => {
   const { toast } = useToast();
 
   const handleGenerateVideo = async () => {
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/workflows/ai-video-creator/run`, { 
-        method: "POST" 
+    if (contentIdeas.length === 0) {
+      toast({
+        title: "No Content Ideas",
+        description: "Please add some content ideas in the Content page first",
+        variant: "destructive",
       });
+      return;
+    }
+
+    try {
+      const payload = {
+        contentIdeas: contentIdeas.map(idea => ({
+          title: idea.title,
+          description: idea.description,
+          tags: idea.tags
+        }))
+      };
+
+      await fetch(`${import.meta.env.VITE_API_URL}/workflows/ai-video-creator/run`, { 
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      
       toast({
         title: "Success",
-        description: "AI Video Creator workflow queued",
+        description: `AI Video Creator workflow queued with ${contentIdeas.length} content ideas`,
       });
     } catch (error) {
       toast({
@@ -37,9 +73,16 @@ const AiVideoCreatorCard: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Button onClick={handleGenerateVideo} className="w-full">
-          Generate AI Video
-        </Button>
+        <div className="space-y-3">
+          {contentIdeas.length > 0 && (
+            <div className="text-sm text-gray-600">
+              Ready to generate from {contentIdeas.length} content idea{contentIdeas.length !== 1 ? 's' : ''}
+            </div>
+          )}
+          <Button onClick={handleGenerateVideo} className="w-full">
+            Generate AI Video
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
