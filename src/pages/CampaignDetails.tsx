@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,9 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { useAIAssistant } from '@/hooks/useAIAssistant';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import AIAssistanceButton from '@/components/AIAssistanceButton';
 import { apiClient } from '@/lib/api-client';
 import { Campaign, ApiResponse } from '@/lib/api-client-interface';
 import {
@@ -44,11 +47,14 @@ const CampaignDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { generateKeyMessages, generateTargetPersonas, loading: aiLoading } = useAIAssistant();
+  const { trackFieldFocus, trackFieldBlur, trackAIAssistanceUsed, trackFormSubmit } = useAnalytics();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const fieldTimers = useRef<{ [key: string]: number }>({});
 
   // Comprehensive form data state
   const [formData, setFormData] = useState<{
@@ -364,6 +370,7 @@ const CampaignDetails: React.FC = () => {
       if (result.success) {
         setCampaign(result.data);
         setIsEditing(false);
+        trackFormSubmit(true);
         toast({
           title: "Success",
           description: id && id !== 'new' ? "Campaign updated successfully" : "Campaign created successfully",
@@ -377,6 +384,7 @@ const CampaignDetails: React.FC = () => {
       }
     } catch (error) {
       console.error('Error saving campaign:', error);
+      trackFormSubmit(false, error instanceof Error ? error.message : 'Unknown error');
       toast({
         title: "Error",
         description: id && id !== 'new' ? "Failed to update campaign" : "Failed to create campaign",
@@ -392,6 +400,79 @@ const CampaignDetails: React.FC = () => {
     // Clear error when field is updated
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  // Field tracking functions for analytics
+  const handleFieldFocus = useCallback((fieldName: string) => {
+    fieldTimers.current[fieldName] = Date.now();
+    trackFieldFocus(fieldName);
+  }, [trackFieldFocus]);
+
+  const handleFieldBlur = useCallback((fieldName: string, value: any) => {
+    const startTime = fieldTimers.current[fieldName];
+    if (startTime) {
+      const timeSpent = Date.now() - startTime;
+      const isEmpty = !value || (Array.isArray(value) && value.length === 0) || value.toString().trim() === '';
+      trackFieldBlur(fieldName, isEmpty, timeSpent);
+      delete fieldTimers.current[fieldName];
+    }
+  }, [trackFieldBlur]);
+
+  // AI assistance functions
+  const handleGenerateKeyMessages = async () => {
+    trackAIAssistanceUsed('key-messages', 'keyMessages');
+    try {
+      const context = {
+        campaignName: formData.name,
+        campaignType: formData.type,
+        targetAudience: formData.targetAudience,
+        primaryObjective: formData.primaryObjective,
+        valueProposition: formData.valueProposition
+      };
+
+      const generatedMessages = await generateKeyMessages(context);
+      
+      if (Array.isArray(generatedMessages)) {
+        setFormData(prev => ({
+          ...prev,
+          keyMessages: [...prev.keyMessages, ...generatedMessages]
+        }));
+        toast({
+          title: "Key Messages Generated",
+          description: `Added ${generatedMessages.length} new key messages to your campaign.`,
+        });
+      }
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
+  const handleGenerateTargetPersonas = async () => {
+    trackAIAssistanceUsed('target-personas', 'buyerPersonas');
+    try {
+      const context = {
+        campaignName: formData.name,
+        campaignType: formData.type,
+        targetAudience: formData.targetAudience,
+        demographics: formData.demographics,
+        industry: formData.type // Use campaign type as industry hint
+      };
+
+      const generatedPersonas = await generateTargetPersonas(context);
+      
+      if (Array.isArray(generatedPersonas)) {
+        setFormData(prev => ({
+          ...prev,
+          buyerPersonas: [...prev.buyerPersonas, ...generatedPersonas]
+        }));
+        toast({
+          title: "Target Personas Generated",
+          description: `Added ${generatedPersonas.length} new buyer personas to your campaign.`,
+        });
+      }
+    } catch (error) {
+      // Error handling is done in the hook
     }
   };
 
@@ -971,11 +1052,21 @@ const CampaignDetails: React.FC = () => {
 
             {/* Audience Tab */}
             <TabsContent value="audience" className="space-y-6">
-              <Card>
+                <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Target Audience & Demographics
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Target Audience & Demographics
+                    </div>
+                    {(isEditing || (!id || id === 'new')) && (
+                      <AIAssistanceButton
+                        type="target-personas"
+                        onClick={handleGenerateTargetPersonas}
+                        loading={aiLoading}
+                        disabled={!formData.targetAudience && !formData.primaryObjective}
+                      />
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -985,6 +1076,8 @@ const CampaignDetails: React.FC = () => {
                       id="targetAudience"
                       value={formData.targetAudience}
                       onChange={(e) => updateField('targetAudience', e.target.value)}
+                      onFocus={() => handleFieldFocus('targetAudience')}
+                      onBlur={() => handleFieldBlur('targetAudience', formData.targetAudience)}
                       placeholder="Describe your target audience in detail"
                       rows={3}
                       disabled={!isEditing && id && id !== 'new'}
@@ -1232,14 +1325,27 @@ const CampaignDetails: React.FC = () => {
                     />
                   </div>
 
-                  <ArrayManager
-                    label="Key Messages"
-                    items={formData.keyMessages}
-                    onAdd={(item) => addArrayItem('keyMessages', item)}
-                    onRemove={(index) => removeArrayItem('keyMessages', index)}
-                    placeholder="Add key message"
-                    disabled={!isEditing && id && id !== 'new'}
-                  />
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label>Key Messages</Label>
+                      {(isEditing || (!id || id === 'new')) && (
+                        <AIAssistanceButton
+                          type="key-messages"
+                          onClick={handleGenerateKeyMessages}
+                          loading={aiLoading}
+                          disabled={!formData.name && !formData.primaryObjective}
+                        />
+                      )}
+                    </div>
+                    <ArrayManager
+                      label=""
+                      items={formData.keyMessages}
+                      onAdd={(item) => addArrayItem('keyMessages', item)}
+                      onRemove={(index) => removeArrayItem('keyMessages', index)}
+                      placeholder="Add key message"
+                      disabled={!isEditing && id && id !== 'new'}
+                    />
+                  </div>
 
                   <div>
                     <Label htmlFor="contentStrategy">Content Strategy</Label>

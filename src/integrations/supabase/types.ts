@@ -2828,7 +2828,15 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "archived"
-      campaign_type: "email" | "social" | "content" | "paid_ads" | "partnership"
+      campaign_type:
+        | "email"
+        | "social"
+        | "content"
+        | "paid_ads"
+        | "partnership"
+        | "lead_generation"
+        | "brand_awareness"
+        | "product_launch"
       company_size: "1-10" | "11-50" | "51-200" | "201-1000" | "1000+"
       confidence_level: "low" | "medium" | "high"
       content_status: "draft" | "review" | "approved" | "published" | "archived"
@@ -3014,7 +3022,16 @@ export const Constants = {
         "cancelled",
         "archived",
       ],
-      campaign_type: ["email", "social", "content", "paid_ads", "partnership"],
+      campaign_type: [
+        "email",
+        "social",
+        "content",
+        "paid_ads",
+        "partnership",
+        "lead_generation",
+        "brand_awareness",
+        "product_launch",
+      ],
       company_size: ["1-10", "11-50", "51-200", "201-1000", "1000+"],
       confidence_level: ["low", "medium", "high"],
       content_status: ["draft", "review", "approved", "published", "archived"],
