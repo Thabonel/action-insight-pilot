@@ -498,6 +498,111 @@ export type Database = {
           },
         ]
       }
+      campaign_performance_monitor: {
+        Row: {
+          auto_actions_taken: Json | null
+          benchmark_metrics: Json | null
+          campaign_id: string
+          channel: string
+          created_at: string | null
+          id: string
+          measured_at: string | null
+          metrics: Json
+          optimization_suggestions: Json | null
+          performance_score: number | null
+        }
+        Insert: {
+          auto_actions_taken?: Json | null
+          benchmark_metrics?: Json | null
+          campaign_id: string
+          channel: string
+          created_at?: string | null
+          id?: string
+          measured_at?: string | null
+          metrics: Json
+          optimization_suggestions?: Json | null
+          performance_score?: number | null
+        }
+        Update: {
+          auto_actions_taken?: Json | null
+          benchmark_metrics?: Json | null
+          campaign_id?: string
+          channel?: string
+          created_at?: string | null
+          id?: string
+          measured_at?: string | null
+          metrics?: Json
+          optimization_suggestions?: Json | null
+          performance_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_performance_monitor_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "active_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_performance_monitor_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_predictions: {
+        Row: {
+          accuracy_score: number | null
+          actual_outcome: Json | null
+          based_on_campaigns: Json | null
+          campaign_id: string
+          confidence_score: number
+          created_at: string | null
+          id: string
+          prediction_data: Json
+          prediction_type: string
+        }
+        Insert: {
+          accuracy_score?: number | null
+          actual_outcome?: Json | null
+          based_on_campaigns?: Json | null
+          campaign_id: string
+          confidence_score: number
+          created_at?: string | null
+          id?: string
+          prediction_data: Json
+          prediction_type: string
+        }
+        Update: {
+          accuracy_score?: number | null
+          actual_outcome?: Json | null
+          based_on_campaigns?: Json | null
+          campaign_id?: string
+          confidence_score?: number
+          created_at?: string | null
+          id?: string
+          prediction_data?: Json
+          prediction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_predictions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "active_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_predictions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           budget_allocated: number | null
@@ -1370,6 +1475,63 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      generated_content_pieces: {
+        Row: {
+          approval_status: string | null
+          campaign_id: string
+          content: string
+          content_type: string
+          created_at: string | null
+          created_by_agent: string | null
+          id: string
+          metadata: Json | null
+          performance_data: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          campaign_id: string
+          content: string
+          content_type: string
+          created_at?: string | null
+          created_by_agent?: string | null
+          id?: string
+          metadata?: Json | null
+          performance_data?: Json | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          campaign_id?: string
+          content?: string
+          content_type?: string
+          created_at?: string | null
+          created_by_agent?: string | null
+          id?: string
+          metadata?: Json | null
+          performance_data?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_content_pieces_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "active_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_content_pieces_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integration_connections: {
         Row: {
