@@ -12,7 +12,6 @@ import CampaignManagement from '@/pages/CampaignManagement'
 import Leads from '@/pages/Leads'
 import Content from '@/pages/Content'
 import Analytics from '@/pages/Analytics'
-import Tools from '@/pages/Tools'
 import Settings from '@/pages/Settings'
 import CampaignDetails from '@/pages/CampaignDetails'
 import Social from '@/pages/Social'
@@ -43,11 +42,10 @@ const AppRouter: React.FC = () => {
         <Route path="content" element={<Content />} />
         <Route path="social" element={<Social />} />
         <Route path="analytics" element={<Analytics />} />
-        <Route path="workflows" element={<Tools />} />
+        <Route path="workflows" element={<Analytics />} />
         <Route path="proposals" element={<Proposals />} />
         <Route path="knowledge" element={<KnowledgeManagement />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="tools" element={<Tools />} />
         <Route path="user-manual" element={<UserManual />} />
         <Route path="connect-platforms" element={<ConnectPlatforms />} />
         <Route path="landing-page-builder" element={<LandingPageBuilder />} />
