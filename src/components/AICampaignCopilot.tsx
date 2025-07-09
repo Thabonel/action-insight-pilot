@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { useAIFeedback } from '@/hooks/useAIFeedback';
+import { AIAutocompleteInput } from '@/components/AIAutocompleteInput';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Bot, 
   Wand2, 
@@ -20,7 +23,10 @@ import {
   HelpCircle,
   Edit3,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  ThumbsUp,
+  ThumbsDown,
+  Star
 } from 'lucide-react';
 
 interface CampaignBrief {
@@ -74,8 +80,10 @@ interface AICampaignCopilotProps {
 
 const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onSave }) => {
   const { toast } = useToast();
+  const { recordApproval, recordEdit, recordRegeneration, recordRating } = useAIFeedback();
   const [step, setStep] = useState<'brief' | 'dashboard'>('brief');
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [brief, setBrief] = useState<CampaignBrief>(initialBrief || {
     businessGoal: '',
     targetAudience: '',
@@ -84,6 +92,7 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
     timeline: ''
   });
   const [aiGeneration, setAIGeneration] = useState<AIGeneration | null>(null);
+  const [generatingStep, setGeneratingStep] = useState<string>('');
 
   const updateBrief = (field: keyof CampaignBrief, value: string) => {
     setBrief(prev => ({ ...prev, [field]: value }));
@@ -102,102 +111,111 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
     }
 
     setLoading(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
-    // Simulate AI generation - in real implementation, this would call the AI service
-    await new Promise(resolve => setTimeout(resolve, 3000));
+      // Create a session for this campaign generation
+      const { data: session } = await supabase
+        .from('campaign_copilot_sessions')
+        .insert({
+          user_id: user.id,
+          brief_data: brief,
+          status: 'active'
+        })
+        .select()
+        .single();
 
-    const mockGeneration: AIGeneration = {
-      personas: [
-        {
-          id: '1',
-          name: 'Tech-Savvy Sarah',
-          age: '28-35',
-          description: 'Digital marketing manager at a growing startup',
-          painPoints: ['Limited budget', 'Time constraints', 'Need for ROI tracking'],
-          goals: ['Increase lead quality', 'Automate processes', 'Scale efficiently'],
-          reasoning: 'This persona represents your primary audience based on typical users of marketing automation tools.'
-        },
-        {
-          id: '2',
-          name: 'Strategic Steve',
-          age: '35-45',
-          description: 'VP of Marketing at a mid-size company',
-          painPoints: ['Proving marketing ROI', 'Cross-channel coordination', 'Team alignment'],
-          goals: ['Drive revenue growth', 'Optimize attribution', 'Improve team efficiency'],
-          reasoning: 'Decision makers in this role often influence purchasing decisions for marketing tools.'
+      setSessionId(session.id);
+
+      // Step 1: Generate Audience Insights
+      setGeneratingStep('Analyzing your audience...');
+      const { data: audienceData } = await supabase.functions.invoke('audience-insight-agent', {
+        body: { brief, userId: user.id, sessionId: session.id }
+      });
+
+      // Step 2: Generate Channel Strategy
+      setGeneratingStep('Optimizing channel mix...');
+      const { data: channelData } = await supabase.functions.invoke('channel-strategy-agent', {
+        body: { brief, personas: audienceData.personas, userId: user.id, sessionId: session.id }
+      });
+
+      // Step 3: Generate Messaging Strategy  
+      setGeneratingStep('Crafting messaging pillars...');
+      const { data: messagingData } = await supabase.functions.invoke('messaging-agent', {
+        body: { brief, personas: audienceData.personas, channelStrategy: channelData, userId: user.id, sessionId: session.id }
+      });
+
+      // Step 4: Generate Content Calendar
+      setGeneratingStep('Creating content calendar...');
+      const { data: contentData } = await supabase.functions.invoke('content-calendar-agent', {
+        body: { 
+          brief, 
+          personas: audienceData.personas, 
+          channelStrategy: channelData,
+          messagingStrategy: messagingData,
+          userId: user.id, 
+          sessionId: session.id 
         }
-      ],
-      channelMix: {
-        channels: [
-          { name: 'LinkedIn Ads', allocation: 40, reasoning: 'High B2B engagement and precise targeting capabilities' },
-          { name: 'Email Marketing', allocation: 30, reasoning: 'Direct communication with existing prospects and customers' },
-          { name: 'Content Marketing', allocation: 20, reasoning: 'Build thought leadership and organic reach' },
-          { name: 'Google Ads', allocation: 10, reasoning: 'Capture high-intent search traffic' }
-        ],
-        totalBudget: parseFloat(brief.budget.replace(/[^\d.]/g, '')) || 0
-      },
-      messagingPillars: [
-        {
-          id: '1',
-          title: 'Efficiency & Automation',
-          description: 'Save time and resources with smart automation',
-          tone: 'Professional yet approachable',
-          reasoning: 'Addresses the core pain point of time constraints identified in your audience.'
-        },
-        {
-          id: '2',
-          title: 'Measurable Results',
-          description: 'Track and prove ROI with clear analytics',
-          tone: 'Data-driven and confident',
-          reasoning: 'Appeals to the need for accountability and performance measurement.'
-        },
-        {
-          id: '3',
-          title: 'Scalable Growth',
-          description: 'Solutions that grow with your business',
-          tone: 'Forward-thinking and ambitious',
-          reasoning: 'Resonates with growth-oriented businesses looking for long-term solutions.'
-        }
-      ],
-      contentCalendar: [
-        {
-          id: '1',
-          date: '2025-01-15',
-          platform: 'LinkedIn',
-          contentType: 'Article',
-          title: 'The Future of Marketing Automation in 2025',
-          description: 'Thought leadership piece on industry trends',
-          reasoning: 'Establishes authority and attracts top-of-funnel prospects.'
-        },
-        {
-          id: '2',
-          date: '2025-01-22',
-          platform: 'Email',
-          contentType: 'Newsletter',
-          title: 'Weekly ROI Report: Best Practices',
-          description: 'Educational content for existing subscribers',
-          reasoning: 'Nurtures existing leads with valuable insights.'
-        },
-        {
-          id: '3',
-          date: '2025-02-01',
-          platform: 'LinkedIn',
-          contentType: 'Video',
-          title: 'Customer Success Story: 300% ROI Increase',
-          description: 'Case study showcase',
-          reasoning: 'Social proof to convert prospects in consideration phase.'
-        }
-      ]
-    };
+      });
 
-    setAIGeneration(mockGeneration);
-    setStep('dashboard');
-    setLoading(false);
+      // Transform the AI responses to match our interface
+      const aiGeneration: AIGeneration = {
+        personas: audienceData.personas.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          age: p.demographics?.age || 'Not specified',
+          description: p.description,
+          painPoints: p.painPoints || [],
+          goals: p.motivations || [],
+          reasoning: audienceData.reasoning || 'Generated based on campaign brief and historical data'
+        })),
+        channelMix: {
+          channels: channelData.channelMix.map((c: any) => ({
+            name: c.channel,
+            allocation: c.budgetPercentage,
+            reasoning: c.rationale
+          })),
+          totalBudget: parseFloat(brief.budget.replace(/[^\d.]/g, '')) || 0
+        },
+        messagingPillars: messagingData.messagingPillars.map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          tone: p.emotionalAppeal || 'Professional',
+          reasoning: messagingData.reasoning || 'Aligned with audience insights and channel strategy'
+        })),
+        contentCalendar: contentData.contentCalendar.slice(0, 10).map((c: any) => ({
+          id: c.content[0]?.id || Math.random().toString(),
+          date: c.date,
+          platform: c.content[0]?.platform || 'Multi-channel',
+          contentType: c.content[0]?.contentType || 'Mixed',
+          title: c.content[0]?.title || 'Content piece',
+          description: c.content[0]?.description || '',
+          reasoning: contentData.reasoning || 'Optimized for audience engagement and channel performance'
+        }))
+      };
 
-    toast({
-      title: "Campaign Generated!",
-      description: "Your AI co-pilot has created a comprehensive campaign strategy.",
-    });
+      setAIGeneration(aiGeneration);
+      setStep('dashboard');
+
+      toast({
+        title: "Campaign Generated!",
+        description: "Your AI co-pilot has created a comprehensive campaign strategy using specialized agents.",
+      });
+
+    } catch (error) {
+      console.error('Error generating campaign:', error);
+      toast({
+        title: "Generation Failed",
+        description: "There was an error generating your campaign. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setGeneratingStep('');
+    }
   };
 
   const regenerateSection = async (section: string) => {
@@ -245,13 +263,13 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
               <Label htmlFor="businessGoal" className="text-base font-medium">
                 1. What's your main business goal? *
               </Label>
-              <Textarea
-                id="businessGoal"
+              <AIAutocompleteInput
+                field="businessGoal"
                 value={brief.businessGoal}
-                onChange={(e) => updateBrief('businessGoal', e.target.value)}
+                onChange={(value) => updateBrief('businessGoal', value)}
                 placeholder="e.g., Increase qualified leads by 40% to hit our Q1 revenue target of $500K"
-                rows={3}
-                className="resize-none"
+                multiline
+                context={{ campaignType: brief.campaignType }}
               />
             </div>
 
@@ -259,13 +277,13 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
               <Label htmlFor="targetAudience" className="text-base font-medium">
                 2. Describe your ideal customer *
               </Label>
-              <Textarea
-                id="targetAudience"
+              <AIAutocompleteInput
+                field="targetAudience"
                 value={brief.targetAudience}
-                onChange={(e) => updateBrief('targetAudience', e.target.value)}
+                onChange={(value) => updateBrief('targetAudience', value)}
                 placeholder="e.g., B2B SaaS marketing managers at companies with 50-500 employees, struggling with lead attribution"
-                rows={3}
-                className="resize-none"
+                multiline
+                context={{ campaignType: brief.campaignType, businessGoal: brief.businessGoal }}
               />
             </div>
 
@@ -472,8 +490,11 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
                     <Badge variant="outline" className="text-xs">{pillar.tone}</Badge>
                   </div>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="sm">
-                      <Edit3 className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" onClick={() => recordApproval(pillar, { type: 'messaging', brief }, sessionId)}>
+                      <ThumbsUp className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => recordRegeneration(pillar, { type: 'messaging', brief }, sessionId)}>
+                      <RefreshCw className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="sm">
                       <HelpCircle 
