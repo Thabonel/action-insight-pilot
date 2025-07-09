@@ -9,21 +9,13 @@ const AiVideoCreatorCard: React.FC = () => {
 
   const handleGenerateVideo = async () => {
     try {
-      const response = await fetch('https://6f5cbaff-337b-4343-bac3-e1fb48a7ef5d.lovableproject.com/workflows/ai-video-creator/run', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      await fetch(`${import.meta.env.VITE_API_URL}/workflows/ai-video-creator/run`, { 
+        method: "POST" 
       });
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "AI Video Creator workflow queued",
-        });
-      } else {
-        throw new Error('Failed to queue workflow');
-      }
+      toast({
+        title: "Success",
+        description: "AI Video Creator workflow queued",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -41,7 +33,7 @@ const AiVideoCreatorCard: React.FC = () => {
           AI Video Creator
         </CardTitle>
         <CardDescription>
-          Generate AI-powered videos automatically using your content
+          Generate a fully-edited faceless POV video from today's content ideas
         </CardDescription>
       </CardHeader>
       <CardContent>
