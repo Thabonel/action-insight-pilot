@@ -9,7 +9,10 @@ const SUPABASE_PUBLISHABLE_KEY = "<JWT_TOKEN>";
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Single instance pattern to prevent multiple client warnings
+let _supabase = (globalThis as any).supabase ?? createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+if (process.env.NODE_ENV !== "production") (globalThis as any).supabase = _supabase;
+export const supabase = _supabase;
 
 // OAuth and social media helper functions
 export const oauthService = {
