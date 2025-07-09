@@ -764,6 +764,8 @@ const CampaignDetails: React.FC = () => {
                         id="name"
                         value={formData.name}
                         onChange={(e) => updateField('name', e.target.value)}
+                        onFocus={() => handleFieldFocus('campaignName')}
+                        onBlur={() => handleFieldBlur('campaignName', formData.name)}
                         placeholder="Enter campaign name"
                         required
                         disabled={!isEditing && id && id !== 'new'}
