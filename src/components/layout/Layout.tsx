@@ -63,7 +63,7 @@ const Layout: React.FC = () => {
     },
     { 
       name: 'Campaign Management', 
-      href: '/app/campaigns', 
+      href: '/app/campaign-management', 
       icon: Zap,
       description: 'Advanced campaign tools'
     },
