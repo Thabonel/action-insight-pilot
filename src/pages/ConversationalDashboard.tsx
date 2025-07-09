@@ -6,6 +6,7 @@ import QuickActionGrid from '@/components/dashboard/QuickActionGrid';
 import SystemOverviewCards from '@/components/dashboard/SystemOverviewCards';
 import AIGreeting from '@/components/dashboard/AIGreeting';
 import LearningInsights from '@/components/dashboard/LearningInsights';
+import AiVideoCreatorCard from '@/components/dashboard/AiVideoCreatorCard';
 import { RealInsights } from '@/types/insights';
 
 const ConversationalDashboard: React.FC = () => {
@@ -123,6 +124,9 @@ const ConversationalDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* AI Greeting */}
         <AIGreeting insights={insights} />
+
+        {/* AI Video Creator */}
+        <AiVideoCreatorCard />
 
         {/* System Overview Cards */}
         <SystemOverviewCards />
