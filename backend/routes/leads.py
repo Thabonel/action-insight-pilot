@@ -24,29 +24,7 @@ async def get_leads(token: str = Depends(verify_token)):
             result = await agent_manager.lead_generation_agent.get_leads()
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
-            mock_leads = [
-                {
-                    "id": str(uuid.uuid4()),
-                    "name": "John Smith",
-                    "email": "john.smith@example.com",
-                    "company": "Tech Corp",
-                    "score": 85,
-                    "status": "qualified",
-                    "source": "website",
-                    "created_at": "2024-01-15T10:00:00Z"
-                },
-                {
-                    "id": str(uuid.uuid4()),
-                    "name": "Sarah Johnson",
-                    "email": "sarah.j@company.com",
-                    "company": "Innovation Inc",
-                    "score": 72,
-                    "status": "contacted",
-                    "source": "social_media",
-                    "created_at": "2024-01-14T14:30:00Z"
-                }
-            ]
-            return APIResponse(success=True, data=mock_leads)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error getting leads: {e}")
         return APIResponse(success=False, error=str(e))
@@ -60,17 +38,7 @@ async def search_leads(q: str, token: str = Depends(verify_token)):
             result = await agent_manager.lead_generation_agent.find_leads(search_criteria)
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
-            mock_results = [
-                {
-                    "id": str(uuid.uuid4()),
-                    "name": f"Lead matching '{q}'",
-                    "email": f"lead@{q.lower()}.com",
-                    "company": f"{q} Company",
-                    "score": 78,
-                    "status": "new"
-                }
-            ]
-            return APIResponse(success=True, data=mock_results)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error searching leads: {e}")
         return APIResponse(success=False, error=str(e))
@@ -83,17 +51,7 @@ async def get_lead_analytics(token: str = Depends(verify_token)):
             result = await agent_manager.lead_generation_agent.get_lead_analytics()
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
-            mock_analytics = {
-                "total_leads": 1247,
-                "qualified_leads": 342,
-                "conversion_rate": 27.4,
-                "avg_score": 68.5,
-                "trends": {
-                    "weekly_growth": 12.3,
-                    "monthly_growth": 45.7
-                }
-            }
-            return APIResponse(success=True, data=mock_analytics)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error getting lead analytics: {e}")
         return APIResponse(success=False, error=str(e))
@@ -106,15 +64,7 @@ async def create_lead(lead_data: Dict[str, Any], token: str = Depends(verify_tok
             result = await agent_manager.lead_generation_agent.add_lead(lead_data)
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
-            from datetime import datetime
-            new_lead = {
-                "id": str(uuid.uuid4()),
-                "score": 50,
-                "status": "new",
-                "created_at": datetime.now().isoformat() + "Z",
-                **lead_data
-            }
-            return APIResponse(success=True, data=new_lead)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error creating lead: {e}")
         return APIResponse(success=False, error=str(e))
@@ -128,28 +78,7 @@ async def export_leads(format: str = "csv", token: str = Depends(verify_token)):
             result = await agent_manager.lead_generation_agent.get_leads()
             leads_data = result.get("data", []) if result["success"] else []
         else:
-            leads_data = [
-                {
-                    "id": str(uuid.uuid4()),
-                    "name": "John Smith",
-                    "email": "john.smith@example.com",
-                    "company": "Tech Corp",
-                    "score": 85,
-                    "status": "qualified",
-                    "source": "website",
-                    "created_at": "2024-01-15T10:00:00Z"
-                },
-                {
-                    "id": str(uuid.uuid4()),
-                    "name": "Sarah Johnson",
-                    "email": "sarah.j@company.com",
-                    "company": "Innovation Inc",
-                    "score": 72,
-                    "status": "contacted",
-                    "source": "social_media",
-                    "created_at": "2024-01-14T14:30:00Z"
-                }
-            ]
+            raise HTTPException(status_code=503, detail="AI agents not available")
 
         if format.lower() == "csv":
             # Create CSV export
@@ -189,7 +118,6 @@ async def sync_leads(token: str = Depends(verify_token)):
     """Sync leads from external sources"""
     try:
         if agent_manager.agents_available:
-            # Simulate sync operation
             result = await agent_manager.lead_generation_agent.get_leads()
             sync_results = {
                 "synced_count": len(result.get("data", [])) if result["success"] else 0,
@@ -200,15 +128,7 @@ async def sync_leads(token: str = Depends(verify_token)):
             }
             return APIResponse(success=True, data=sync_results)
         else:
-            # Mock sync results
-            sync_results = {
-                "synced_count": 25,
-                "new_leads": 8,
-                "updated_leads": 17,
-                "sync_time": datetime.now().isoformat() + "Z",
-                "sources": ["website", "social_media", "email_campaigns", "crm"]
-            }
-            return APIResponse(success=True, data=sync_results)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error syncing leads: {e}")
         return APIResponse(success=False, error=str(e))

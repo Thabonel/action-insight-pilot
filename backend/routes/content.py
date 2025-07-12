@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, Any, List, Optional
 import uuid
 from datetime import datetime
@@ -44,21 +44,7 @@ async def generate_content(brief: ContentBriefRequest, token: str = Depends(veri
             )
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
-            # Mock content generation
-            mock_content = {
-                "id": str(uuid.uuid4()),
-                "title": brief.title,
-                "content": f"AI-generated {brief.content_type} content for {brief.target_audience}. This content focuses on {', '.join(brief.key_messages[:3])} with a {brief.tone} tone.",
-                "html_content": f"<h2>{brief.title}</h2><p>AI-generated {brief.content_type} content for <strong>{brief.target_audience}</strong>.</p><p>This content focuses on {', '.join(brief.key_messages[:3])} with a {brief.tone} tone.</p>",
-                "cta": brief.cta or "Take Action Now",
-                "seo_score": 85,
-                "readability_score": 92,
-                "engagement_prediction": 0.78,
-                "tags": brief.keywords[:5] if brief.keywords else ["marketing", "growth", "engagement"],
-                "status": "generated",
-                "created_at": datetime.now().isoformat() + "Z"
-            }
-            return APIResponse(success=True, data=mock_content)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error generating content: {e}")
         return APIResponse(success=False, error=str(e))
@@ -76,16 +62,7 @@ async def create_content(content_data: Dict[str, Any], token: str = Depends(veri
             )
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
-            new_content = {
-                "id": str(uuid.uuid4()),
-                "title": content_data.get("title", "Generated Content"),
-                "content": "This is AI-generated content based on your prompt.",
-                "type": content_data.get("type", "blog_post"),
-                "status": "draft",
-                "created_at": datetime.now().isoformat() + "Z",
-                **content_data
-            }
-            return APIResponse(success=True, data=new_content)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error creating content: {e}")
         return APIResponse(success=False, error=str(e))
@@ -98,25 +75,7 @@ async def get_content_library(content_type: str = None, platform: str = None, to
             result = await agent_manager.content_agent.get_content_library(content_type, platform)
             return APIResponse(success=result["success"], data=result.get("data"), error=result.get("error"))
         else:
-            mock_content = [
-                {
-                    "id": str(uuid.uuid4()),
-                    "title": "10 Marketing Tips for 2024",
-                    "type": "blog_post",
-                    "status": "published",
-                    "engagement": 245,
-                    "created_at": "2024-01-10T10:00:00Z"
-                },
-                {
-                    "id": str(uuid.uuid4()),
-                    "title": "Product Launch Email Template",
-                    "type": "email_template",
-                    "status": "draft",
-                    "engagement": 0,
-                    "created_at": "2024-01-12T15:30:00Z"
-                }
-            ]
-            return APIResponse(success=True, data=mock_content)
+            raise HTTPException(status_code=503, detail="AI agents not available")
     except Exception as e:
         logger.error(f"Error getting content library: {e}")
         return APIResponse(success=False, error=str(e))
