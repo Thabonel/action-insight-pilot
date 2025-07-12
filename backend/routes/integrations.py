@@ -18,30 +18,7 @@ router = APIRouter(prefix="/api/integrations", tags=["integrations"])
 async def get_webhooks(token: str = Depends(verify_token)):
     """Get all webhooks for the authenticated user"""
     try:
-        # Mock webhook data for now - will be replaced with Supabase queries
-        mock_webhooks = [
-            {
-                "id": str(uuid.uuid4()),
-                "name": "Campaign Completed",
-                "url": "https://api.company.com/webhooks/campaign-complete",
-                "events": ["campaign.completed", "campaign.paused"],
-                "is_active": True,
-                "last_triggered_at": datetime.now().isoformat(),
-                "last_response_code": 200,
-                "created_at": datetime.now().isoformat()
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "name": "Lead Generated",
-                "url": "https://api.company.com/webhooks/new-lead",
-                "events": ["lead.created", "lead.qualified"],
-                "is_active": True,
-                "last_triggered_at": datetime.now().isoformat(),
-                "last_response_code": 200,
-                "created_at": datetime.now().isoformat()
-            }
-        ]
-        return APIResponse(success=True, data=mock_webhooks)
+        raise HTTPException(status_code=503, detail="Webhook storage not configured")
     except Exception as e:
         logger.error(f"Error fetching webhooks: {e}")
         return APIResponse(success=False, error=str(e))
@@ -100,16 +77,7 @@ async def connect_buffer(connection_data: Dict[str, Any], token: str = Depends(v
             return APIResponse(success=False, error="API key is required")
         
         # Mock connection validation
-        connection_result = {
-            "service": "buffer",
-            "status": "connected",
-            "connected_at": datetime.now().isoformat(),
-            "account_info": {
-                "username": "example_user",
-                "plan": "pro"
-            }
-        }
-        return APIResponse(success=True, data=connection_result)
+        raise HTTPException(status_code=501, detail="Buffer integration not implemented")
     except Exception as e:
         logger.error(f"Error connecting to Buffer: {e}")
         return APIResponse(success=False, error=str(e))
@@ -122,16 +90,7 @@ async def connect_hootsuite(connection_data: Dict[str, Any], token: str = Depend
         if not api_key:
             return APIResponse(success=False, error="API key is required")
         
-        connection_result = {
-            "service": "hootsuite",
-            "status": "connected",
-            "connected_at": datetime.now().isoformat(),
-            "account_info": {
-                "organization": "Example Corp",
-                "plan": "enterprise"
-            }
-        }
-        return APIResponse(success=True, data=connection_result)
+        raise HTTPException(status_code=501, detail="Hootsuite integration not implemented")
     except Exception as e:
         logger.error(f"Error connecting to Hootsuite: {e}")
         return APIResponse(success=False, error=str(e))
@@ -144,16 +103,7 @@ async def connect_later(connection_data: Dict[str, Any], token: str = Depends(ve
         if not api_key:
             return APIResponse(success=False, error="API key is required")
         
-        connection_result = {
-            "service": "later",
-            "status": "connected",
-            "connected_at": datetime.now().isoformat(),
-            "account_info": {
-                "username": "example_later",
-                "plan": "premium"
-            }
-        }
-        return APIResponse(success=True, data=connection_result)
+        raise HTTPException(status_code=501, detail="Later integration not implemented")
     except Exception as e:
         logger.error(f"Error connecting to Later: {e}")
         return APIResponse(success=False, error=str(e))
@@ -166,16 +116,7 @@ async def connect_sprout_social(connection_data: Dict[str, Any], token: str = De
         if not api_key:
             return APIResponse(success=False, error="API key is required")
         
-        connection_result = {
-            "service": "sprout_social",
-            "status": "connected",
-            "connected_at": datetime.now().isoformat(),
-            "account_info": {
-                "organization": "Example Enterprise",
-                "plan": "enterprise"
-            }
-        }
-        return APIResponse(success=True, data=connection_result)
+        raise HTTPException(status_code=501, detail="Sprout Social integration not implemented")
     except Exception as e:
         logger.error(f"Error connecting to Sprout Social: {e}")
         return APIResponse(success=False, error=str(e))
@@ -188,16 +129,7 @@ async def connect_video_publisher(connection_data: Dict[str, Any], token: str = 
         if not api_key:
             return APIResponse(success=False, error="API key is required")
         
-        connection_result = {
-            "service": "video_publisher",
-            "status": "connected",
-            "connected_at": datetime.now().isoformat(),
-            "account_info": {
-                "credits_remaining": 500,
-                "plan": "professional"
-            }
-        }
-        return APIResponse(success=True, data=connection_result)
+        raise HTTPException(status_code=501, detail="Video publisher integration not implemented")
     except Exception as e:
         logger.error(f"Error connecting to Video Publisher: {e}")
         return APIResponse(success=False, error=str(e))
@@ -207,45 +139,7 @@ async def connect_video_publisher(connection_data: Dict[str, Any], token: str = 
 async def get_connections(token: str = Depends(verify_token)):
     """Get all integration connections"""
     try:
-        mock_connections = [
-            {
-                "service_name": "google_analytics",
-                "connection_status": "connected",
-                "last_sync_at": datetime.now().isoformat(),
-                "sync_status": "success"
-            },
-            {
-                "service_name": "mailchimp",
-                "connection_status": "connected",
-                "last_sync_at": datetime.now().isoformat(),
-                "sync_status": "success"
-            },
-            {
-                "service_name": "slack",
-                "connection_status": "disconnected",
-                "last_sync_at": None,
-                "sync_status": "idle"
-            },
-            {
-                "service_name": "shopify",
-                "connection_status": "connected",
-                "last_sync_at": datetime.now().isoformat(),
-                "sync_status": "success"
-            },
-            {
-                "service_name": "stripe",
-                "connection_status": "connected",
-                "last_sync_at": datetime.now().isoformat(),
-                "sync_status": "success"
-            },
-            {
-                "service_name": "hubspot",
-                "connection_status": "disconnected",
-                "last_sync_at": None,
-                "sync_status": "idle"
-            }
-        ]
-        return APIResponse(success=True, data=mock_connections)
+        raise HTTPException(status_code=503, detail="Connection listing not implemented")
     except Exception as e:
         logger.error(f"Error fetching connections: {e}")
         return APIResponse(success=False, error=str(e))
@@ -258,13 +152,7 @@ async def connect_service(service: str, connection_data: Dict[str, Any], token: 
         if not api_key:
             return APIResponse(success=False, error="API key is required")
         
-        connection_result = {
-            "service": service,
-            "status": "connected",
-            "connected_at": datetime.now().isoformat(),
-            "message": f"Successfully connected to {service}"
-        }
-        return APIResponse(success=True, data=connection_result)
+        raise HTTPException(status_code=501, detail=f"Integration {service} not implemented")
     except Exception as e:
         logger.error(f"Error connecting to {service}: {e}")
         return APIResponse(success=False, error=str(e))
@@ -273,13 +161,7 @@ async def connect_service(service: str, connection_data: Dict[str, Any], token: 
 async def sync_service(service: str, token: str = Depends(verify_token)):
     """Trigger data sync for a service"""
     try:
-        sync_result = {
-            "service": service,
-            "sync_status": "success",
-            "synced_at": datetime.now().isoformat(),
-            "records_synced": 125
-        }
-        return APIResponse(success=True, data=sync_result)
+        raise HTTPException(status_code=501, detail=f"Sync for {service} not implemented")
     except Exception as e:
         logger.error(f"Error syncing {service}: {e}")
         return APIResponse(success=False, error=str(e))
@@ -288,12 +170,7 @@ async def sync_service(service: str, token: str = Depends(verify_token)):
 async def disconnect_service(service: str, token: str = Depends(verify_token)):
     """Disconnect from a service"""
     try:
-        disconnect_result = {
-            "service": service,
-            "status": "disconnected",
-            "disconnected_at": datetime.now().isoformat()
-        }
-        return APIResponse(success=True, data=disconnect_result)
+        raise HTTPException(status_code=501, detail=f"Disconnect for {service} not implemented")
     except Exception as e:
         logger.error(f"Error disconnecting from {service}: {e}")
         return APIResponse(success=False, error=str(e))

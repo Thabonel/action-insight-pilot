@@ -54,41 +54,7 @@ async def research_keywords(
                 error=result.get("error")
             )
         else:
-            # Mock response when agent not available
-            mock_keywords = []
-            for keyword in request.seed_keywords:
-                mock_keywords.append({
-                    "keyword": keyword,
-                    "search_volume": abs(hash(keyword)) % 50000 + 1000,
-                    "difficulty": round((abs(hash(keyword + "diff")) % 100) / 100 * 100, 1),
-                    "cpc": round((abs(hash(keyword + "cpc")) % 500) / 100, 2),
-                    "competition": ["Low", "Medium", "High"][abs(hash(keyword)) % 3],
-                    "serp_features": ["Featured Snippet", "People Also Ask", "Images"],
-                    "trend_data": [
-                        {"month": f"2024-{str(i+1).zfill(2)}", "volume": 100 + (i * 5)} 
-                        for i in range(12)
-                    ]
-                })
-            
-            # Save to database
-            supabase = await get_supabase_client()
-            research_data = {
-                "created_by": user_id,
-                "query": ", ".join(request.seed_keywords),
-                "keywords": mock_keywords
-            }
-            
-            result = supabase.table("keyword_research").insert(research_data).execute()
-            
-            return APIResponse(
-                success=True,
-                data={
-                    "research_id": result.data[0]["id"] if result.data else None,
-                    "keywords": mock_keywords,
-                    "total_keywords": len(mock_keywords),
-                    "query": ", ".join(request.seed_keywords)
-                }
-            )
+            raise HTTPException(status_code=503, detail="Keyword research agent not available")
             
     except Exception as e:
         logger.error(f"Error in keyword research: {e}")
@@ -118,43 +84,7 @@ async def get_competitor_keywords(
                 error=result.get("error")
             )
         else:
-            # Mock competitor keywords
-            domain_name = request.competitor_domain.split('.')[0]
-            mock_keywords = [
-                {
-                    "keyword": f"{domain_name} review",
-                    "search_volume": 15000,
-                    "difficulty": 65.5,
-                    "cpc": 2.50,
-                    "competition": "High",
-                    "serp_features": ["Ads", "Reviews", "Local Pack"],
-                    "trend_data": [
-                        {"month": f"2024-{str(i+1).zfill(2)}", "volume": 95 + (i * 2)} 
-                        for i in range(12)
-                    ]
-                },
-                {
-                    "keyword": f"{domain_name} alternative",
-                    "search_volume": 8500,
-                    "difficulty": 55.2,
-                    "cpc": 3.20,
-                    "competition": "Medium",
-                    "serp_features": ["Featured Snippet", "People Also Ask"],
-                    "trend_data": [
-                        {"month": f"2024-{str(i+1).zfill(2)}", "volume": 90 + (i * 3)} 
-                        for i in range(12)
-                    ]
-                }
-            ]
-            
-            return APIResponse(
-                success=True,
-                data={
-                    "keywords": mock_keywords,
-                    "total_keywords": len(mock_keywords),
-                    "competitor_domain": request.competitor_domain
-                }
-            )
+            raise HTTPException(status_code=503, detail="Keyword research agent not available")
             
     except Exception as e:
         logger.error(f"Error in competitor keyword research: {e}")
@@ -184,43 +114,7 @@ async def get_trending_keywords(
                 error=result.get("error")
             )
         else:
-            # Mock trending keywords
-            industry = request.industry or "marketing"
-            mock_keywords = [
-                {
-                    "keyword": f"AI {industry}",
-                    "search_volume": 45000,
-                    "difficulty": 78.5,
-                    "cpc": 4.50,
-                    "competition": "High",
-                    "serp_features": ["News", "Videos", "Featured Snippet"],
-                    "trend_data": [
-                        {"month": f"2024-{str(i+1).zfill(2)}", "volume": 100 + (i * 8)} 
-                        for i in range(12)
-                    ]
-                },
-                {
-                    "keyword": f"{industry} automation",
-                    "search_volume": 32000,
-                    "difficulty": 62.3,
-                    "cpc": 3.80,
-                    "competition": "Medium",
-                    "serp_features": ["Featured Snippet", "People Also Ask"],
-                    "trend_data": [
-                        {"month": f"2024-{str(i+1).zfill(2)}", "volume": 95 + (i * 6)} 
-                        for i in range(12)
-                    ]
-                }
-            ]
-            
-            return APIResponse(
-                success=True,
-                data={
-                    "keywords": mock_keywords,
-                    "total_keywords": len(mock_keywords),
-                    "industry": industry
-                }
-            )
+            raise HTTPException(status_code=503, detail="Keyword research agent not available")
             
     except Exception as e:
         logger.error(f"Error in trending keyword research: {e}")

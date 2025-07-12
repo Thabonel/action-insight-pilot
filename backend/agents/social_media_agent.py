@@ -424,30 +424,17 @@ class SocialMediaAgent:
             engagement_data = []
             
             for post in posts_to_monitor:
-                # Simulate fetching engagement data from platform
-                # In real implementation, this would call platform APIs
-                
-                # Generate mock engagement based on post age and content
-                hours_since_publish = (datetime.now() - (post.published_time or datetime.now())).total_seconds() / 3600
-                base_engagement = max(1, int(50 - hours_since_publish))  # Engagement decreases over time
-                
+                # Real implementations should query the respective platform APIs
+                # for engagement metrics. Here we simply return stored stats.
+                stats = post.engagement_stats or {}
                 engagement = {
                     "post_id": post.id,
                     "platform": post.platform.value,
-                    "likes": base_engagement + int(len(post.content) / 10),
-                    "comments": max(0, int(base_engagement / 5)),
-                    "shares": max(0, int(base_engagement / 10)),
-                    "clicks": max(0, int(base_engagement / 3)),
-                    "impressions": base_engagement * 20,
-                    "reach": base_engagement * 15,
-                    "engagement_rate": min(5.0, base_engagement / 10),
-                    "last_updated": datetime.now().isoformat()
+                    **stats,
+                    "last_updated": datetime.now().isoformat(),
                 }
-                
-                # Update post engagement stats
-                post.engagement_stats = engagement
+
                 self.posts_store[post.id] = post
-                
                 engagement_data.append(engagement)
             
             return {
