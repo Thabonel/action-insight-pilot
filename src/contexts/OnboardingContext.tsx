@@ -14,6 +14,7 @@ interface OnboardingContextType {
   currentStep: number;
   steps: OnboardingStep[];
   startOnboarding: (steps: OnboardingStep[]) => void;
+  startDefaultOnboarding: () => void;
   nextStep: () => void;
   prevStep: () => void;
   skipOnboarding: () => void;
@@ -69,7 +70,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     setIsActive(false);
   };
 
-  // Removed auto-starting onboarding that was causing overlay issues
+  // Automatically start onboarding on first visit
 
   const startDefaultOnboarding = () => {
     const defaultSteps: OnboardingStep[] = [
@@ -113,11 +114,20 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     startOnboarding(defaultSteps);
   };
 
+  useEffect(() => {
+    const skipped = localStorage.getItem('onboarding_skipped');
+    const completed = localStorage.getItem('onboarding_completed');
+    if (!skipped && !completed) {
+      startDefaultOnboarding();
+    }
+  }, []);
+
   const value = {
     isActive,
     currentStep,
     steps,
     startOnboarding,
+    startDefaultOnboarding,
     nextStep,
     prevStep,
     skipOnboarding,

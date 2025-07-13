@@ -5,6 +5,8 @@
 
 This guide will help you get started with the platform and set up your first campaigns.
 
+When you first sign in, an onboarding tour automatically begins to walk you through the main areas of the app. You can skip or complete the tour at any time.
+
 ## First Steps
 
 ### 1. Account Setup
