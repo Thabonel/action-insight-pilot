@@ -30,7 +30,10 @@ JSON2VIDEO_API_KEY      = os.getenv("JSON2VIDEO_API_KEY")      # json2video key
 JSON2VIDEO_TEMPLATE_ID  = os.getenv("JSON2VIDEO_TEMPLATE_ID")  # json2video template
 
 if not all([GOOGLE_SA_JSON, OPENAI_API_KEY, JSON2VIDEO_API_KEY, JSON2VIDEO_TEMPLATE_ID]):
-    raise RuntimeError("Missing one or more required environment variables.")
+    # When environment variables are missing (e.g., during testing), skip workflow setup
+    WORKFLOW_ENABLED = False
+else:
+    WORKFLOW_ENABLED = True
 
 # ───────────────────────────── FASTAPI SETUP ────────────────────── #
 
