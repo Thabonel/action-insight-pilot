@@ -2,8 +2,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict, Any, Optional
 import logging
-from agents.mcp_agent import MCPAgent
-from auth import get_current_user
+from ..agents.mcp_agent import MCPAgent
+from ..auth import get_current_user
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -129,7 +129,7 @@ async def execute_workflow(workflow_id: str):
         # Initialize MCP agent if not already connected
         await mcp_agent.connect_all_servers()
         
-        # Get workflow definition (in real implementation, fetch from database)
+        # Get workflow definition (in real implementation, fetch from ..database)
         if workflow_id == "lead_nurture_sequence":
             workflow = {
                 "id": workflow_id,
@@ -209,7 +209,7 @@ async def update_workflow(workflow_id: str, workflow_data: WorkflowUpdate):
 async def delete_workflow(workflow_id: str):
     """Delete a workflow"""
     try:
-        # In real implementation, delete from database
+        # In real implementation, delete from ..database
         logger.info(f"Deleted workflow: {workflow_id}")
         
         return {

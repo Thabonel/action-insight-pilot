@@ -5,9 +5,9 @@ from typing import Dict, Any, List, Optional
 import logging
 from datetime import datetime
 
-from auth import verify_token, get_current_user_dependency
-from database.supabase_client import get_supabase
-from config import agent_manager
+from ..auth import verify_token, get_current_user_dependency
+from ..database.supabase_client import get_supabase
+from ..config import agent_manager
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

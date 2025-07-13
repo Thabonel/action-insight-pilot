@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import Mock, AsyncMock, patch
 import json
 
-from main import app
+from backend.main import app
 
 client = TestClient(app)
 
@@ -36,7 +36,7 @@ class TestKeywordResearch:
     
     def test_research_keywords_success(self, sample_keywords_payload):
         """Test successful keyword research"""
-        with patch('routes.keyword_research.verify_token') as mock_verify:
+        with patch('backend.routes.keyword_research.verify_token') as mock_verify:
             mock_verify.return_value = {"sub": "test-user-id"}
             
             response = client.post(
@@ -53,7 +53,7 @@ class TestKeywordResearch:
     
     def test_research_keywords_missing_seeds(self):
         """Test keyword research with missing seed keywords"""
-        with patch('routes.keyword_research.verify_token') as mock_verify:
+        with patch('backend.routes.keyword_research.verify_token') as mock_verify:
             mock_verify.return_value = {"sub": "test-user-id"}
             
             response = client.post(
@@ -66,7 +66,7 @@ class TestKeywordResearch:
     
     def test_competitor_keywords_success(self, sample_competitor_payload):
         """Test successful competitor keyword analysis"""
-        with patch('routes.keyword_research.verify_token') as mock_verify:
+        with patch('backend.routes.keyword_research.verify_token') as mock_verify:
             mock_verify.return_value = {"sub": "test-user-id"}
             
             response = client.post(
@@ -82,7 +82,7 @@ class TestKeywordResearch:
     
     def test_trending_keywords_success(self):
         """Test successful trending keywords request"""
-        with patch('routes.keyword_research.verify_token') as mock_verify:
+        with patch('backend.routes.keyword_research.verify_token') as mock_verify:
             mock_verify.return_value = {"sub": "test-user-id"}
             
             response = client.post(
@@ -98,7 +98,7 @@ class TestKeywordResearch:
     
     def test_keyword_history_success(self):
         """Test getting keyword research history"""
-        with patch('routes.keyword_research.verify_token') as mock_verify:
+        with patch('backend.routes.keyword_research.verify_token') as mock_verify:
             mock_verify.return_value = {"sub": "test-user-id"}
             
             response = client.get(

@@ -4,10 +4,10 @@ import uuid
 from datetime import datetime
 import logging
 
-from models import APIResponse
-from auth import verify_token, get_current_user
-from config import agent_manager
-from database import get_supabase
+from ..models import APIResponse
+from ..auth import verify_token, get_current_user
+from ..config import agent_manager
+from ..database import get_supabase
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ async def get_campaigns_from_database(user_id: str):
                 "created_by": row.get('created_by')
             })
         
-        logger.info(f"✅ Retrieved {len(campaigns)} campaigns from database for user {user_id}")
+        logger.info(f"✅ Retrieved {len(campaigns)} campaigns from ..database for user {user_id}")
         return campaigns
         
     except Exception as e:
@@ -263,7 +263,7 @@ async def get_campaign(campaign_id: str, token: str = Depends(verify_token)):
                     "updated_at": row.get('updated_at'),
                     "created_by": row.get('created_by')
                 }
-                logger.info(f"✅ Retrieved campaign {campaign_id} from database for user {user_id}")
+                logger.info(f"✅ Retrieved campaign {campaign_id} from ..database for user {user_id}")
                 return APIResponse(success=True, data=campaign)
             else:
                 logger.info(f"❌ Campaign {campaign_id} not found for user {user_id}")
@@ -344,7 +344,7 @@ async def delete_campaign(campaign_id: str, token: str = Depends(verify_token)):
             result = supabase.table('active_campaigns').delete().eq('id', campaign_id).eq('created_by', user_id).execute()
             
             if result.data:
-                logger.info(f"✅ Deleted campaign {campaign_id} from database for user {user_id}")
+                logger.info(f"✅ Deleted campaign {campaign_id} from ..database for user {user_id}")
                 return APIResponse(success=True, data={"deleted": True, "id": campaign_id})
             else:
                 logger.info(f"❌ Campaign {campaign_id} not found for user {user_id}")
