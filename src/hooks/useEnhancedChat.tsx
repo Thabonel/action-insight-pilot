@@ -1,8 +1,9 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ChatMessage {
   id: string;
@@ -17,9 +18,8 @@ interface ChatMessage {
 
 interface ChatSession {
   id: string;
-  title: string;
-  messages: ChatMessage[];
   createdAt: Date;
+  messages: ChatMessage[];
 }
 
 export const useEnhancedChat = () => {
@@ -31,8 +31,29 @@ export const useEnhancedChat = () => {
   const [query, setQuery] = useState('');
   const { toast } = useToast();
 
-  // Mock user - in a real app this would come from auth
-  const user = { id: 'user-1', name: 'User' };
+  const [userId, setUserId] = useState<string | null>(null);
+  const user = userId ? { id: userId } : null;
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+      if (user) {
+        const { data } = await supabase
+          .from('conversations')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (data) {
+          setSessions(data.map(rec => ({
+            id: rec.id,
+            createdAt: new Date(rec.created_at),
+            messages: []
+          })));
+        }
+      }
+    })();
+  }, []);
 
   const sendMessage = useCallback(async (content: string, context?: any) => {
     const userMessage: ChatMessage = {
@@ -46,8 +67,14 @@ export const useEnhancedChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setLoading(true);
 
+    if (currentSession?.id) {
+      await supabase.functions.invoke('chat-memory', {
+        body: { conversationId: currentSession.id, role: 'user', content }
+      });
+    }
+
     try {
-      const result = await apiClient.queryAgent(content, context) as ApiResponse<any>;
+      const result = await apiClient.queryAgent(content, { ...(context || {}), conversationId: currentSession?.id }) as ApiResponse<any>;
       
       if (result.success && result.data) {
         const assistantMessage: ChatMessage = {
@@ -60,6 +87,11 @@ export const useEnhancedChat = () => {
         };
 
         setMessages(prev => [...prev, assistantMessage]);
+        if (currentSession?.id) {
+          await supabase.functions.invoke('chat-memory', {
+            body: { conversationId: currentSession.id, role: 'assistant', content: assistantMessage.content }
+          });
+        }
         return assistantMessage;
       } else {
         throw new Error('Failed to get response');
@@ -97,27 +129,52 @@ export const useEnhancedChat = () => {
     setIsProcessing(false);
   }, [query, sendMessage]);
 
-  const createNewSession = useCallback(() => {
+  const createNewSession = useCallback(async () => {
+    if (!userId) return;
+    const { data, error } = await supabase
+      .from('conversations')
+      .insert({ user_id: userId })
+      .select()
+      .single();
+
+    if (error || !data) {
+      toast({ title: 'Error', description: 'Failed to create session', variant: 'destructive' });
+      return;
+    }
+
     const newSession: ChatSession = {
-      id: Date.now().toString(),
-      title: `Chat ${sessions.length + 1}`,
-      messages: [],
-      createdAt: new Date()
+      id: data.id,
+      createdAt: new Date(data.created_at),
+      messages: []
     };
-    setSessions(prev => [...prev, newSession]);
+    setSessions(prev => [newSession, ...prev]);
     setCurrentSession(newSession);
     setMessages([]);
-  }, [sessions.length]);
+  }, [sessions.length, userId, toast]);
 
-  const switchSession = useCallback((sessionId: string) => {
+  const switchSession = useCallback(async (sessionId: string) => {
     const session = sessions.find(s => s.id === sessionId);
     if (session) {
       setCurrentSession(session);
-      setMessages(session.messages);
+      const { data, error } = await supabase.functions.invoke('chat-memory', {
+        body: { conversationId: sessionId }
+      });
+      if (!error && data?.messages) {
+        const msgs = (data.messages as any[]).map(m => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: new Date(m.timestamp)
+        })).reverse();
+        setMessages(msgs);
+      } else {
+        setMessages([]);
+      }
     }
   }, [sessions]);
 
-  const deleteSession = useCallback((sessionId: string) => {
+  const deleteSession = useCallback(async (sessionId: string) => {
+    await supabase.from('conversations').delete().eq('id', sessionId);
     setSessions(prev => prev.filter(s => s.id !== sessionId));
     if (currentSession?.id === sessionId) {
       setCurrentSession(null);
