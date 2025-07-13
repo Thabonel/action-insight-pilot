@@ -13,3 +13,6 @@ verify_jwt = true
 
 [functions.knowledge-processor]
 verify_jwt = true
+
+[functions.chat-memory]
+verify_jwt = true

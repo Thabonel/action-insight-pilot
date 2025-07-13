@@ -128,7 +128,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                 onClick={() => handleSessionSelect(session)}
               >
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{session.title}</div>
+                  <div className="font-medium text-sm">Chat</div>
                   <div className="text-xs text-gray-500">
                     {formatSessionDate(session)} • {session.messages.length} messages
                   </div>

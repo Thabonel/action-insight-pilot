@@ -248,7 +248,6 @@ export interface IntegrationMethods {
 
 export interface ChatSession {
   id: string;
-  title: string;
   messages: ChatMessage[];
   createdAt: Date;
   updated_at?: string;

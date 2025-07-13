@@ -23,12 +23,22 @@ PAM (Personal Assistant for Marketing) is a comprehensive AI-powered marketing a
 - Real-time message streaming
 - Session-based conversation history
 - Context injection from knowledge base
+- Conversation history stored in Supabase via `chat-memory` edge function
 
 **Usage**:
 ```typescript
 // Example chat interaction
 "Create an email campaign for our new product launch targeting B2B executives"
 // AI generates campaign structure, content, and scheduling recommendations
+```
+
+// Retrieve or store chat memory
+```bash
+curl -X POST \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"conversationId":"your-id","role":"user","content":"Hello"}' \
+  https://YOUR_PROJECT.supabase.co/functions/v1/chat-memory
 ```
 
 ---
