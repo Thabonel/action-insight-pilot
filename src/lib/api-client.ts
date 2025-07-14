@@ -1,4 +1,4 @@
-import { ApiResponse, Campaign, ContentBrief, SocialPlatformConnection, IntegrationConnection, Webhook, UserPreferences, Workflow } from './api-client-interface';
+import { ApiResponse, Campaign, ContentBrief, SocialPlatformConnection, IntegrationConnection, Webhook, UserPreferences, Workflow, ResearchNote } from './api-client-interface';
 import { supabase } from './supabase';
 
 export class ApiClient {
@@ -977,6 +977,41 @@ export class ApiClient {
     return { success: true, data };
   }
 
+  // Research notes
+  async getResearchNotes(conversationId?: string): Promise<ApiResponse<ResearchNote[]>> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+    let query = supabase.from('research_notes').select('*');
+    if (conversationId) {
+      query = query.eq('conversation_id', conversationId);
+    }
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, data: data as ResearchNote[] };
+  }
+
+  async createResearchNote(note: { conversation_id: string; content: string; source_refs?: string }): Promise<ApiResponse<ResearchNote>> {
+    const { data, error } = await supabase
+      .from('research_notes')
+      .insert({
+        conversation_id: note.conversation_id,
+        content: note.content,
+        source_refs: note.source_refs || null
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: data as ResearchNote };
+  }
+
   // Chat/Agent methods
   async callGeneralCampaignAgent(message: string, context?: any): Promise<ApiResponse<any>> {
     return {
@@ -1039,6 +1074,13 @@ export class ApiClient {
       createSocialPost: (postData: any) => this.scheduleSocialPost(postData),
       getSocialAnalytics: () => Promise.resolve({ success: true, data: { followers: 100, engagement: 5.2 } }),
       generateSocialContent: (brief: any) => Promise.resolve({ success: true, data: { content: 'Generated content', hashtags: [] } })
+    };
+  }
+
+  get research() {
+    return {
+      list: (conversationId?: string) => this.getResearchNotes(conversationId),
+      create: (note: { conversation_id: string; content: string; source_refs?: string }) => this.createResearchNote(note)
     };
   }
 }
