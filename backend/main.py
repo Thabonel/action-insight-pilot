@@ -48,6 +48,7 @@ from .routes.email import router as email_router
 from .routes.workflows import router as workflows_router
 from .routes.brand import router as brand_router
 from .routes.keyword_research import router as keyword_research_router
+from .routes.research import router as research_router
 from .workflows.ai_video_creator_workflow import (
     router as ai_video_creator_router,
     WORKFLOW_ENABLED as AI_VIDEO_WORKFLOW_ENABLED,
@@ -61,6 +62,7 @@ app.include_router(email_router)
 app.include_router(workflows_router)
 app.include_router(brand_router)
 app.include_router(keyword_research_router)
+app.include_router(research_router)
 if AI_VIDEO_WORKFLOW_ENABLED:
     app.include_router(ai_video_creator_router)
 

@@ -17,7 +17,8 @@ import {
   User,
   Clock,
   Trash2,
-  Edit3
+  Edit3,
+  BookmarkPlus
 } from 'lucide-react';
 import { ChatSession, ChatMessage } from '@/lib/api-client-interface';
 
@@ -34,6 +35,9 @@ interface EnhancedChatInterfaceProps {
   onSelectSession?: (sessionId: string) => void;
   onDeleteSession?: (sessionId: string) => void;
   currentSessionId?: string;
+  researchNotes?: { id: string; content: string }[];
+  onSaveNote?: (message: ChatMessage) => void;
+  onInsertNote?: (note: { id: string; content: string }) => void;
 }
 
 const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
@@ -48,7 +52,10 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
   onCreateNewSession,
   onSelectSession,
   onDeleteSession,
-  currentSessionId
+  currentSessionId,
+  researchNotes = [],
+  onSaveNote,
+  onInsertNote
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [showSessions, setShowSessions] = useState(false);
@@ -216,9 +223,9 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                     <span className="text-xs text-gray-500">
                       {formatTimestamp(message.timestamp)}
                     </span>
-                    {message.role === 'assistant' && (
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                        <Edit3 className="h-3 w-3" />
+                    {message.role === 'assistant' && onSaveNote && (
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => onSaveNote(message)}>
+                        <BookmarkPlus className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
@@ -289,7 +296,22 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
               <Send className="h-4 w-4" />
             </Button>
           </form>
-          
+
+          {researchNotes.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {researchNotes.map((note) => (
+                <Badge
+                  key={note.id}
+                  variant="outline"
+                  className="cursor-pointer"
+                  onClick={() => onInsertNote && onInsertNote(note)}
+                >
+                  {note.content.slice(0, 30)}
+                </Badge>
+              ))}
+            </div>
+          )}
+
           {!user && (
             <div className="mt-2 text-center">
               <Badge variant="outline" className="text-xs">

@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
-import { ApiResponse } from '@/lib/api-client-interface';
+import { ApiResponse, ResearchNote } from '@/lib/api-client-interface';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ChatMessage {
@@ -27,12 +27,33 @@ export const useEnhancedChat = () => {
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
+  const [researchNotes, setResearchNotes] = useState<ResearchNote[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState('');
   const { toast } = useToast();
 
   const [userId, setUserId] = useState<string | null>(null);
   const user = userId ? { id: userId } : null;
+
+  const fetchResearchNotes = useCallback(async (convId: string) => {
+    const res = await apiClient.research.list(convId) as ApiResponse<ResearchNote[]>;
+    if (res.success && res.data) {
+      setResearchNotes(res.data);
+    } else {
+      setResearchNotes([]);
+    }
+  }, []);
+
+  const saveResearchNote = useCallback(async (message: ChatMessage) => {
+    if (!currentSession) return;
+    await apiClient.research.create({
+      conversation_id: currentSession.id,
+      content: message.content,
+      source_refs: JSON.stringify(message.metadata || {})
+    });
+    toast({ title: 'Saved note' });
+    fetchResearchNotes(currentSession.id);
+  }, [currentSession, fetchResearchNotes, toast]);
 
   useEffect(() => {
     (async () => {
@@ -45,11 +66,16 @@ export const useEnhancedChat = () => {
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
         if (data) {
-          setSessions(data.map(rec => ({
+          const sessionsData = data.map(rec => ({
             id: rec.id,
             createdAt: new Date(rec.created_at),
             messages: []
-          })));
+          }));
+          setSessions(sessionsData);
+          if (sessionsData.length > 0) {
+            setCurrentSession(sessionsData[0]);
+            fetchResearchNotes(sessionsData[0].id);
+          }
         }
       }
     })();
@@ -150,12 +176,14 @@ export const useEnhancedChat = () => {
     setSessions(prev => [newSession, ...prev]);
     setCurrentSession(newSession);
     setMessages([]);
+    fetchResearchNotes(newSession.id);
   }, [sessions.length, userId, toast]);
 
   const switchSession = useCallback(async (sessionId: string) => {
     const session = sessions.find(s => s.id === sessionId);
     if (session) {
       setCurrentSession(session);
+      fetchResearchNotes(sessionId);
       const { data, error } = await supabase.functions.invoke('chat-memory', {
         body: { conversationId: sessionId }
       });
@@ -200,6 +228,8 @@ export const useEnhancedChat = () => {
     createNewSession,
     switchSession,
     deleteSession,
-    user
+    user,
+    researchNotes,
+    saveResearchNote
   };
 };

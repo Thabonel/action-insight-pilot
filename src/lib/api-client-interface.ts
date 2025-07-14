@@ -262,3 +262,11 @@ export interface ChatMessage {
   query?: string;
   response?: string;
 }
+
+export interface ResearchNote {
+  id: string;
+  conversation_id: string;
+  content: string;
+  source_refs?: string;
+  created_at: string;
+}
