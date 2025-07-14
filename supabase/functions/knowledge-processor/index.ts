@@ -149,7 +149,7 @@ async function processDocumentBackground(supabaseClient: any, documentId: string
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i]
       const embedding = await generateEmbedding(chunk.content, openaiKey)
-      
+
       chunksToInsert.push({
         document_id: documentId,
         bucket_id: document.bucket_id,
@@ -162,6 +162,14 @@ async function processDocumentBackground(supabaseClient: any, documentId: string
       })
     }
 
+    // Generate a short summary for the entire document
+    let summary: string | null = null
+    try {
+      summary = await summarizeText(content, openaiKey)
+    } catch (e) {
+      console.error('Summary generation failed:', e)
+    }
+
     // Insert chunks
     const { error: chunksError } = await supabaseClient
       .from('knowledge_chunks')
@@ -169,10 +177,10 @@ async function processDocumentBackground(supabaseClient: any, documentId: string
 
     if (chunksError) throw chunksError
 
-    // Update document status
+    // Update document status and summary
     await supabaseClient
       .from('knowledge_documents')
-      .update({ status: 'ready' })
+      .update({ status: 'ready', summary })
       .eq('id', documentId)
 
   } catch (error) {
@@ -243,6 +251,32 @@ async function generateEmbedding(text: string, apiKey: string): Promise<number[]
   }
 
   return data.data[0].embedding
+}
+
+async function summarizeText(text: string, apiKey: string): Promise<string> {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'Summarize the following text' },
+        { role: 'user', content: text }
+      ],
+      max_tokens: 200,
+      temperature: 0.3
+    })
+  })
+
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`)
+  }
+
+  return data.choices[0].message.content as string
 }
 
 function estimateTokenCount(text: string): number {

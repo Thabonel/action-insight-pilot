@@ -25,12 +25,13 @@ class EnhancedUserAIService:
             return False
     
     async def search_knowledge_base(
-        self, 
-        query: str, 
+        self,
+        query: str,
         bucket_type: Optional[str] = None,
         campaign_id: Optional[str] = None,
         limit: int = 5,
-        include_platform_docs: bool = True
+        include_platform_docs: bool = True,
+        use_document_summaries: bool = False
     ) -> List[Dict[str, Any]]:
         """Search user's knowledge base including platform documentation for relevant information"""
         try:
@@ -72,8 +73,13 @@ class EnhancedUserAIService:
                 'p_limit': limit,
                 'p_similarity_threshold': 0.7
             }).execute()
-            
+
             knowledge_results = result.data if result.data else []
+            if use_document_summaries:
+                for r in knowledge_results:
+                    summary = r.get('document_summary')
+                    if summary:
+                        r['chunk_content'] = f"Summary: {summary}\n\n{r['chunk_content']}"
             
             # If including platform docs and query seems to be about platform usage, search platform docs
             if include_platform_docs and self._is_platform_help_query(query):

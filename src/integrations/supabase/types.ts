@@ -1808,6 +1808,7 @@ export type Database = {
         Row: {
           bucket_id: string
           content: string
+          summary: string | null
           created_at: string
           created_by: string
           file_name: string | null
@@ -1824,6 +1825,7 @@ export type Database = {
         Insert: {
           bucket_id: string
           content: string
+          summary?: string | null
           created_at?: string
           created_by: string
           file_name?: string | null
@@ -1840,6 +1842,7 @@ export type Database = {
         Update: {
           bucket_id?: string
           content?: string
+          summary?: string | null
           created_at?: string
           created_by?: string
           file_name?: string | null
