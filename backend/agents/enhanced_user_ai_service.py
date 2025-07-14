@@ -359,3 +359,135 @@ class EnhancedUserAIService:
                 'success': False,
                 'error': str(e)
             }
+
+    async def _fetch_conversation_history(self, conversation_id: str, limit: int = 20) -> List[Dict[str, Any]]:
+        """Retrieve recent conversation messages"""
+        try:
+            supabase = get_supabase()
+            result = supabase.from('conversation_messages') \
+                .select('role, content') \
+                .eq('conversation_id', conversation_id) \
+                .order('timestamp', { 'ascending': False }) \
+                .limit(limit) \
+                .execute()
+            return result.data or []
+        except Exception as e:
+            logger.error(f"Conversation history fetch failed: {e}")
+            return []
+
+    async def _summarize_text(self, text: str, api_key: str) -> str:
+        """Summarize long context using OpenAI if it exceeds token limits"""
+        try:
+            import httpx
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                response = await client.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    headers={
+                        'Authorization': f'Bearer {api_key}',
+                        'Content-Type': 'application/json',
+                    },
+                    json={
+                        'model': 'gpt-3.5-turbo',
+                        'messages': [
+                            {'role': 'system', 'content': 'Summarize the following text'} ,
+                            {'role': 'user', 'content': text}
+                        ],
+                        'max_tokens': 200,
+                        'temperature': 0.3
+                    }
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    return data['choices'][0]['message']['content']
+        except Exception as e:
+            logger.error(f"Summarization failed: {e}")
+        return text[:4000]
+
+    async def process_conversation_query_with_knowledge(
+        self,
+        query: str,
+        conversation_id: str,
+        campaigns: Optional[List[Dict[str, Any]]] = None,
+        context: Optional[List[Dict[str, Any]]] = None,
+        history_limit: int = 20
+    ) -> Dict[str, Any]:
+        """Generate a chat response using conversation history and knowledge base"""
+        try:
+            supabase = get_supabase()
+
+            api_key = await self.secrets_client.get_secret(self.user_id, 'openai_api_key')
+            if not api_key:
+                return {'success': False, 'error': 'OpenAI API key not configured'}
+
+            history_records = await self._fetch_conversation_history(conversation_id, history_limit)
+            history_records.reverse()
+            history_text = "\n".join(f"{m['role']}: {m['content']}" for m in history_records)
+
+            if len(history_text) / 4 > 1500:
+                history_text = await self._summarize_text(history_text, api_key)
+
+            knowledge_chunks = await self.search_knowledge_base(
+                query=f"{history_text}\n{query}",
+                limit=5,
+                include_platform_docs=True
+            )
+
+            knowledge_context = ""
+            if knowledge_chunks:
+                knowledge_context = "\n\nContext from knowledge base:\n" + "\n".join(
+                    f"- {c['chunk_content']}" for c in knowledge_chunks
+                )
+
+            system_prompt = (
+                "You are a helpful marketing assistant. Use the conversation history "
+                "and provided knowledge to answer the user."
+                f"{knowledge_context}"
+            )
+
+            messages = [
+                {'role': m['role'], 'content': m['content']} for m in history_records
+            ]
+            messages.append({'role': 'user', 'content': query})
+
+            import httpx
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    headers={
+                        'Authorization': f'Bearer {api_key}',
+                        'Content-Type': 'application/json',
+                    },
+                    json={
+                        'model': 'gpt-4',
+                        'messages': [{'role': 'system', 'content': system_prompt}, *messages],
+                        'temperature': 0.7,
+                        'max_tokens': 1500
+                    }
+                )
+
+                if response.status_code != 200:
+                    return {'success': False, 'error': f'OpenAI API error: {response.status_code}'}
+
+                ai_response = response.json()
+
+            chunk_ids = [c['chunk_id'] for c in knowledge_chunks]
+            if chunk_ids:
+                records = [
+                    {'conversation_id': conversation_id, 'chunk_id': cid}
+                    for cid in chunk_ids
+                ]
+                try:
+                    supabase.from('conversation_knowledge_refs').insert(records).execute()
+                except Exception as e:
+                    logger.error(f"Failed to persist knowledge refs: {e}")
+
+            return {
+                'success': True,
+                'response': ai_response['choices'][0]['message']['content'],
+                'knowledge_chunk_ids': chunk_ids
+            }
+
+        except Exception as e:
+            logger.error(f"Conversation query failed for user {self.user_id}: {e}")
+            return {'success': False, 'error': str(e)}
