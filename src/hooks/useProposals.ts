@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { ProposalFormData, Proposal, GeneratedProposal } from '@/types/proposals';
 import { useProposalTemplates } from '@/hooks/useProposalTemplates';
 
@@ -44,24 +45,42 @@ export const useProposals = () => {
         throw new Error('Selected template not found');
       }
 
-      // Generate a mock proposal based on the template and form data
-      const mockProposal: GeneratedProposal = {
+      // Call AI edge function to generate actual proposal content
+      const { data, error } = await supabase.functions.invoke('full-content-generator', {
+        body: {
+          type: 'proposal',
+          brief: {
+            template_type: formData.template_type,
+            client_company: formData.client_info.company_name,
+            client_industry: formData.client_info.industry,
+            project_description: formData.project_details.description,
+            services: formData.project_details.services,
+            budget_range: formData.budget_range,
+            duration: formData.project_details.duration,
+            call_transcript: formData.call_transcript
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      const generatedProposal: GeneratedProposal = {
         id: crypto.randomUUID(),
         template_type: formData.template_type,
         client_info: formData.client_info,
         content: {
-          executive_summary: `This proposal outlines ${selectedTemplate.name.toLowerCase()} services for ${formData.client_info.company_name}. ${selectedTemplate.description}`,
-          proposed_services: selectedTemplate.template_content.sections?.map(section => 
+          executive_summary: data.content?.executive_summary || `Professional ${selectedTemplate.name.toLowerCase()} services for ${formData.client_info.company_name}.`,
+          proposed_services: data.content?.proposed_services || selectedTemplate.template_content.sections?.map(section => 
             `${section.title}: ${section.content}`
           ).join('\n\n') || 'Custom services based on your requirements.'
         },
-        pricing: selectedTemplate.template_content.default_services?.map((service, index) => ({
+        pricing: data.pricing || selectedTemplate.template_content.default_services?.map((service, index) => ({
           item: service,
           description: `Professional ${service.toLowerCase()} services`,
           price: formData.budget_range.min + (index * 1000),
           quantity: 1
         })) || [],
-        timeline: selectedTemplate.template_content.sections?.map((section, index) => ({
+        timeline: data.timeline || selectedTemplate.template_content.sections?.map((section, index) => ({
           phase: section.title,
           duration: `${index + 1} week${index > 0 ? 's' : ''}`,
           deliverables: [`${section.title} completion`]
@@ -76,10 +95,10 @@ export const useProposals = () => {
         status: 'draft'
       };
 
-      setGeneratedProposal(mockProposal);
+      setGeneratedProposal(generatedProposal);
       toast({
         title: "Proposal Generated",
-        description: "Your proposal has been successfully generated!",
+        description: "Your proposal has been successfully generated using AI!",
       });
       return true;
     } catch (error) {
@@ -95,6 +114,39 @@ export const useProposals = () => {
     }
   };
 
+  const saveProposal = async (proposal: GeneratedProposal) => {
+    try {
+      const { data, error } = await supabase
+        .from('proposals')
+        .insert([{
+          client_name: proposal.client_info.company_name,
+          template_type: proposal.template_type,
+          content: proposal.content,
+          pricing: proposal.pricing,
+          timeline: proposal.timeline,
+          terms: proposal.terms,
+          status: proposal.status,
+          created_by: user?.id
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Proposal Saved",
+        description: "Your proposal has been saved successfully!",
+      });
+      
+      await loadProposals();
+    } catch (error) {
+      console.error('Error saving proposal:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save proposal. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const exportProposal = async (proposalId: string, format: string) => {
     try {
       toast({
@@ -102,8 +154,20 @@ export const useProposals = () => {
         description: `Your proposal is being exported as ${format.toUpperCase()}`,
       });
       
-      // Mock export functionality
-      const blob = new Blob(['Mock proposal export'], { type: 'text/plain' });
+      // Get proposal data first
+      const proposal = proposals.find(p => p.id === proposalId) || generatedProposal;
+      if (!proposal) {
+        throw new Error('Proposal not found');
+      }
+      
+      // Generate actual export content
+      const exportContent = format === 'pdf' 
+        ? await generatePDFExport(proposal)
+        : await generateWordExport(proposal);
+      
+      const blob = new Blob([exportContent], { 
+        type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -121,19 +185,62 @@ export const useProposals = () => {
     }
   };
 
+  const generatePDFExport = async (proposal: any) => {
+    // Basic text export for now - could be enhanced with proper PDF generation
+    return `
+PROPOSAL FOR ${proposal.client_info?.company_name || proposal.client_name}
+
+${proposal.content?.executive_summary || ''}
+
+PROPOSED SERVICES:
+${proposal.content?.proposed_services || ''}
+
+PRICING:
+${proposal.pricing?.map((item: any) => `${item.item}: $${item.price}`).join('\n') || ''}
+
+TIMELINE:
+${proposal.timeline?.map((phase: any) => `${phase.phase}: ${phase.duration}`).join('\n') || ''}
+
+TERMS:
+${proposal.terms?.payment_terms || ''}
+${proposal.terms?.warranty || ''}
+    `;
+  };
+
+  const generateWordExport = async (proposal: any) => {
+    return generatePDFExport(proposal); // Same content for now
+  };
+
   const loadProposals = async () => {
-    // Mock proposals for now - could be implemented with Supabase later
-    const mockProposals: Proposal[] = [
-      {
-        id: crypto.randomUUID(),
-        client_name: "Sample Corp",
-        template_type: "web_development",
-        status: "sent",
-        created_at: new Date().toISOString(),
-        value: 15000
-      }
-    ];
-    setProposals(mockProposals);
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('proposals')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mappedProposals: Proposal[] = (data || []).map(proposal => ({
+        id: proposal.id,
+        client_name: proposal.client_name,
+        template_type: proposal.template_type,
+        status: proposal.status,
+        created_at: proposal.created_at,
+        value: proposal.pricing?.reduce((total: number, item: any) => total + (item.price * (item.quantity || 1)), 0) || 0
+      }));
+
+      setProposals(mappedProposals);
+    } catch (error) {
+      console.error('Error loading proposals:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load proposals. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
@@ -150,6 +257,7 @@ export const useProposals = () => {
     templatesLoading,
     backendAvailable: !templatesError, // Available if no error loading templates
     generateProposal,
+    saveProposal,
     exportProposal,
     loadProposals,
     refreshTemplates: () => {}, // Templates are auto-refreshed by the hook
