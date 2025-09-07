@@ -107,10 +107,9 @@ async function callOpenAI(messages: any[], apiKey: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-2025-08-07',
       messages,
-      temperature: 0.7,
-      max_tokens: 1500,
+      max_completion_tokens: 1500,
     }),
   });
 
@@ -146,13 +145,12 @@ async function summarizeText(text: string, apiKey: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-5-mini-2025-08-07',
       messages: [
         { role: 'system', content: 'Summarize the following text' },
         { role: 'user', content: text },
       ],
-      max_tokens: 200,
-      temperature: 0.3,
+      max_completion_tokens: 200,
     }),
   });
   const data = await response.json();

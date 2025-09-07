@@ -112,13 +112,12 @@ Format as JSON:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-2025-08-07',
         messages: [
           { role: 'system', content: 'You are an expert marketing channel strategist. Always respond with valid JSON.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.6,
-        max_tokens: 2500,
+        max_completion_tokens: 2500,
       }),
     });
 

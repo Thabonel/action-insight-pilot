@@ -34,11 +34,16 @@ class BaseAIService:
                 logger.error(f"OpenAI API request failed: {str(e)}")
                 raise Exception(f"AI service error: {str(e)}")
     
-    def _create_chat_completion_data(self, messages: list, model: str = "gpt-4o-mini", temperature: float = 0.7, max_tokens: int = 800) -> Dict[str, Any]:
+    def _create_chat_completion_data(self, messages: list, model: str = "gpt-5-2025-08-07", temperature: float = 0.7, max_tokens: int = 800) -> Dict[str, Any]:
         """Create standardized chat completion request data"""
-        return {
+        data = {
             "model": model,
             "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens
         }
+        # Use correct params for newer models (GPT-5, GPT-4.1+, O3, O4)
+        if isinstance(model, str) and model.startswith(("gpt-5", "gpt-4.1", "o3", "o4")):
+            data["max_completion_tokens"] = max_tokens
+        else:
+            data["temperature"] = temperature
+            data["max_tokens"] = max_tokens
+        return data
