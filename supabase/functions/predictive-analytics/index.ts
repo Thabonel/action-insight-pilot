@@ -141,13 +141,12 @@ Generate predictions in JSON format:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-5-2025-08-07',
       messages: [
         { role: 'system', content: 'You are an expert marketing data scientist and predictive analyst. Always respond with valid JSON.' },
         { role: 'user', content: prompt }
       ],
-      temperature: 0.2,
-      max_tokens: 1500,
+      max_completion_tokens: 1500,
     }),
   });
 
