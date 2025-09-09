@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Video, MessageCircle, Mail, TrendingUp, Settings, Play, Users, Target } from 'lucide-react';
+import { Video, MessageCircle, Mail, TrendingUp, Settings, Play, Users, Target, Sparkles } from 'lucide-react';
+import ViralContentGenerator from '@/components/viral/ViralContentGenerator';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
@@ -33,8 +34,9 @@ const ViralVideoMarketing: React.FC = () => {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="viral-gpt">Go Viral GPT</TabsTrigger>
           <TabsTrigger value="videos">Videos</TabsTrigger>
           <TabsTrigger value="comments">Comments</TabsTrigger>
           <TabsTrigger value="emails">Email Collection</TabsTrigger>
@@ -157,6 +159,10 @@ const ViralVideoMarketing: React.FC = () => {
               </CardHeader>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="viral-gpt" className="space-y-6">
+          <ViralContentGenerator />
         </TabsContent>
 
         <TabsContent value="videos" className="space-y-6">

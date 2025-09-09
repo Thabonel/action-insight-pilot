@@ -40,6 +40,46 @@ export interface ContentSuggestion {
 export class EnhancedSocialService {
   constructor(private httpClient: HttpClient) {}
 
+  // Viral Content Generation (New)
+  async generateViralContent(request: {
+    topic: string;
+    platform: string;
+    viralTemplate?: string;
+    hooks?: string[];
+    emotionalTriggers?: string[];
+    targetAudience?: string;
+  }) {
+    return this.httpClient.request('/api/social/viral-content/generate', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async getViralScore(content: string, platform: string) {
+    return this.httpClient.request('/api/social/viral-content/score', {
+      method: 'POST',
+      body: JSON.stringify({ content, platform }),
+    });
+  }
+
+  async generateViralVariations(baseContent: string, platform: string, count: number = 3) {
+    return this.httpClient.request('/api/social/viral-content/variations', {
+      method: 'POST',
+      body: JSON.stringify({
+        base_content: baseContent,
+        platform,
+        variation_count: count
+      }),
+    });
+  }
+
+  async optimizeForVirality(content: string, platform: string) {
+    return this.httpClient.request('/api/social/viral-content/optimize', {
+      method: 'POST',
+      body: JSON.stringify({ content, platform }),
+    });
+  }
+
   // AI Content Generation
   async generateAIContent(request: AIContentRequest) {
     return this.httpClient.request('/api/social/ai-content/generate', {
