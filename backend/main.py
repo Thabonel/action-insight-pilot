@@ -41,7 +41,7 @@ app.add_middleware(
 )
 
 # ─────────────────────────── ROUTER IMPORTS ─────────────────────────── #
-# Fixed import paths for deployment
+# Fixed import paths for deployment - absolute imports required
 
 from routes.unified_agents import router as unified_agents_router
 from routes.system_health import router as system_health_router
