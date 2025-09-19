@@ -42,14 +42,14 @@ app.add_middleware(
 
 # ─────────────────────────── ROUTER IMPORTS ─────────────────────────── #
 
-from backend.routes.unified_agents import router as unified_agents_router
-from backend.routes.system_health import router as system_health_router
-from backend.routes.email import router as email_router
-from backend.routes.workflows import router as workflows_router
-from backend.routes.brand import router as brand_router
-from backend.routes.keyword_research import router as keyword_research_router
-from backend.routes.research import router as research_router
-from backend.workflows.ai_video_creator_workflow import (
+from .routes.unified_agents import router as unified_agents_router
+from .routes.system_health import router as system_health_router
+from .routes.email import router as email_router
+from .routes.workflows import router as workflows_router
+from .routes.brand import router as brand_router
+from .routes.keyword_research import router as keyword_research_router
+from .routes.research import router as research_router
+from .workflows.ai_video_creator_workflow import (
     router as ai_video_creator_router,
     WORKFLOW_ENABLED as AI_VIDEO_WORKFLOW_ENABLED,
 )
