@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, Dict, Any
 
-from ..auth import verify_token
-from ..database import get_supabase
-from ..models import APIResponse
+from auth import verify_token
+from database import get_supabase
+from models import APIResponse
 
 router = APIRouter(prefix="/api/research", tags=["research"])
 
