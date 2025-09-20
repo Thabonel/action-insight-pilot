@@ -2,8 +2,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict, Any, Optional
 import logging
-from ..agents.mcp_agent import MCPAgent
-from ..auth import get_current_user
+from agents.mcp_agent import MCPAgent
+from auth import get_current_user
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
