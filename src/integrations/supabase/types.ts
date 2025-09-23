@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1808,7 +1808,6 @@ export type Database = {
         Row: {
           bucket_id: string
           content: string
-          summary: string | null
           created_at: string
           created_by: string
           file_name: string | null
@@ -1825,7 +1824,6 @@ export type Database = {
         Insert: {
           bucket_id: string
           content: string
-          summary?: string | null
           created_at?: string
           created_by: string
           file_name?: string | null
@@ -1842,7 +1840,6 @@ export type Database = {
         Update: {
           bucket_id?: string
           content?: string
-          summary?: string | null
           created_at?: string
           created_by?: string
           file_name?: string | null
@@ -2395,6 +2392,48 @@ export type Database = {
           sections?: Json | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      proposals: {
+        Row: {
+          client_name: string
+          content: Json | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          pricing: Json | null
+          status: string
+          template_type: string
+          terms: Json | null
+          timeline: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_name: string
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          pricing?: Json | null
+          status?: string
+          template_type: string
+          terms?: Json | null
+          timeline?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_name?: string
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          pricing?: Json | null
+          status?: string
+          template_type?: string
+          terms?: Json | null
+          timeline?: Json | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -3119,23 +3158,23 @@ export type Database = {
       }
       search_knowledge_chunks: {
         Args: {
-          p_user_id: string
-          p_query_embedding: string
           p_bucket_type?: string
           p_campaign_id?: string
           p_limit?: number
+          p_query_embedding: string
           p_similarity_threshold?: number
+          p_user_id: string
         }
         Returns: {
-          chunk_id: string
           bucket_id: string
-          document_id: string
           bucket_name: string
-          document_title: string
           chunk_content: string
+          chunk_id: string
           chunk_index: number
-          similarity_score: number
+          document_id: string
+          document_title: string
           metadata: Json
+          similarity_score: number
         }[]
       }
       seed_demo_data: {
