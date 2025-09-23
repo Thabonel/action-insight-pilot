@@ -1339,6 +1339,7 @@ export type Database = {
           last_name: string | null
           subscribed: boolean | null
           tags: Json | null
+          user_id: string
         }
         Insert: {
           company?: string | null
@@ -1351,6 +1352,7 @@ export type Database = {
           last_name?: string | null
           subscribed?: boolean | null
           tags?: Json | null
+          user_id: string
         }
         Update: {
           company?: string | null
@@ -1363,6 +1365,7 @@ export type Database = {
           last_name?: string | null
           subscribed?: boolean | null
           tags?: Json | null
+          user_id?: string
         }
         Relationships: []
       }
