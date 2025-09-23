@@ -1,5 +1,6 @@
 
 import { HttpClient } from '../http-client';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface SocialPlatformConnection {
   id: string;
@@ -8,7 +9,9 @@ export interface SocialPlatformConnection {
   connection_status: 'connected' | 'disconnected' | 'error';
   platform_user_id?: string;
   platform_username?: string;
-  connection_metadata: Record<string, any>;
+  platform: string;
+  is_connected: boolean;
+  expires_at?: string;
   created_at: string;
   updated_at: string;
   token_expires_at?: string;
@@ -22,22 +25,38 @@ export interface OAuthAuthorizationURL {
 export class SocialPlatformsService {
   constructor(private httpClient: HttpClient) {}
 
-  async getPlatformConnections() {
-    const supabaseUrl = 'https://kciuuxoqxfsogjuqflou.supabase.co';
-    const response = await fetch(`${supabaseUrl}/functions/v1/social-connections`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`,
-        'Content-Type': 'application/json'
+  async getPlatformConnections(): Promise<SocialPlatformConnection[]> {
+    try {
+      // Validate user authentication before making API calls
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('User not authenticated');
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // Check token expiration
+      if (session.expires_at && session.expires_at * 1000 < Date.now()) {
+        throw new Error('Session token expired - please re-authenticate');
+      }
+
+      const supabaseUrl = 'https://kciuuxoqxfsogjuqflou.supabase.co';
+      const response = await fetch(`${supabaseUrl}/functions/v1/social-connections`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to get platform connections:', error);
+      throw error;
     }
-
-    const data = await response.json();
-    return data;
   }
 
   async initiatePlatformConnection(platform: string) {
@@ -118,9 +137,42 @@ export class SocialPlatformsService {
     return data;
   }
 
-  async testPlatformConnection(platform: string) {
-    // This would make an actual API call to the platform to test the connection
-    return { success: true, data: { status: 'healthy', message: 'Connection is working' } };
+  async testPlatformConnection(platform: string): Promise<{ success: boolean; data: any }> {
+    try {
+      // Get the current session to validate authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('User not authenticated');
+      }
+
+      // Validate token expiration
+      if (session.expires_at && session.expires_at * 1000 < Date.now()) {
+        throw new Error('Session token expired');
+      }
+
+      // Test connection by fetching platform connections
+      const connections = await this.getPlatformConnections();
+      const platformConnection = connections.find(conn => conn.platform === platform);
+      
+      if (!platformConnection) {
+        return { success: false, data: { status: 'not_connected', message: 'Platform not connected' } };
+      }
+
+      // Validate connection is active and tokens are not expired
+      const isValid = platformConnection.is_connected && 
+                     (!platformConnection.expires_at || new Date(platformConnection.expires_at) > new Date());
+      
+      return { 
+        success: isValid, 
+        data: { 
+          status: isValid ? 'healthy' : 'expired', 
+          message: isValid ? 'Connection is working' : 'Connection expired or inactive'
+        }
+      };
+    } catch (error) {
+      console.error('Platform connection test failed:', error);
+      return { success: false, data: { status: 'error', message: 'Connection test failed' } };
+    }
   }
 
   async syncPlatformData(platform: string) {

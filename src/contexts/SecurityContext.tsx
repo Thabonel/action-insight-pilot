@@ -36,19 +36,20 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     sessionTimeout: 3600000, // 1 hour in ms
   });
 
-  // Simple encryption for demonstration (use proper encryption in production)
+  // Token security functions - Note: Supabase handles token encryption natively
   const encryptToken = (token: string): string => {
     if (!securitySettings.encryptStorage) return token;
-    return btoa(token); // Base64 encoding for demo
+    // Note: This is NOT real encryption - tokens are stored securely by Supabase client
+    // This function is for demonstration only. Real encryption would use Web Crypto API
+    console.warn('Token encryption is not implemented - tokens handled by Supabase client');
+    return token; // Return token as-is, rely on Supabase's secure storage
   };
 
   const decryptToken = (encryptedToken: string): string => {
     if (!securitySettings.encryptStorage) return encryptedToken;
-    try {
-      return atob(encryptedToken);
-    } catch {
-      return encryptedToken;
-    }
+    // Note: This is NOT real decryption - tokens are handled securely by Supabase client
+    console.warn('Token decryption is not implemented - tokens handled by Supabase client');
+    return encryptedToken; // Return token as-is, rely on Supabase's secure handling
   };
 
   const refreshTokens = async (): Promise<boolean> => {
