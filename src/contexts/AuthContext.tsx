@@ -75,6 +75,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUp = async (email: string, password: string): Promise<{ error?: any }> => {
     setLoading(true);
     try {
+      // Validate password strength before signup
+      const { validatePasswordStrength } = await import('@/lib/validation/input-sanitizer');
+      const validation = validatePasswordStrength(password);
+      
+      if (!validation.isValid) {
+        setLoading(false);
+        return { 
+          error: { 
+            message: `Password requirements not met: ${validation.errors.join(', ')}` 
+          }
+        };
+      }
+
       const redirectUrl = `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signUp({
