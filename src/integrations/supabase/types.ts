@@ -248,7 +248,7 @@ export type Database = {
           created_at: string | null
           id: string
           metadata: Json | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           action: string
@@ -256,7 +256,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           metadata?: Json | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           action?: string
@@ -264,7 +264,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           metadata?: Json | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -3152,6 +3152,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: Record<PropertyKey, never> | { company_uuid: string }
         Returns: string
@@ -3180,6 +3184,10 @@ export type Database = {
       seed_demo_data: {
         Args: Record<PropertyKey, never> | { demo_user_id?: string }
         Returns: undefined
+      }
+      user_has_role: {
+        Args: { check_role: string }
+        Returns: boolean
       }
     }
     Enums: {
