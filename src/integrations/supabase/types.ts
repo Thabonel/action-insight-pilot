@@ -142,6 +142,7 @@ export type Database = {
           recommendations: Json | null
           timestamp: string | null
           title: string
+          user_id: string
         }
         Insert: {
           description: string
@@ -151,6 +152,7 @@ export type Database = {
           recommendations?: Json | null
           timestamp?: string | null
           title: string
+          user_id: string
         }
         Update: {
           description?: string
@@ -160,6 +162,7 @@ export type Database = {
           recommendations?: Json | null
           timestamp?: string | null
           title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -214,6 +217,7 @@ export type Database = {
           recommendations: Json | null
           report_type: string
           title: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -226,6 +230,7 @@ export type Database = {
           recommendations?: Json | null
           report_type: string
           title: string
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -238,6 +243,7 @@ export type Database = {
           recommendations?: Json | null
           report_type?: string
           title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1454,6 +1460,7 @@ export type Database = {
           seo_score: number | null
           status: string | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           brief: Json
@@ -1465,6 +1472,7 @@ export type Database = {
           seo_score?: number | null
           status?: string | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           brief?: Json
@@ -1476,6 +1484,7 @@ export type Database = {
           seo_score?: number | null
           status?: string | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2640,6 +2649,7 @@ export type Database = {
           sentiment: string | null
           timestamp: string
           type: string
+          user_id: string
         }
         Insert: {
           author?: string | null
@@ -2653,6 +2663,7 @@ export type Database = {
           sentiment?: string | null
           timestamp: string
           type: string
+          user_id: string
         }
         Update: {
           author?: string | null
@@ -2666,6 +2677,7 @@ export type Database = {
           sentiment?: string | null
           timestamp?: string
           type?: string
+          user_id?: string
         }
         Relationships: []
       }
