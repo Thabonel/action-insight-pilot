@@ -12,6 +12,10 @@ def get_supabase_jwt_secret() -> str:
     """Get Supabase JWT secret with caching"""
     jwt_secret = os.getenv("SUPABASE_JWT_SECRET")
     if not jwt_secret:
+        # Fallback to JWT_SECRET for backwards compatibility
+        jwt_secret = os.getenv("JWT_SECRET")
+    
+    if not jwt_secret:
         # If JWT_SECRET is not set, try to derive it from the project
         supabase_url = os.getenv("SUPABASE_URL")
         if supabase_url:
