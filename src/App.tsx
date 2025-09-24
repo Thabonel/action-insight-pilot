@@ -1,4 +1,6 @@
 
+// Deployment trigger - fixed dependency conflicts
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AppRouter from '@/components/AppRouter';
