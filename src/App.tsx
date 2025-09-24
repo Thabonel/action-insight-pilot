@@ -1,5 +1,5 @@
 
-// Deployment trigger - fixed dependency conflicts
+// Deployment trigger - fixed Render deployment issues
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';

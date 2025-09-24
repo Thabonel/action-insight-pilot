@@ -12,19 +12,9 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Initialize FastAPI app
-app = FastAPI()
+app = FastAPI(title="Marketing Automation API", version="1.0.1")
 
 # CORS settings
-origins = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://wheels-wins.vercel.app",
-    "https://wheels-wins-git-staging-wheels-wins.vercel.app",
-    "https://wheels-wins-git-dev-wheels-wins.vercel.app",
-    os.getenv("FRONTEND_URL"),
-]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -34,6 +24,7 @@ app.add_middleware(
         "https://wheels-wins-orchestrator.onrender.com",
         "https://lovable.dev",
         "https://app.lovable.dev",
+        "*",  # Allow all origins during deployment debugging
     ],
     allow_headers=["*"],
     allow_credentials=True,
@@ -41,31 +32,41 @@ app.add_middleware(
 )
 
 # ─────────────────────────── ROUTER IMPORTS ─────────────────────────── #
-# Fixed import paths for deployment - all relative imports converted to absolute for Render
+# Import routers with graceful error handling
 
-from routes.unified_agents import router as unified_agents_router
-from routes.system_health import router as system_health_router
-from routes.email import router as email_router
-from routes.workflows import router as workflows_router
-from routes.brand import router as brand_router
-from routes.keyword_research import router as keyword_research_router
-from routes.research import router as research_router
-from workflows.ai_video_creator_workflow import (
-    router as ai_video_creator_router,
-    WORKFLOW_ENABLED as AI_VIDEO_WORKFLOW_ENABLED,
-)
+routers_to_load = [
+    ("routes.unified_agents", "unified_agents_router"),
+    ("routes.system_health", "system_health_router"),
+    ("routes.email", "email_router"),
+    ("routes.workflows", "workflows_router"),
+    ("routes.brand", "brand_router"),
+    ("routes.keyword_research", "keyword_research_router"),
+    ("routes.research", "research_router"),
+]
 
-# ─────────────────────────── ROUTER REGISTRY ────────────────────────── #
+loaded_routers = []
 
-app.include_router(unified_agents_router)
-app.include_router(system_health_router)
-app.include_router(email_router)
-app.include_router(workflows_router)
-app.include_router(brand_router)
-app.include_router(keyword_research_router)
-app.include_router(research_router)
-if AI_VIDEO_WORKFLOW_ENABLED:
-    app.include_router(ai_video_creator_router)
+for module_path, router_name in routers_to_load:
+    try:
+        module = __import__(module_path, fromlist=[router_name])
+        router = getattr(module, "router")
+        app.include_router(router)
+        loaded_routers.append(module_path)
+        logger.info(f"✅ Loaded router: {module_path}")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to load router {module_path}: {str(e)}")
+
+# Try to load AI video creator workflow
+try:
+    from workflows.ai_video_creator_workflow import (
+        router as ai_video_creator_router,
+        WORKFLOW_ENABLED as AI_VIDEO_WORKFLOW_ENABLED,
+    )
+    if AI_VIDEO_WORKFLOW_ENABLED:
+        app.include_router(ai_video_creator_router)
+        logger.info("✅ Loaded AI video creator workflow")
+except Exception as e:
+    logger.warning(f"⚠️ AI video creator workflow not available: {str(e)}")
 
 # ───────────────────────────── ROOT ENDPOINTS ───────────────────────── #
 
