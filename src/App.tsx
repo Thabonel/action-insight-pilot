@@ -1,5 +1,5 @@
 
-// Backend deployment fix - corrected environment variables and imports
+// Backend deployment fix - corrected working directory in render.yaml
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
