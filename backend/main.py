@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Initialize FastAPI app
-app = FastAPI(title="Marketing Automation API", version="1.0.1")
+app = FastAPI(title="Marketing Automation API", version="1.0.2")
 
 # CORS settings
 app.add_middleware(
@@ -22,7 +22,7 @@ app.add_middleware(
         "https://aiboostcampaign.com",
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://wheels-wins-orchestrator.onrender.com",
+        "https://wheels-wins-orchestrator.onrender.com",  
         "https://lovable.dev",
         "https://app.lovable.dev",
         "*",  # Allow all origins during deployment debugging
@@ -32,47 +32,59 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
 )
 
-# ─────────────────────────── ROUTER IMPORTS ─────────────────────────── #
-# Import routers with graceful error handling
+# ─────────────────────────── MINIMAL ROUTER IMPORTS ─────────────────────────── #
+# Start with minimal imports for stable deployment
 
-routers_to_load = [
-    ("routes.unified_agents", "router"),
+# Only load essential routers that don't have complex dependencies
+essential_routers = [
     ("routes.system_health", "router"),
-    ("routes.email", "router"),
-    ("routes.workflows", "router"),
-    ("routes.brand", "router"),
-    ("routes.keyword_research", "router"),
-    ("routes.research", "router"),
 ]
 
 loaded_routers = []
 
-for module_path, router_name in routers_to_load:
+# Load essential routers first
+for module_path, router_name in essential_routers:
     try:
         module = __import__(module_path, fromlist=[router_name])
         if hasattr(module, "router"):
             router = getattr(module, "router")
             app.include_router(router)
             loaded_routers.append(module_path)
-            logger.info(f"✅ Loaded router: {module_path}")
+            logger.info(f"✅ Loaded essential router: {module_path}")
+        else:
+            logger.warning(f"⚠️ Router {module_path} exists but has no 'router' attribute")
+    except Exception as e:
+        logger.error(f"❌ Failed to load essential router {module_path}: {str(e)}")
+
+# Try to load other routers with better error handling
+optional_routers = [
+    ("routes.unified_agents", "router"),
+    ("routes.email", "router"),
+    ("routes.workflows", "router"),
+    ("routes.brand", "router"), 
+    ("routes.keyword_research", "router"),
+    ("routes.research", "router"),
+]
+
+for module_path, router_name in optional_routers:
+    try:
+        # Test import first
+        module = __import__(module_path, fromlist=[router_name])
+        if hasattr(module, "router"):
+            router = getattr(module, "router")
+            app.include_router(router)
+            loaded_routers.append(module_path)
+            logger.info(f"✅ Loaded optional router: {module_path}")
         else:
             logger.warning(f"⚠️ Router {module_path} exists but has no 'router' attribute")
     except ImportError as e:
-        logger.warning(f"⚠️ Could not import router {module_path}: {str(e)}")
+        logger.warning(f"⚠️ Could not import router {module_path} (missing dependency): {str(e)}")
+    except AttributeError as e:
+        logger.warning(f"⚠️ Router {module_path} missing expected attributes: {str(e)}")
     except Exception as e:
-        logger.error(f"❌ Failed to load router {module_path}: {str(e)}")
+        logger.error(f"❌ Failed to load optional router {module_path}: {str(e)}")
 
-# Try to load AI video creator workflow
-try:
-    from workflows.ai_video_creator_workflow import (
-        router as ai_video_creator_router,
-        WORKFLOW_ENABLED as AI_VIDEO_WORKFLOW_ENABLED,
-    )
-    if AI_VIDEO_WORKFLOW_ENABLED:
-        app.include_router(ai_video_creator_router)
-        logger.info("✅ Loaded AI video creator workflow")
-except Exception as e:
-    logger.warning(f"⚠️ AI video creator workflow not available: {str(e)}")
+logger.info(f"📋 Loaded {len(loaded_routers)} out of {len(essential_routers) + len(optional_routers)} routers")
 
 # ───────────────────────────── ROOT ENDPOINTS ───────────────────────── #
 
