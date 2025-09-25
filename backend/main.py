@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -81,4 +82,10 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "version": "1.0.1", "timestamp": "2024-01-01T00:00:00Z"}
+    return {
+        "status": "healthy", 
+        "version": "1.0.1", 
+        "timestamp": datetime.now().isoformat(),
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "agents_status": "operational"
+    }
