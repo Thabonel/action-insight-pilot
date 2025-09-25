@@ -39,16 +39,20 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Token security functions - Note: Supabase handles token encryption natively
   const encryptToken = (token: string): string => {
     if (!securitySettings.encryptStorage) return token;
-    // Note: This is NOT real encryption - tokens are stored securely by Supabase client
+  // Note: This is NOT real encryption - tokens are stored securely by Supabase client
     // This function is for demonstration only. Real encryption would use Web Crypto API
-    console.warn('Token encryption is not implemented - tokens handled by Supabase client');
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Token encryption is not implemented - tokens handled by Supabase client');
+    }
     return token; // Return token as-is, rely on Supabase's secure storage
   };
 
   const decryptToken = (encryptedToken: string): string => {
     if (!securitySettings.encryptStorage) return encryptedToken;
     // Note: This is NOT real decryption - tokens are handled securely by Supabase client
-    console.warn('Token decryption is not implemented - tokens handled by Supabase client');
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Token decryption is not implemented - tokens handled by Supabase client');
+    }
     return encryptedToken; // Return token as-is, rely on Supabase's secure handling
   };
 
@@ -56,12 +60,16 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const { data, error } = await supabase.auth.refreshSession();
       if (error) {
-        console.error('Token refresh failed:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Token refresh failed:', error);
+        }
         return false;
       }
       return !!data.session;
     } catch (error) {
-      console.error('Token refresh error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Token refresh error:', error);
+      }
       return false;
     }
   };
@@ -78,10 +86,14 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const revokeTokens = async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
+      // Remove only specific OAuth tokens, let Supabase handle auth tokens
       localStorage.removeItem('oauth_tokens');
-      sessionStorage.clear();
+      // Don't clear all sessionStorage as it may contain other app data
     } catch (error) {
-      console.error('Token revocation error:', error);
+      // Log errors in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Token revocation error:', error);
+      }
     }
   };
 
