@@ -54,7 +54,10 @@ export class SocialPlatformsService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Failed to get platform connections:', error);
+      // Only log errors in development for security
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to get platform connections:', error);
+      }
       throw error;
     }
   }
@@ -62,26 +65,21 @@ export class SocialPlatformsService {
   async initiatePlatformConnection(platform: string) {
     const supabaseUrl = 'https://kciuuxoqxfsogjuqflou.supabase.co';
     
-    // Get current user token from Supabase auth
-    const token = localStorage.getItem('sb-kciuuxoqxfsogjuqflou-auth-token');
-    let authToken = '';
-    
-    if (token) {
-      try {
-        const parsed = JSON.parse(token);
-        authToken = parsed.access_token;
-      } catch (e) {
-        console.error('Failed to parse auth token:', e);
-        throw new Error('Authentication required');
-      }
-    } else {
+    // Use proper Supabase session management instead of localStorage access
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       throw new Error('Authentication required');
+    }
+
+    // Check token expiration
+    if (session.expires_at && session.expires_at * 1000 < Date.now()) {
+      throw new Error('Session expired - please re-authenticate');
     }
 
     const response = await fetch(`${supabaseUrl}/functions/v1/social-oauth-initiate`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ platform })
@@ -105,25 +103,21 @@ export class SocialPlatformsService {
   async disconnectPlatform(platform: string) {
     const supabaseUrl = 'https://kciuuxoqxfsogjuqflou.supabase.co';
     
-    const token = localStorage.getItem('sb-kciuuxoqxfsogjuqflou-auth-token');
-    let authToken = '';
-    
-    if (token) {
-      try {
-        const parsed = JSON.parse(token);
-        authToken = parsed.access_token;
-      } catch (e) {
-        console.error('Failed to parse auth token:', e);
-        throw new Error('Authentication required');
-      }
-    } else {
+    // Use proper Supabase session management instead of localStorage access
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       throw new Error('Authentication required');
+    }
+
+    // Check token expiration
+    if (session.expires_at && session.expires_at * 1000 < Date.now()) {
+      throw new Error('Session expired - please re-authenticate');
     }
 
     const response = await fetch(`${supabaseUrl}/functions/v1/social-connections/${platform}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json'
       }
     });
@@ -170,7 +164,10 @@ export class SocialPlatformsService {
         }
       };
     } catch (error) {
-      console.error('Platform connection test failed:', error);
+      // Only log errors in development for security
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Platform connection test failed:', error);
+      }
       return { success: false, data: { status: 'error', message: 'Connection test failed' } };
     }
   }
