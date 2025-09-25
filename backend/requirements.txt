@@ -27,3 +27,12 @@ pydantic==2.6.4
 
 # Missing core dependencies
 typing-extensions==4.10.0
+
+# FastAPI CORS middleware (missing dependency)
+starlette>=0.27.0
+
+# JWT dependencies 
+cryptography>=41.0.0
+
+# OpenAI for AI features (if needed)
+openai>=1.0.0

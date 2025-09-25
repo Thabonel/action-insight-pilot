@@ -1,5 +1,5 @@
 
-// Backend deployment fix - moved render.yaml to root for proper monorepo setup
+// Backend deployment fix - added missing dependencies and removed duplicate render.yaml
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
