@@ -36,13 +36,13 @@ app.add_middleware(
 # Import routers with graceful error handling
 
 routers_to_load = [
-    ("routes.unified_agents", "unified_agents_router"),
-    ("routes.system_health", "system_health_router"),
-    ("routes.email", "email_router"),
-    ("routes.workflows", "workflows_router"),
-    ("routes.brand", "brand_router"),
-    ("routes.keyword_research", "keyword_research_router"),
-    ("routes.research", "research_router"),
+    ("routes.unified_agents", "router"),
+    ("routes.system_health", "router"),
+    ("routes.email", "router"),
+    ("routes.workflows", "router"),
+    ("routes.brand", "router"),
+    ("routes.keyword_research", "router"),
+    ("routes.research", "router"),
 ]
 
 loaded_routers = []

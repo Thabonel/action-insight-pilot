@@ -1,5 +1,5 @@
 
-// Backend deployment fix - added missing dependencies and removed duplicate render.yaml
+// Backend deployment fix - fixed router imports in main.py
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
