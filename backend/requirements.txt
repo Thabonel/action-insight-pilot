@@ -29,7 +29,7 @@ pydantic==2.5.3
 typing-extensions==4.8.0
 
 # Cryptography
-cryptography==41.0.8
+cryptography==44.0.1
 
 # OpenAI for AI features
 openai==1.6.1
