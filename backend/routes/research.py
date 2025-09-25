@@ -1,34 +1,37 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import Optional, Dict, Any
-
-from auth import verify_token
-from database import get_supabase
-from models import APIResponse
+from fastapi import APIRouter, HTTPException
+from typing import Dict, Any
+import logging
 
 router = APIRouter(prefix="/api/research", tags=["research"])
+logger = logging.getLogger(__name__)
 
-@router.get("/")
-async def list_notes(conversation_id: Optional[str] = None, token: Dict[str, Any] = Depends(verify_token)):
-    """List research notes for the authenticated user"""
-    supabase = get_supabase()
-    query = supabase.table('research_notes').select('*')
-    if conversation_id:
-        query = query.eq('conversation_id', conversation_id)
-    result = query.order('created_at', desc=True).execute()
-    return APIResponse(success=True, data=result.data)
+@router.post("/analyze")
+async def analyze_market_research(research_data: Dict[str, Any]):
+    """Analyze market research data"""
+    try:
+        topic = research_data.get("topic")
+        if not topic:
+            raise HTTPException(status_code=400, detail="Research topic is required")
+        
+        return {
+            "status": "success",
+            "analysis": {
+                "topic": topic,
+                "insights": ["market trend 1", "competitor insight 2"],
+                "recommendations": ["recommendation 1", "recommendation 2"]
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error analyzing research: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-@router.post("/")
-async def create_note(note: Dict[str, Any], token: Dict[str, Any] = Depends(verify_token)):
-    """Create a research note from a chat message"""
-    conversation_id = note.get('conversation_id')
-    content = note.get('content')
-    if not conversation_id or not content:
-        raise HTTPException(status_code=400, detail="conversation_id and content required")
-    source_refs = note.get('source_refs')
-    supabase = get_supabase()
-    result = supabase.table('research_notes').insert({
-        'conversation_id': conversation_id,
-        'content': content,
-        'source_refs': source_refs
-    }).select('*').single().execute()
-    return APIResponse(success=True, data=result.data)
+@router.get("/topics")
+async def get_research_topics():
+    """Get available research topics"""
+    return {
+        "topics": [
+            {"id": "market_trends", "name": "Market Trends"},
+            {"id": "competitor_analysis", "name": "Competitor Analysis"},
+            {"id": "customer_insights", "name": "Customer Insights"}
+        ]
+    }
