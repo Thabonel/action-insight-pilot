@@ -49,12 +49,17 @@ loaded_routers = []
 for module_path, router_name in routers_to_load:
     try:
         module = __import__(module_path, fromlist=[router_name])
-        router = getattr(module, "router")
-        app.include_router(router)
-        loaded_routers.append(module_path)
-        logger.info(f"✅ Loaded router: {module_path}")
+        if hasattr(module, "router"):
+            router = getattr(module, "router")
+            app.include_router(router)
+            loaded_routers.append(module_path)
+            logger.info(f"✅ Loaded router: {module_path}")
+        else:
+            logger.warning(f"⚠️ Router {module_path} exists but has no 'router' attribute")
+    except ImportError as e:
+        logger.warning(f"⚠️ Could not import router {module_path}: {str(e)}")
     except Exception as e:
-        logger.warning(f"⚠️ Failed to load router {module_path}: {str(e)}")
+        logger.error(f"❌ Failed to load router {module_path}: {str(e)}")
 
 # Try to load AI video creator workflow
 try:

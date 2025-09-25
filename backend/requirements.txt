@@ -21,3 +21,9 @@ apscheduler==3.10.4
 python-multipart==0.0.20
 requests==2.31.0
 psutil==5.9.8
+
+# Pydantic for data validation (required by FastAPI)
+pydantic==2.6.4
+
+# Missing core dependencies
+typing-extensions==4.10.0

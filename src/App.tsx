@@ -1,5 +1,5 @@
 
-// Deployment trigger - fixed Render deployment issues
+// Backend deployment fix - corrected environment variables and imports
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
