@@ -38,11 +38,12 @@ class CampaignExecutor:
     Orchestrates campaign execution across multiple channels and agents
     """
 
-    def __init__(self, supabase_client, email_agent=None, social_agent=None, content_agent=None):
+    def __init__(self, supabase_client, email_agent=None, social_agent=None, content_agent=None, task_scheduler=None):
         self.supabase = supabase_client
         self.email_agent = email_agent
         self.social_agent = social_agent
         self.content_agent = content_agent
+        self.task_scheduler = task_scheduler
         self.logger = logging.getLogger(f"{__class__.__name__}")
 
     async def launch_campaign(self, campaign_id: str, user_id: str) -> ExecutionResult:
@@ -214,36 +215,76 @@ class CampaignExecutor:
     async def _execute_social_campaign(self, campaign: Dict[str, Any], user_id: str) -> Dict[str, Any]:
         """Execute social media component of campaign"""
         try:
-            if not self.social_agent:
-                return {"success": False, "message": "Social agent not available"}
+            if not self.social_agent and not self.task_scheduler:
+                return {"success": False, "message": "Social agent or task scheduler not available"}
 
             # Extract content calendar or social posts
             content_calendar = campaign.get("content_calendar", [])
             social_posts = []
+            scheduled_count = 0
 
             for content_item in content_calendar:
                 if content_item.get("channel") in ["social", "facebook", "twitter", "linkedin", "instagram"]:
-                    # Schedule post using social agent
-                    post_data = {
-                        "content": content_item.get("content", ""),
-                        "platforms": [content_item.get("platform", "facebook")],
-                        "scheduled_time": content_item.get("publish_date"),
-                        "campaign_id": campaign["id"]
-                    }
+                    platforms = [content_item.get("platform", "facebook")]
+                    scheduled_time = content_item.get("publish_date")
 
-                    # Create scheduled post
-                    result = await self.social_agent.schedule_post(**post_data)
-                    social_posts.append({
-                        "post_id": result.get("post_id"),
-                        "platform": content_item.get("platform"),
-                        "scheduled_time": content_item.get("publish_date"),
-                        "success": result.get("success", False)
-                    })
+                    # If task scheduler is available and scheduled time is in the future, use it
+                    if self.task_scheduler and scheduled_time:
+                        try:
+                            from datetime import datetime
+                            schedule_dt = datetime.fromisoformat(scheduled_time.replace('Z', '+00:00'))
+
+                            # Only schedule if in the future
+                            if schedule_dt > datetime.now(schedule_dt.tzinfo):
+                                post_id = f"{campaign['id']}_post_{len(social_posts)}"
+
+                                job_id = self.task_scheduler.schedule_social_post(
+                                    post_id=post_id,
+                                    campaign_id=campaign["id"],
+                                    user_id=user_id,
+                                    content=content_item.get("content", ""),
+                                    platforms=platforms,
+                                    scheduled_time=schedule_dt,
+                                    media_urls=content_item.get("media_urls", [])
+                                )
+
+                                if job_id:
+                                    scheduled_count += 1
+                                    social_posts.append({
+                                        "post_id": post_id,
+                                        "job_id": job_id,
+                                        "platform": platforms[0],
+                                        "scheduled_time": scheduled_time,
+                                        "success": True,
+                                        "method": "scheduler"
+                                    })
+                                    continue
+                        except Exception as scheduler_error:
+                            self.logger.warning(f"Failed to schedule with task scheduler: {scheduler_error}")
+
+                    # Fallback to social agent immediate posting
+                    if self.social_agent:
+                        post_data = {
+                            "content": content_item.get("content", ""),
+                            "platforms": platforms,
+                            "scheduled_time": scheduled_time,
+                            "campaign_id": campaign["id"]
+                        }
+
+                        result = await self.social_agent.schedule_post(**post_data)
+                        social_posts.append({
+                            "post_id": result.get("post_id"),
+                            "platform": platforms[0],
+                            "scheduled_time": scheduled_time,
+                            "success": result.get("success", False),
+                            "method": "agent"
+                        })
 
             return {
                 "success": True,
-                "message": f"Scheduled {len(social_posts)} social media posts",
-                "posts": social_posts
+                "message": f"Scheduled {scheduled_count} posts via scheduler, {len(social_posts) - scheduled_count} via agent",
+                "posts": social_posts,
+                "scheduled_count": scheduled_count
             }
 
         except Exception as e:
@@ -256,6 +297,7 @@ class CampaignExecutor:
             # Extract blog/content items from campaign
             content_items = campaign.get("content_calendar", [])
             published_content = []
+            scheduled_count = 0
 
             for item in content_items:
                 if item.get("type") in ["blog", "article", "content"]:
@@ -271,16 +313,45 @@ class CampaignExecutor:
 
                     result = self.supabase.table('generated_content_pieces').insert(content_data).execute()
 
-                    published_content.append({
-                        "content_id": result.data[0]["id"] if result.data else None,
-                        "title": item.get("title"),
-                        "scheduled_date": item.get("publish_date")
-                    })
+                    if result.data:
+                        content_id = result.data[0]["id"]
+                        publish_date = item.get("publish_date")
+
+                        # Schedule publishing if task scheduler is available and publish date is in future
+                        if self.task_scheduler and publish_date:
+                            try:
+                                from datetime import datetime
+                                publish_dt = datetime.fromisoformat(publish_date.replace('Z', '+00:00'))
+
+                                if publish_dt > datetime.now(publish_dt.tzinfo):
+                                    job_id = self.task_scheduler.schedule_content_publish(
+                                        content_id=content_id,
+                                        campaign_id=campaign["id"],
+                                        user_id=user_id,
+                                        title=item.get("title", ""),
+                                        content=item.get("content", ""),
+                                        publish_time=publish_dt,
+                                        content_type=item.get("type", "blog")
+                                    )
+
+                                    if job_id:
+                                        scheduled_count += 1
+
+                            except Exception as scheduler_error:
+                                self.logger.warning(f"Failed to schedule content publish: {scheduler_error}")
+
+                        published_content.append({
+                            "content_id": content_id,
+                            "title": item.get("title"),
+                            "scheduled_date": publish_date,
+                            "method": "scheduler" if scheduled_count else "database"
+                        })
 
             return {
                 "success": True,
-                "message": f"Scheduled {len(published_content)} content pieces",
-                "content": published_content
+                "message": f"Scheduled {scheduled_count} content pieces via scheduler, {len(published_content) - scheduled_count} in database",
+                "content": published_content,
+                "scheduled_count": scheduled_count
             }
 
         except Exception as e:
