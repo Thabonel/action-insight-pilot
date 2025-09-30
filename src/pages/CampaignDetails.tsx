@@ -40,7 +40,11 @@ import {
   FileText,
   Shield,
   Plus,
-  X
+  X,
+  Rocket,
+  Pause,
+  Play,
+  StopCircle
 } from 'lucide-react';
 
 const CampaignDetails: React.FC = () => {
@@ -53,6 +57,7 @@ const CampaignDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [launching, setLaunching] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const fieldTimers = useRef<{ [key: string]: number }>({});
 
@@ -549,7 +554,7 @@ const CampaignDetails: React.FC = () => {
 
   const handleDelete = async () => {
     if (!campaign?.id) return;
-    
+
     if (confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
       try {
         const result = await apiClient.deleteCampaign(campaign.id);
@@ -569,6 +574,127 @@ const CampaignDetails: React.FC = () => {
           description: "Failed to delete campaign",
           variant: "destructive",
         });
+      }
+    }
+  };
+
+  const handleLaunch = async () => {
+    if (!campaign?.id) return;
+
+    if (confirm(`Are you sure you want to launch "${campaign.name}"? This will activate the campaign and begin execution.`)) {
+      try {
+        setLaunching(true);
+        const result = await apiClient.launchCampaign(campaign.id);
+
+        if (result.success) {
+          // Update local campaign state to reflect active status
+          setCampaign(prev => prev ? { ...prev, status: 'active' } : null);
+          setFormData(prev => ({ ...prev, status: 'active' }));
+
+          toast({
+            title: "Campaign Launched! 🚀",
+            description: result.data?.summary || `"${campaign.name}" is now active and executing.`,
+          });
+        } else {
+          throw new Error(result.message || 'Launch failed');
+        }
+      } catch (error) {
+        toast({
+          title: "Launch Failed",
+          description: error instanceof Error ? error.message : "Failed to launch campaign",
+          variant: "destructive",
+        });
+      } finally {
+        setLaunching(false);
+      }
+    }
+  };
+
+  const handlePause = async () => {
+    if (!campaign?.id) return;
+
+    try {
+      setLaunching(true);
+      const result = await apiClient.pauseCampaign(campaign.id);
+
+      if (result.success) {
+        setCampaign(prev => prev ? { ...prev, status: 'paused' } : null);
+        setFormData(prev => ({ ...prev, status: 'paused' }));
+
+        toast({
+          title: "Campaign Paused",
+          description: `"${campaign.name}" has been paused.`,
+        });
+      } else {
+        throw new Error(result.message || 'Pause failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to pause campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setLaunching(false);
+    }
+  };
+
+  const handleResume = async () => {
+    if (!campaign?.id) return;
+
+    try {
+      setLaunching(true);
+      const result = await apiClient.resumeCampaign(campaign.id);
+
+      if (result.success) {
+        setCampaign(prev => prev ? { ...prev, status: 'active' } : null);
+        setFormData(prev => ({ ...prev, status: 'active' }));
+
+        toast({
+          title: "Campaign Resumed",
+          description: `"${campaign.name}" is now active again.`,
+        });
+      } else {
+        throw new Error(result.message || 'Resume failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resume campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setLaunching(false);
+    }
+  };
+
+  const handleStop = async () => {
+    if (!campaign?.id) return;
+
+    if (confirm(`Are you sure you want to stop "${campaign.name}"? This will mark the campaign as completed.`)) {
+      try {
+        setLaunching(true);
+        const result = await apiClient.stopCampaign(campaign.id);
+
+        if (result.success) {
+          setCampaign(prev => prev ? { ...prev, status: 'completed' } : null);
+          setFormData(prev => ({ ...prev, status: 'completed' }));
+
+          toast({
+            title: "Campaign Stopped",
+            description: `"${campaign.name}" has been marked as completed.`,
+          });
+        } else {
+          throw new Error(result.message || 'Stop failed');
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to stop campaign",
+          variant: "destructive",
+        });
+      } finally {
+        setLaunching(false);
       }
     }
   };
@@ -688,6 +814,78 @@ const CampaignDetails: React.FC = () => {
           <div className="flex items-center gap-2">
             {!isEditing && id && id !== 'new' ? (
               <>
+                {/* Campaign Control Buttons - Show based on status */}
+                {formData.status === 'draft' && (
+                  <Button
+                    onClick={handleLaunch}
+                    disabled={launching}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {launching ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Launching...
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="mr-2 h-4 w-4" />
+                        Launch Campaign
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {formData.status === 'active' && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handlePause}
+                      disabled={launching}
+                    >
+                      <Pause className="mr-2 h-4 w-4" />
+                      Pause
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleStop}
+                      disabled={launching}
+                    >
+                      <StopCircle className="mr-2 h-4 w-4" />
+                      Stop
+                    </Button>
+                  </>
+                )}
+
+                {formData.status === 'paused' && (
+                  <>
+                    <Button
+                      onClick={handleResume}
+                      disabled={launching}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {launching ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Resuming...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="mr-2 h-4 w-4" />
+                          Resume
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleStop}
+                      disabled={launching}
+                    >
+                      <StopCircle className="mr-2 h-4 w-4" />
+                      Stop
+                    </Button>
+                  </>
+                )}
+
                 <Button variant="outline" onClick={() => navigate(`/app/campaigns/${id}/dashboard`)}>
                   <BarChart3 className="mr-2 h-4 w-4" />
                   View Dashboard
