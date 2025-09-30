@@ -11,6 +11,7 @@ import AICampaignCopilotPage from '@/pages/AICampaignCopilotPage'
 import Campaigns from '@/pages/Campaigns'
 import CampaignManagement from '@/pages/CampaignManagement'
 import Leads from '@/pages/Leads'
+import LeadCaptureForms from '@/pages/LeadCaptureForms'
 import Content from '@/pages/Content'
 import Analytics from '@/pages/Analytics'
 import Settings from '@/pages/Settings'
@@ -40,6 +41,7 @@ const AppRouter: React.FC = () => {
         <Route path="campaigns/new" element={<CampaignDetails />} />
         <Route path="campaigns/:id" element={<CampaignDetails />} />
         <Route path="leads" element={<Leads />} />
+        <Route path="lead-capture-forms" element={<LeadCaptureForms />} />
         <Route path="content" element={<Content />} />
         <Route path="social" element={<Social />} />
         <Route path="analytics" element={<Analytics />} />
