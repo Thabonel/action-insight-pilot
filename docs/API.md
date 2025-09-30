@@ -3,23 +3,169 @@
 
 ## Overview
 
-The AI Marketing Hub API provides programmatic access to all platform features including campaign management, lead tracking, content generation, and analytics.
+The AI Marketing Hub API is built with **FastAPI** and provides programmatic access to all platform features including AI agent orchestration, campaign management, lead tracking, content generation, and analytics.
 
 ## Authentication
 
-All API requests require authentication using Supabase Auth tokens. The token should be included in the Authorization header:
+All API requests require authentication using Supabase Auth JWT tokens. The token should be included in the Authorization header:
 
 ```
-Authorization: Bearer <your-token>
+Authorization: Bearer <your-supabase-jwt-token>
 ```
 
-## Base URL
+## Base URLs
 
+**Backend API (FastAPI):**
 ```
-https://your-project.supabase.co/functions/v1
+Production: https://your-backend.onrender.com
+Development: http://localhost:8000
+```
+
+**Interactive API Documentation:**
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+- OpenAPI JSON: `http://localhost:8000/openapi.json`
+
+## Core Endpoints
+
+### Health Check
+
+#### Root Endpoint
+```http
+GET /
+```
+
+**Response:**
+```json
+{
+  "message": "Marketing Automation Backend API",
+  "status": "running"
+}
+```
+
+#### Health Check
+```http
+GET /health
+```
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "version": "1.0.2",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "environment": "production",
+  "agents_status": "operational"
+}
+```
+
+#### System Health
+```http
+GET /api/system-health
+```
+
+**Response:**
+```json
+{
+  "status": "operational",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "services": {
+    "database": "healthy",
+    "ai_agents": "healthy",
+    "external_apis": "healthy"
+  }
+}
 ```
 
 ## Endpoints
+
+### AI Agents API
+
+The unified agents API allows you to execute tasks across all specialized AI agents.
+
+#### Execute Agent Task
+```http
+POST /api/agents/{agent_type}/{task_type}
+```
+
+**Path Parameters:**
+- `agent_type`: Type of agent (`campaign`, `content`, `email`, `social`, `analytics`, `leads`)
+- `task_type`: Specific task to execute (varies by agent)
+
+**Request Body:**
+```json
+{
+  "campaign_id": 123,
+  "goals": ["increase_conversions"],
+  "parameters": {}
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "task_id": "string",
+    "status": "completed",
+    "output": {},
+    "execution_time_ms": 1500
+  }
+}
+```
+
+**Agent Types & Tasks:**
+
+**Campaign Agent** (`/api/agents/campaign/...`)
+- `optimize_campaign` - Optimize campaign parameters
+- `analyze_performance` - Analyze metrics
+- `generate_ab_tests` - A/B test creation
+- `schedule_campaigns` - Scheduling optimization
+- `create_campaign_copy` - Copy generation
+
+**Content Agent** (`/api/agents/content/...`)
+- `create_email_content` - Email copy
+- `create_social_content` - Social posts
+- `create_blog_content` - Blog articles
+- `optimize_content` - Content optimization
+- `generate_headlines` - Headlines generation
+
+**Email Agent** (`/api/agents/email/...`)
+- `create_email_sequence` - Drip campaigns
+- `personalize_emails` - Personalization
+- `optimize_send_times` - Send timing
+- `segment_audience` - Segmentation
+
+**Social Media Agent** (`/api/agents/social/...`)
+- `create_social_post` - Post creation
+- `schedule_posts` - Post scheduling
+- `analyze_engagement` - Engagement analytics
+- `suggest_hashtags` - Hashtag suggestions
+
+**Analytics Agent** (`/api/agents/analytics/...`)
+- `analyze_campaign_performance` - Campaign analysis
+- `generate_insights` - AI insights
+- `predict_trends` - Forecasting
+- `create_reports` - Report generation
+
+**Lead Agent** (`/api/agents/leads/...`)
+- `score_leads` - Lead scoring
+- `qualify_leads` - Qualification
+- `enrich_lead_data` - Data enrichment
+- `generate_outreach` - Outreach creation
+
+#### Example: Generate Blog Content
+```bash
+curl -X POST https://your-backend.onrender.com/api/agents/content/create_blog_content \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "Marketing Automation Best Practices",
+    "keywords": ["marketing", "automation", "AI"],
+    "tone": "professional",
+    "length": 1500
+  }'
+```
 
 ### Campaigns
 

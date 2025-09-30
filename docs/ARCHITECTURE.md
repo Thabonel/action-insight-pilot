@@ -2,20 +2,42 @@
 
 ## System Overview
 
-PAM is a modern, cloud-native marketing automation platform built with a serverless architecture. The system follows a three-tier architecture pattern with clear separation of concerns.
+AI Marketing Hub is a comprehensive, cloud-native marketing automation platform combining React frontend, FastAPI backend, and Supabase infrastructure. The system follows a multi-tier architecture with AI-powered agents handling specialized marketing tasks.
 
 ## Architecture Diagram
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend       │    │   External      │
-│   (React SPA)   │◄──►│   (Supabase)    │◄──►│   Services      │
-│                 │    │                 │    │                 │
-│ • React 18      │    │ • PostgreSQL    │    │ • OpenAI API    │
-│ • TypeScript    │    │ • Edge Functions │    │ • Resend        │
-│ • Tailwind CSS  │    │ • Real-time     │    │ • OAuth         │
-│ • Vite          │    │ • Auth          │    │   Providers     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                        Frontend Layer                             │
+│              React 18 + TypeScript + Vite                        │
+└──────────────────────┬───────────────────────────────────────────┘
+                       │ REST API (HTTPS)
+                       │
+┌──────────────────────▼───────────────────────────────────────────┐
+│                    API Gateway Layer                              │
+│                  FastAPI (Python 3.8+)                           │
+│  ┌───────────────┐  ┌────────────────┐  ┌──────────────────┐   │
+│  │   Routes      │  │  AI Agents     │  │   Workflows      │   │
+│  │   (REST API)  │  │  (Specialized) │  │   (Automation)   │   │
+│  └───────────────┘  └────────────────┘  └──────────────────┘   │
+└──────────────────────┬───────────────────────────────────────────┘
+                       │
+┌──────────────────────▼───────────────────────────────────────────┐
+│                     Data & Auth Layer                             │
+│                   Supabase Cloud Platform                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────────┐   │
+│  │ PostgreSQL   │  │  Auth + JWT  │  │  Real-time + Storage│   │
+│  │   + RLS      │  │   + OAuth    │  │                     │   │
+│  └──────────────┘  └──────────────┘  └─────────────────────┘   │
+└──────────────────────┬───────────────────────────────────────────┘
+                       │
+┌──────────────────────▼───────────────────────────────────────────┐
+│                   External Services Layer                         │
+│  ┌──────────┐  ┌───────────┐  ┌──────────┐  ┌──────────────┐   │
+│  │ OpenAI   │  │  Social   │  │  Email   │  │  Analytics   │   │
+│  │   API    │  │Media APIs │  │ Services │  │  Services    │   │
+│  └──────────┘  └───────────┘  └──────────┘  └──────────────┘   │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ## Frontend Architecture
@@ -67,13 +89,71 @@ src/
 
 ## Backend Architecture
 
+### FastAPI Application Layer
+
+The backend is built with FastAPI (Python 3.8+), providing:
+
+**Core Structure:**
+```
+backend/
+├── main.py              # FastAPI app initialization & router loading
+├── routes/              # API endpoint handlers
+├── agents/              # AI-powered agent system
+├── workflows/           # Automation workflows
+├── database/            # Supabase client & utilities
+├── social_connectors/   # Social media platform integrations
+├── models.py           # Pydantic data models
+├── config.py           # Configuration management
+└── auth.py             # Authentication utilities
+```
+
+**Key Features:**
+- **Async Support** - High-performance async/await patterns
+- **Auto Documentation** - OpenAPI/Swagger docs at `/docs`
+- **Type Safety** - Pydantic models for request/response validation
+- **CORS Middleware** - Configured for frontend origins
+- **Health Checks** - `/health` and `/api/system-health` endpoints
+
+### AI Agent System
+
+The platform employs a sophisticated **multi-agent architecture** with specialized agents:
+
+**Agent Types:**
+```
+backend/agents/
+├── base_agent.py                    # Base agent class
+├── campaign_agent.py                # Campaign strategy & planning
+├── content_agent.py                 # Content generation
+├── email_automation_agent.py        # Email campaigns
+├── social_media_agent.py            # Social media management
+├── enhanced_social_media_agent.py   # Advanced social features
+├── analytics_agent.py               # Performance analytics
+├── lead_generation_agent.py         # Lead management
+├── internal_publishing_agent.py     # Content publishing
+├── proposal_generator.py            # Proposal generation
+├── mcp_agent.py                     # MCP protocol agent
+├── ai/                              # AI service modules
+├── content/                         # Content services
+├── email/                           # Email services
+├── leads/                           # Lead services
+├── seo/                             # SEO services
+└── social/                          # Social media services
+```
+
+**Agent Architecture:**
+- Inherits from `BaseAgentCore`
+- Managed by `AgentRegistry`
+- Status tracking with `AgentStatus` and `TaskStatus` enums
+- Centralized logging via `AgentLogger`
+- Utility functions in `AgentUtils`
+
 ### Supabase Infrastructure
 
 - **PostgreSQL Database** - Primary data store with JSONB support
 - **Row Level Security (RLS)** - Database-level authorization
-- **Edge Functions** - Serverless functions for business logic
 - **Real-time Subscriptions** - Live data synchronization
 - **Authentication** - JWT-based auth with multiple providers
+- **Storage** - File and media asset storage
 
 ### Database Design
 
@@ -90,6 +170,20 @@ The database follows a normalized design with strategic denormalization for perf
 
 ### API Architecture
 
+**FastAPI Routes:**
+```python
+# Main route modules
+routes/
+├── system_health.py     # Health check endpoints
+├── unified_agents.py    # Unified agent API
+├── email.py            # Email campaign endpoints
+├── workflows.py        # Workflow automation
+├── brand.py            # Brand management
+├── keyword_research.py # SEO keyword research
+└── research.py         # Research tools
+```
+
+**Frontend Client:**
 ```typescript
 // Supabase Client Configuration
 const supabase = createClient(url, key, {
@@ -100,15 +194,6 @@ const supabase = createClient(url, key, {
   }
 });
 ```
-
-### Edge Functions
-
-Located in `supabase/functions/`, these serverless functions handle:
-- AI content generation
-- Email sending
-- Third-party API integrations
-- Complex business logic
-- Scheduled tasks
 
 ## Security Architecture
 
@@ -190,16 +275,47 @@ Located in `supabase/functions/`, these serverless functions handle:
 
 ### Production Environment
 
-- **Vercel/Netlify** - Frontend hosting and CDN
-- **Supabase Cloud** - Backend infrastructure
+**Frontend:**
+- **Vercel/Netlify** - Static site hosting and CDN
+- **Vite Build** - Optimized production bundles
+- **Environment Variables** - Configured via hosting platform
+
+**Backend:**
+- **Render/Railway** - Python/FastAPI hosting
+- **Auto-scaling** - Dynamic resource allocation
+- **Health Monitoring** - Continuous uptime checks
+
+**Database & Services:**
+- **Supabase Cloud** - Managed PostgreSQL + Auth + Storage
 - **Custom Domains** - Professional domain configuration
 - **SSL/TLS** - End-to-end encryption
 
 ### CI/CD Pipeline
 
 ```yaml
-# Example workflow
-build → test → type-check → deploy
+# Frontend workflow
+build → type-check → lint → deploy to CDN
+
+# Backend workflow
+install deps → run tests → deploy to Render/Railway
+```
+
+### Environment Configuration
+
+**Frontend (.env):**
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_API_URL=https://your-backend.onrender.com
+```
+
+**Backend (Supabase Secrets/Environment):**
+```
+OPENAI_API_KEY=sk-...
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+SECRET_MASTER_KEY=your_encryption_key
+ENVIRONMENT=production
 ```
 
 ## Monitoring & Observability
