@@ -59,9 +59,10 @@ for module_path, router_name in essential_routers:
 # Try to load other routers with better error handling
 optional_routers = [
     ("routes.unified_agents", "router"),
+    ("routes.campaigns", "router"),
     ("routes.email", "router"),
     ("routes.workflows", "router"),
-    ("routes.brand", "router"), 
+    ("routes.brand", "router"),
     ("routes.keyword_research", "router"),
     ("routes.research", "router"),
 ]
@@ -85,6 +86,40 @@ for module_path, router_name in optional_routers:
         logger.error(f"❌ Failed to load optional router {module_path}: {str(e)}")
 
 logger.info(f"📋 Loaded {len(loaded_routers)} out of {len(essential_routers) + len(optional_routers)} routers")
+
+# ───────────────────────────── TASK SCHEDULER ───────────────────────── #
+
+task_scheduler = None
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on application startup"""
+    global task_scheduler
+    try:
+        from database import get_supabase
+        from config import agent_manager
+        from services.task_scheduler import initialize_task_scheduler
+
+        # Initialize task scheduler with agents
+        task_scheduler = initialize_task_scheduler(
+            supabase_client=get_supabase(),
+            email_agent=getattr(agent_manager, 'email_agent', None) if hasattr(agent_manager, 'agents_available') and agent_manager.agents_available else None,
+            social_agent=getattr(agent_manager, 'social_agent', None) if hasattr(agent_manager, 'agents_available') and agent_manager.agents_available else None,
+            content_agent=getattr(agent_manager, 'content_agent', None) if hasattr(agent_manager, 'agents_available') and agent_manager.agents_available else None
+        )
+        logger.info("✅ Task scheduler initialized successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize task scheduler: {e}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup services on application shutdown"""
+    try:
+        from services.task_scheduler import shutdown_task_scheduler
+        shutdown_task_scheduler()
+        logger.info("✅ Task scheduler shut down successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to shutdown task scheduler: {e}")
 
 # ───────────────────────────── ROOT ENDPOINTS ───────────────────────── #
 

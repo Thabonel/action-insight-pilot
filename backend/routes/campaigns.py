@@ -380,12 +380,17 @@ async def launch_campaign(campaign_id: str, token: str = Depends(verify_token)):
 
         logger.info(f"🚀 Launching campaign {campaign_id} for user: {user_id}")
 
-        # Initialize campaign executor with available agents
+        # Get task scheduler
+        from services.task_scheduler import get_task_scheduler
+        task_scheduler = get_task_scheduler()
+
+        # Initialize campaign executor with available agents and scheduler
         executor = CampaignExecutor(
             supabase_client=get_supabase(),
             email_agent=getattr(agent_manager, 'email_agent', None) if agent_manager.agents_available else None,
             social_agent=getattr(agent_manager, 'social_agent', None) if agent_manager.agents_available else None,
-            content_agent=getattr(agent_manager, 'content_agent', None) if agent_manager.agents_available else None
+            content_agent=getattr(agent_manager, 'content_agent', None) if agent_manager.agents_available else None,
+            task_scheduler=task_scheduler
         )
 
         # Execute campaign launch
@@ -412,19 +417,31 @@ async def launch_campaign(campaign_id: str, token: str = Depends(verify_token)):
 
 @router.post("/{campaign_id}/pause", response_model=APIResponse)
 async def pause_campaign(campaign_id: str, token: str = Depends(verify_token)):
-    """Pause an active campaign"""
+    """Pause an active campaign and its scheduled jobs"""
     try:
         user_data = get_current_user(token)
         user_id = user_data["id"]
 
         logger.info(f"⏸️ Pausing campaign {campaign_id} for user: {user_id}")
 
+        # Pause scheduled jobs if scheduler is available
+        from services.task_scheduler import get_task_scheduler
+        task_scheduler = get_task_scheduler()
+        jobs_paused = 0
+
+        if task_scheduler:
+            jobs_paused = task_scheduler.pause_campaign_jobs(campaign_id)
+            logger.info(f"⏸️ Paused {jobs_paused} scheduled jobs")
+
         executor = CampaignExecutor(supabase_client=get_supabase())
         result = await executor.pause_campaign(campaign_id, user_id)
 
         return APIResponse(
             success=result.success,
-            data=result.data if result.success else None,
+            data={
+                **(result.data or {}),
+                "jobs_paused": jobs_paused
+            } if result.success else None,
             error=result.message if not result.success else None
         )
 
@@ -434,19 +451,31 @@ async def pause_campaign(campaign_id: str, token: str = Depends(verify_token)):
 
 @router.post("/{campaign_id}/resume", response_model=APIResponse)
 async def resume_campaign(campaign_id: str, token: str = Depends(verify_token)):
-    """Resume a paused campaign"""
+    """Resume a paused campaign and its scheduled jobs"""
     try:
         user_data = get_current_user(token)
         user_id = user_data["id"]
 
         logger.info(f"▶️ Resuming campaign {campaign_id} for user: {user_id}")
 
+        # Resume scheduled jobs if scheduler is available
+        from services.task_scheduler import get_task_scheduler
+        task_scheduler = get_task_scheduler()
+        jobs_resumed = 0
+
+        if task_scheduler:
+            jobs_resumed = task_scheduler.resume_campaign_jobs(campaign_id)
+            logger.info(f"▶️ Resumed {jobs_resumed} scheduled jobs")
+
         executor = CampaignExecutor(supabase_client=get_supabase())
         result = await executor.resume_campaign(campaign_id, user_id)
 
         return APIResponse(
             success=result.success,
-            data=result.data if result.success else None,
+            data={
+                **(result.data or {}),
+                "jobs_resumed": jobs_resumed
+            } if result.success else None,
             error=result.message if not result.success else None
         )
 
@@ -456,19 +485,37 @@ async def resume_campaign(campaign_id: str, token: str = Depends(verify_token)):
 
 @router.post("/{campaign_id}/stop", response_model=APIResponse)
 async def stop_campaign(campaign_id: str, token: str = Depends(verify_token)):
-    """Stop and complete a campaign"""
+    """Stop and complete a campaign, canceling all scheduled jobs"""
     try:
         user_data = get_current_user(token)
         user_id = user_data["id"]
 
         logger.info(f"⏹️ Stopping campaign {campaign_id} for user: {user_id}")
 
+        # Cancel all scheduled jobs for this campaign
+        from services.task_scheduler import get_task_scheduler
+        task_scheduler = get_task_scheduler()
+        jobs_cancelled = 0
+
+        if task_scheduler:
+            # Get all jobs for this campaign
+            scheduled_jobs = task_scheduler.get_scheduled_jobs(campaign_id)
+
+            for job in scheduled_jobs:
+                if task_scheduler.cancel_job(job['id']):
+                    jobs_cancelled += 1
+
+            logger.info(f"🗑️ Cancelled {jobs_cancelled} scheduled jobs")
+
         executor = CampaignExecutor(supabase_client=get_supabase())
         result = await executor.stop_campaign(campaign_id, user_id)
 
         return APIResponse(
             success=result.success,
-            data=result.data if result.success else None,
+            data={
+                **(result.data or {}),
+                "jobs_cancelled": jobs_cancelled
+            } if result.success else None,
             error=result.message if not result.success else None
         )
 
