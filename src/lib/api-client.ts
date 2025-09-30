@@ -528,6 +528,155 @@ export class ApiClient {
     }
   }
 
+  // Campaign Control Methods
+  async launchCampaign(id: string): Promise<ApiResponse<any>> {
+    try {
+      const token = await this.getAuthToken();
+
+      const response = await fetch(`${this.renderBackendUrl}/api/campaigns/${id}/launch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || 'Launch failed',
+          message: result.error || 'Failed to launch campaign'
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+        message: result.message || 'Campaign launched successfully'
+      };
+    } catch (error) {
+      console.error('Error launching campaign:', error);
+      return {
+        success: false,
+        error: 'Unexpected error',
+        message: 'Failed to launch campaign'
+      };
+    }
+  }
+
+  async pauseCampaign(id: string): Promise<ApiResponse<any>> {
+    try {
+      const token = await this.getAuthToken();
+
+      const response = await fetch(`${this.renderBackendUrl}/api/campaigns/${id}/pause`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || 'Pause failed',
+          message: result.error || 'Failed to pause campaign'
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+        message: result.message || 'Campaign paused successfully'
+      };
+    } catch (error) {
+      console.error('Error pausing campaign:', error);
+      return {
+        success: false,
+        error: 'Unexpected error',
+        message: 'Failed to pause campaign'
+      };
+    }
+  }
+
+  async resumeCampaign(id: string): Promise<ApiResponse<any>> {
+    try {
+      const token = await this.getAuthToken();
+
+      const response = await fetch(`${this.renderBackendUrl}/api/campaigns/${id}/resume`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || 'Resume failed',
+          message: result.error || 'Failed to resume campaign'
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+        message: result.message || 'Campaign resumed successfully'
+      };
+    } catch (error) {
+      console.error('Error resuming campaign:', error);
+      return {
+        success: false,
+        error: 'Unexpected error',
+        message: 'Failed to resume campaign'
+      };
+    }
+  }
+
+  async stopCampaign(id: string): Promise<ApiResponse<any>> {
+    try {
+      const token = await this.getAuthToken();
+
+      const response = await fetch(`${this.renderBackendUrl}/api/campaigns/${id}/stop`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: result.error || 'Stop failed',
+          message: result.error || 'Failed to stop campaign'
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+        message: result.message || 'Campaign stopped successfully'
+      };
+    } catch (error) {
+      console.error('Error stopping campaign:', error);
+      return {
+        success: false,
+        error: 'Unexpected error',
+        message: 'Failed to stop campaign'
+      };
+    }
+  }
+
   async createCampaignFromAI(parsedCampaignData: any): Promise<ApiResponse<Campaign>> {
     try {
       const { data: { user } } = await supabase.auth.getUser();

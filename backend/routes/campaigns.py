@@ -8,6 +8,7 @@ from models import APIResponse
 from auth import verify_token, get_current_user
 from config import agent_manager
 from database import get_supabase
+from services.campaign_executor import CampaignExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -334,29 +335,143 @@ async def delete_campaign(campaign_id: str, token: str = Depends(verify_token)):
         # Extract user from token
         user_data = get_current_user(token)
         user_id = user_data["id"]
-        
+
         logger.info(f"🗑️ Deleting campaign {campaign_id} for user: {user_id}")
-        
+
         # Try database first
         try:
             supabase = get_supabase()
             # CRITICAL FIX: Filter by both campaign_id AND user_id
             result = supabase.table('active_campaigns').delete().eq('id', campaign_id).eq('created_by', user_id).execute()
-            
+
             if result.data:
                 logger.info(f"✅ Deleted campaign {campaign_id} from ..database for user {user_id}")
                 return APIResponse(success=True, data={"deleted": True, "id": campaign_id})
             else:
                 logger.info(f"❌ Campaign {campaign_id} not found for user {user_id}")
                 return APIResponse(success=False, error="Campaign not found or not authorized")
-                
+
         except Exception as db_error:
             logger.error(f"❌ Database delete failed: {db_error}")
             return APIResponse(success=False, error=f"Database error: {str(db_error)}")
-        
+
         # No fallback for delete - must succeed or fail
         return APIResponse(success=False, error="Campaign deletion failed")
-        
+
     except Exception as e:
         logger.error(f"❌ Error deleting campaign {campaign_id}: {e}")
+        return APIResponse(success=False, error=str(e))
+
+@router.post("/{campaign_id}/launch", response_model=APIResponse)
+async def launch_campaign(campaign_id: str, token: str = Depends(verify_token)):
+    """
+    Launch a campaign - executes across all configured channels
+
+    This endpoint orchestrates campaign execution by:
+    - Validating the campaign is ready to launch
+    - Coordinating email, social, and content agents
+    - Scheduling campaign activities
+    - Tracking execution status
+    """
+    try:
+        # Extract user from token
+        user_data = get_current_user(token)
+        user_id = user_data["id"]
+
+        logger.info(f"🚀 Launching campaign {campaign_id} for user: {user_id}")
+
+        # Initialize campaign executor with available agents
+        executor = CampaignExecutor(
+            supabase_client=get_supabase(),
+            email_agent=getattr(agent_manager, 'email_agent', None) if agent_manager.agents_available else None,
+            social_agent=getattr(agent_manager, 'social_agent', None) if agent_manager.agents_available else None,
+            content_agent=getattr(agent_manager, 'content_agent', None) if agent_manager.agents_available else None
+        )
+
+        # Execute campaign launch
+        result = await executor.launch_campaign(campaign_id, user_id)
+
+        if result.success:
+            logger.info(f"✅ Campaign {campaign_id} launched successfully: {result.message}")
+            return APIResponse(
+                success=True,
+                data=result.data,
+                error=None
+            )
+        else:
+            logger.error(f"❌ Campaign {campaign_id} launch failed: {result.message}")
+            return APIResponse(
+                success=False,
+                data=None,
+                error=result.message
+            )
+
+    except Exception as e:
+        logger.error(f"❌ Error launching campaign {campaign_id}: {e}")
+        return APIResponse(success=False, error=f"Launch error: {str(e)}")
+
+@router.post("/{campaign_id}/pause", response_model=APIResponse)
+async def pause_campaign(campaign_id: str, token: str = Depends(verify_token)):
+    """Pause an active campaign"""
+    try:
+        user_data = get_current_user(token)
+        user_id = user_data["id"]
+
+        logger.info(f"⏸️ Pausing campaign {campaign_id} for user: {user_id}")
+
+        executor = CampaignExecutor(supabase_client=get_supabase())
+        result = await executor.pause_campaign(campaign_id, user_id)
+
+        return APIResponse(
+            success=result.success,
+            data=result.data if result.success else None,
+            error=result.message if not result.success else None
+        )
+
+    except Exception as e:
+        logger.error(f"❌ Error pausing campaign {campaign_id}: {e}")
+        return APIResponse(success=False, error=str(e))
+
+@router.post("/{campaign_id}/resume", response_model=APIResponse)
+async def resume_campaign(campaign_id: str, token: str = Depends(verify_token)):
+    """Resume a paused campaign"""
+    try:
+        user_data = get_current_user(token)
+        user_id = user_data["id"]
+
+        logger.info(f"▶️ Resuming campaign {campaign_id} for user: {user_id}")
+
+        executor = CampaignExecutor(supabase_client=get_supabase())
+        result = await executor.resume_campaign(campaign_id, user_id)
+
+        return APIResponse(
+            success=result.success,
+            data=result.data if result.success else None,
+            error=result.message if not result.success else None
+        )
+
+    except Exception as e:
+        logger.error(f"❌ Error resuming campaign {campaign_id}: {e}")
+        return APIResponse(success=False, error=str(e))
+
+@router.post("/{campaign_id}/stop", response_model=APIResponse)
+async def stop_campaign(campaign_id: str, token: str = Depends(verify_token)):
+    """Stop and complete a campaign"""
+    try:
+        user_data = get_current_user(token)
+        user_id = user_data["id"]
+
+        logger.info(f"⏹️ Stopping campaign {campaign_id} for user: {user_id}")
+
+        executor = CampaignExecutor(supabase_client=get_supabase())
+        result = await executor.stop_campaign(campaign_id, user_id)
+
+        return APIResponse(
+            success=result.success,
+            data=result.data if result.success else None,
+            error=result.message if not result.success else None
+        )
+
+    except Exception as e:
+        logger.error(f"❌ Error stopping campaign {campaign_id}: {e}")
         return APIResponse(success=False, error=str(e))
