@@ -3,6 +3,8 @@ import logging
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 
 # Configure logging
@@ -60,6 +62,7 @@ for module_path, router_name in essential_routers:
 optional_routers = [
     ("routes.unified_agents", "router"),
     ("routes.campaigns", "router"),
+    ("routes.lead_capture", "router"),
     ("routes.email", "router"),
     ("routes.workflows", "router"),
     ("routes.brand", "router"),
@@ -86,6 +89,26 @@ for module_path, router_name in optional_routers:
         logger.error(f"❌ Failed to load optional router {module_path}: {str(e)}")
 
 logger.info(f"📋 Loaded {len(loaded_routers)} out of {len(essential_routers) + len(optional_routers)} routers")
+
+# ───────────────────────────── STATIC FILES & FORM ROUTES ───────────────────────── #
+
+# Mount static files for form widget
+static_path = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_path):
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
+    logger.info("✅ Static files mounted at /static")
+else:
+    logger.warning("⚠️ Static directory not found")
+
+# Serve standalone form page for iframe embedding
+@app.get("/form/{form_id}")
+async def serve_form(form_id: str):
+    """Serve standalone form page for iframe embedding"""
+    form_path = os.path.join(static_path, "form.html")
+    if os.path.exists(form_path):
+        return FileResponse(form_path)
+    else:
+        return {"error": "Form not found"}
 
 # ───────────────────────────── TASK SCHEDULER ───────────────────────── #
 
