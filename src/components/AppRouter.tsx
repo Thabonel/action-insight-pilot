@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowRight, BarChart3, Users, Target, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import ConversationalDashboard from '@/pages/ConversationalDashboard'
+import ActionInsightQuickStart from '@/components/ActionInsightQuickStart'
 import ViralVideoMarketing from '@/pages/ViralVideoMarketing'
 import CampaignBriefGenerator from '@/components/CampaignBriefGenerator'
 import AICampaignCopilotPage from '@/pages/AICampaignCopilotPage'
@@ -34,6 +35,7 @@ const AppRouter: React.FC = () => {
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="conversational-dashboard" replace />} />
         <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
+        <Route path="getting-started" element={<ActionInsightQuickStart />} />
         <Route path="campaigns" element={<Campaigns />} />
         <Route path="campaign-management" element={<CampaignManagement />} />
         <Route path="campaigns/ai-generator" element={<CampaignBriefGenerator />} />

@@ -44,6 +44,26 @@ export const OnboardingOverlay: React.FC = () => {
           left = rect.right + 20;
           break;
       }
+
+      // Ensure overlay stays within viewport bounds
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const overlayWidth = 320; // Card width (w-80 = 320px)
+      const overlayHeight = 300; // Approximate height
+
+      // Adjust horizontal position
+      if (left + overlayWidth / 2 > viewportWidth) {
+        left = viewportWidth - overlayWidth / 2 - 20;
+      } else if (left - overlayWidth / 2 < 0) {
+        left = overlayWidth / 2 + 20;
+      }
+
+      // Adjust vertical position
+      if (top + overlayHeight > viewportHeight) {
+        top = viewportHeight - overlayHeight - 20;
+      } else if (top < 0) {
+        top = 20;
+      }
       
       setOverlayPosition({ top, left });
       
@@ -53,6 +73,10 @@ export const OnboardingOverlay: React.FC = () => {
       target.style.border = '2px solid #3B82F6';
       target.style.borderRadius = '8px';
       target.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+    } else {
+      // If target element not found, skip onboarding automatically
+      console.warn(`Onboarding target not found: ${steps[currentStep].target}`);
+      skipOnboarding();
     }
 
     return () => {
@@ -64,7 +88,7 @@ export const OnboardingOverlay: React.FC = () => {
         target.style.backgroundColor = '';
       }
     };
-  }, [isActive, currentStep, steps]);
+  }, [isActive, currentStep, steps, skipOnboarding]);
 
   if (!isActive || !steps[currentStep]) return null;
 
