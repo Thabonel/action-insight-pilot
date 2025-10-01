@@ -9,29 +9,10 @@ import { Palette, Target, Zap, TrendingUp } from 'lucide-react';
 const CreativeAnalytics: React.FC = () => {
   const [activeView, setActiveView] = useState<'elements' | 'themes' | 'performance'>('elements');
 
-  // Mock data for creative elements analysis
-  const [creativeElements] = useState([
-    { element: 'Call-to-Action Buttons', usage: 85, performance: 92, color: '#3B82F6' },
-    { element: 'Video Content', usage: 78, performance: 88, color: '#10B981' },
-    { element: 'User Testimonials', usage: 65, performance: 94, color: '#8B5CF6' },
-    { element: 'Product Demos', usage: 72, performance: 86, color: '#F59E0B' },
-    { element: 'Before/After Images', usage: 45, performance: 90, color: '#EF4444' }
-  ]);
-
-  const [themeData] = useState([
-    { name: 'Professional', value: 35, color: '#3B82F6' },
-    { name: 'Casual', value: 25, color: '#10B981' },
-    { name: 'Urgency', value: 20, color: '#EF4444' },
-    { name: 'Educational', value: 15, color: '#8B5CF6' },
-    { name: 'Emotional', value: 5, color: '#F59E0B' }
-  ]);
-
-  const [performanceData] = useState([
-    { metric: 'Click-through Rate', competitor: 3.2, industry: 2.8, yours: 3.8 },
-    { metric: 'Engagement Rate', competitor: 4.1, industry: 3.5, yours: 4.6 },
-    { metric: 'Conversion Rate', competitor: 2.7, industry: 2.3, yours: 3.1 },
-    { metric: 'Cost per Click', competitor: 1.85, industry: 2.10, yours: 1.60 }
-  ]);
+  // Creative analytics data will come from database
+  const [creativeElements] = useState<any[]>([]);
+  const [themeData] = useState<any[]>([]);
+  const [performanceData] = useState<any[]>([]);
 
   const getPerformanceColor = (value: number, baseline: number) => {
     if (value > baseline * 1.1) return 'text-green-600';
