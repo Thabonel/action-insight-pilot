@@ -1,9 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowRight, BarChart3, Users, Target, Sparkles } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import ProtectedRoute from '@/components/ProtectedRoute'
 import ConversationalDashboard from '@/pages/ConversationalDashboard'
 import ActionInsightQuickStart from '@/components/ActionInsightQuickStart'
 import ViralVideoMarketing from '@/pages/ViralVideoMarketing'
@@ -23,16 +20,12 @@ import UserManual from '@/pages/UserManual'
 import ConnectPlatforms from '@/pages/ConnectPlatforms'
 import LandingPageBuilder from '@/pages/LandingPageBuilder'
 import { KeywordResearch } from '@/pages/KeywordResearch'
-import { useAuth } from '@/contexts/AuthContext'
 import KnowledgeManagement from '@/components/knowledge/KnowledgeManagement'
 
 const AppRouter: React.FC = () => {
-  const { user } = useAuth()
-
-
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Navigate to="conversational-dashboard" replace />} />
         <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
         <Route path="getting-started" element={<ActionInsightQuickStart />} />
