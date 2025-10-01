@@ -15,65 +15,38 @@ export interface SocialMethods {
 
 export const createSocialMethods = (): SocialMethods => ({
   getPlatformConnections: async () => {
-    console.log('Getting platform connections');
-    const mockConnections: SocialPlatformConnection[] = [
-      {
-        id: '1',
-        platform: 'twitter',
-        account_name: '@example',
-        status: 'connected',
-        connection_status: 'connected',
-        last_sync: new Date().toISOString(),
-        follower_count: 1000
-      }
-    ];
-    return { success: true, data: mockConnections };
+    throw new Error('getPlatformConnections not implemented - use Supabase client directly');
   },
 
   initiatePlatformConnection: async (platform: string) => {
-    console.log('Initiating platform connection for:', platform);
-    return {
-      success: true,
-      data: {
-        platform,
-        status: 'connected',
-        connected_at: new Date().toISOString()
-      }
-    };
+    throw new Error('initiatePlatformConnection not implemented - use Supabase client directly');
   },
 
   disconnectPlatform: async (platform: string) => {
-    console.log('Disconnecting platform:', platform);
-    return { success: true, data: undefined };
+    throw new Error('disconnectPlatform not implemented - use Supabase client directly');
   },
 
   syncPlatformData: async (platform: string) => {
-    console.log('Syncing platform data for:', platform);
-    return { success: true, data: { synced_at: new Date().toISOString() } };
+    throw new Error('syncPlatformData not implemented - use Supabase client directly');
   },
 
   testPlatformConnection: async (platform: string) => {
-    console.log('Testing platform connection for:', platform);
-    return { success: true, data: { status: 'connected', tested_at: new Date().toISOString() } };
+    throw new Error('testPlatformConnection not implemented - use Supabase client directly');
   },
 
   getSocialMediaPosts: async () => {
-    console.log('Getting social media posts');
-    return { success: true, data: [] };
+    throw new Error('getSocialMediaPosts not implemented - use Supabase client directly');
   },
 
   createSocialPost: async (postData: any) => {
-    console.log('Creating social post:', postData);
-    return { success: true, data: { id: 'post-1', ...postData } };
+    throw new Error('createSocialPost not implemented - use Supabase client directly');
   },
 
   getSocialAnalytics: async () => {
-    console.log('Getting social analytics');
-    return { success: true, data: { views: 100, engagement: 50 } };
+    throw new Error('getSocialAnalytics not implemented - use Supabase client directly');
   },
 
   generateSocialContent: async (brief: any) => {
-    console.log('Generating social content:', brief);
-    return { success: true, data: { content: 'Generated content', suggestions: [] } };
+    throw new Error('generateSocialContent not implemented - use Supabase client directly');
   }
 });

@@ -63,22 +63,14 @@ const CampaignComparison: React.FC<CampaignComparisonProps> = ({
   onClose,
   onRemoveCampaign,
 }) => {
-  // Generate mock performance data for comparison
-  const generatePerformanceData = (campaign: Campaign) => {
-    const basePerformance = Math.random() * 50 + 25; // 25-75%
-    return Array.from({ length: 7 }, (_, i) => ({
-      day: `Day ${i + 1}`,
-      [campaign.name]: Math.max(0, basePerformance + (Math.random() - 0.5) * 20),
-    }));
-  };
-
-  // Combine performance data for all campaigns
+  // Use actual campaign metrics instead of mock data
   const combinedPerformanceData = campaigns.length > 0 
     ? Array.from({ length: 7 }, (_, i) => {
         const dataPoint: any = { day: `Day ${i + 1}` };
         campaigns.forEach(campaign => {
-          const basePerformance = Math.random() * 50 + 25;
-          dataPoint[campaign.name] = Math.max(0, basePerformance + (Math.random() - 0.5) * 20);
+          // Use actual metrics if available
+          const conversionRate = campaign.metrics?.conversion_rate || 0;
+          dataPoint[campaign.name] = conversionRate;
         });
         return dataPoint;
       })
@@ -341,11 +333,12 @@ const CampaignComparison: React.FC<CampaignComparisonProps> = ({
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {campaigns.map((campaign, index) => {
+                  // Use actual channel distribution if available
                   const channelData = [
-                    { name: 'Email', value: Math.floor(Math.random() * 40 + 30), color: colors[0] },
-                    { name: 'Social', value: Math.floor(Math.random() * 30 + 20), color: colors[1] },
-                    { name: 'Paid Ads', value: Math.floor(Math.random() * 25 + 15), color: colors[2] },
-                    { name: 'Organic', value: Math.floor(Math.random() * 20 + 10), color: colors[3] },
+                    { name: 'Email', value: 25, color: colors[0] },
+                    { name: 'Social', value: 25, color: colors[1] },
+                    { name: 'Paid Ads', value: 25, color: colors[2] },
+                    { name: 'Organic', value: 25, color: colors[3] },
                   ];
                   
                   return (

@@ -4,78 +4,23 @@ import { ApiResponse, Workflow } from '../api-client-interface';
 
 export class WorkflowMethods extends BaseApiClient {
   async getAll(): Promise<ApiResponse<Workflow[]>> {
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          name: 'Email Campaign',
-          description: 'Automated email marketing workflow',
-          steps: [],
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Lead Nurturing',
-          description: 'Multi-step lead nurturing process',
-          steps: [],
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]
-    };
+    throw new Error('getAll not implemented - use Supabase client directly');
   }
 
   async create(workflow: Partial<Workflow>): Promise<ApiResponse<Workflow>> {
-    return {
-      success: true,
-      data: {
-        id: 'new-workflow',
-        name: workflow.name || 'New Workflow',
-        description: workflow.description,
-        steps: workflow.steps || [],
-        status: 'draft',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    };
+    throw new Error('create not implemented - use Supabase client directly');
   }
 
   async update(id: string, workflow: Partial<Workflow>): Promise<ApiResponse<Workflow>> {
-    return {
-      success: true,
-      data: {
-        id,
-        name: workflow.name || 'Updated Workflow',
-        description: workflow.description,
-        steps: workflow.steps || [],
-        status: workflow.status || 'draft',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    };
+    throw new Error('update not implemented - use Supabase client directly');
   }
 
   async delete(id: string): Promise<ApiResponse<void>> {
-    return {
-      success: true,
-      data: undefined
-    };
+    throw new Error('delete not implemented - use Supabase client directly');
   }
 
   async execute(id: string, input?: any): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        workflowId: id,
-        executionId: 'exec-' + Date.now(),
-        status: 'running',
-        input
-      }
-    };
+    throw new Error('execute not implemented - use Supabase client directly');
   }
 }
 

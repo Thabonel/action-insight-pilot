@@ -26,51 +26,8 @@ const CompetitorTracker: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
   
-  // Mock competitor ads data
-  const [competitorAds] = useState<CompetitorAd[]>([
-    {
-      id: '1',
-      competitorName: 'TechCorp',
-      platform: 'Facebook',
-      adType: 'Video',
-      headline: 'Revolutionary AI Solution',
-      copy: 'Transform your business with cutting-edge AI technology...',
-      performance: {
-        estimatedReach: 50000,
-        engagement: 1250,
-        runDuration: '7 days'
-      },
-      capturedAt: '2024-01-15'
-    },
-    {
-      id: '2',
-      competitorName: 'InnovateLab',
-      platform: 'LinkedIn',
-      adType: 'Carousel',
-      headline: 'B2B Growth Strategies',
-      copy: 'Unlock enterprise-level growth with our proven methods...',
-      performance: {
-        estimatedReach: 25000,
-        engagement: 890,
-        runDuration: '14 days'
-      },
-      capturedAt: '2024-01-14'
-    },
-    {
-      id: '3',
-      competitorName: 'MarketLeader',
-      platform: 'Google',
-      adType: 'Search',
-      headline: 'Best Marketing Platform 2024',
-      copy: 'Join thousands of businesses already scaling with us...',
-      performance: {
-        estimatedReach: 75000,
-        engagement: 2100,
-        runDuration: '21 days'
-      },
-      capturedAt: '2024-01-13'
-    }
-  ]);
+  // Competitor ads will come from database
+  const [competitorAds] = useState<CompetitorAd[]>([]);
 
   const platforms = ['all', 'Facebook', 'LinkedIn', 'Google', 'TikTok', 'YouTube'];
 
@@ -181,15 +138,15 @@ const CompetitorTracker: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
             <div>
               <p className="text-purple-600">Tracked Competitors</p>
-              <p className="font-bold text-purple-900">12</p>
+              <p className="font-bold text-purple-900">{competitorAds.length}</p>
             </div>
             <div>
               <p className="text-purple-600">Ads Captured</p>
-              <p className="font-bold text-purple-900">1,247</p>
+              <p className="font-bold text-purple-900">{competitorAds.length}</p>
             </div>
             <div>
               <p className="text-purple-600">New This Week</p>
-              <p className="font-bold text-purple-900">23</p>
+              <p className="font-bold text-purple-900">0</p>
             </div>
           </div>
         </div>

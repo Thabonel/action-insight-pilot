@@ -4,123 +4,42 @@ import { ApiResponse, IntegrationConnection, Webhook } from '../api-client-inter
 
 export class IntegrationMethods extends BaseApiClient {
   async getConnections(): Promise<ApiResponse<IntegrationConnection[]>> {
-    // Mock implementation
-    return {
-      success: true,
-      data: [
-        {
-          id: '1',
-          name: 'WordPress',
-          service_name: 'wordpress',
-          type: 'blog',
-          status: 'connected',
-          connection_status: 'connected',
-          last_sync_at: new Date().toISOString(),
-          config: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          name: 'Mailchimp',
-          service_name: 'mailchimp',
-          type: 'email',
-          status: 'connected',
-          connection_status: 'connected',
-          last_sync_at: new Date().toISOString(),
-          config: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]
-    };
+    throw new Error('getConnections not implemented - use Supabase client directly');
   }
 
   async createConnection(data: any): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        id: 'new-connection',
-        ...data,
-        status: 'connected',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    };
+    throw new Error('createConnection not implemented - use Supabase client directly');
   }
 
   async deleteConnection(id: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { id, deleted: true }
-    };
+    throw new Error('deleteConnection not implemented - use Supabase client directly');
   }
 
   async getWebhooks(): Promise<ApiResponse<Webhook[]>> {
-    return {
-      success: true,
-      data: []
-    };
+    throw new Error('getWebhooks not implemented - use Supabase client directly');
   }
 
   async createWebhook(data: Partial<Webhook>): Promise<ApiResponse<Webhook>> {
-    return {
-      success: true,
-      data: {
-        id: 'webhook-1',
-        name: data.name || 'New Webhook',
-        url: data.url || '',
-        events: data.events || [],
-        active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    };
+    throw new Error('createWebhook not implemented - use Supabase client directly');
   }
 
   async deleteWebhook(id: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { id, deleted: true }
-    };
+    throw new Error('deleteWebhook not implemented - use Supabase client directly');
   }
 
   async testWebhook(id: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: { id, status: 'success', response_time: 150 }
-    };
+    throw new Error('testWebhook not implemented - use Supabase client directly');
   }
 
   async connectService(service: string, apiKey: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        service,
-        status: 'connected',
-        connected_at: new Date().toISOString()
-      }
-    };
+    throw new Error('connectService not implemented - use Supabase client directly');
   }
 
   async syncService(service: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        service,
-        synced_at: new Date().toISOString(),
-        records_synced: Math.floor(Math.random() * 100)
-      }
-    };
+    throw new Error('syncService not implemented - use Supabase client directly');
   }
 
   async disconnectService(service: string): Promise<ApiResponse<any>> {
-    return {
-      success: true,
-      data: {
-        service,
-        disconnected_at: new Date().toISOString()
-      }
-    };
+    throw new Error('disconnectService not implemented - use Supabase client directly');
   }
 }
