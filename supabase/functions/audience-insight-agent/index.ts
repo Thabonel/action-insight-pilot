@@ -139,8 +139,32 @@ Format as JSON:
       }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+    }
+
     const data = await response.json();
-    const audienceInsights = JSON.parse(data.choices[0].message.content);
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Unexpected OpenAI response structure:', JSON.stringify(data));
+      throw new Error('Invalid response structure from OpenAI');
+    }
+
+    const content = data.choices[0].message.content;
+    if (!content) {
+      console.error('Empty content from OpenAI');
+      throw new Error('Empty response from OpenAI');
+    }
+
+    let audienceInsights;
+    try {
+      audienceInsights = JSON.parse(content);
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response as JSON:', content);
+      throw new Error(`Failed to parse AI response: ${parseError.message}`);
+    }
 
     // Store learning data for future improvements
     if (patterns && patterns.length > 0) {
