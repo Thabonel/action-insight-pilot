@@ -1,11 +1,20 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const ChannelStrategyRequestSchema = z.object({
+  brief: z.record(z.unknown()),
+  personas: z.array(z.record(z.unknown())).optional(),
+  userId: z.string().uuid(),
+  sessionId: z.string().uuid()
+});
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -17,8 +26,22 @@ serve(async (req) => {
   }
 
   try {
+    // Validate request body
+    const requestBody = await req.json();
+    const validationResult = ChannelStrategyRequestSchema.safeParse(requestBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request parameters' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { brief, personas, userId, sessionId } = validationResult.data;
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
-    const { brief, personas, userId, sessionId } = await req.json();
 
     console.log('Generating channel strategy for:', brief);
 
@@ -167,8 +190,13 @@ Format as JSON:
     });
 
   } catch (error) {
+    // Log detailed error server-side only
     console.error('Error in channel-strategy-agent:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    
+    // Return generic error to client
+    return new Response(JSON.stringify({ 
+      error: 'An error occurred generating channel strategy' 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

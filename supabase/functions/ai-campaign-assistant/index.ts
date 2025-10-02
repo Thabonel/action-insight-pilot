@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -8,6 +9,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation schemas
+const AssistantRequestSchema = z.object({
+  type: z.enum(['key-messages', 'target-personas']),
+  context: z.object({
+    campaignName: z.string().optional(),
+    campaignType: z.string().optional(),
+    targetAudience: z.string().optional(),
+    primaryObjective: z.string().optional(),
+    valueProposition: z.string().optional(),
+    demographics: z.record(z.unknown()).optional(),
+    industry: z.string().optional()
+  })
+});
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,7 +30,22 @@ serve(async (req) => {
   }
 
   try {
-    const { type, context } = await req.json();
+    // Validate request body
+    const requestBody = await req.json();
+    const validationResult = AssistantRequestSchema.safeParse(requestBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Invalid request parameters' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { type, context } = validationResult.data;
 
     let systemPrompt = '';
     let userPrompt = '';
@@ -91,10 +121,13 @@ Create detailed buyer personas. Return them as a JSON array of objects with the 
     }
 
   } catch (error) {
+    // Log detailed error server-side only
     console.error('Error in ai-campaign-assistant function:', error);
+    
+    // Return generic error to client
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: 'An error occurred generating campaign content' 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
