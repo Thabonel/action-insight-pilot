@@ -131,25 +131,37 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
 
       // Step 1: Generate Audience Insights
       setGeneratingStep('Analyzing your audience...');
-      const { data: audienceData } = await supabase.functions.invoke('audience-insight-agent', {
+      const { data: audienceData, error: audienceError } = await supabase.functions.invoke('audience-insight-agent', {
         body: { brief, userId: user.id, sessionId: session.id }
       });
 
+      if (audienceError || !audienceData || audienceData.error) {
+        throw new Error(audienceData?.error || audienceError?.message || 'Failed to generate audience insights');
+      }
+
       // Step 2: Generate Channel Strategy
       setGeneratingStep('Optimizing channel mix...');
-      const { data: channelData } = await supabase.functions.invoke('channel-strategy-agent', {
+      const { data: channelData, error: channelError } = await supabase.functions.invoke('channel-strategy-agent', {
         body: { brief, personas: audienceData.personas, userId: user.id, sessionId: session.id }
       });
 
+      if (channelError || !channelData || channelData.error) {
+        throw new Error(channelData?.error || channelError?.message || 'Failed to generate channel strategy');
+      }
+
       // Step 3: Generate Messaging Strategy  
       setGeneratingStep('Crafting messaging pillars...');
-      const { data: messagingData } = await supabase.functions.invoke('messaging-agent', {
+      const { data: messagingData, error: messagingError } = await supabase.functions.invoke('messaging-agent', {
         body: { brief, personas: audienceData.personas, channelStrategy: channelData, userId: user.id, sessionId: session.id }
       });
 
+      if (messagingError || !messagingData || messagingData.error) {
+        throw new Error(messagingData?.error || messagingError?.message || 'Failed to generate messaging strategy');
+      }
+
       // Step 4: Generate Content Calendar
       setGeneratingStep('Creating content calendar...');
-      const { data: contentData } = await supabase.functions.invoke('content-calendar-agent', {
+      const { data: contentData, error: contentError } = await supabase.functions.invoke('content-calendar-agent', {
         body: { 
           brief, 
           personas: audienceData.personas, 
@@ -159,6 +171,10 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
           sessionId: session.id 
         }
       });
+
+      if (contentError || !contentData || contentData.error) {
+        throw new Error(contentData?.error || contentError?.message || 'Failed to generate content calendar');
+      }
 
       // Transform the AI responses to match our interface
       const aiGeneration: AIGeneration = {
