@@ -256,8 +256,16 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Social post error:', error)
+    // Return generic error to client, log full error server-side
+    const publicError = error.message?.includes('authorization') || error.message?.includes('token')
+      ? 'Authentication required'
+      : error.message?.includes('platforms')
+      ? 'Invalid platform configuration'
+      : error.message?.includes('content')
+      ? 'Invalid content provided'
+      : 'Failed to post to social media';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: publicError }),
       { 
         status: 400,
         headers: { 
