@@ -322,8 +322,14 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in GTM planner:', error);
+    // Return generic error to client, log full error server-side
+    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI') || error.message?.includes('PERPLEXITY')
+      ? 'Configuration error - please contact support'
+      : error.message?.includes('Missing required field')
+      ? error.message
+      : 'An error occurred generating GTM strategy';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: publicError }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

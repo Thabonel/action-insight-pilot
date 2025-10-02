@@ -84,7 +84,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in ai-feedback-loop:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    // Return generic error to client, log full error server-side
+    const publicError = 'Failed to process feedback';
+    return new Response(JSON.stringify({ error: publicError }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

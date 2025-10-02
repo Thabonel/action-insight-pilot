@@ -47,8 +47,12 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('chat-memory error:', error);
+    // Return generic error to client, log full error server-side
+    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+      ? 'Configuration error - please contact support'
+      : 'An error occurred accessing conversation history';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: publicError }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }

@@ -88,7 +88,13 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in full-content-generator:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    // Return generic error to client, log full error server-side
+    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+      ? 'Configuration error - please contact support'
+      : error.message?.includes('not found')
+      ? 'Campaign not found'
+      : 'An error occurred generating content';
+    return new Response(JSON.stringify({ error: publicError }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

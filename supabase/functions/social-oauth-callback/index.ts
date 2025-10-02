@@ -259,16 +259,24 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('OAuth callback error:', error)
+    // Return generic error to user, log full error server-side
+    const publicError = error.message?.includes('credentials')
+      ? 'Platform configuration error'
+      : error.message?.includes('state')
+      ? 'Invalid or expired authorization'
+      : error.message?.includes('Token exchange')
+      ? 'Authorization failed'
+      : 'Failed to complete authorization';
     return new Response(`
       <html>
         <body>
           <h1>OAuth Error</h1>
-          <p>Failed to complete authorization: ${error.message}</p>
+          <p>${publicError}</p>
           <script>
             if (window.opener) {
               window.opener.postMessage({
                 type: 'oauth_error',
-                error: '${error.message}'
+                error: '${publicError}'
               }, '*');
             }
             setTimeout(() => window.close(), 3000);
