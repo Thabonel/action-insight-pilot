@@ -16,6 +16,7 @@ const AudienceInsightRequestSchema = z.object({
 });
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -123,20 +124,30 @@ Format as JSON:
   "reasoning": "Why these personas were generated..."
 }`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Use Lovable AI Gateway (more reliable) or fallback to OpenAI
+    const uselovableAI = lovableApiKey && lovableApiKey.length > 0;
+    const apiUrl = uselovableAI 
+      ? 'https://ai.gateway.lovable.dev/v1/chat/completions'
+      : 'https://api.openai.com/v1/chat/completions';
+    const apiKey = uselovableAI ? lovableApiKey : openAIApiKey;
+    const model = uselovableAI ? 'google/gemini-2.5-flash' : 'gpt-5-2025-08-07';
+
+    console.log(`Using ${uselovableAI ? 'Lovable AI' : 'OpenAI'} with model: ${model}`);
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: model,
         messages: [
           { role: 'system', content: 'You are an expert marketing audience analyst. Always respond with valid JSON.' },
           { role: 'user', content: prompt }
         ],
         max_completion_tokens: 3000,
-        response_format: { type: "json_object" }
+        ...(uselovableAI ? {} : { response_format: { type: "json_object" } })
       }),
     });
 
@@ -147,6 +158,7 @@ Format as JSON:
     }
 
     const data = await response.json();
+    console.log('OpenAI response:', JSON.stringify(data, null, 2));
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error('Unexpected OpenAI response structure:', JSON.stringify(data));
@@ -154,16 +166,19 @@ Format as JSON:
     }
 
     const content = data.choices[0].message.content;
-    if (!content) {
-      console.error('Empty content from OpenAI');
+    if (!content || content.trim() === '') {
+      console.error('Empty content from OpenAI. Full response:', JSON.stringify(data));
       throw new Error('Empty response from OpenAI');
     }
+
+    console.log('Received content from OpenAI, length:', content.length);
 
     let audienceInsights;
     try {
       audienceInsights = JSON.parse(content);
+      console.log('Successfully parsed JSON response');
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response as JSON:', content);
+      console.error('Failed to parse OpenAI response as JSON. Content:', content);
       throw new Error(`Failed to parse AI response: ${parseError.message}`);
     }
 
