@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -3199,6 +3199,10 @@ export type Database = {
       seed_demo_data: {
         Args: Record<PropertyKey, never> | { demo_user_id?: string }
         Returns: undefined
+      }
+      user_has_company_role: {
+        Args: { _company_id: string; _roles: string[]; _user_id: string }
+        Returns: boolean
       }
       user_has_role: {
         Args: { check_role: string }

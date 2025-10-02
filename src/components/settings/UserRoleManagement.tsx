@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,29 +15,74 @@ import {
   Crown,
   Settings
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface UserRole {
+  id: string;
+  user_id: string;
+  role: string;
+  company_id: string;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+    avatar_url: string | null;
+  };
+}
 
 const UserRoleManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
+  const [users, setUsers] = useState<UserRole[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const roles = [
     { id: 'admin', name: 'Administrator', color: 'red', permissions: ['Full System Access', 'User Management', 'Billing', 'Settings'] },
-    { id: 'manager', name: 'Manager', color: 'blue', permissions: ['Campaign Management', 'Team Oversight', 'Analytics', 'Content Creation'] },
-    { id: 'user', name: 'User', color: 'green', permissions: ['Campaign Creation', 'Content Creation', 'Basic Analytics'] },
+    { id: 'editor', name: 'Editor', color: 'blue', permissions: ['Campaign Management', 'Team Oversight', 'Analytics', 'Content Creation'] },
     { id: 'viewer', name: 'Viewer', color: 'gray', permissions: ['Read-only Access', 'Basic Reports'] }
   ];
 
-  const users = [
-    { id: 1, name: 'Sarah Chen', email: 'sarah.chen@company.com', role: 'admin', status: 'active', lastActive: '2 hours ago', avatar: 'SC' },
-    { id: 2, name: 'Marcus Rodriguez', email: 'marcus.r@company.com', role: 'manager', status: 'active', lastActive: '1 day ago', avatar: 'MR' },
-    { id: 3, name: 'Emma Thompson', email: 'emma.t@company.com', role: 'user', status: 'active', lastActive: '3 hours ago', avatar: 'ET' },
-    { id: 4, name: 'David Park', email: 'david.park@company.com', role: 'user', status: 'pending', lastActive: 'Never', avatar: 'DP' },
-    { id: 5, name: 'Lisa Wang', email: 'lisa.wang@company.com', role: 'viewer', status: 'inactive', lastActive: '2 weeks ago', avatar: 'LW' }
-  ];
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select(`
+          id,
+          user_id,
+          role,
+          company_id,
+          profiles (
+            first_name,
+            last_name,
+            avatar_url
+          )
+        `);
+
+      if (error) throw error;
+
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load users. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const profile = user.profiles;
+    const fullName = profile ? `${profile.first_name} ${profile.last_name}` : '';
+    const matchesSearch = fullName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
     return matchesSearch && matchesRole;
   });
@@ -47,14 +92,20 @@ const UserRoleManagement: React.FC = () => {
     return role?.color || 'gray';
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'green';
-      case 'pending': return 'yellow';
-      case 'inactive': return 'gray';
-      default: return 'gray';
-    }
+  const getInitials = (firstName?: string, lastName?: string) => {
+    if (!firstName && !lastName) return '??';
+    return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-600">Loading users...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -106,7 +157,7 @@ const UserRoleManagement: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {roles.map(role => (
               <div key={role.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
@@ -139,62 +190,63 @@ const UserRoleManagement: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4">User</th>
-                  <th className="text-left py-3 px-4">Role</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-left py-3 px-4">Last Active</th>
-                  <th className="text-left py-3 px-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map(user => (
-                  <tr key={user.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                          {user.avatar}
-                        </div>
-                        <div>
-                          <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-gray-600">{user.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className={`text-${getRoleColor(user.role)}-600 border-${getRoleColor(user.role)}-300`}>
-                        {user.role}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className={`text-${getStatusColor(user.status)}-600 border-${getStatusColor(user.status)}-300`}>
-                        {user.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
-                      {user.lastActive}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Edit3 className="h-3 w-3" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Mail className="h-3 w-3" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </td>
+          {filteredUsers.length === 0 ? (
+            <div className="text-center py-8 text-gray-600">
+              No users found. Try adjusting your search or filters.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">User</th>
+                    <th className="text-left py-3 px-4">Role</th>
+                    <th className="text-left py-3 px-4">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredUsers.map(user => {
+                    const profile = user.profiles;
+                    const fullName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Unknown User';
+                    
+                    return (
+                      <tr key={user.id} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                              {getInitials(profile?.first_name, profile?.last_name)}
+                            </div>
+                            <div>
+                              <div className="font-medium">{fullName}</div>
+                              <div className="text-sm text-gray-600">{user.user_id.slice(0, 8)}...</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline" className={`text-${getRoleColor(user.role)}-600 border-${getRoleColor(user.role)}-300`}>
+                            {user.role}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex space-x-2">
+                            <Button variant="outline" size="sm" title="Edit role">
+                              <Edit3 className="h-3 w-3" />
+                            </Button>
+                            <Button variant="outline" size="sm" title="Send email">
+                              <Mail className="h-3 w-3" />
+                            </Button>
+                            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" title="Remove user">
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

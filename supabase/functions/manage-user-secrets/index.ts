@@ -210,8 +210,21 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in manage-user-secrets:', error)
     
+    // Map errors to generic user messages while logging details server-side
+    let userMessage = 'An error occurred';
+    
+    if (error.message?.includes('Master key')) {
+      userMessage = 'Configuration error';
+    } else if (error.message?.includes('not found')) {
+      userMessage = 'Secret not found';
+    } else if (error.message?.includes('Invalid action')) {
+      userMessage = 'Invalid request';
+    } else if (error.message?.includes('Authentication')) {
+      userMessage = 'Authentication required';
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: userMessage }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

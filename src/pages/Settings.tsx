@@ -21,13 +21,12 @@ import ExportDataSettings from '@/components/settings/ExportDataSettings';
 import AdminDashboard from '@/components/settings/AdminDashboard';
 import OnboardingFlow from '@/components/settings/OnboardingFlow';
 import SystemPreferences from '@/components/settings/SystemPreferences';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('workspace');
   const [showOnboarding, setShowOnboarding] = useState(false);
-
-  // Mock user role - in real app this would come from auth context
-  const userRole = 'admin'; // admin, manager, user
+  const { role: userRole, loading } = useUserRole();
 
   const settingsSections = [
     {
@@ -79,6 +78,16 @@ const Settings: React.FC = () => {
     if (section.adminOnly && userRole !== 'admin') return false;
     return true;
   });
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6 bg-white min-h-screen">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-600">Loading settings...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 bg-white min-h-screen">
