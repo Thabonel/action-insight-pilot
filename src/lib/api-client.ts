@@ -738,36 +738,44 @@ export class ApiClient {
     return ((revenue - spent) / spent) * 100;
   }
 
-  // Render Backend AI Integration
+  // Dashboard AI Chat via Lovable AI
   async queryAgent(query: string, context?: any): Promise<ApiResponse<any>> {
     try {
-      console.log('Calling Render backend with query:', query);
+      console.log('Calling dashboard chat with query:', query);
 
-      // Get auth token from Supabase
-      const authToken = await this.getAuthToken();
-      
-      const response = await fetch(`${this.renderBackendUrl}/api/ai/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('dashboard-chat', {
+        body: {
           query,
           context
-        }),
+        }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Render backend API error:', response.status, errorText);
-        throw new Error(`Backend API error: ${response.status}`);
+      if (error) {
+        console.error('Dashboard chat error:', error);
+        
+        // Handle specific error types
+        if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+          return {
+            success: false,
+            error: 'Rate limit exceeded',
+            message: 'Too many requests. Please wait a moment and try again.'
+          };
+        }
+        
+        if (error.message?.includes('credits') || error.message?.includes('402')) {
+          return {
+            success: false,
+            error: 'Credits exhausted',
+            message: 'AI credits exhausted. Please add credits to continue.'
+          };
+        }
+        
+        throw error;
       }
 
-      const data = await response.json();
-      const aiResponse = data.message || data.response || 'I apologize, but I could not generate a response at this time.';
+      const aiResponse = data?.message || 'I apologize, but I could not generate a response at this time.';
 
-      console.log('Render backend response received successfully');
+      console.log('Dashboard chat response received successfully');
 
       // Generate relevant suggestions based on query
       const suggestions = this.generateSuggestions(query);
@@ -785,7 +793,7 @@ export class ApiClient {
         }
       };
     } catch (error) {
-      console.error('Error calling OpenAI directly:', error);
+      console.error('Error calling dashboard chat:', error);
       return {
         success: false,
         error: 'AI service error',
