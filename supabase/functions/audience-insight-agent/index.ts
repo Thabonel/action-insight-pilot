@@ -135,7 +135,8 @@ Format as JSON:
           { role: 'system', content: 'You are an expert marketing audience analyst. Always respond with valid JSON.' },
           { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 2000,
+        max_completion_tokens: 3000,
+        response_format: { type: "json_object" }
       }),
     });
 
