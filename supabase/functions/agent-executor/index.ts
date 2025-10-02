@@ -1,11 +1,19 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const AgentRequestSchema = z.object({
+  agent_type: z.string().min(1).max(50),
+  task_type: z.string().min(1).max(50),
+  input_data: z.record(z.unknown()).optional().default({})
+});
 
 interface AgentRequest {
   agent_type: string;
@@ -22,7 +30,10 @@ serve(async (req) => {
     // Authentication required
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('Authorization header required');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const supabase = createClient(
@@ -35,10 +46,26 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
-      throw new Error('Invalid authentication token');
+      console.error('Authentication error:', authError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const { agent_type, task_type, input_data }: AgentRequest = await req.json();
+    // Validate and parse request body
+    const requestBody = await req.json();
+    const validationResult = AgentRequestSchema.safeParse(requestBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid request parameters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { agent_type, task_type, input_data }: AgentRequest = validationResult.data;
 
     console.log(`🚀 User ${user.id} executing ${task_type} for agent ${agent_type}`, input_data);
 
@@ -76,9 +103,12 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    // Log detailed error server-side only
     console.error('Agent execution error:', error);
+    
+    // Return generic error to client
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: 'An error occurred processing your request' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
