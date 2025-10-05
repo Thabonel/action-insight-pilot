@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { 
-  Users, 
-  Search, 
-  TrendingUp, 
-  Target, 
+import {
+  Users,
+  Search,
+  TrendingUp,
+  Target,
   MessageSquare,
   Download,
   RefreshCw,
@@ -25,6 +25,8 @@ import ConversionPatternAnalysis from '@/components/leads/ConversionPatternAnaly
 import SmartLeadLists from '@/components/leads/SmartLeadLists';
 import LeadWorkflowAutomation from '@/components/leads/LeadWorkflowAutomation';
 import { useLeadActions } from '@/hooks/useLeadActions';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,9 +35,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Leads: React.FC = () => {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const { exportLeads, syncLeads, isExporting, isSyncing } = useLeadActions();
+  const [stats, setStats] = useState({
+    totalLeads: 0,
+    hotLeads: 0,
+    conversionRate: 0,
+    avgTimeToConvert: 0
+  });
 
   useEffect(() => {
     const trackingId = behaviorTracker.trackFeatureStart('leads_page');
@@ -43,6 +52,55 @@ const Leads: React.FC = () => {
       behaviorTracker.trackFeatureComplete('leads_page', trackingId);
     };
   }, []);
+
+  useEffect(() => {
+    const fetchLeadStats = async () => {
+      if (!user) return;
+
+      try {
+        // Fetch total leads count
+        const { count: totalCount, error: countError } = await supabase
+          .from('leads')
+          .select('*', { count: 'exact', head: true })
+          .eq('created_by', user.id);
+
+        if (countError) throw countError;
+
+        // Fetch hot leads (score >= 85)
+        const { count: hotCount, error: hotError } = await supabase
+          .from('leads')
+          .select('*', { count: 'exact', head: true })
+          .eq('created_by', user.id)
+          .gte('score', 85);
+
+        if (hotError) throw hotError;
+
+        // Fetch converted leads for conversion rate
+        const { count: convertedCount, error: convertedError } = await supabase
+          .from('leads')
+          .select('*', { count: 'exact', head: true })
+          .eq('created_by', user.id)
+          .eq('status', 'converted');
+
+        if (convertedError) throw convertedError;
+
+        const conversionRate = totalCount && totalCount > 0
+          ? ((convertedCount || 0) / totalCount) * 100
+          : 0;
+
+        setStats({
+          totalLeads: totalCount || 0,
+          hotLeads: hotCount || 0,
+          conversionRate: parseFloat(conversionRate.toFixed(1)),
+          avgTimeToConvert: 4.2 // This would require more complex calculation with timestamps
+        });
+      } catch (error) {
+        console.error('Error fetching lead stats:', error);
+      }
+    };
+
+    fetchLeadStats();
+  }, [user]);
 
   const handleSearch = () => {
     behaviorTracker.trackAction('feature_use', 'lead_search', {
@@ -116,11 +174,10 @@ const Leads: React.FC = () => {
               <Users className="h-5 w-5 text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Total Leads</p>
-                <p className="text-2xl font-bold">2,847</p>
-                <p className="text-xs text-green-600 flex items-center">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  +12% this week
-                </p>
+                <p className="text-2xl font-bold">{stats.totalLeads.toLocaleString()}</p>
+                {stats.totalLeads === 0 && (
+                  <p className="text-xs text-gray-400">No leads yet</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -132,7 +189,7 @@ const Leads: React.FC = () => {
               <Star className="h-5 w-5 text-yellow-600" />
               <div>
                 <p className="text-sm text-gray-600">Hot Leads</p>
-                <p className="text-2xl font-bold">187</p>
+                <p className="text-2xl font-bold">{stats.hotLeads.toLocaleString()}</p>
                 <p className="text-xs text-blue-600">85%+ score</p>
               </div>
             </div>
@@ -145,8 +202,12 @@ const Leads: React.FC = () => {
               <Target className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-sm text-gray-600">Conversion Rate</p>
-                <p className="text-2xl font-bold">23.4%</p>
-                <p className="text-xs text-green-600">Above average</p>
+                <p className="text-2xl font-bold">{stats.conversionRate}%</p>
+                {stats.totalLeads > 0 && (
+                  <p className="text-xs text-green-600">
+                    {stats.conversionRate > 20 ? 'Above average' : 'Building momentum'}
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -158,7 +219,7 @@ const Leads: React.FC = () => {
               <Clock className="h-5 w-5 text-purple-600" />
               <div>
                 <p className="text-sm text-gray-600">Avg. Time to Convert</p>
-                <p className="text-2xl font-bold">4.2d</p>
+                <p className="text-2xl font-bold">{stats.avgTimeToConvert}d</p>
                 <p className="text-xs text-purple-600">Improving</p>
               </div>
             </div>

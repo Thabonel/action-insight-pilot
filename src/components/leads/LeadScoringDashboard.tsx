@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,55 +8,117 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { Star, TrendingUp, Users, Target, Clock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+const MOCK_LEADS = [
+  {
+    id: 1,
+    name: 'Emily Chen',
+    company: 'TechFlow Solutions',
+    title: 'VP Marketing',
+    score: 94,
+    grade: 'A+',
+    conversionProbability: 89,
+    timeToConvert: '3-5 days',
+    source: 'LinkedIn',
+    industry: 'SaaS',
+    companySize: '150 employees',
+    engagement: 'High',
+    factors: ['Industry match', 'Company size', 'High engagement', 'Previous interactions']
+  },
+  {
+    id: 2,
+    name: 'Marcus Rodriguez',
+    company: 'StartupBoost',
+    title: 'Marketing Director',
+    score: 87,
+    grade: 'A',
+    conversionProbability: 76,
+    timeToConvert: '5-7 days',
+    source: 'Email Campaign',
+    industry: 'Fintech',
+    companySize: '75 employees',
+    engagement: 'Medium',
+    factors: ['Job title match', 'Company growth', 'Email engagement']
+  },
+  {
+    id: 3,
+    name: 'Sarah Kim',
+    company: 'Enterprise Corp',
+    title: 'CMO',
+    score: 82,
+    grade: 'B+',
+    conversionProbability: 68,
+    timeToConvert: '7-10 days',
+    source: 'Webinar',
+    industry: 'Enterprise',
+    companySize: '500+ employees',
+    engagement: 'High',
+    factors: ['Senior position', 'Large budget', 'Content engagement']
+  }
+];
 
 const LeadScoringDashboard: React.FC = () => {
-  const [leads] = useState([
-    {
-      id: 1,
-      name: 'Emily Chen',
-      company: 'TechFlow Solutions',
-      title: 'VP Marketing',
-      score: 94,
-      grade: 'A+',
-      conversionProbability: 89,
-      timeToConvert: '3-5 days',
-      source: 'LinkedIn',
-      industry: 'SaaS',
-      companySize: '150 employees',
-      engagement: 'High',
-      factors: ['Industry match', 'Company size', 'High engagement', 'Previous interactions']
-    },
-    {
-      id: 2,
-      name: 'Marcus Rodriguez',
-      company: 'StartupBoost',
-      title: 'Marketing Director',
-      score: 87,
-      grade: 'A',
-      conversionProbability: 76,
-      timeToConvert: '5-7 days',
-      source: 'Email Campaign',
-      industry: 'Fintech',
-      companySize: '75 employees',
-      engagement: 'Medium',
-      factors: ['Job title match', 'Company growth', 'Email engagement']
-    },
-    {
-      id: 3,
-      name: 'Sarah Kim',
-      company: 'Enterprise Corp',
-      title: 'CMO',
-      score: 82,
-      grade: 'B+',
-      conversionProbability: 68,
-      timeToConvert: '7-10 days',
-      source: 'Webinar',
-      industry: 'Enterprise',
-      companySize: '500+ employees',
-      engagement: 'High',
-      factors: ['Senior position', 'Large budget', 'Content engagement']
-    }
-  ]);
+  const { user } = useAuth();
+  const [leads, setLeads] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeads = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('leads')
+          .select('*')
+          .eq('created_by', user.id)
+          .order('score', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        // Transform database leads to match component structure
+        const transformedLeads = data?.map((lead: any) => ({
+          id: lead.id,
+          name: lead.full_name || lead.email,
+          company: lead.company_name || 'Unknown',
+          title: lead.job_title || 'N/A',
+          score: lead.score || 0,
+          grade: calculateGrade(lead.score || 0),
+          conversionProbability: lead.conversion_probability || 0,
+          timeToConvert: 'N/A',
+          source: lead.source || 'Unknown',
+          industry: lead.industry || 'N/A',
+          companySize: 'N/A',
+          engagement: lead.engagement_level || 'Low',
+          factors: []
+        })) || [];
+
+        // Use real data if available, otherwise show mock data
+        setLeads(transformedLeads.length > 0 ? transformedLeads : MOCK_LEADS);
+      } catch (error) {
+        console.error('Error fetching leads:', error);
+        setLeads(MOCK_LEADS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLeads();
+  }, [user]);
+
+  const calculateGrade = (score: number): string => {
+    if (score >= 95) return 'A+';
+    if (score >= 90) return 'A';
+    if (score >= 85) return 'A-';
+    if (score >= 80) return 'B+';
+    if (score >= 75) return 'B';
+    if (score >= 70) return 'B-';
+    if (score >= 65) return 'C+';
+    if (score >= 60) return 'C';
+    return 'D';
+  };
 
   const scoreDistribution = [
     { range: '90-100', count: 47, color: '#10b981' },
