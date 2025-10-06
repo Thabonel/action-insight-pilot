@@ -21,12 +21,20 @@ import ConnectPlatforms from '@/pages/ConnectPlatforms'
 import LandingPageBuilder from '@/pages/LandingPageBuilder'
 import { KeywordResearch } from '@/pages/KeywordResearch'
 import KnowledgeManagement from '@/components/knowledge/KnowledgeManagement'
+import SimpleDashboard from '@/pages/SimpleDashboard'
+import AutopilotSetup from '@/pages/AutopilotSetup'
 
 const AppRouter: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<Navigate to="conversational-dashboard" replace />} />
+        <Route index element={<Navigate to="autopilot" replace />} />
+
+        {/* Autopilot Routes */}
+        <Route path="autopilot" element={<SimpleDashboard />} />
+        <Route path="autopilot/setup" element={<AutopilotSetup />} />
+
+        {/* Advanced Mode Routes */}
         <Route path="conversational-dashboard" element={<ConversationalDashboard />} />
         <Route path="getting-started" element={<ActionInsightQuickStart />} />
         <Route path="campaigns" element={<Campaigns />} />
@@ -48,7 +56,9 @@ const AppRouter: React.FC = () => {
         <Route path="connect-platforms" element={<ConnectPlatforms />} />
         <Route path="landing-page-builder" element={<LandingPageBuilder />} />
         <Route path="keyword-research" element={<KeywordResearch />} />
-        <Route path="*" element={<Navigate to="/app/conversational-dashboard" replace />} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/app/autopilot" replace />} />
       </Route>
     </Routes>
   )
