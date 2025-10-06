@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Zap, 
-  Users, 
-  FileText, 
-  Share2, 
-  Mail, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Zap,
+  Users,
+  FileText,
+  Share2,
+  Mail,
+  BarChart3,
   Workflow,
   FileCheck,
   Settings,
@@ -16,9 +16,12 @@ import {
   LogOut,
   User,
   Brain,
-  Video
+  Video,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserMode } from '@/hooks/useUserMode';
+import ModeSwitcher from '@/components/layout/ModeSwitcher';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +38,7 @@ import { Button } from '@/components/ui/button';
 const Layout: React.FC = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { mode } = useUserMode();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -48,92 +52,111 @@ const Layout: React.FC = () => {
     }
   };
 
-  const navItems = [
-    { 
-      name: 'AI Dashboard', 
-      href: '/app/conversational-dashboard', 
+  // Simple mode navigation items
+  const simpleNavItems = [
+    {
+      name: 'Autopilot Dashboard',
+      href: '/app/autopilot',
+      icon: Sparkles,
+      description: 'Your marketing results'
+    },
+    {
+      name: 'Autopilot Settings',
+      href: '/app/autopilot/setup',
+      icon: Settings,
+      description: 'Configure autopilot'
+    }
+  ];
+
+  // Advanced mode navigation items
+  const advancedNavItems = [
+    {
+      name: 'AI Dashboard',
+      href: '/app/conversational-dashboard',
       icon: LayoutDashboard,
       description: 'AI-powered insights'
     },
-    { 
-      name: 'Campaigns', 
-      href: '/app/campaigns', 
+    {
+      name: 'Campaigns',
+      href: '/app/campaigns',
       icon: Zap,
       description: 'Marketing campaigns'
     },
-    { 
-      name: 'Campaign Management', 
-      href: '/app/campaign-management', 
+    {
+      name: 'Campaign Management',
+      href: '/app/campaign-management',
       icon: Zap,
       description: 'Advanced campaign tools'
     },
-    { 
-      name: 'Leads', 
-      href: '/app/leads', 
+    {
+      name: 'Leads',
+      href: '/app/leads',
       icon: Users,
       description: 'Lead management'
     },
-    { 
-      name: 'Content', 
-      href: '/app/content', 
+    {
+      name: 'Content',
+      href: '/app/content',
       icon: FileText,
       description: 'Content creation'
     },
-    { 
-      name: 'Social', 
-      href: '/app/social', 
+    {
+      name: 'Social',
+      href: '/app/social',
       icon: Share2,
       description: 'Social media'
     },
-    { 
-      name: 'Email', 
-      href: '/app/email', 
+    {
+      name: 'Email',
+      href: '/app/email',
       icon: Mail,
       description: 'Email automation'
     },
-    { 
-      name: 'Analytics', 
-      href: '/app/analytics', 
+    {
+      name: 'Analytics',
+      href: '/app/analytics',
       icon: BarChart3,
       description: 'Performance metrics'
     },
-    { 
-      name: 'Viral Video Marketing', 
-      href: '/app/viral-video-marketing', 
+    {
+      name: 'Viral Video Marketing',
+      href: '/app/viral-video-marketing',
       icon: Video,
       description: 'Video content automation'
     },
-    { 
-      name: 'Proposals', 
-      href: '/app/proposals', 
+    {
+      name: 'Proposals',
+      href: '/app/proposals',
       icon: FileCheck,
       description: 'Proposal generation'
     },
-    { 
-      name: 'Knowledge', 
-      href: '/app/knowledge', 
+    {
+      name: 'Knowledge',
+      href: '/app/knowledge',
       icon: Brain,
       description: 'AI knowledge base'
     },
-    { 
-      name: 'Settings', 
-      href: '/app/settings', 
+    {
+      name: 'Settings',
+      href: '/app/settings',
       icon: Settings,
       description: 'System configuration'
     },
-    { 
-      name: 'User Manual', 
-      href: '/app/user-manual', 
+    {
+      name: 'User Manual',
+      href: '/app/user-manual',
       icon: BookOpen,
       description: 'Documentation'
     },
-    { 
-      name: 'Connect Platforms', 
-      href: '/app/connect-platforms', 
+    {
+      name: 'Connect Platforms',
+      href: '/app/connect-platforms',
       icon: Link,
       description: 'Integration setup'
     }
   ];
+
+  const navItems = mode === 'simple' ? simpleNavItems : advancedNavItems;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -141,8 +164,15 @@ const Layout: React.FC = () => {
       <aside className="w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto">
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-900">AI Marketing Hub</h2>
-          <p className="text-sm text-gray-600 mt-1">Intelligent Automation Platform</p>
-          
+          <p className="text-sm text-gray-600 mt-1">
+            {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
+          </p>
+
+          {/* Mode Switcher */}
+          <div className="mt-4">
+            <ModeSwitcher />
+          </div>
+
           {/* User info and logout section */}
           {user && (
             <div className="mt-4 pt-4 border-t border-gray-200">
@@ -154,12 +184,12 @@ const Layout: React.FC = () => {
                   <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
                 </div>
               </div>
-              
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     disabled={isLoggingOut}
                   >
