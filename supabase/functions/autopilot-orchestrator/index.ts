@@ -276,6 +276,15 @@ async function optimizeCampaigns(supabase: any, userId: string, configId: string
         p_metadata: optimizationAction
       });
     }
+
+    // NEW: Check if video ads would improve engagement
+    const avgEngagement = recentMetrics.reduce((sum: number, m: any) =>
+      sum + (m.engagement_rate || 0), 0) / recentMetrics.length;
+
+    if (avgEngagement < 2.0 && shouldGenerateVideoAds(campaign)) {
+      console.log(`Low engagement (${avgEngagement.toFixed(2)}%) for campaign ${campaign.id}. Trying video ads...`);
+      await tryGenerateVideoAds(supabase, userId, campaign, configId);
+    }
   }
 }
 
@@ -346,4 +355,129 @@ function mapChannelToType(channelName: string): string {
 
   const normalized = channelName.toLowerCase();
   return mapping[normalized] || 'other';
+}
+
+// ============================================================================
+// VIDEO GENERATION FUNCTIONS
+// ============================================================================
+
+function shouldGenerateVideoAds(campaign: any): boolean {
+  // Only generate for video-friendly channels
+  const videoChannels = ['LinkedIn', 'Facebook', 'TikTok', 'YouTube', 'Instagram', 'social'];
+  const campaignName = campaign.name?.toLowerCase() || '';
+  const isVideoChannel = videoChannels.some(channel =>
+    campaignName.includes(channel.toLowerCase())
+  );
+
+  if (!isVideoChannel) return false;
+
+  // Check if budget allows (estimate $3.20 for 8-second video with Veo Fast)
+  const estimatedCost = 3.20;
+  const remainingBudget = campaign.total_budget - (campaign.spent || 0);
+
+  return remainingBudget >= estimatedCost;
+}
+
+async function tryGenerateVideoAds(supabase: any, userId: string, campaign: any, configId: string) {
+  try {
+    // Check if user has Gemini API key
+    const { data: apiKeys } = await supabase
+      .from('user_api_keys')
+      .select('gemini_api_key_encrypted')
+      .eq('user_id', userId)
+      .single();
+
+    if (!apiKeys?.gemini_api_key_encrypted) {
+      console.log(`User ${userId} missing Gemini API key. Skipping video generation.`);
+      return;
+    }
+
+    // Check rate limit: max 5 videos per campaign per week
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentVideos } = await supabase
+      .from('ai_video_projects')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('campaign_id', campaign.id)
+      .eq('auto_generated', true)
+      .gte('created_at', weekAgo);
+
+    if (recentVideos && recentVideos.length >= 5) {
+      console.log(`Already generated 5 videos this week for campaign ${campaign.id}. Skipping.`);
+      return;
+    }
+
+    // Get autopilot config for brand info
+    const { data: config } = await supabase
+      .from('marketing_autopilot_config')
+      .select('*')
+      .eq('id', configId)
+      .single();
+
+    // Call backend AI video generation endpoint
+    const backendUrl = Deno.env.get('BACKEND_URL') || 'https://wheels-wins-orchestrator.onrender.com';
+
+    const response = await fetch(`${backendUrl}/ai-video/autopilot-generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        campaign_id: campaign.id,
+        goal: `Create engaging video ad for ${campaign.name}. Campaign description: ${campaign.description}`,
+        platform: determinePlatform(campaign.name),
+        duration_s: 8,
+        brand_kit: {
+          primary_color: config?.brand_kit?.primary_color || '#FF5722',
+          secondary_color: config?.brand_kit?.secondary_color || '#FFC107',
+          logo_url: config?.brand_kit?.logo_url || '',
+          font_family: 'Inter'
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error(`Video generation failed for campaign ${campaign.id}:`, error);
+      return;
+    }
+
+    const result = await response.json();
+
+    if (result.status === 'skipped') {
+      console.log(`Video generation skipped: ${result.reason}`);
+      return;
+    }
+
+    console.log(`✅ Started video generation for campaign ${campaign.id}. Project ID: ${result.project_id}`);
+
+    // Log activity
+    await supabase.rpc('log_autopilot_activity', {
+      p_user_id: userId,
+      p_config_id: configId,
+      p_activity_type: 'video_generation',
+      p_description: `Auto-generating video ad for ${campaign.name} to boost engagement`,
+      p_entity_type: 'campaign',
+      p_entity_id: campaign.id,
+      p_metadata: {
+        project_id: result.project_id,
+        estimated_cost: result.estimated_cost || 3.20
+      }
+    });
+
+  } catch (error) {
+    console.error(`Error in tryGenerateVideoAds for campaign ${campaign.id}:`, error);
+  }
+}
+
+function determinePlatform(campaignName: string): string {
+  const name = campaignName.toLowerCase();
+
+  if (name.includes('youtube')) return 'YouTubeShort';
+  if (name.includes('tiktok')) return 'TikTok';
+  if (name.includes('instagram') || name.includes('reels')) return 'Reels';
+  if (name.includes('linkedin') || name.includes('facebook')) return 'YouTubeShort'; // Vertical format
+
+  return 'YouTubeShort'; // Default to vertical
 }

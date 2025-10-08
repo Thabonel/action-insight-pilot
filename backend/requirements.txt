@@ -26,3 +26,6 @@ pydantic==2.10.1
 
 # OpenAI for AI features - current version
 openai==1.55.0
+
+# Google AI (Gemini/Veo/Nano Banana) for video generation
+google-generativeai==0.8.3
