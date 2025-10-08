@@ -103,16 +103,16 @@ class AutopilotVideoRequest(BaseModel):
 
 async def get_user_gemini_key(user_id: str) -> Optional[str]:
     """
-    Retrieve and decrypt user's Gemini API key from database
+    Retrieve and decrypt user's Gemini API key from user_secrets table
     """
     try:
         supabase = get_supabase()
-        result = supabase.table('user_api_keys').select('gemini_api_key_encrypted').eq('user_id', user_id).single().execute()
+        result = supabase.table('user_secrets').select('encrypted_value').eq('user_id', user_id).eq('service_name', 'gemini_api_key_encrypted').single().execute()
 
-        if result.data and result.data.get('gemini_api_key_encrypted'):
-            # In production, you'd decrypt this. For now, assuming it's stored decrypted
-            # TODO: Implement proper encryption/decryption
-            return result.data['gemini_api_key_encrypted']
+        if result.data and result.data.get('encrypted_value'):
+            # The encrypted_value from user_secrets is already the API key
+            # The secrets service handles encryption/decryption via Edge Functions
+            return result.data['encrypted_value']
 
         return None
     except Exception as e:
