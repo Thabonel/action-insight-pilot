@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Zap, 
-  Users, 
-  FileText, 
-  Share2, 
-  Mail, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Zap,
+  Users,
+  FileText,
+  Share2,
+  Mail,
+  BarChart3,
   Workflow,
   FileCheck,
   Settings,
@@ -16,9 +16,12 @@ import {
   Link,
   LogOut,
   User,
-  Shield
+  Shield,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserMode } from '@/hooks/useUserMode';
+import ModeSwitcher from '@/components/layout/ModeSwitcher';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +38,7 @@ import { Button } from '@/components/ui/button';
 const Layout: React.FC = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { mode, isLoading: modeLoading } = useUserMode();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -48,86 +52,112 @@ const Layout: React.FC = () => {
     }
   };
 
-  const navItems = [
-    { 
-      name: 'AI Dashboard', 
-      href: '/app/dashboard', 
+  // Simple Mode Navigation (2 items)
+  const simpleNavItems = [
+    {
+      name: 'Autopilot',
+      href: '/app/autopilot',
+      icon: Sparkles,
+      description: 'Your marketing on autopilot'
+    },
+    {
+      name: 'Settings',
+      href: '/app/settings',
+      icon: Settings,
+      description: 'Configure your account'
+    }
+  ];
+
+  // Advanced Mode Navigation (All items)
+  const advancedNavItems = [
+    {
+      name: 'Autopilot',
+      href: '/app/autopilot',
+      icon: Sparkles,
+      description: 'Marketing automation'
+    },
+    {
+      name: 'AI Dashboard',
+      href: '/app/conversational-dashboard',
       icon: LayoutDashboard,
       description: 'AI-powered insights & chat'
     },
-    { 
-      name: 'Admin Dashboard', 
-      href: '/app/admin', 
+    {
+      name: 'Admin Dashboard',
+      href: '/app/admin',
       icon: Shield,
       description: 'Business metrics & system'
     },
-    { 
-      name: 'Campaign Management', 
-      href: '/app/campaign-management', 
+    {
+      name: 'Campaign Management',
+      href: '/app/campaign-management',
       icon: Zap,
       description: 'Advanced campaign tools'
     },
-    { 
-      name: 'Leads', 
-      href: '/app/leads', 
+    {
+      name: 'Leads',
+      href: '/app/leads',
       icon: Users,
       description: 'Lead management'
     },
-    { 
-      name: 'Content', 
-      href: '/app/content', 
+    {
+      name: 'Content',
+      href: '/app/content',
       icon: FileText,
       description: 'Content creation'
     },
-    { 
-      name: 'Social', 
-      href: '/app/social', 
+    {
+      name: 'Social',
+      href: '/app/social',
       icon: Share2,
       description: 'Social media'
     },
-    { 
-      name: 'Email', 
-      href: '/app/email', 
+    {
+      name: 'Email',
+      href: '/app/email',
       icon: Mail,
       description: 'Email automation'
     },
-    { 
-      name: 'Analytics', 
-      href: '/app/analytics', 
+    {
+      name: 'Analytics',
+      href: '/app/analytics',
       icon: BarChart3,
       description: 'Performance metrics'
     },
-    { 
-      name: 'Workflows', 
-      href: '/app/workflows', 
+    {
+      name: 'Workflows',
+      href: '/app/workflows',
       icon: Workflow,
       description: 'Automation workflows'
     },
-    { 
-      name: 'Proposals', 
-      href: '/app/proposals', 
+    {
+      name: 'Proposals',
+      href: '/app/proposals',
       icon: FileCheck,
       description: 'Proposal generation'
     },
-    { 
-      name: 'Settings', 
-      href: '/app/settings', 
+    {
+      name: 'Settings',
+      href: '/app/settings',
       icon: Settings,
       description: 'System configuration'
     },
-    { 
-      name: 'User Manual', 
-      href: '/app/user-manual', 
+    {
+      name: 'User Manual',
+      href: '/app/user-manual',
       icon: BookOpen,
       description: 'Documentation'
     },
-    { 
-      name: 'Connect Platforms', 
-      href: '/app/connect-platforms', 
+    {
+      name: 'Connect Platforms',
+      href: '/app/connect-platforms',
       icon: Link,
       description: 'Integration setup'
     }
   ];
+
+  // Select navigation items based on current mode
+  const navItems = mode === 'simple' ? simpleNavItems : advancedNavItems;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -136,7 +166,14 @@ const Layout: React.FC = () => {
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-900">AI Marketing Hub</h2>
           <p className="text-sm text-gray-600 mt-1">Intelligent Automation Platform</p>
-          
+
+          {/* Mode Switcher */}
+          {!modeLoading && (
+            <div className="mt-4">
+              <ModeSwitcher />
+            </div>
+          )}
+
           {/* User info and logout section */}
           {user && (
             <div className="mt-4 pt-4 border-t border-gray-200">

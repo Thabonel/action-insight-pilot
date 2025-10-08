@@ -31,6 +31,15 @@ export const aiServices: ApiKeyConfig[] = [
     validation: (value) => value.startsWith('sk-ant-') && value.length > 20
   },
   {
+    id: 'gemini_api_key_encrypted',
+    name: 'Google Gemini API Key',
+    description: 'Required for AI video generation with Veo 3 and Nano Banana image generation. Get your key from https://aistudio.google.com/apikey',
+    placeholder: 'AIza...',
+    icon: '🎬',
+    required: false,
+    validation: (value) => value.startsWith('AIza') && value.length > 30
+  },
+  {
     id: 'json2video_api_key',
     name: 'json2video API Key',
     description: 'For automated video creation and rendering',

@@ -10,7 +10,8 @@ import {
   Users,
   Mail,
   Share2,
-  Clock
+  Clock,
+  Video
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -95,6 +96,8 @@ const ActivityFeed: React.FC = () => {
         return <Mail className="h-4 w-4 text-blue-600" />;
       case 'social_post_created':
         return <Share2 className="h-4 w-4 text-pink-600" />;
+      case 'video_generation':
+        return <Video className="h-4 w-4 text-purple-600" />;
       default:
         return <Clock className="h-4 w-4 text-gray-600" />;
     }
@@ -118,6 +121,8 @@ const ActivityFeed: React.FC = () => {
         return 'bg-blue-50 border-blue-200';
       case 'social_post_created':
         return 'bg-pink-50 border-pink-200';
+      case 'video_generation':
+        return 'bg-purple-50 border-purple-200';
       default:
         return 'bg-gray-50 border-gray-200';
     }

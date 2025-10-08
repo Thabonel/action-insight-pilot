@@ -12,20 +12,23 @@ import { Toaster } from "@/components/ui/toaster";
 import { OnboardingProvider } from '@/contexts/OnboardingContext';
 import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
 import { ContentIdeasProvider } from '@/contexts/ContentIdeasContext';
+import { UserModeProvider } from '@/hooks/useUserMode';
 
 function App() {
   return (
     <OnboardingProvider>
       <ContentIdeasProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/oauth/callback" element={<OAuthCallback />} />
-          <Route path="/help" element={<HelpPage />} />
-          <Route path="/app/*" element={<AppRouter />} />
-        </Routes>
-        <OnboardingOverlay />
-        <Toaster />
+        <UserModeProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/oauth/callback" element={<OAuthCallback />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/app/*" element={<AppRouter />} />
+          </Routes>
+          <OnboardingOverlay />
+          <Toaster />
+        </UserModeProvider>
       </ContentIdeasProvider>
     </OnboardingProvider>
   );
