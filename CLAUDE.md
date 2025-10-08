@@ -55,6 +55,76 @@ npm run knip
 
 ---
 
+## 🤖 AI Models & Services
+
+All AI services use **user-provided API keys** (no platform markup on costs).
+
+### OpenAI (Primary - Required)
+
+**Latest Models (2025)**:
+- `gpt-5` - Best model for coding and agentic tasks (August 2025)
+- `gpt-5-mini` - Fast, cost-effective (default for most tasks)
+- `gpt-4.1` - Improved coding and instruction following
+- `gpt-4.1-mini` - Smaller, faster variant
+
+**Current Usage**:
+- **Default**: `gpt-5-mini` (backend/agents/social/multi_model_service.py:33)
+- Content generation, social media posts
+- Video script creation
+- Analytics and campaign optimization
+
+**Legacy models removed**: ~~gpt-4o~~, ~~gpt-4o-mini~~, ~~gpt-3.5-turbo~~ (deprecated)
+
+### Anthropic Claude (Optional Fallback)
+
+**Latest Models (2025)**:
+- `claude-sonnet-4.5` - Best coding model in the world (September 2025)
+- `claude-opus-4.1` - Most powerful model (August 2025)
+- `claude-sonnet-4` - Previous version (May 2025)
+
+**Current Usage**:
+- **Default**: `claude-sonnet-4.5` (backend/agents/social/multi_model_service.py:42)
+- Alternative to OpenAI for advanced reasoning
+- Analytics (optional)
+- Fallback when OpenAI fails
+
+**Legacy models removed**: ~~claude-3-sonnet-20240229~~, ~~claude-3-haiku-20240307~~ (deprecated)
+
+### Google Gemini (Required for Video)
+
+**Latest Models (2025)**:
+- `gemini-2.5-pro` - State-of-the-art thinking model
+- `gemini-2.5-flash` - Best price-performance (default)
+- `gemini-2.0-flash` - Second generation workhorse
+- `veo-3` / `veo-3-fast` - Video generation
+- `nano-banana` - Image generation (Gemini 2.5 Flash Image)
+
+**Current Usage**:
+- **Default**: `gemini-2.5-flash` (backend/agents/social/multi_model_service.py:60)
+- AI video generation (`/app/studio/ai-video`)
+- Autopilot video ads
+- Scene planning and image generation
+
+**Legacy models removed**: ~~gemini-pro~~, ~~gemini-pro-vision~~ (deprecated)
+
+### Mistral AI (Optional Fallback)
+
+**Models**:
+- `mistral-large-latest` - Current flagship (default)
+- `mistral-medium-latest` - Smaller variant
+
+**Usage**: Third fallback option in multi-model service
+
+### Model Fallback Order
+
+```python
+fallback_order = [OpenAI, Anthropic, Mistral]
+```
+
+If OpenAI fails → tries Anthropic → tries Mistral → returns error
+
+---
+
 ## Key Features
 
 ### 1. Marketing Autopilot

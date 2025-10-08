@@ -133,7 +133,7 @@ async function callOpenAI(messages: any[], openaiKey: string) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-mini',
       messages,
       temperature: 0.7,
     }),
@@ -160,7 +160,7 @@ async function callClaude(messages: any[], anthropicKey: string) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4.5',
       max_tokens: 1000,
       system: systemMessage,
       messages: userMessages.map(msg => ({

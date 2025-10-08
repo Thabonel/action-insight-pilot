@@ -80,7 +80,7 @@ async def read_media():
 async def generate_script(idea: str) -> dict:
     openai.api_key = OPENAI_API_KEY
     chat = await openai.ChatCompletion.acreate(
-        model="gpt-4o",
+        model="gpt-5",
         temperature=0.7,
         response_format={"type": "json_object"},
         messages=[
