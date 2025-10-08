@@ -239,7 +239,7 @@ const MyComponent = () => {
 const testAIService = async () => {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-5-mini",
       messages: [{ role: "user", content: "Hello" }],
     });
     console.log('AI service working:', response);

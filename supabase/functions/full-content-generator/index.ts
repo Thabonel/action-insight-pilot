@@ -42,7 +42,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5',
         messages: [
           { role: 'system', content: 'You are an expert content creator and copywriter. Create compelling, engaging content that drives action.' },
           { role: 'user', content: contentPrompt }

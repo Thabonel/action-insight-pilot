@@ -29,8 +29,8 @@ class MultiModelService:
         return {
             LLMProvider.OPENAI: {
                 "api_url": "https://api.openai.com/v1/chat/completions",
-                "models": ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"],
-                "default_model": "gpt-4o-mini",
+                "models": ["gpt-5", "gpt-5-mini", "gpt-4.1", "gpt-4.1-mini"],
+                "default_model": "gpt-5-mini",
                 "max_tokens": 4000,
                 "temperature": 0.7,
                 "supports_vision": True,
@@ -38,8 +38,8 @@ class MultiModelService:
             },
             LLMProvider.ANTHROPIC: {
                 "api_url": "https://api.anthropic.com/v1/messages",
-                "models": ["claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
-                "default_model": "claude-3-haiku-20240307",
+                "models": ["claude-sonnet-4.5", "claude-opus-4.1", "claude-sonnet-4"],
+                "default_model": "claude-sonnet-4.5",
                 "max_tokens": 4000,
                 "temperature": 0.7,
                 "supports_vision": True,
@@ -48,7 +48,7 @@ class MultiModelService:
             LLMProvider.MISTRAL: {
                 "api_url": "https://api.mistral.ai/v1/chat/completions",
                 "models": ["mistral-large-latest", "mistral-medium-latest"],
-                "default_model": "mistral-medium-latest",
+                "default_model": "mistral-large-latest",
                 "max_tokens": 4000,
                 "temperature": 0.7,
                 "supports_vision": False,
@@ -56,8 +56,8 @@ class MultiModelService:
             },
             LLMProvider.GOOGLE: {
                 "api_url": "https://generativelanguage.googleapis.com/v1beta/models",
-                "models": ["gemini-pro", "gemini-pro-vision"],
-                "default_model": "gemini-pro",
+                "models": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"],
+                "default_model": "gemini-2.5-flash",
                 "max_tokens": 4000,
                 "temperature": 0.7,
                 "supports_vision": True,

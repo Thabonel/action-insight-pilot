@@ -46,7 +46,7 @@ async function searchMarketData(query: string): Promise<any> {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'gpt-5',
           messages: [
             {
               role: 'system',
@@ -237,7 +237,7 @@ Create a GTM strategy document with the following structure:
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-5',
       messages: [
         {
           role: 'system',

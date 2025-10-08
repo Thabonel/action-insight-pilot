@@ -261,7 +261,7 @@ async function summarizeText(text: string, apiKey: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: 'Summarize the following text' },
         { role: 'user', content: text }
