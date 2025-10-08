@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Knip cache (staging only - never in production)
+.knip/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
