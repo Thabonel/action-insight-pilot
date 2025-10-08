@@ -82,6 +82,8 @@ export const UserModeProvider: React.FC<{ children: ReactNode }> = ({ children }
         .upsert(
           {
             user_id: user.id,
+            preference_category: 'general',
+            preference_data: {},
             interface_mode: newMode
           },
           {
