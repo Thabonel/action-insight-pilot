@@ -56,7 +56,22 @@ This creates:
 
 **Note:** Gemini API keys are stored in the existing `user_secrets` table (no new columns needed)
 
-### Step 4: Verify
+### Step 4: Apply Migration 3 (Fix Mode Switching)
+
+1. Click **New query** in SQL Editor
+2. Open the file: `docs/migration_03_fix_user_preferences.sql`
+3. Copy the entire contents
+4. Paste into Supabase SQL Editor
+5. Click **Run**
+6. You should see output showing the constraint was added
+
+This fixes:
+- ✅ Adds UNIQUE constraint on `user_preferences.user_id`
+- ✅ Removes old composite constraint
+- ✅ Cleans up any duplicate rows
+- ✅ Enables mode switching upsert to work
+
+### Step 5: Verify
 
 Run this query in SQL Editor to verify everything was created:
 
@@ -84,7 +99,7 @@ WHERE table_name = 'user_preferences'
 
 You should see 6 tables and 1 column listed.
 
-### Step 5: Refresh Your App
+### Step 6: Refresh Your App
 
 1. Go back to your application
 2. Hard refresh your browser (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows)
