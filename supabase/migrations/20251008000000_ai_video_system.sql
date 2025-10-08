@@ -2,22 +2,12 @@
 -- Adds support for user-provided Gemini API keys and AI video generation
 
 -- ============================================================================
--- 1. EXTEND USER API KEYS TABLE
+-- 1. API KEY STORAGE
 -- ============================================================================
 
--- Add Gemini API key support to existing user_api_keys table
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'user_api_keys'
-    AND column_name = 'gemini_api_key_encrypted'
-  ) THEN
-    ALTER TABLE user_api_keys
-    ADD COLUMN gemini_api_key_encrypted TEXT,
-    ADD COLUMN gemini_key_added_at TIMESTAMPTZ;
-  END IF;
-END $$;
+-- Note: Gemini API keys are stored in the existing user_secrets table
+-- with service_name = 'gemini_api_key_encrypted'
+-- No additional table or column changes needed for API key storage
 
 -- ============================================================================
 -- 2. AI VIDEO PROJECTS TABLE
