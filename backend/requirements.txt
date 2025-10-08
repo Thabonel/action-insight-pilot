@@ -18,7 +18,7 @@ apscheduler==3.10.4
 pytz==2024.1
 
 # Additional utilities
-python-multipart==0.0.12
+python-multipart==0.0.18
 requests==2.32.3
 
 # Pydantic for data validation - current version
