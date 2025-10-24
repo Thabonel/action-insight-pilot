@@ -24,49 +24,49 @@ const PublicHomepage: React.FC = () => {
   const features = [
     {
       icon: Brain,
-      title: "AI-Powered Campaign Management",
-      description: "Create, optimize, and manage marketing campaigns with intelligent automation that learns from performance data.",
-      benefits: ["Smart audience targeting", "Automated A/B testing", "Performance optimization"],
+      title: "Campaign Management",
+      description: "Create and manage your marketing campaigns in one place. AI helps optimize performance based on what's working.",
+      benefits: ["Campaign planning tools", "Performance tracking", "Budget management"],
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       alt: "Marketing analytics dashboard on computer screen"
     },
     {
       icon: Users,
-      title: "Intelligent Lead Generation",
-      description: "Advanced AI algorithms identify, score, and nurture leads automatically for maximum conversion rates.",
-      benefits: ["Predictive lead scoring", "Automated nurturing", "Conversion optimization"],
+      title: "Lead Management",
+      description: "Track and organize your leads. See which ones are most engaged and ready to convert.",
+      benefits: ["Lead tracking", "Activity monitoring", "Export to CSV"],
       image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       alt: "Team collaborating around a laptop with charts and graphs"
     },
     {
       icon: Sparkles,
-      title: "Automated Content Creation",
-      description: "Generate high-converting content across all channels with AI that understands your brand voice.",
-      benefits: ["Brand-consistent messaging", "Multi-platform optimization", "Performance tracking"],
+      title: "AI Content Generator",
+      description: "Generate blog posts, social media content, and email copy. Use your own OpenAI, Claude, or Gemini API keys.",
+      benefits: ["Multiple AI models", "Your own API keys", "No markup on costs"],
       image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       alt: "MacBook showing code on screen representing content creation"
     },
     {
       icon: Mail,
-      title: "Email Marketing Intelligence",
-      description: "Personalized email campaigns powered by behavioral analysis and predictive send-time optimization.",
-      benefits: ["Behavioral triggers", "Send-time optimization", "Personalization at scale"],
+      title: "Email Campaigns",
+      description: "Build and send email campaigns. Track opens, clicks, and conversions.",
+      benefits: ["Campaign builder", "Performance metrics", "Behavioral triggers"],
       image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       alt: "Person typing on laptop with email interface visible"
     },
     {
       icon: BarChart3,
-      title: "Predictive Analytics",
-      description: "Advanced insights and forecasting that help you make data-driven marketing decisions.",
-      benefits: ["Revenue forecasting", "Performance predictions", "ROI optimization"],
+      title: "Analytics Dashboard",
+      description: "See how your campaigns are performing. Track revenue, conversions, and ROI in real-time.",
+      benefits: ["Revenue tracking", "Conversion metrics", "Performance charts"],
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       alt: "Data visualization charts and graphs on computer screen"
     },
     {
       icon: Workflow,
-      title: "Workflow Automation",
-      description: "Connect all your marketing tools and automate complex workflows without coding.",
-      benefits: ["No-code automation", "Cross-platform integration", "Smart triggers"],
+      title: "Marketing Autopilot",
+      description: "Set your goals and budget. AI creates campaigns, adjusts budgets, and optimizes performance automatically.",
+      benefits: ["Automated campaign management", "Budget optimization", "Weekly reports"],
       image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       alt: "Multiple people working with laptops in a collaborative workspace"
     }
@@ -130,12 +130,11 @@ const PublicHomepage: React.FC = () => {
             </Badge>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
               AI Marketing Hub
-              <span className="block text-blue-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">Intelligent Automation Platform</span>
+              <span className="block text-blue-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">Run Your Marketing on Autopilot</span>
             </h1>
             <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed font-medium drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
-              Transform your marketing operations with AI-powered automation that learns, adapts, and optimizes
-              every campaign for maximum ROI. From lead generation to content creation, let artificial intelligence
-              handle the complexity while you focus on strategy.
+              Set your goals and budget. AI handles the rest - creating campaigns, writing content,
+              and optimizing performance. Use your own API keys from OpenAI, Claude, or Gemini.
             </p>
             <div className="flex justify-center items-center mb-12">
               <Button
@@ -166,37 +165,36 @@ const PublicHomepage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-black mb-6">
-              Marketing Teams Are Drowning in Manual Tasks
+              Marketing Shouldn't Be This Hard
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-              Modern marketing requires managing dozens of platforms, analyzing endless data points, 
-              and creating personalized experiences at scale. Without AI assistance, teams spend 
-              80% of their time on repetitive tasks instead of strategic growth.
+              You know you need to run campaigns, create content, and track performance.
+              But juggling multiple tools and learning complex platforms takes time you don't have.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="p-6 border-red-200 bg-red-50">
               <CardContent className="p-0">
                 <Target className="w-12 h-12 text-red-600 mb-4" />
-                <h3 className="text-lg font-semibold text-black mb-2">Inefficient Targeting</h3>
-                <p className="text-gray-700">Manual audience segmentation leads to broad, ineffective campaigns and wasted ad spend.</p>
+                <h3 className="text-lg font-semibold text-black mb-2">Too Many Tools</h3>
+                <p className="text-gray-700">Email here, social there, analytics somewhere else. Logging into five platforms just to post one campaign.</p>
               </CardContent>
             </Card>
-            
+
             <Card className="p-6 border-orange-200 bg-orange-50">
               <CardContent className="p-0">
                 <BarChart3 className="w-12 h-12 text-orange-600 mb-4" />
-                <h3 className="text-lg font-semibold text-black mb-2">Data Overwhelm</h3>
-                <p className="text-gray-700">Teams struggle to extract actionable insights from multiple analytics platforms and data sources.</p>
+                <h3 className="text-lg font-semibold text-black mb-2">Learning Curve</h3>
+                <p className="text-gray-700">Every platform has its own interface, rules, and best practices. Just when you figure one out, they update it.</p>
               </CardContent>
             </Card>
-            
+
             <Card className="p-6 border-yellow-200 bg-yellow-50">
               <CardContent className="p-0">
                 <Zap className="w-12 h-12 text-yellow-600 mb-4" />
-                <h3 className="text-lg font-semibold text-black mb-2">Slow Execution</h3>
-                <p className="text-gray-700">Manual processes delay campaign launches and prevent real-time optimization opportunities.</p>
+                <h3 className="text-lg font-semibold text-black mb-2">No Time</h3>
+                <p className="text-gray-700">You're running a business. Marketing should work for you, not become another full-time job.</p>
               </CardContent>
             </Card>
           </div>
@@ -208,11 +206,10 @@ const PublicHomepage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-black mb-6">
-              Meet Your AI Marketing Assistant
+              Everything You Need in One Place
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-              Our intelligent automation platform combines machine learning, predictive analytics, 
-              and natural language processing to handle every aspect of your marketing operations.
+              Manage campaigns, create content, track leads, and see what's working. All in one dashboard.
             </p>
           </div>
 
@@ -255,10 +252,10 @@ const PublicHomepage: React.FC = () => {
       <section className="py-20 bg-blue-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Transform Your Marketing?
+            Try It Free
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Start using AI to automate your workflows, optimize your campaigns, and improve your marketing ROI.
+            Create an account and connect your own AI API keys. No credit card required to start.
           </p>
           <div className="flex justify-center">
             <Button
