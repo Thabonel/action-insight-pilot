@@ -50,8 +50,8 @@ const SupportTickets: React.FC = () => {
     } catch (error) {
       console.error('Error fetching support tickets:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load support tickets',
+        title: 'Unable to Load Tickets',
+        description: 'Could not retrieve support tickets from the server. Please refresh the page or contact support if the issue persists.',
         variant: 'destructive'
       });
     } finally {
@@ -91,8 +91,8 @@ const SupportTickets: React.FC = () => {
     } catch (error) {
       console.error('Error updating ticket:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update ticket',
+        title: 'Update Failed',
+        description: 'Could not save changes to this ticket. Your changes were not saved. Please try again.',
         variant: 'destructive'
       });
     } finally {

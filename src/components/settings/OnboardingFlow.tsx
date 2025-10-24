@@ -129,8 +129,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
     } catch (error) {
       console.error('Error saving onboarding data:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to save onboarding data. Please try again.',
+        title: 'Could Not Save Preferences',
+        description: 'Your onboarding preferences could not be saved. Please check your internet connection and try again. You can also complete this later from Settings.',
         variant: 'destructive'
       });
     } finally {

@@ -89,8 +89,8 @@ const SystemPreferences: React.FC = () => {
     } catch (error) {
       console.error('Error loading preferences:', error);
       toast({
-        title: "Error",
-        description: "Failed to load system preferences",
+        title: "Could Not Load Preferences",
+        description: "Your system preferences could not be loaded. Default settings will be used. Please refresh the page or contact support if this continues.",
         variant: "destructive",
       });
     } finally {
@@ -121,8 +121,8 @@ const SystemPreferences: React.FC = () => {
     } catch (error) {
       console.error('Error updating preference:', error);
       toast({
-        title: "Error",
-        description: "Failed to update preferences",
+        title: "Update Failed",
+        description: "Your preference change could not be saved. Please try again or contact support if the problem continues.",
         variant: "destructive",
       });
     } finally {
@@ -165,8 +165,8 @@ const SystemPreferences: React.FC = () => {
       } catch (error) {
         console.error('Error resetting preferences:', error);
         toast({
-          title: "Error",
-          description: "Failed to reset preferences",
+          title: "Reset Failed",
+          description: "Could not reset your preferences to defaults. Your current settings remain unchanged. Please try again.",
           variant: "destructive",
         });
       }

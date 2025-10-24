@@ -35,7 +35,7 @@ const PrivacyDashboard: React.FC = () => {
     } else {
       toast({
         title: "Update Failed",
-        description: "Failed to update privacy settings. Please try again.",
+        description: "Your privacy settings could not be updated at this time. Your previous settings remain in effect. Please try again or contact support.",
         variant: "destructive"
       });
     }
@@ -53,8 +53,8 @@ const PrivacyDashboard: React.FC = () => {
       });
     } else {
       toast({
-        title: "Export Failed",
-        description: "Failed to request data export. Please try again.",
+        title: "Export Request Failed",
+        description: "We could not process your data export request. Please try again later or contact support for assistance with downloading your data.",
         variant: "destructive"
       });
     }
@@ -73,8 +73,8 @@ const PrivacyDashboard: React.FC = () => {
       });
     } else {
       toast({
-        title: "Deletion Failed", 
-        description: "Failed to request data deletion. Please try again.",
+        title: "Deletion Request Failed",
+        description: "We could not process your data deletion request. Please try again later or contact support. Your data remains secure and private.",
         variant: "destructive"
       });
     }
