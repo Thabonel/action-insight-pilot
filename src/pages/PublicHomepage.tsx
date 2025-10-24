@@ -26,8 +26,8 @@ const PublicHomepage: React.FC = () => {
     },
     {
       title: "AI Content Generator",
-      description: "Generate blog posts, social media content, and email copy. Use your own OpenAI, Claude, or Gemini API keys.",
-      benefits: ["Multiple AI models", "Your own API keys", "No markup on costs"],
+      description: "Generate blog posts, social media content, and email copy.",
+      benefits: ["Multiple AI models", "Fast content creation", "Professional quality"],
       image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       alt: "MacBook showing code on screen representing content creation"
     },
@@ -115,7 +115,7 @@ const PublicHomepage: React.FC = () => {
             </h1>
             <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed font-medium drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
               Set your goals and budget. AI handles the rest - creating campaigns, writing content,
-              and optimizing performance. Use your own API keys from OpenAI, Claude, or Gemini.
+              and optimizing performance.
             </p>
             <div className="flex justify-center items-center mb-12">
               <Button
@@ -230,7 +230,7 @@ const PublicHomepage: React.FC = () => {
             Try It Free
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Create an account and connect your own AI API keys. No credit card required to start.
+            Create an account and start managing your marketing. No credit card required to start.
           </p>
           <div className="flex justify-center">
             <Button
