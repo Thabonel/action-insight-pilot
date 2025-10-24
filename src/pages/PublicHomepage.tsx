@@ -132,7 +132,7 @@ const PublicHomepage: React.FC = () => {
               AI Marketing Hub
               <span className="block text-blue-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">Intelligent Automation Platform</span>
             </h1>
-            <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            <p className="text-xl text-black mb-8 max-w-3xl mx-auto leading-relaxed">
               Transform your marketing operations with AI-powered automation that learns, adapts, and optimizes
               every campaign for maximum ROI. From lead generation to content creation, let artificial intelligence
               handle the complexity while you focus on strategy.
