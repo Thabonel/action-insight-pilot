@@ -3,19 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Brain, 
-  Zap, 
-  TrendingUp, 
-  Users, 
-  Mail, 
-  BarChart3, 
-  Workflow,
-  Target,
-  Sparkles,
-  CheckCircle,
-  ArrowRight
-} from 'lucide-react';
+import { Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const PublicHomepage: React.FC = () => {
@@ -23,7 +11,6 @@ const PublicHomepage: React.FC = () => {
 
   const features = [
     {
-      icon: Brain,
       title: "Campaign Management",
       description: "Create and manage your marketing campaigns in one place. AI helps optimize performance based on what's working.",
       benefits: ["Campaign planning tools", "Performance tracking", "Budget management"],
@@ -31,7 +18,6 @@ const PublicHomepage: React.FC = () => {
       alt: "Marketing analytics dashboard on computer screen"
     },
     {
-      icon: Users,
       title: "Lead Management",
       description: "Track and organize your leads. See which ones are most engaged and ready to convert.",
       benefits: ["Lead tracking", "Activity monitoring", "Export to CSV"],
@@ -39,7 +25,6 @@ const PublicHomepage: React.FC = () => {
       alt: "Team collaborating around a laptop with charts and graphs"
     },
     {
-      icon: Sparkles,
       title: "AI Content Generator",
       description: "Generate blog posts, social media content, and email copy. Use your own OpenAI, Claude, or Gemini API keys.",
       benefits: ["Multiple AI models", "Your own API keys", "No markup on costs"],
@@ -47,7 +32,6 @@ const PublicHomepage: React.FC = () => {
       alt: "MacBook showing code on screen representing content creation"
     },
     {
-      icon: Mail,
       title: "Email Campaigns",
       description: "Build and send email campaigns. Track opens, clicks, and conversions.",
       benefits: ["Campaign builder", "Performance metrics", "Behavioral triggers"],
@@ -55,7 +39,6 @@ const PublicHomepage: React.FC = () => {
       alt: "Person typing on laptop with email interface visible"
     },
     {
-      icon: BarChart3,
       title: "Analytics Dashboard",
       description: "See how your campaigns are performing. Track revenue, conversions, and ROI in real-time.",
       benefits: ["Revenue tracking", "Conversion metrics", "Performance charts"],
@@ -63,7 +46,6 @@ const PublicHomepage: React.FC = () => {
       alt: "Data visualization charts and graphs on computer screen"
     },
     {
-      icon: Workflow,
       title: "Marketing Autopilot",
       description: "Set your goals and budget. AI creates campaigns, adjusts budgets, and optimizes performance automatically.",
       benefits: ["Automated campaign management", "Budget optimization", "Weekly reports"],
@@ -125,7 +107,6 @@ const PublicHomepage: React.FC = () => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Badge className="mb-6 bg-white text-blue-600 px-4 py-2 shadow-lg">
-              <Sparkles className="w-4 h-4 mr-2" />
               Powered by Advanced AI
             </Badge>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
@@ -143,7 +124,6 @@ const PublicHomepage: React.FC = () => {
                 onClick={() => navigate('/auth')}
               >
                 Get Started Free
-                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
 
@@ -176,7 +156,6 @@ const PublicHomepage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="p-6 border-red-200 bg-red-50">
               <CardContent className="p-0">
-                <Target className="w-12 h-12 text-red-600 mb-4" />
                 <h3 className="text-lg font-semibold text-black mb-2">Too Many Tools</h3>
                 <p className="text-gray-700">Email here, social there, analytics somewhere else. Logging into five platforms just to post one campaign.</p>
               </CardContent>
@@ -184,7 +163,6 @@ const PublicHomepage: React.FC = () => {
 
             <Card className="p-6 border-orange-200 bg-orange-50">
               <CardContent className="p-0">
-                <BarChart3 className="w-12 h-12 text-orange-600 mb-4" />
                 <h3 className="text-lg font-semibold text-black mb-2">Learning Curve</h3>
                 <p className="text-gray-700">Every platform has its own interface, rules, and best practices. Just when you figure one out, they update it.</p>
               </CardContent>
@@ -192,7 +170,6 @@ const PublicHomepage: React.FC = () => {
 
             <Card className="p-6 border-yellow-200 bg-yellow-50">
               <CardContent className="p-0">
-                <Zap className="w-12 h-12 text-yellow-600 mb-4" />
                 <h3 className="text-lg font-semibold text-black mb-2">No Time</h3>
                 <p className="text-gray-700">You're running a business. Marketing should work for you, not become another full-time job.</p>
               </CardContent>
@@ -219,14 +196,12 @@ const PublicHomepage: React.FC = () => {
                 <div className="flex-1">
                   <Card className="p-8 border-0 shadow-lg bg-white">
                     <CardContent className="p-0">
-                      <feature.icon className="w-16 h-16 text-blue-600 mb-6" />
                       <h3 className="text-2xl font-bold text-black mb-4">{feature.title}</h3>
                       <p className="text-lg text-gray-700 mb-6 leading-relaxed">{feature.description}</p>
-                      <ul className="space-y-3">
+                      <ul className="space-y-3 list-disc list-inside">
                         {feature.benefits.map((benefit, benefitIndex) => (
-                          <li key={benefitIndex} className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                            <span className="text-black">{benefit}</span>
+                          <li key={benefitIndex} className="text-black">
+                            {benefit}
                           </li>
                         ))}
                       </ul>
@@ -264,7 +239,6 @@ const PublicHomepage: React.FC = () => {
               onClick={() => navigate('/auth')}
             >
               Get Started Free
-              <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
         </div>
