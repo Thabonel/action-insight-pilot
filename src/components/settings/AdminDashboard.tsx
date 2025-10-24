@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Shield, 
-  Users, 
-  Activity, 
-  DollarSign, 
+import {
+  Shield,
+  Users,
+  Activity,
+  DollarSign,
   AlertTriangle,
   Server,
   Database,
@@ -18,6 +18,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react';
+import SupportTickets from './SupportTickets';
 
 const AdminDashboard: React.FC = () => {
   const [systemStatus] = useState({
@@ -275,34 +276,7 @@ const AdminDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="support" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
-                <span>Support Metrics</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-800">23</div>
-                  <div className="text-sm text-blue-600">Open Tickets</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-800">4.2h</div>
-                  <div className="text-sm text-green-600">Avg Response</div>
-                </div>
-                <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-800">92%</div>
-                  <div className="text-sm text-yellow-600">Satisfaction</div>
-                </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-800">156</div>
-                  <div className="text-sm text-purple-600">Resolved Today</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <SupportTickets />
         </TabsContent>
       </Tabs>
     </div>

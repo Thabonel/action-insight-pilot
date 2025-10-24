@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import SupportTicketDialog from '@/components/support/SupportTicketDialog';
 
 const PublicHomepage: React.FC = () => {
   const navigate = useNavigate();
@@ -241,6 +242,16 @@ const PublicHomepage: React.FC = () => {
               Get Started Free
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Support Section */}
+      <section className="py-12 bg-gray-50 border-t border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-lg text-gray-700 mb-4">
+            If something does not work, let me know and I will fix it immediately.
+          </p>
+          <SupportTicketDialog />
         </div>
       </section>
 
