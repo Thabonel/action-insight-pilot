@@ -121,37 +121,37 @@ const PublicHomepage: React.FC = () => {
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <Badge className="mb-6 bg-blue-100 text-blue-800 px-4 py-2">
+          <div className="text-center bg-black/70 backdrop-blur-md rounded-3xl p-12 md:p-16">
+            <Badge className="mb-6 bg-white/90 text-blue-600 px-4 py-2">
               <Sparkles className="w-4 h-4 mr-2" />
               Powered by Advanced AI
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold text-black mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
               AI Marketing Hub
-              <span className="block text-blue-600">Intelligent Automation Platform</span>
+              <span className="block text-blue-400">Intelligent Automation Platform</span>
             </h1>
-            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Transform your marketing operations with AI-powered automation that learns, adapts, and optimizes 
-              every campaign for maximum ROI. From lead generation to content creation, let artificial intelligence 
+            <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Transform your marketing operations with AI-powered automation that learns, adapts, and optimizes
+              every campaign for maximum ROI. From lead generation to content creation, let artificial intelligence
               handle the complexity while you focus on strategy.
             </p>
             <div className="flex justify-center items-center mb-12">
               <Button
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg shadow-xl"
                 onClick={() => navigate('/auth')}
               >
                 Get Started Free
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
-            
+
             {/* Trust Indicators */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">{stat.value}</div>
-                  <div className="text-sm text-gray-700 mt-1">{stat.label}</div>
+                  <div className="text-3xl font-bold text-blue-400">{stat.value}</div>
+                  <div className="text-sm text-gray-300 mt-1">{stat.label}</div>
                 </div>
               ))}
             </div>
