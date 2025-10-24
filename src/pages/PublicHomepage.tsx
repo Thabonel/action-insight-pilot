@@ -109,15 +109,14 @@ const PublicHomepage: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-50 via-blue-25 to-white py-20 overflow-hidden">
+      <section className="relative py-20 overflow-hidden">
         {/* Hero Background Image */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://kciuuxoqxfsogjuqflou.supabase.co/storage/v1/object/public/digital-assets/Marketing%20Hero.jpg"
             alt="AI Marketing Hub"
-            className="w-full h-full object-cover opacity-30"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/70 to-white/50" />
         </div>
 
         {/* Hero Content */}
