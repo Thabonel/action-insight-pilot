@@ -117,20 +117,22 @@ const PublicHomepage: React.FC = () => {
             alt="AI Marketing Hub"
             className="w-full h-full object-cover"
           />
+          {/* Subtle vignette overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
         </div>
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center bg-black/70 backdrop-blur-md rounded-3xl p-12 md:p-16">
-            <Badge className="mb-6 bg-white/90 text-blue-600 px-4 py-2">
+          <div className="text-center">
+            <Badge className="mb-6 bg-white text-blue-600 px-4 py-2 shadow-lg">
               <Sparkles className="w-4 h-4 mr-2" />
               Powered by Advanced AI
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
               AI Marketing Hub
-              <span className="block text-blue-400">Intelligent Automation Platform</span>
+              <span className="block text-blue-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">Intelligent Automation Platform</span>
             </h1>
-            <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
               Transform your marketing operations with AI-powered automation that learns, adapts, and optimizes
               every campaign for maximum ROI. From lead generation to content creation, let artificial intelligence
               handle the complexity while you focus on strategy.
@@ -138,7 +140,7 @@ const PublicHomepage: React.FC = () => {
             <div className="flex justify-center items-center mb-12">
               <Button
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg shadow-xl"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg shadow-2xl"
                 onClick={() => navigate('/auth')}
               >
                 Get Started Free
@@ -150,8 +152,8 @@ const PublicHomepage: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className="text-3xl font-bold text-blue-400">{stat.value}</div>
-                  <div className="text-sm text-gray-300 mt-1">{stat.label}</div>
+                  <div className="text-3xl font-bold text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">{stat.value}</div>
+                  <div className="text-sm text-gray-200 mt-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]">{stat.label}</div>
                 </div>
               ))}
             </div>
