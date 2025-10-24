@@ -83,7 +83,7 @@ const SupportTicketDialog: React.FC<SupportTicketDialogProps> = ({
       console.error('Error submitting support ticket:', error);
       toast({
         title: 'Submission Failed',
-        description: 'Unable to submit your ticket. Please try again.',
+        description: 'We could not submit your support ticket right now. Please check your internet connection and try again, or email us directly at support@aimarketinghub.com.',
         variant: 'destructive'
       });
     } finally {

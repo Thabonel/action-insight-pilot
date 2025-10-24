@@ -143,8 +143,8 @@ const LeadCaptureForms: React.FC = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create form",
+        title: "Could Not Create Form",
+        description: error instanceof Error ? error.message : "Your lead capture form could not be created. Please check your inputs and try again.",
         variant: "destructive"
       });
     }
@@ -166,8 +166,8 @@ const LeadCaptureForms: React.FC = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to generate embed code",
+        title: "Embed Code Unavailable",
+        description: "Could not generate embed code for this form. Please try again in a moment.",
         variant: "destructive"
       });
     }
@@ -203,8 +203,8 @@ const LeadCaptureForms: React.FC = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete form",
+        title: "Could Not Delete Form",
+        description: "The form could not be deleted. It may still be in use. Please try again or contact support if the issue persists.",
         variant: "destructive"
       });
     }

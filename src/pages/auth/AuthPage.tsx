@@ -51,8 +51,8 @@ const AuthPage: React.FC = () => {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Authentication failed",
+        title: "Authentication Error",
+        description: error.message || "Could not sign in. Please check your email and password, or try resetting your password.",
         variant: "destructive"
       });
     } finally {
