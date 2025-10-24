@@ -6,7 +6,7 @@ renders a video with json2video, then returns the finished URL.
 External publishing (Blotato/YouTube/etc.) will be added in later steps.
 """
 
-import os, json, asyncio
+import os, json, asyncio, logging
 from datetime import datetime
 
 import httpx
@@ -39,6 +39,7 @@ else:
 
 router    = APIRouter(prefix="/workflows/ai-video-creator", tags=["workflows"])
 scheduler = AsyncIOScheduler()
+logger    = logging.getLogger(__name__)
 
 # ───────────────────────────── HELPERS ──────────────────────────── #
 
@@ -133,7 +134,7 @@ async def wait_for_video(project_id: str, retries: int = 15, delay: int = 20) ->
 async def run_workflow():
     ideas  = await read_ideas()
     if not ideas:
-        print("[AI Video Creator] No new ideas found.")
+        logger.info("No new ideas found")
         return
     media  = await read_media()
     for idea in ideas:
@@ -142,9 +143,9 @@ async def run_workflow():
             project_id  = await create_video(script, media)
             video_url   = await wait_for_video(project_id)
             # TODO: publishing & sheet updates (next step)
-            print(f"[AI Video Creator] {idea['idea']} → {video_url}")
+            logger.info(f"Video created for idea '{idea['idea']}': {video_url}")
         except Exception as e:
-            print(f"[AI Video Creator] ERROR for idea '{idea['idea']}': {e}")
+            logger.error(f"Error creating video for idea '{idea['idea']}': {e}")
 
 # ───────────────────────────── SCHEDULER & ENDPOINTS ────────────── #
 

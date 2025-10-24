@@ -2,6 +2,7 @@
 
 import os
 import asyncio
+import logging
 import requests
 from typing import Dict, List, Optional, Any
 from datetime import datetime
@@ -9,6 +10,8 @@ from enum import Enum
 import openai
 from pydantic import BaseModel
 from .base_agent import BaseAgent
+
+logger = logging.getLogger(__name__)
 
 # Enums for better type safety
 class VideoStatus(Enum):
@@ -447,8 +450,8 @@ async def main():
         hashtags=["GreyNomads", "RVTravel", "Australia", "RetirementTravel"],
         music_url="https://example.com/upbeat-travel-music.mp3"
     )
-    
-    print(f"Video created and published: {result}")
+
+    logger.info(f"Video created and published: {result}")
 
 if __name__ == "__main__":
     asyncio.run(main())

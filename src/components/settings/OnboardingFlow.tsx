@@ -4,24 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  X, 
-  ChevronLeft, 
-  ChevronRight, 
-  Building2, 
-  Target, 
-  Zap, 
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+  Target,
+  Zap,
   Upload,
   CheckCircle,
   Lightbulb
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface OnboardingFlowProps {
   onClose: () => void;
 }
 
 const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     businessType: '',
     industry: '',
@@ -77,10 +83,59 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
     }
   };
 
-  const handleComplete = () => {
-    console.log('Onboarding completed with data:', formData);
-    // Implementation would save onboarding data and configure AI
-    onClose();
+  const handleComplete = async () => {
+    if (!user?.id) {
+      toast({
+        title: 'Error',
+        description: 'You must be logged in to complete onboarding',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          preference_category: 'onboarding',
+          preference_data: {
+            business_type: formData.businessType,
+            industry: formData.industry,
+            team_size: formData.teamSize,
+            goals: formData.goals,
+            current_tools: formData.currentTools,
+            budget_range: formData.budgetRange,
+            target_audience: formData.targetAudience,
+            content_types: formData.contentTypes,
+            completed_at: new Date().toISOString()
+          }
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: 'Onboarding completed',
+        description: 'Your preferences have been saved successfully'
+      });
+
+      onClose();
+    } catch (error) {
+      console.error('Error saving onboarding data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save onboarding data. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleArrayItem = (array: string[], item: string, setter: (items: string[]) => void) => {
@@ -361,8 +416,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
             Previous
           </Button>
           
-          <Button onClick={handleNext}>
-            {currentStep === totalSteps ? 'Complete Setup' : 'Next'}
+          <Button onClick={handleNext} disabled={isSaving}>
+            {currentStep === totalSteps ? (isSaving ? 'Saving...' : 'Complete Setup') : 'Next'}
             {currentStep < totalSteps && <ChevronRight className="h-4 w-4 ml-2" />}
           </Button>
         </div>
