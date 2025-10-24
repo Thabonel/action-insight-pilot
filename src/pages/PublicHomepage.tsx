@@ -73,10 +73,10 @@ const PublicHomepage: React.FC = () => {
   ];
 
   const stats = [
-    { value: "85%", label: "Increase in Lead Quality" },
-    { value: "3.2x", label: "Faster Campaign Creation" },
-    { value: "67%", label: "Reduction in Manual Tasks" },
-    { value: "150%", label: "ROI Improvement" }
+    { value: "AI-Powered", label: "Campaign Management" },
+    { value: "Multi-Channel", label: "Marketing Automation" },
+    { value: "Real-Time", label: "Analytics & Insights" },
+    { value: "Intelligent", label: "Lead Scoring" }
   ];
 
   return (
@@ -125,22 +125,14 @@ const PublicHomepage: React.FC = () => {
               every campaign for maximum ROI. From lead generation to content creation, let artificial intelligence 
               handle the complexity while you focus on strategy.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button 
-                size="lg" 
+            <div className="flex justify-center items-center mb-12">
+              <Button
+                size="lg"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg"
                 onClick={() => navigate('/auth')}
               >
-                Start Free Trial
+                Get Started Free
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg"
-                onClick={() => navigate('/auth')}
-              >
-                View Demo
               </Button>
             </div>
             
@@ -254,25 +246,16 @@ const PublicHomepage: React.FC = () => {
             Ready to Transform Your Marketing?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of marketing teams using AI to automate their workflows, 
-            optimize their campaigns, and achieve unprecedented ROI.
+            Start using AI to automate your workflows, optimize your campaigns, and improve your marketing ROI.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
+          <div className="flex justify-center">
+            <Button
+              size="lg"
               className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg"
               onClick={() => navigate('/auth')}
             >
-              Start Your Free Trial
+              Get Started Free
               <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-white text-white hover:bg-blue-700 px-8 py-4 text-lg"
-              onClick={() => navigate('/auth')}
-            >
-              Schedule Demo
             </Button>
           </div>
         </div>
@@ -281,13 +264,29 @@ const PublicHomepage: React.FC = () => {
       {/* Footer */}
       <footer className="bg-white text-black py-12 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Brain className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-black">AI Marketing Hub</span>
+          <div className="flex flex-col space-y-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="flex items-center space-x-2 mb-4 md:mb-0">
+                <Brain className="h-8 w-8 text-blue-600" />
+                <span className="text-xl font-bold text-black">AI Marketing Hub</span>
+              </div>
+              <div className="flex flex-wrap justify-center gap-6 text-sm">
+                <button onClick={() => navigate('/privacy')} className="text-gray-600 hover:text-blue-600">
+                  Privacy Policy
+                </button>
+                <button onClick={() => navigate('/terms')} className="text-gray-600 hover:text-blue-600">
+                  Terms of Service
+                </button>
+                <button onClick={() => navigate('/cookies')} className="text-gray-600 hover:text-blue-600">
+                  Cookie Policy
+                </button>
+                <button onClick={() => navigate('/acceptable-use')} className="text-gray-600 hover:text-blue-600">
+                  Acceptable Use
+                </button>
+              </div>
             </div>
-            <div className="text-gray-600">
-              © 2024 AI Marketing Hub. Intelligent Automation Platform.
+            <div className="text-center text-gray-600 text-sm">
+              © {new Date().getFullYear()} AI Marketing Hub. All rights reserved.
             </div>
           </div>
         </div>
