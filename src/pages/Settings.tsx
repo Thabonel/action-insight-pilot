@@ -3,15 +3,16 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Building2, 
-  Users, 
-  Settings as SettingsIcon, 
-  Download, 
-  Zap, 
+import {
+  Building2,
+  Users,
+  Settings as SettingsIcon,
+  Download,
+  Zap,
   Shield,
   Crown,
-  BookOpen
+  BookOpen,
+  UserCircle
 } from 'lucide-react';
 import WorkspaceSettings from '@/components/settings/WorkspaceSettings';
 import UserRoleManagement from '@/components/settings/UserRoleManagement';
@@ -21,6 +22,7 @@ import ExportDataSettings from '@/components/settings/ExportDataSettings';
 import AdminDashboard from '@/components/settings/AdminDashboard';
 import OnboardingFlow from '@/components/settings/OnboardingFlow';
 import SystemPreferences from '@/components/settings/SystemPreferences';
+import AccountSettings from '@/components/settings/AccountSettings';
 import { useUserRole } from '@/hooks/useUserRole';
 
 const Settings: React.FC = () => {
@@ -34,6 +36,13 @@ const Settings: React.FC = () => {
       name: 'Workspace',
       icon: Building2,
       description: 'Company settings and configuration',
+      enterprise: false
+    },
+    {
+      id: 'account',
+      name: 'Account & Privacy',
+      icon: UserCircle,
+      description: 'Account settings and data management',
       enterprise: false
     },
     {
@@ -108,7 +117,7 @@ const Settings: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 lg:w-fit bg-gray-100">
+        <TabsList className="grid w-full grid-cols-7 lg:w-fit bg-gray-100">
           {availableSections.map((section) => {
             const Icon = section.icon;
             return (
@@ -165,6 +174,10 @@ const Settings: React.FC = () => {
         {/* Settings Content */}
         <TabsContent value="workspace">
           <WorkspaceSettings />
+        </TabsContent>
+
+        <TabsContent value="account">
+          <AccountSettings />
         </TabsContent>
 
         <TabsContent value="users">

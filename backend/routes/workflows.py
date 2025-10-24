@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 import logging
+import uuid
 
 router = APIRouter(prefix="/api/workflows", tags=["workflows"])
 logger = logging.getLogger(__name__)
@@ -23,10 +24,12 @@ async def execute_workflow(workflow_data: Dict[str, Any]):
         if not workflow_id:
             raise HTTPException(status_code=400, detail="Workflow ID is required")
         
+        execution_id = str(uuid.uuid4())
+
         return {
             "status": "success",
             "message": f"Workflow {workflow_id} executed",
-            "execution_id": "placeholder-execution-id"
+            "execution_id": execution_id
         }
     except Exception as e:
         logger.error(f"Error executing workflow: {str(e)}")

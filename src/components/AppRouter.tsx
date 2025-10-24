@@ -23,7 +23,6 @@ import { KeywordResearch } from '@/pages/KeywordResearch'
 import KnowledgeManagement from '@/components/knowledge/KnowledgeManagement'
 import SimpleDashboard from '@/pages/SimpleDashboard'
 import AutopilotSetup from '@/pages/AutopilotSetup'
-import AIVideoStudio from '@/pages/AIVideoStudio'
 
 const AppRouter: React.FC = () => {
   return (
@@ -57,7 +56,6 @@ const AppRouter: React.FC = () => {
         <Route path="connect-platforms" element={<ConnectPlatforms />} />
         <Route path="landing-page-builder" element={<LandingPageBuilder />} />
         <Route path="keyword-research" element={<KeywordResearch />} />
-        <Route path="studio/ai-video" element={<AIVideoStudio />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/app/autopilot" replace />} />

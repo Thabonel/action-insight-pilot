@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any
 import logging
+import uuid
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
 logger = logging.getLogger(__name__)
@@ -24,10 +25,12 @@ async def execute_agent_task(task_data: Dict[str, Any]):
         if not agent_type:
             raise HTTPException(status_code=400, detail="Agent type is required")
         
+        task_id = str(uuid.uuid4())
+
         return {
             "status": "success",
             "message": f"Task queued for {agent_type} agent",
-            "task_id": "placeholder-task-id"
+            "task_id": task_id
         }
     except Exception as e:
         logger.error(f"Error executing agent task: {str(e)}")

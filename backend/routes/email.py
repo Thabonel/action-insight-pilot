@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 import logging
+import uuid
 
 router = APIRouter(prefix="/api/email", tags=["email"])
 logger = logging.getLogger(__name__)
@@ -9,10 +10,12 @@ logger = logging.getLogger(__name__)
 async def send_email(email_data: Dict[str, Any]):
     """Send email endpoint"""
     try:
+        email_id = str(uuid.uuid4())
+
         return {
             "status": "success",
             "message": "Email queued for sending",
-            "email_id": "placeholder-email-id"
+            "email_id": email_id
         }
     except Exception as e:
         logger.error(f"Error sending email: {str(e)}")
