@@ -179,7 +179,7 @@ const SimpleDashboard: React.FC = () => {
           <p className="text-gray-600 mt-1">Your AI is running your marketing 24/7</p>
         </div>
         <div className="flex gap-3">
-          <Link to="/app/autopilot/settings">
+          <Link to="/app/settings">
             <Button variant="outline" size="sm">
               <SettingsIcon className="h-4 w-4 mr-2" />
               Settings
