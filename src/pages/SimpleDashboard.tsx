@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -10,7 +10,8 @@ import {
   Play,
   Settings as SettingsIcon,
   Download,
-  Sparkles
+  Sparkles,
+  Target
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,6 +34,17 @@ interface AutopilotConfig {
   business_description: string;
 }
 
+interface Campaign {
+  id: string;
+  name: string;
+  status: string;
+  type: string;
+  total_budget: number;
+  spent: number;
+  auto_managed: boolean;
+  created_at: string;
+}
+
 const SimpleDashboard: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -44,6 +56,7 @@ const SimpleDashboard: React.FC = () => {
     week_start: new Date().toISOString()
   });
   const [autopilotConfig, setAutopilotConfig] = useState<AutopilotConfig | null>(null);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -74,6 +87,21 @@ const SimpleDashboard: React.FC = () => {
       if (statsError) throw statsError;
 
       setStats(statsData || stats);
+
+      // Fetch campaigns
+      const { data: campaignsData, error: campaignsError } = await supabase
+        .from('campaigns')
+        .select('id, name, status, type, total_budget, spent, auto_managed, created_at')
+        .eq('created_by', user?.id)
+        .eq('auto_managed', true)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (campaignsError) {
+        console.error('Error fetching campaigns:', campaignsError);
+      } else {
+        setCampaigns(campaignsData || []);
+      }
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -256,6 +284,86 @@ const SimpleDashboard: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Active Campaigns */}
+      {campaigns.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-blue-600" />
+                Active Campaigns ({campaigns.length})
+              </CardTitle>
+              <Link to="/app/campaigns">
+                <Button variant="outline" size="sm">
+                  View All
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {campaigns.map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-900">{campaign.name}</h3>
+                        <Badge
+                          variant={campaign.status === 'active' ? 'default' : 'secondary'}
+                          className={campaign.status === 'active' ? 'bg-green-100 text-green-700' : ''}
+                        >
+                          {campaign.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <span className="capitalize">{campaign.type.replace('_', ' ')}</span>
+                        <span>Budget: ${campaign.total_budget?.toLocaleString() || 0}</span>
+                        <span>Spent: ${campaign.spent?.toLocaleString() || 0}</span>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {new Date(campaign.created_at).toLocaleDateString()}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No Campaigns Message */}
+      {campaigns.length === 0 && autopilotConfig?.is_active && (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <Sparkles className="h-6 w-6 text-blue-600 mt-1" />
+              <div>
+                <h3 className="font-semibold text-blue-900 mb-1">Setting Up Your Campaigns</h3>
+                <p className="text-sm text-blue-800 mb-3">
+                  The autopilot runs daily at 2 AM UTC. If you just activated it, your first campaigns will be created during the next scheduled run.
+                </p>
+                <p className="text-sm text-blue-800">
+                  <strong>What happens next:</strong>
+                </p>
+                <ul className="text-sm text-blue-800 mt-2 space-y-1 list-disc list-inside">
+                  <li>AI analyzes your business description</li>
+                  <li>Creates campaigns for optimal channels (LinkedIn, Facebook, etc.)</li>
+                  <li>Generates 15-question assessments for lead capture</li>
+                  <li>Sets up targeting and budget allocation</li>
+                </ul>
+                <p className="text-xs text-blue-700 mt-3">
+                  Watch the Activity Feed on the right for real-time updates.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
