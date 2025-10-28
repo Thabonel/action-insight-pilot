@@ -1,5 +1,26 @@
 # AI Marketing Hub Documentation
 
+## COMPLETE DOCUMENTATION - THE BIBLE
+
+**Looking for complete platform documentation?**
+
+**→ Go to [BIBLE/](BIBLE/) for the complete, organized documentation (15,137+ lines)**
+
+- **Quick Start**: [BIBLE/README.md](BIBLE/README.md)
+- **Master Navigation**: [BIBLE/INDEX.md](BIBLE/INDEX.md)
+- **Frontend**: [BIBLE/01-FRONTEND/](BIBLE/01-FRONTEND/)
+- **Backend**: [BIBLE/02-BACKEND/](BIBLE/02-BACKEND/)
+- **Database**: [BIBLE/03-DATABASE/](BIBLE/03-DATABASE/)
+- **Edge Functions**: [BIBLE/04-EDGE-FUNCTIONS/](BIBLE/04-EDGE-FUNCTIONS/)
+- **Security**: [BIBLE/05-SECURITY/](BIBLE/05-SECURITY/)
+- **AI Systems**: [BIBLE/06-AI-SYSTEMS/](BIBLE/06-AI-SYSTEMS/)
+- **Features**: [BIBLE/07-FEATURES/](BIBLE/07-FEATURES/)
+- **Guides**: [BIBLE/08-GUIDES/](BIBLE/08-GUIDES/)
+
+The BIBLE contains 100% of the platform documentation organized by function.
+
+---
+
 ## Overview
 
 AI Marketing Hub is a comprehensive AI-powered marketing automation platform built with React, TypeScript, FastAPI (Python), and Supabase. The platform provides intelligent campaign management, AI-powered agents, lead generation, content creation, and marketing analytics.

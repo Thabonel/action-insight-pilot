@@ -307,59 +307,83 @@ npm run knip
 
 All AI services use **user-provided API keys** (no platform markup on costs).
 
+### AI Model Management System (NEW - October 2025)
+
+The platform now includes an **automated AI model management system** that:
+- Discovers latest models monthly from all providers
+- Automatically switches to newest flagship models
+- Tracks model capabilities, pricing, and availability
+- Provides admin UI for monitoring and manual triggers
+
+**Documentation**: `docs/AI-MODEL-MANAGEMENT.md`
+**Admin UI**: `/app/admin` → AI Models tab
+**Edge Functions**: `ai-model-updater` (monthly cron), `ai-model-config` (API)
+
 ### OpenAI (Primary - Required)
 
-**Latest Models (2025)**:
-- `gpt-5` - Best model for coding and agentic tasks (August 2025)
-- `gpt-5-mini` - Fast, cost-effective (default for most tasks)
-- `gpt-4.1` - Improved coding and instruction following
-- `gpt-4.1-mini` - Smaller, faster variant
+**Latest Models (October 2025)**:
+- `gpt-5` - Flagship model with best performance (August 2025)
+- `gpt-5-mini` - Fast, cost-effective (recommended default)
+- `gpt-5-nano` - Smallest fast model
+- `gpt-4.1` - Previous generation flagship (1M token context)
+- `gpt-4.1-mini` - Previous generation fast model
+- `o3` / `o4-mini` - Advanced reasoning models
 
-**Current Usage**:
-- **Default**: `gpt-5-mini` (backend/agents/social/multi_model_service.py:33)
+**Default Model**: `gpt-5` (flagship) - auto-updated monthly
+
+**Usage**:
 - Content generation, social media posts
 - Video script creation
 - Analytics and campaign optimization
+- All AI-powered features
 
 **Legacy models removed**: ~~gpt-4o~~, ~~gpt-4o-mini~~, ~~gpt-3.5-turbo~~ (deprecated)
 
 ### Anthropic Claude (Optional Fallback)
 
-**Latest Models (2025)**:
-- `claude-sonnet-4.5` - Best coding model in the world (September 2025)
-- `claude-opus-4.1` - Most powerful model (August 2025)
-- `claude-sonnet-4` - Previous version (May 2025)
+**Latest Models (October 2025)**:
+- `claude-sonnet-4-5` - Best coding model in the world (September 29, 2025)
+- `claude-opus-4-1` - Most powerful model for complex tasks (August 5, 2025)
+- `claude-haiku-4-5` - Fast and cost-effective (October 15, 2025)
+- `claude-sonnet-4` - Previous generation (May 22, 2025, 1M token context)
 
-**Current Usage**:
-- **Default**: `claude-sonnet-4.5` (backend/agents/social/multi_model_service.py:42)
+**Default Model**: `claude-sonnet-4-5` (flagship) - auto-updated monthly
+
+**Usage**:
 - Alternative to OpenAI for advanced reasoning
 - Analytics (optional)
 - Fallback when OpenAI fails
 
-**Legacy models removed**: ~~claude-3-sonnet-20240229~~, ~~claude-3-haiku-20240307~~ (deprecated)
+**Legacy models removed**: ~~claude-3-sonnet~~, ~~claude-3-haiku~~, ~~claude-3-opus~~ (deprecated)
 
 ### Google Gemini (Required for Video)
 
-**Latest Models (2025)**:
-- `gemini-2.5-pro` - State-of-the-art thinking model
-- `gemini-2.5-flash` - Best price-performance (default)
-- `gemini-2.0-flash` - Second generation workhorse
+**Latest Models (October 2025)**:
+- `gemini-2.5-pro` - State-of-the-art with adaptive thinking (1M token context)
+- `gemini-2.5-flash` - Best price-performance (recommended default)
+- `gemini-2.5-flash-lite` - Most cost-efficient
+- `gemini-2.5-computer-use` - UI interaction capabilities
+- `gemini-2.0-flash` - Previous generation
 - `veo-3` / `veo-3-fast` - Video generation
-- `nano-banana` - Image generation (Gemini 2.5 Flash Image)
+- `nano-banana` - Image generation
 
-**Current Usage**:
-- **Default**: `gemini-2.5-flash` (backend/agents/social/multi_model_service.py:60)
+**Default Model**: `gemini-2.5-pro` (flagship) - auto-updated monthly
+
+**Usage**:
 - AI video generation (`/app/studio/ai-video`)
 - Autopilot video ads
 - Scene planning and image generation
+- Visual content creation
 
-**Legacy models removed**: ~~gemini-pro~~, ~~gemini-pro-vision~~ (deprecated)
+**Legacy models removed**: ~~gemini-pro~~, ~~gemini-pro-vision~~, ~~gemini-1.5~~ (deprecated)
 
 ### Mistral AI (Optional Fallback)
 
-**Models**:
+**Latest Models (October 2025)**:
 - `mistral-large-latest` - Current flagship (default)
-- `mistral-medium-latest` - Smaller variant
+- `mistral-medium-latest` - Balanced performance
+
+**Default Model**: `mistral-large-latest` (flagship) - auto-updated monthly
 
 **Usage**: Third fallback option in multi-model service
 
@@ -370,6 +394,30 @@ fallback_order = [OpenAI, Anthropic, Mistral]
 ```
 
 If OpenAI fails → tries Anthropic → tries Mistral → returns error
+
+### Accessing Current Models
+
+All AI features now use the **AI Model Config API** for dynamic model selection:
+
+```typescript
+// Frontend/Edge Functions
+const { data } = await supabase.functions.invoke('ai-model-config', {
+  body: { provider: 'openai', type: 'flagship' }
+});
+const model = data.model_name;  // Returns current flagship model
+```
+
+```python
+# Backend Python
+from services.ai_model_service import AIModelService
+model_service = AIModelService()
+model = model_service.get_model('openai', 'flagship')
+```
+
+**Model Types**:
+- `flagship` - Best/latest model (always used by default)
+- `fast` - Cost-effective alternative
+- `legacy` - Deprecated but still available
 
 ---
 

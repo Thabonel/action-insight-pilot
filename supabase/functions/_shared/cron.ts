@@ -12,6 +12,12 @@ export const cronConfig = {
   'autopilot-weekly-report': {
     schedule: '0 9 * * 1', // Every Monday at 9 AM
     description: 'Weekly performance report generation'
+  },
+
+  // AI model updater - runs on 1st of every month at 3 AM UTC
+  'ai-model-updater': {
+    schedule: '0 3 1 * *', // First day of every month at 3 AM
+    description: 'Discover and update latest AI models from all providers'
   }
 };
 

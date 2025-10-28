@@ -16,9 +16,11 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  Brain
 } from 'lucide-react';
 import SupportTickets from './SupportTickets';
+import { AIModelManager } from '@/components/admin/AIModelManager';
 
 const AdminDashboard: React.FC = () => {
   const [systemStatus] = useState({
@@ -99,10 +101,11 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       <Tabs defaultValue="health" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="health">System Health</TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
+          <TabsTrigger value="ai-models">AI Models</TabsTrigger>
           <TabsTrigger value="support">Support</TabsTrigger>
         </TabsList>
 
@@ -273,6 +276,10 @@ const AdminDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-models" className="space-y-6">
+          <AIModelManager />
         </TabsContent>
 
         <TabsContent value="support" className="space-y-6">
