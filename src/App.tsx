@@ -12,6 +12,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import TermsOfService from '@/pages/TermsOfService';
 import CookiePolicy from '@/pages/CookiePolicy';
 import AcceptableUsePolicy from '@/pages/AcceptableUsePolicy';
+import PublicAssessmentPage from '@/pages/PublicAssessmentPage';
 import { Toaster } from "@/components/ui/toaster";
 import { OnboardingProvider } from '@/contexts/OnboardingContext';
 import { OnboardingOverlay } from '@/components/onboarding/OnboardingOverlay';
@@ -32,6 +33,7 @@ function App() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/cookies" element={<CookiePolicy />} />
             <Route path="/acceptable-use" element={<AcceptableUsePolicy />} />
+            <Route path="/a/:assessmentId" element={<PublicAssessmentPage />} />
             <Route path="/app/*" element={<AppRouter />} />
           </Routes>
           <OnboardingOverlay />

@@ -71,6 +71,7 @@ optional_routers = [
     ("routes.ai_video", "router"),
     ("routes.user", "router"),
     ("routes.support", "router"),
+    ("routes.assessments", "router"),
 ]
 
 for module_path, router_name in optional_routers:

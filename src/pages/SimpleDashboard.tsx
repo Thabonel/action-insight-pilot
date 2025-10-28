@@ -59,9 +59,11 @@ const SimpleDashboard: React.FC = () => {
         .from('marketing_autopilot_config')
         .select('is_active, monthly_budget, business_description')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
-      if (configError && configError.code !== 'PGRST116') throw configError;
+      if (configError) {
+        console.error('Error fetching autopilot config:', configError);
+      }
 
       setAutopilotConfig(configData);
 

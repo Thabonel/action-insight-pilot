@@ -91,7 +91,10 @@ async function processAutopilot(supabase: any, config: any) {
   // Step 2: Sync leads to autopilot inbox
   await syncLeadsToInbox(supabase, userId);
 
-  // Step 3: Update last optimized timestamp
+  // Step 3: Process assessment-based workflows
+  await processAssessmentWorkflows(supabase, userId, configId);
+
+  // Step 4: Update last optimized timestamp
   await supabase
     .from('marketing_autopilot_config')
     .update({ last_optimized_at: new Date().toISOString() })
@@ -155,6 +158,9 @@ async function createInitialCampaigns(supabase: any, userId: string, configId: s
       p_metadata: { channel: channel.name, budget: channelBudget }
     });
 
+    // Create assessment for lead capture
+    await createCampaignAssessment(supabase, userId, campaign.id, configId, config);
+
     // Create initial campaign tasks
     await createCampaignTasks(supabase, campaign.id, userId, channel);
   }
@@ -197,6 +203,74 @@ async function createCampaignTasks(supabase: any, campaignId: string, userId: st
 
   if (error) {
     console.error('Error creating campaign tasks:', error);
+  }
+}
+
+async function createCampaignAssessment(supabase: any, userId: string, campaignId: string, configId: string, config: any) {
+  try {
+    console.log(`Generating assessment for campaign ${campaignId}...`);
+
+    // Extract business info from autopilot config
+    const businessDescription = config.business_description || '';
+    const targetAudience = config.ai_strategy?.targetAudience || config.target_audience || 'potential customers';
+    const businessType = config.business_type || 'business';
+
+    // Call assessment-generator Edge Function
+    const { data: assessmentData, error: genError } = await supabase.functions.invoke('assessment-generator', {
+      body: {
+        business_type: businessType,
+        target_audience: targetAudience,
+        product_offer: businessDescription,
+        assessment_goal: 'Qualify leads and identify their readiness to buy',
+        campaign_id: campaignId
+      }
+    });
+
+    if (genError) {
+      console.error('Assessment generation error:', genError);
+      return;
+    }
+
+    if (!assessmentData?.success) {
+      console.error('Assessment generation failed:', assessmentData?.error);
+      return;
+    }
+
+    const assessment = assessmentData.assessment;
+    const assessmentId = assessmentData.assessment_id;
+
+    console.log(`Assessment generated: ${assessmentId}`);
+
+    // Update campaign metadata with assessment URL
+    await supabase
+      .from('campaigns')
+      .update({
+        metadata: {
+          ...config.metadata,
+          assessment_id: assessmentId,
+          assessment_url: `/a/${assessmentId}`
+        }
+      })
+      .eq('id', campaignId);
+
+    // Log activity
+    await supabase.rpc('log_autopilot_activity', {
+      p_user_id: userId,
+      p_config_id: configId,
+      p_activity_type: 'assessment_created',
+      p_description: `Auto-generated assessment for lead capture: ${assessment.headline}`,
+      p_entity_type: 'campaign',
+      p_entity_id: campaignId,
+      p_metadata: {
+        assessment_id: assessmentId,
+        question_count: assessment.questions?.length || 0
+      }
+    });
+
+    console.log(`Assessment linked to campaign. URL: /a/${assessmentId}`);
+
+  } catch (error) {
+    console.error(`Error creating assessment for campaign ${campaignId}:`, error);
   }
 }
 
@@ -331,6 +405,93 @@ async function syncLeadsToInbox(supabase: any, userId: string) {
     if (!error) {
       console.log(`Synced ${leadsToAdd.length} new leads to inbox`);
     }
+  }
+}
+
+async function processAssessmentWorkflows(supabase: any, userId: string, configId: string) {
+  try {
+    // Get recent assessment responses (last 7 days)
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: recentResponses } = await supabase
+      .from('assessment_responses')
+      .select(`
+        *,
+        assessment_templates(user_id),
+        leads(id, email, full_name, tags, score)
+      `)
+      .eq('assessment_templates.user_id', userId)
+      .gte('submitted_at', weekAgo)
+      .order('submitted_at', { ascending: false });
+
+    if (!recentResponses || recentResponses.length === 0) return;
+
+    console.log(`Processing ${recentResponses.length} recent assessment responses`);
+
+    for (const response of recentResponses) {
+      const lead = response.leads;
+      if (!lead) continue;
+
+      const score = response.score;
+      const category = response.result_category;
+
+      // Apply score-based tags
+      let newTags = lead.tags || [];
+
+      if (score >= 75) {
+        // High score - ready to buy
+        if (!newTags.includes('high_intent')) newTags.push('high_intent');
+        if (!newTags.includes('qualified')) newTags.push('qualified');
+
+        // Log high-value lead
+        await supabase.rpc('log_autopilot_activity', {
+          p_user_id: userId,
+          p_config_id: configId,
+          p_activity_type: 'high_score_lead',
+          p_description: `High-intent lead captured: ${lead.email} (score: ${score})`,
+          p_entity_type: 'lead',
+          p_entity_id: lead.id,
+          p_metadata: {
+            score,
+            category,
+            assessment_id: response.assessment_id
+          }
+        });
+
+      } else if (score >= 50) {
+        // Medium score - needs nurturing
+        if (!newTags.includes('nurture')) newTags.push('nurture');
+        if (!newTags.includes('interested')) newTags.push('interested');
+
+      } else {
+        // Low score - long-term prospect
+        if (!newTags.includes('education_track')) newTags.push('education_track');
+        if (!newTags.includes('early_stage')) newTags.push('early_stage');
+      }
+
+      // Update lead with tags
+      await supabase
+        .from('leads')
+        .update({
+          tags: newTags,
+          score: Math.max(lead.score || 0, score)
+        })
+        .eq('id', lead.id);
+
+      // Update inbox status based on score
+      const inboxStatus = score >= 75 ? 'hot' : score >= 50 ? 'warm' : 'cold';
+
+      await supabase
+        .from('autopilot_lead_inbox')
+        .update({ status: inboxStatus })
+        .eq('lead_id', lead.id)
+        .eq('user_id', userId);
+    }
+
+    console.log(`Processed assessment workflows for ${recentResponses.length} leads`);
+
+  } catch (error) {
+    console.error('Error processing assessment workflows:', error);
   }
 }
 
