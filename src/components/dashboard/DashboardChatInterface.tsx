@@ -27,8 +27,13 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   } = useChatLogic({ onChatUpdate });
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-50 overflow-hidden">
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+        <h3 className="text-lg font-medium text-slate-900">AI Marketing Assistant</h3>
+        <p className="text-sm text-slate-600">Ask me anything about your marketing automation</p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto bg-gray-50">
         <ChatHistory
           chatHistory={chatHistory}
           isTyping={isTyping}
