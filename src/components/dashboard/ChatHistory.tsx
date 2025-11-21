@@ -19,23 +19,25 @@ interface ChatHistoryProps {
   user: any;
 }
 
-const ChatHistory: React.FC<ChatHistoryProps> = ({ 
-  chatHistory, 
-  isTyping, 
-  currentMessage, 
-  user 
+const ChatHistory: React.FC<ChatHistoryProps> = ({
+  chatHistory,
+  isTyping,
+  currentMessage,
+  user
 }) => {
   return (
-    <div className="h-80 overflow-y-auto mb-4 space-y-4">
-      {!user && <AuthenticationPrompt />}
+    <div className="w-full h-full">
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        {!user && <AuthenticationPrompt />}
 
-      {chatHistory.length === 0 && !isTyping && user && <EmptyChatState />}
-      
-      {chatHistory.map((chat) => (
-        <ChatMessage key={chat.id} chat={chat} />
-      ))}
-      
-      {isTyping && <TypingIndicator currentMessage={currentMessage} />}
+        {chatHistory.length === 0 && !isTyping && user && <EmptyChatState />}
+
+        {chatHistory.map((chat) => (
+          <ChatMessage key={chat.id} chat={chat} />
+        ))}
+
+        {isTyping && <TypingIndicator currentMessage={currentMessage} />}
+      </div>
     </div>
   );
 };

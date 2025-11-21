@@ -27,27 +27,26 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   } = useChatLogic({ onChatUpdate });
 
   return (
-    <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-slate-900">AI Marketing Assistant</h3>
-        <p className="text-sm text-slate-600">Ask me anything about your marketing automation</p>
-      </div>
-      
-      <div className="p-6">
-        <ChatHistory 
+    <div className="flex flex-col flex-1 bg-gray-50 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <ChatHistory
           chatHistory={chatHistory}
           isTyping={isTyping}
           currentMessage={chatMessage}
           user={user}
         />
-        
-        <ChatInput
-          chatMessage={chatMessage}
-          setChatMessage={setChatMessage}
-          onSubmit={handleChatSubmit}
-          user={user}
-          isTyping={isTyping}
-        />
+      </div>
+
+      <div className="border-t border-gray-200 bg-white p-4 flex-shrink-0">
+        <div className="max-w-4xl mx-auto">
+          <ChatInput
+            chatMessage={chatMessage}
+            setChatMessage={setChatMessage}
+            onSubmit={handleChatSubmit}
+            user={user}
+            isTyping={isTyping}
+          />
+        </div>
       </div>
     </div>
   );
