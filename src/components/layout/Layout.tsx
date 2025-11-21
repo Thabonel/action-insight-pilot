@@ -52,19 +52,25 @@ const Layout: React.FC = () => {
     }
   };
 
-  // Simple Mode Navigation (2 items)
+  // Simple Mode Navigation (3 items)
   const simpleNavItems = [
     {
-      name: 'Autopilot',
+      name: 'Autopilot Dashboard',
       href: '/app/autopilot',
       icon: Sparkles,
-      description: 'Your marketing on autopilot'
+      description: 'Your marketing results'
+    },
+    {
+      name: 'AI Chat',
+      href: '/app/conversational-dashboard',
+      icon: LayoutDashboard,
+      description: 'Ask me anything'
     },
     {
       name: 'Settings',
       href: '/app/settings',
       icon: Settings,
-      description: 'Configure your account'
+      description: 'Configure autopilot'
     }
   ];
 
