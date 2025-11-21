@@ -77,21 +77,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUp = async (email: string, password: string): Promise<{ error?: any }> => {
     setLoading(true);
     try {
-      // Validate password strength before signup
-      const { validatePasswordStrength } = await import('@/lib/validation/input-sanitizer');
-      const validation = validatePasswordStrength(password);
-      
-      if (!validation.isValid) {
+      const { validatePasswordStrength, validateEmail } = await import('@/lib/validation/input-sanitizer');
+
+      const emailValidation = validateEmail(email);
+      if (!emailValidation) {
         setLoading(false);
-        return { 
-          error: { 
-            message: `Password requirements not met: ${validation.errors.join(', ')}` 
+        return {
+          error: {
+            message: 'Invalid email address format'
+          }
+        };
+      }
+
+      const passwordValidation = validatePasswordStrength(password);
+
+      if (!passwordValidation.isValid) {
+        setLoading(false);
+        return {
+          error: {
+            message: `Password requirements not met: ${passwordValidation.errors.join(', ')}`
+          }
+        };
+      }
+
+      const { data: validationData, error: validationError } = await supabase.functions.invoke(
+        'validate-user-registration',
+        {
+          body: { email, password }
+        }
+      );
+
+      if (validationError || !validationData?.success) {
+        setLoading(false);
+        return {
+          error: {
+            message: validationData?.errors?.join(', ') || 'Registration validation failed'
           }
         };
       }
 
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { error } = await supabase.auth.signUp({
         email,
         password,

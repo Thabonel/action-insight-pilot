@@ -167,8 +167,8 @@ const Layout: React.FC = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto">
-        <div className="p-6">
+      <aside className="w-64 bg-white shadow-sm border-r border-gray-200 flex flex-col">
+        <div className="p-6 flex-shrink-0">
           <h2 className="text-xl font-bold text-gray-900">AI Marketing Hub</h2>
           <p className="text-sm text-gray-600 mt-1">
             {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
@@ -178,56 +178,14 @@ const Layout: React.FC = () => {
           <div className="mt-4">
             <ModeSwitcher />
           </div>
-
-          {/* User info and logout section */}
-          {user && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-blue-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
-                </div>
-              </div>
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                    disabled={isLoggingOut}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    {isLoggingOut ? 'Signing out...' : 'Sign out'}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Sign out</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to sign out of your account?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
-                      {isLoggingOut ? 'Signing out...' : 'Sign out'}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
         </div>
-        
-        <nav className="px-3 pb-6">
+
+        <nav className="flex-1 px-3 pb-6 overflow-y-auto">
           <div className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
-              
+
               return (
                 <NavLink
                   key={item.name}
@@ -238,7 +196,7 @@ const Layout: React.FC = () => {
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <Icon 
+                  <Icon
                     className={`mr-3 h-5 w-5 transition-colors duration-200 ${
                       isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
                     }`}
@@ -261,6 +219,48 @@ const Layout: React.FC = () => {
             })}
           </div>
         </nav>
+
+        {/* User info and logout section - moved to bottom */}
+        {user && (
+          <div className="p-4 border-t border-gray-200 flex-shrink-0">
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
+              </div>
+            </div>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  disabled={isLoggingOut}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sign out</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to sign out of your account?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+                    {isLoggingOut ? 'Signing out...' : 'Sign out'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </aside>
 
       {/* Main content */}
