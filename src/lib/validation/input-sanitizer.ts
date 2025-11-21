@@ -91,7 +91,17 @@ export const createRateLimiter = (maxRequests: number, windowMs: number) => {
   };
 };
 
-// Validate password strength
+const COMMON_PASSWORDS = [
+  'password', 'password123', '12345678', 'qwerty', 'abc123',
+  'monkey', '1234567', 'letmein', 'trustno1', 'dragon',
+  'baseball', 'iloveyou', 'master', 'sunshine', 'ashley',
+  'bailey', 'passw0rd', 'shadow', '123123', '654321'
+];
+
+function isCommonPassword(password: string): boolean {
+  return COMMON_PASSWORDS.includes(password.toLowerCase());
+}
+
 export const validatePasswordStrength = (password: string): {
   isValid: boolean;
   errors: string[];
@@ -99,37 +109,58 @@ export const validatePasswordStrength = (password: string): {
 } => {
   const errors: string[] = [];
   let score = 0;
-  
+
+  if (!password || typeof password !== 'string') {
+    return {
+      isValid: false,
+      errors: ['Password is required'],
+      score: 0
+    };
+  }
+
+  if (password.length > 128) {
+    errors.push('Password is too long (maximum 128 characters)');
+    return {
+      isValid: false,
+      errors,
+      score: 0
+    };
+  }
+
   if (password.length < 8) {
     errors.push('Password must be at least 8 characters long');
   } else {
     score += 1;
   }
-  
+
   if (!/[a-z]/.test(password)) {
     errors.push('Password must contain at least one lowercase letter');
   } else {
     score += 1;
   }
-  
+
   if (!/[A-Z]/.test(password)) {
     errors.push('Password must contain at least one uppercase letter');
   } else {
     score += 1;
   }
-  
+
   if (!/\d/.test(password)) {
     errors.push('Password must contain at least one number');
   } else {
     score += 1;
   }
-  
+
   if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     errors.push('Password must contain at least one special character');
   } else {
     score += 1;
   }
-  
+
+  if (isCommonPassword(password)) {
+    errors.push('Password is too common. Please choose a more unique password');
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
