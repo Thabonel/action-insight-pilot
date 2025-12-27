@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { SocialPlatform, PlatformConnection, PlatformConfig } from '@/types/socialConnectors';
 import { useToast } from '@/hooks/use-toast';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import PlatformSelector from '@/components/socialConnectors/PlatformSelector';
 import ConnectedAccountsDashboard from '@/components/socialConnectors/ConnectedAccountsDashboard';
 import OAuthHandler from '@/components/socialConnectors/OAuthHandler';
@@ -261,6 +262,7 @@ const ConnectPlatforms: React.FC = () => {
           />
         </TabsContent>
       </Tabs>
+      <FloatingHelpButton helpSection="connectPlatforms" />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { TrendingUp, Users, Mail, DollarSign, Activity, AlertCircle } from 'lucide-react';
 
@@ -178,6 +179,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      <FloatingHelpButton helpSection="adminDashboard" />
     </div>
   );
 };

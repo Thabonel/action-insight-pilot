@@ -31,6 +31,7 @@ import {
   FormInput,
   ExternalLink
 } from 'lucide-react';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 
 const LeadCaptureForms: React.FC = () => {
   const navigate = useNavigate();
@@ -469,6 +470,7 @@ const LeadCaptureForms: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
+      <FloatingHelpButton helpSection="leadCaptureForms" />
     </div>
   );
 };

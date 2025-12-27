@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import EmailAIAssistant from '@/components/email/EmailAIAssistant';
 import IntelligentCampaignBuilder from '@/components/email/IntelligentCampaignBuilder';
 import RealTimeMetricsDashboard from '@/components/email/RealTimeMetricsDashboard';
@@ -39,6 +40,7 @@ const Email: React.FC = () => {
         {/* Workflow Features */}
         <EmailWorkflowFeatures />
       </div>
+      <FloatingHelpButton helpSection="email" />
     </div>
   );
 };

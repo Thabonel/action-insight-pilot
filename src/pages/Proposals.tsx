@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus } from 'lucide-react';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import { ProposalFormData } from '@/types/proposals';
 import { useProposals } from '@/hooks/useProposals';
 import ProposalForm from '@/components/proposals/ProposalForm';
@@ -156,6 +157,7 @@ const Proposals: React.FC = () => {
           />
         </TabsContent>
       </Tabs>
+      <FloatingHelpButton helpSection="proposals" />
     </div>
   );
 };

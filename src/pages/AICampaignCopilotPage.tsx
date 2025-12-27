@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import AICampaignCopilot from '@/components/AICampaignCopilot';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
@@ -71,10 +72,11 @@ const AICampaignCopilotPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
-      <AICampaignCopilot 
+      <AICampaignCopilot
         initialBrief={initialBrief}
         onSave={handleSaveCampaign}
       />
+      <FloatingHelpButton helpSection="aiCampaignCopilot" />
     </div>
   );
 };
