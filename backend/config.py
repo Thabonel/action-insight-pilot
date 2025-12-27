@@ -32,11 +32,11 @@ class AgentManager:
     def _validate_api_keys(self):
         """Validate required API keys and provide clear error messages"""
         required_keys = {
-            'OPENAI_API_KEY': 'OpenAI API key for AI-powered content generation',
+            'ANTHROPIC_API_KEY': 'Anthropic Claude API key for AI-powered content generation (primary AI provider)',
             'SUPABASE_URL': 'Supabase project URL for database operations',
             'SUPABASE_SERVICE_ROLE_KEY': 'Supabase service role key for backend operations'
         }
-        
+
         for key, description in required_keys.items():
             value = os.getenv(key)
             if not value:
@@ -46,10 +46,10 @@ class AgentManager:
                     'required': True
                 })
                 logger.warning(f"❌ Missing required API key: {key} ({description})")
-        
+
         # Optional API keys with warnings
         optional_keys = {
-            'ANTHROPIC_API_KEY': 'Anthropic API key for Claude AI (optional fallback)',
+            'GEMINI_API_KEY': 'Google Gemini API key for visual AI tasks',
             'FACEBOOK_CLIENT_ID': 'Facebook OAuth integration',
             'TWITTER_CLIENT_ID': 'Twitter OAuth integration',
             'LINKEDIN_CLIENT_ID': 'LinkedIn OAuth integration'
@@ -124,9 +124,9 @@ class AgentManager:
         ]
         
         # For development, try to load agents but don't fail startup
-        openai_key = os.getenv("OPENAI_API_KEY", "")
-        if not openai_key:
-            logger.warning("⚠️ OpenAI API key not configured - using mock agents")
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not anthropic_key:
+            logger.warning("⚠️ Anthropic Claude API key not configured - using mock agents")
             for config in agent_configs:
                 mock_agent = MockAgent(config['name'])
                 self.initialized_agents[config['name']] = mock_agent
@@ -162,8 +162,8 @@ class AgentManager:
     def _get_integrations_config(self) -> Dict[str, Any]:
         """Get integrations configuration with available API keys"""
         return {
-            'openai_key': os.getenv("OPENAI_API_KEY", ""),
             'anthropic_key': os.getenv("ANTHROPIC_API_KEY", ""),
+            'gemini_key': os.getenv("GEMINI_API_KEY", ""),
             'supabase_url': os.getenv("SUPABASE_URL", ""),
             'supabase_key': os.getenv("SUPABASE_SERVICE_ROLE_KEY", ""),
             'facebook_client_id': os.getenv("FACEBOOK_CLIENT_ID", ""),
@@ -226,21 +226,22 @@ agent_manager = AgentManager()
 def get_environment_config() -> Dict[str, Any]:
     """Get environment configuration with validation"""
     config = {
-        "openai_key": os.getenv("OPENAI_API_KEY"),
+        "anthropic_key": os.getenv("ANTHROPIC_API_KEY"),
+        "gemini_key": os.getenv("GEMINI_API_KEY"),
         "supabase_url": os.getenv("SUPABASE_URL"),
         "supabase_key": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
         "port": int(os.getenv("PORT", 8000)),
         "host": os.getenv("HOST", "0.0.0.0"),
         "environment": os.getenv("ENVIRONMENT", "production")
     }
-    
+
     # Log missing critical configuration
-    critical_keys = ["openai_key", "supabase_url", "supabase_key"]
+    critical_keys = ["anthropic_key", "supabase_url", "supabase_key"]
     missing_critical = [key for key in critical_keys if not config[key]]
-    
+
     if missing_critical:
         logger.error(f"❌ Missing critical configuration: {missing_critical}")
-    
+
     return config
 
 def get_system_health() -> Dict[str, Any]:

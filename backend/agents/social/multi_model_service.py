@@ -19,10 +19,10 @@ class MultiModelService:
     
     def __init__(self):
         self.logger = logger
-        self.current_provider = LLMProvider.OPENAI
+        self.current_provider = LLMProvider.ANTHROPIC
         self.api_keys = {}
         self.model_configs = self._initialize_model_configs()
-        self.fallback_order = [LLMProvider.OPENAI, LLMProvider.ANTHROPIC, LLMProvider.MISTRAL]
+        self.fallback_order = [LLMProvider.ANTHROPIC, LLMProvider.GOOGLE, LLMProvider.MISTRAL]
     
     def _initialize_model_configs(self) -> Dict[str, Dict[str, Any]]:
         """Initialize configuration for different LLM providers"""
@@ -38,8 +38,8 @@ class MultiModelService:
             },
             LLMProvider.ANTHROPIC: {
                 "api_url": "https://api.anthropic.com/v1/messages",
-                "models": ["claude-sonnet-4.5", "claude-opus-4.1", "claude-sonnet-4"],
-                "default_model": "claude-sonnet-4.5",
+                "models": ["claude-opus-4.5", "claude-sonnet-4.5", "claude-haiku-4.5", "claude-opus-4.1", "claude-sonnet-4"],
+                "default_model": "claude-opus-4.5",
                 "max_tokens": 4000,
                 "temperature": 0.7,
                 "supports_vision": True,
@@ -56,8 +56,8 @@ class MultiModelService:
             },
             LLMProvider.GOOGLE: {
                 "api_url": "https://generativelanguage.googleapis.com/v1beta/models",
-                "models": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"],
-                "default_model": "gemini-2.5-flash",
+                "models": ["gemini-3-pro", "gemini-3-flash", "gemini-2.5-pro", "gemini-2.5-flash"],
+                "default_model": "gemini-3-flash",
                 "max_tokens": 4000,
                 "temperature": 0.7,
                 "supports_vision": True,

@@ -2,7 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -91,45 +91,45 @@ Create detailed buyer personas. Return them as a JSON array of objects with the 
       throw new Error('Invalid request: must provide either message or type with context');
     }
 
-    if (!openAIApiKey) {
-      console.error('OPENAI_API_KEY environment variable not set');
-      throw new Error('OpenAI API key not configured');
+    if (!anthropicApiKey) {
+      console.error('ANTHROPIC_API_KEY environment variable not set');
+      throw new Error('Anthropic Claude API key not configured');
     }
 
-    console.log('Calling OpenAI API with model: gpt-5');
+    console.log('Calling Anthropic Claude API with model: claude-opus-4.5');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'x-api-key': anthropicApiKey,
         'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model: 'claude-opus-4.5',
+        max_tokens: 4000,
+        system: systemPrompt,
         messages: [
-          { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 1500,
         temperature: 0.7,
-        response_format: { type: 'json_object' }
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
+      console.error('Claude API error:', errorData);
       console.error('Status:', response.status, 'StatusText:', response.statusText);
-      throw new Error(errorData.error?.message || `OpenAI API request failed with status ${response.status}`);
+      throw new Error(errorData.error?.message || `Claude API request failed with status ${response.status}`);
     }
 
     const data = await response.json();
 
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response from OpenAI API');
+    if (!data.content || !data.content[0] || !data.content[0].text) {
+      throw new Error('Invalid response from Claude API');
     }
 
-    const generatedContent = data.choices[0].message.content;
+    const generatedContent = data.content[0].text;
 
     try {
       const parsedContent = JSON.parse(generatedContent);
@@ -164,7 +164,7 @@ Create detailed buyer personas. Return them as a JSON array of objects with the 
     return new Response(JSON.stringify({
       success: false,
       error: errorMessage,
-      hint: isConfigError ? 'Check that OPENAI_API_KEY is set in Supabase Edge Function environment variables' : undefined
+      hint: isConfigError ? 'Check that ANTHROPIC_API_KEY is set in Supabase Edge Function environment variables' : undefined
     }), {
       status: isConfigError ? 503 : 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

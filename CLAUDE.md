@@ -11,7 +11,7 @@ This file provides essential context for Claude Code when working on this projec
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Shadcn/ui
 - **Backend**: FastAPI (Python), deployed on Render
 - **Database**: PostgreSQL via Supabase
-- **AI Services**: Google Gemini API (user-provided keys)
+- **AI Services**: Anthropic Claude API (primary), Google Gemini API (visual AI) - user-provided keys
 - **Deployment**: Frontend on Vercel/Netlify, Backend on Render
 
 ---
@@ -319,63 +319,57 @@ The platform now includes an **automated AI model management system** that:
 **Admin UI**: `/app/admin` → AI Models tab
 **Edge Functions**: `ai-model-updater` (monthly cron), `ai-model-config` (API)
 
-### OpenAI (Primary - Required)
+### Anthropic Claude (Primary - Required)
 
-**Latest Models (October 2025)**:
-- `gpt-5` - Flagship model with best performance (August 2025)
-- `gpt-5-mini` - Fast, cost-effective (recommended default)
-- `gpt-5-nano` - Smallest fast model
-- `gpt-4.1` - Previous generation flagship (1M token context)
-- `gpt-4.1-mini` - Previous generation fast model
-- `o3` / `o4-mini` - Advanced reasoning models
-
-**Default Model**: `gpt-5` (flagship) - auto-updated monthly
-
-**Usage**:
-- Content generation, social media posts
-- Video script creation
-- Analytics and campaign optimization
-- All AI-powered features
-
-**Legacy models removed**: ~~gpt-4o~~, ~~gpt-4o-mini~~, ~~gpt-3.5-turbo~~ (deprecated)
-
-### Anthropic Claude (Optional Fallback)
-
-**Latest Models (October 2025)**:
-- `claude-sonnet-4-5` - Best coding model in the world (September 29, 2025)
-- `claude-opus-4-1` - Most powerful model for complex tasks (August 5, 2025)
-- `claude-haiku-4-5` - Fast and cost-effective (October 15, 2025)
+**Latest Models (December 2025)**:
+- `claude-opus-4.5` - Flagship model, industry-leading coding performance (November 24, 2025)
+- `claude-sonnet-4.5` - Best coding model, fast and efficient (September 29, 2025)
+- `claude-haiku-4.5` - Fast and cost-effective (October 15, 2025)
+- `claude-opus-4.1` - Previous generation powerful model (August 5, 2025)
 - `claude-sonnet-4` - Previous generation (May 22, 2025, 1M token context)
 
-**Default Model**: `claude-sonnet-4-5` (flagship) - auto-updated monthly
+**Default Model**: `claude-opus-4.5` (flagship) - auto-updated monthly
 
 **Usage**:
-- Alternative to OpenAI for advanced reasoning
-- Analytics (optional)
-- Fallback when OpenAI fails
+- Primary AI for all content generation and social media posts
+- Video script creation
+- Analytics and campaign optimization
+- Advanced reasoning and strategic planning
+- All AI-powered features
+
+**Pricing**: $5/million input tokens, $25/million output tokens
 
 **Legacy models removed**: ~~claude-3-sonnet~~, ~~claude-3-haiku~~, ~~claude-3-opus~~ (deprecated)
 
-### Google Gemini (Required for Video)
+### OpenAI (Deprecated)
 
-**Latest Models (October 2025)**:
+**Status**: OpenAI/GPT models have been removed from the platform as of December 2025.
+
+**Migration**: All AI features now use Anthropic Claude Opus 4.5 as the primary AI provider.
+
+**Legacy models removed**: ~~gpt-5~~, ~~gpt-5-mini~~, ~~gpt-4.1~~, ~~gpt-4o~~, ~~gpt-4o-mini~~, ~~gpt-3.5-turbo~~ (deprecated)
+
+### Google Gemini (Required for Visual AI)
+
+**Latest Models (December 2025)**:
+- `gemini-3-pro` - Latest flagship with advanced multimodal reasoning
+- `gemini-3-flash` - 3x faster than Gemini 2.5, 81.2% on MMMU-Pro (recommended default)
 - `gemini-2.5-pro` - State-of-the-art with adaptive thinking (1M token context)
-- `gemini-2.5-flash` - Best price-performance (recommended default)
-- `gemini-2.5-flash-lite` - Most cost-efficient
-- `gemini-2.5-computer-use` - UI interaction capabilities
-- `gemini-2.0-flash` - Previous generation
+- `gemini-2.5-flash` - Best price-performance (previous default)
 - `veo-3` / `veo-3-fast` - Video generation
 - `nano-banana` - Image generation
 
-**Default Model**: `gemini-2.5-pro` (flagship) - auto-updated monthly
+**Default Model**: `gemini-3-flash` (flagship) - auto-updated monthly
 
 **Usage**:
+- Primary visual AI for all image and video tasks
 - AI video generation (`/app/studio/ai-video`)
 - Autopilot video ads
 - Scene planning and image generation
 - Visual content creation
+- Advanced visual and spatial reasoning
 
-**Legacy models removed**: ~~gemini-pro~~, ~~gemini-pro-vision~~, ~~gemini-1.5~~ (deprecated)
+**Legacy models removed**: ~~gemini-2.0-flash~~, ~~gemini-pro~~, ~~gemini-pro-vision~~, ~~gemini-1.5~~ (deprecated)
 
 ### Mistral AI (Optional Fallback)
 
@@ -390,10 +384,10 @@ The platform now includes an **automated AI model management system** that:
 ### Model Fallback Order
 
 ```python
-fallback_order = [OpenAI, Anthropic, Mistral]
+fallback_order = [Anthropic, Google, Mistral]
 ```
 
-If OpenAI fails → tries Anthropic → tries Mistral → returns error
+If Anthropic fails → tries Google (Gemini) → tries Mistral → returns error
 
 ### Accessing Current Models
 
@@ -570,7 +564,7 @@ const response = await supabase.functions.invoke('brand-positioning-agent', {
 - `interface_mode` (TEXT) - 'simple' or 'advanced'
 
 **user_secrets**
-- Stores encrypted API keys (Gemini, OpenAI, etc.)
+- Stores encrypted API keys (Claude, Gemini, etc.)
 - Managed via Edge Function `manage-user-secrets`
 - Never query directly - use `SecretsService` in frontend
 
@@ -694,13 +688,14 @@ Allows imports like: `import { Button } from '@/components/ui/button'`
 2. Apply them manually via Supabase SQL Editor
 3. See `docs/APPLY_MIGRATIONS.md`
 
-### Issue: Gemini API key not found
-**Error**: `Please add your Gemini API key in Settings`
+### Issue: Claude or Gemini API key not found
+**Error**: `Please add your Anthropic Claude or Gemini API key in Settings`
 
 **Solution**:
 1. Go to Settings → Integrations
-2. Add key from https://aistudio.google.com/apikey
-3. Key is stored in `user_secrets` table with service_name = 'gemini_api_key_encrypted'
+2. Add Claude API key from https://console.anthropic.com (required)
+3. Add Gemini API key from https://aistudio.google.com/apikey (required for visual AI)
+4. Keys are stored in `user_secrets` table with service_name = 'anthropic_api_key' or 'gemini_api_key_encrypted'
 
 ---
 

@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -64,7 +64,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in performance-optimizer:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+    const publicError = error.message?.includes('API key') || error.message?.includes('Claude') || error.message?.includes('Anthropic')
       ? 'Configuration error - please contact support'
       : 'An error occurred analyzing performance';
     return new Response(JSON.stringify({ error: publicError }), {
@@ -101,24 +101,25 @@ Provide analysis in JSON format:
   "urgentActions": ["action1", "action2"]
 }`;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
+      'x-api-key': anthropicApiKey!,
+      'anthropic-version': '2023-06-01',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-5-2025-08-07',
+      model: 'claude-opus-4.5',
+      system: 'You are an expert marketing analyst. Always respond with valid JSON.',
       messages: [
-        { role: 'system', content: 'You are an expert marketing analyst. Always respond with valid JSON.' },
         { role: 'user', content: prompt }
       ],
-      max_completion_tokens: 1000,
+      max_tokens: 4000,
     }),
   });
 
   const data = await response.json();
-  return JSON.parse(data.choices[0].message.content);
+  return JSON.parse(data.content[0].text);
 }
 
 async function generateOptimizationSuggestions(analysis: any, campaign: any): Promise<any[]> {

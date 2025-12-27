@@ -2,7 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -47,11 +47,11 @@ serve(async (req) => {
     const { businessType, targetAudience, productOffer, assessmentGoal } = validationResult.data;
 
     // Check API key
-    if (!openAIApiKey) {
-      console.error('OPENAI_API_KEY environment variable not set');
+    if (!anthropicApiKey) {
+      console.error('ANTHROPIC_API_KEY environment variable not set');
       return new Response(JSON.stringify({
         success: false,
-        error: 'OpenAI API key not configured'
+        error: 'Anthropic Claude API key not configured'
       }), {
         status: 503,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -162,41 +162,41 @@ Return JSON in this exact format:
   ]
 }`;
 
-    console.log('Calling OpenAI API with model: gpt-5-mini');
+    console.log('Calling Anthropic Claude API with model: claude-opus-4.5');
 
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call Claude API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'x-api-key': anthropicApiKey,
         'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: 'claude-opus-4.5',
+        max_tokens: 4000,
+        system: systemPrompt,
         messages: [
-          { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 3000,
         temperature: 0.7,
-        response_format: { type: 'json_object' }
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
+      console.error('Claude API error:', errorData);
       console.error('Status:', response.status, 'StatusText:', response.statusText);
-      throw new Error(errorData.error?.message || `OpenAI API request failed with status ${response.status}`);
+      throw new Error(errorData.error?.message || `Claude API request failed with status ${response.status}`);
     }
 
     const data = await response.json();
 
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response from OpenAI API');
+    if (!data.content || !data.content[0] || !data.content[0].text) {
+      throw new Error('Invalid response from Claude API');
     }
 
-    const generatedContent = data.choices[0].message.content;
+    const generatedContent = data.content[0].text;
     console.log('Assessment generated successfully');
 
     try {
