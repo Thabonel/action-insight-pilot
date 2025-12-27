@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -135,25 +135,26 @@ Format as JSON:
   "reasoning": "Content strategy rationale..."
 }`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'x-api-key': anthropicApiKey!,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: 'claude-opus-4.5',
+        system: 'You are an expert content strategist and calendar planner. Always respond with valid JSON.',
         messages: [
-          { role: 'system', content: 'You are an expert content strategist and calendar planner. Always respond with valid JSON.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 3000,
+        max_tokens: 4000,
       }),
     });
 
     const data = await response.json();
-    const contentCalendar = JSON.parse(data.choices[0].message.content);
+    const contentCalendar = JSON.parse(data.content[0].text);
 
     // Update learning patterns
     if (patterns && patterns.length > 0) {
@@ -201,7 +202,7 @@ Format as JSON:
   } catch (error) {
     console.error('Error in content-calendar-agent:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+    const publicError = error.message?.includes('API key') || error.message?.includes('Claude') || error.message?.includes('Anthropic')
       ? 'Configuration error - please contact support'
       : 'An error occurred generating content calendar';
     return new Response(JSON.stringify({ error: publicError }), {

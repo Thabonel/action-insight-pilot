@@ -63,14 +63,14 @@ serve(async (req) => {
       .from('user_secrets')
       .select('encrypted_value, service_name')
       .eq('user_id', user.id)
-      .in('service_name', ['openai_api_key', 'gemini_api_key_encrypted'])
+      .in('service_name', ['anthropic_api_key', 'gemini_api_key_encrypted'])
       .maybeSingle();
 
     if (keyError || !apiKeyData) {
       return new Response(
         JSON.stringify({
           error: 'API key not configured',
-          message: 'Please add your OpenAI or Gemini API key in Settings > Integrations to enable AI chat.'
+          message: 'Please add your Anthropic Claude or Gemini API key in Settings > Integrations to enable AI chat.'
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-type': 'application/json' } }
       );
@@ -81,8 +81,8 @@ serve(async (req) => {
 
     let aiResponse: string;
 
-    if (apiKeyData.service_name === 'openai_api_key') {
-      aiResponse = await callOpenAI(apiKeyData.encrypted_value, systemPrompt, userPrompt);
+    if (apiKeyData.service_name === 'anthropic_api_key') {
+      aiResponse = await callClaude(apiKeyData.encrypted_value, systemPrompt, userPrompt);
     } else {
       aiResponse = await callGemini(apiKeyData.encrypted_value, systemPrompt, userPrompt);
     }
@@ -192,36 +192,37 @@ function buildUserPrompt(query: string, context: ChatContext): string {
   return query;
 }
 
-async function callOpenAI(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+async function callClaude(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
+      'x-api-key': apiKey,
       'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'claude-opus-4.5',
+      max_tokens: 4000,
+      system: systemPrompt,
       messages: [
-        { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.7,
-      max_tokens: 800,
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('OpenAI API error:', response.status, errorText);
-    throw new Error(`OpenAI API error: ${response.status}`);
+    console.error('Claude API error:', response.status, errorText);
+    throw new Error(`Claude API error: ${response.status}`);
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content || 'I apologize, but I could not generate a response. Please try again.';
+  return data.content?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
 }
 
 async function callGemini(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -234,7 +235,7 @@ async function callGemini(apiKey: string, systemPrompt: string, userPrompt: stri
       }],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 800,
+        maxOutputTokens: 4000,
       },
     }),
   });

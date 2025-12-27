@@ -13,30 +13,21 @@ export interface ApiKeyConfig {
 
 export const aiServices: ApiKeyConfig[] = [
   {
-    id: 'openai_api_key',
-    name: 'OpenAI API Key',
-    description: 'Required for AI content generation and video script creation',
-    placeholder: 'sk-...',
-    icon: '🧠',
-    required: true,
-    validation: (value) => value.startsWith('sk-') && value.length > 20
-  },
-  {
     id: 'anthropic_api_key',
     name: 'Anthropic Claude API Key',
-    description: 'Alternative to OpenAI for advanced reasoning and analytics',
+    description: 'Required for AI content generation, analytics, and advanced reasoning. Primary AI provider using Claude Opus 4.5.',
     placeholder: 'sk-ant-...',
     icon: '🤖',
-    required: false,
+    required: true,
     validation: (value) => value.startsWith('sk-ant-') && value.length > 20
   },
   {
     id: 'gemini_api_key_encrypted',
     name: 'Google Gemini API Key',
-    description: 'Required for AI video generation with Veo 3 and Nano Banana image generation. Get your key from https://aistudio.google.com/apikey',
+    description: 'Required for visual AI tasks with Gemini 3 Pro/Flash, AI video generation with Veo 3, and image generation. Get your key from https://aistudio.google.com/apikey',
     placeholder: 'AIza...',
     icon: '🎬',
-    required: false,
+    required: true,
     validation: (value) => value.startsWith('AIza') && value.length > 30
   },
   {

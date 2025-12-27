@@ -115,11 +115,11 @@ serve(async (req) => {
 });
 
 async function callAI(messages: any[], openaiKey?: string, anthropicKey?: string) {
-  // Prefer OpenAI if available, fallback to Claude
-  if (openaiKey) {
-    return await callOpenAI(messages, openaiKey);
-  } else if (anthropicKey) {
+  // Prefer Claude if available, fallback to OpenAI
+  if (anthropicKey) {
     return await callClaude(messages, anthropicKey);
+  } else if (openaiKey) {
+    return await callOpenAI(messages, openaiKey);
   } else {
     throw new Error('No AI API key available');
   }
@@ -151,17 +151,17 @@ async function callClaude(messages: any[], anthropicKey: string) {
   // Convert OpenAI format to Claude format
   const systemMessage = messages.find(m => m.role === 'system')?.content || '';
   const userMessages = messages.filter(m => m.role !== 'system');
-  
+
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${anthropicKey}`,
-      'Content-Type': 'application/json',
+      'x-api-key': anthropicKey,
       'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4.5',
-      max_tokens: 1000,
+      model: 'claude-opus-4.5',
+      max_tokens: 4000,
       system: systemMessage,
       messages: userMessages.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'assistant',
@@ -171,7 +171,7 @@ async function callClaude(messages: any[], anthropicKey: string) {
   });
 
   if (!response.ok) {
-    throw new Error(`Anthropic API error: ${response.statusText}`);
+    throw new Error(`Claude API error: ${response.statusText}`);
   }
 
   const data = await response.json();
