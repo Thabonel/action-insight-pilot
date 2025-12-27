@@ -45,9 +45,49 @@ const helpArticles: HelpArticle[] = [
     icon: <Target className="h-5 w-5" />
   },
   {
+    id: 'autopilot-setup',
+    title: 'Marketing Autopilot Setup',
+    description: 'Configure AI-powered autonomous marketing that runs 24/7',
+    category: 'Getting Started',
+    difficulty: 'Beginner',
+    readTime: '7 min',
+    tags: ['autopilot', 'ai', 'automation'],
+    icon: <Zap className="h-5 w-5" />
+  },
+  {
+    id: 'ai-api-keys',
+    title: 'Setting Up AI API Keys',
+    description: 'Configure Claude and Gemini API keys for AI features (Required)',
+    category: 'Getting Started',
+    difficulty: 'Beginner',
+    readTime: '4 min',
+    tags: ['setup', 'api-keys', 'claude', 'gemini'],
+    icon: <Settings className="h-5 w-5" />
+  },
+  {
+    id: 'ai-video-studio',
+    title: 'AI Video Generation with Gemini 3',
+    description: 'Create professional marketing videos using AI - no editing skills required',
+    category: 'AI Features',
+    difficulty: 'Intermediate',
+    readTime: '10 min',
+    tags: ['video', 'ai', 'gemini', 'veo-3'],
+    icon: <PlayCircle className="h-5 w-5" />
+  },
+  {
+    id: 'conversational-dashboard',
+    title: 'Using the AI Chat Dashboard',
+    description: 'Get instant marketing insights and recommendations using Claude Opus 4.5',
+    category: 'AI Features',
+    difficulty: 'Beginner',
+    readTime: '5 min',
+    tags: ['ai', 'chat', 'claude', 'dashboard'],
+    icon: <MessageSquare className="h-5 w-5" />
+  },
+  {
     id: 'lead-management',
     title: 'Understanding Lead Scoring',
-    description: 'Learn how lead scoring works and how to use it effectively',
+    description: 'Learn how AI lead scoring works and how to use it effectively',
     category: 'Lead Management',
     difficulty: 'Beginner',
     readTime: '3 min',
@@ -57,17 +97,17 @@ const helpArticles: HelpArticle[] = [
   {
     id: 'analytics-guide',
     title: 'Reading Your Analytics Dashboard',
-    description: 'Understand key metrics and how to interpret campaign performance',
+    description: 'Understand key metrics and AI-powered insights for campaign performance',
     category: 'Analytics',
     difficulty: 'Intermediate',
     readTime: '8 min',
-    tags: ['analytics', 'metrics', 'performance'],
+    tags: ['analytics', 'metrics', 'performance', 'ai'],
     icon: <BarChart3 className="h-5 w-5" />
   },
   {
-    id: 'automation-setup',
-    title: 'Setting Up Marketing Automation',
-    description: 'Create automated workflows to nurture leads and save time',
+    id: 'automation-workflows',
+    title: 'Creating Marketing Workflows',
+    description: 'Automate repetitive tasks and nurture leads on autopilot',
     category: 'Automation',
     difficulty: 'Advanced',
     readTime: '12 min',
@@ -76,23 +116,43 @@ const helpArticles: HelpArticle[] = [
   },
   {
     id: 'budget-optimization',
-    title: 'Optimizing Campaign Budgets',
-    description: 'Tips for maximizing ROI and managing campaign spending',
+    title: 'Autopilot Budget Optimization',
+    description: 'How AI automatically adjusts budgets based on campaign performance',
     category: 'Strategy',
     difficulty: 'Intermediate',
     readTime: '6 min',
-    tags: ['budget', 'roi', 'optimization'],
+    tags: ['budget', 'roi', 'optimization', 'autopilot'],
     icon: <Target className="h-5 w-5" />
   },
   {
     id: 'integration-setup',
-    title: 'Connecting External Tools',
-    description: 'How to integrate with CRM, email tools, and other platforms',
+    title: 'Connecting Social Media Platforms',
+    description: 'Integrate Facebook, Instagram, Twitter, LinkedIn, TikTok, and more',
     category: 'Integrations',
-    difficulty: 'Advanced',
-    readTime: '10 min',
-    tags: ['integrations', 'crm', 'tools'],
+    difficulty: 'Intermediate',
+    readTime: '8 min',
+    tags: ['integrations', 'social-media', 'platforms'],
     icon: <Settings className="h-5 w-5" />
+  },
+  {
+    id: 'simple-vs-advanced',
+    title: 'Simple Mode vs Advanced Mode',
+    description: 'Choose between simplified autopilot-focused UI or full feature access',
+    category: 'Getting Started',
+    difficulty: 'Beginner',
+    readTime: '3 min',
+    tags: ['interface', 'modes', 'settings'],
+    icon: <Settings className="h-5 w-5" />
+  },
+  {
+    id: 'ai-content-generation',
+    title: 'AI Content Generation with Claude',
+    description: 'Generate social media posts, emails, and marketing copy using Claude Opus 4.5',
+    category: 'AI Features',
+    difficulty: 'Beginner',
+    readTime: '6 min',
+    tags: ['ai', 'content', 'claude', 'copywriting'],
+    icon: <FileText className="h-5 w-5" />
   }
 ];
 

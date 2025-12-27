@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import AIAssistanceButton from '@/components/AIAssistanceButton';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import { apiClient } from '@/lib/api-client';
 import { Campaign, ApiResponse } from '@/lib/api-client-interface';
 import {
@@ -1733,6 +1734,7 @@ const CampaignDetails: React.FC = () => {
           </Tabs>
         </form>
       </div>
+      <FloatingHelpButton helpSection="campaigns" />
     </div>
   );
 };

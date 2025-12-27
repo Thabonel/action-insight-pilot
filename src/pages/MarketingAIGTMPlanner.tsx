@@ -1,3 +1,4 @@
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import { MarketingAIGTMPlanner } from '@/components/MarketingAIGTMPlanner';
 
 export default function MarketingAIGTMPlannerPage() {
@@ -6,6 +7,7 @@ export default function MarketingAIGTMPlannerPage() {
       <div className="container mx-auto p-6">
         <MarketingAIGTMPlanner />
       </div>
+      <FloatingHelpButton helpSection="gtmPlanner" />
     </div>
   );
 }

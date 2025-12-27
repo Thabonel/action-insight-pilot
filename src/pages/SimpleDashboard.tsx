@@ -19,6 +19,9 @@ import { useToast } from '@/hooks/use-toast';
 import LeadInbox from '@/components/autopilot/LeadInbox';
 import ActivityFeed from '@/components/autopilot/ActivityFeed';
 import { Link } from 'react-router-dom';
+import { HelpButton } from '@/components/common/HelpButton';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
+import { helpContent } from '@/config/helpContent';
 
 interface DashboardStats {
   this_week_leads: number;
@@ -172,6 +175,10 @@ const SimpleDashboard: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <HelpButton
+        title={helpContent.dashboard.title}
+        content={helpContent.dashboard.content}
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -396,6 +403,7 @@ const SimpleDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      <FloatingHelpButton helpSection="dashboard" />
     </div>
   );
 };

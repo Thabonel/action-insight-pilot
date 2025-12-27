@@ -6,6 +6,9 @@ import CampaignCreator from '@/components/campaigns/CampaignCreator';
 import CampaignTemplates from '@/components/campaigns/CampaignTemplates';
 import BrandAmbassador from '@/components/campaigns/BrandAmbassador';
 import BlogCreator from '@/components/campaigns/BlogCreator';
+import { HelpButton } from '@/components/common/HelpButton';
+import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
+import { helpContent } from '@/config/helpContent';
 
 const CampaignManagement: React.FC = () => {
   const [activeView, setActiveView] = useState<'overview' | 'create' | 'templates' | 'brand-ambassador' | 'blog-creator'>('overview');
@@ -18,6 +21,10 @@ const CampaignManagement: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <HelpButton
+        title={helpContent.campaigns.title}
+        content={helpContent.campaigns.content}
+      />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Campaign Intelligence Hub</h1>
         <p className="text-slate-600">Manage campaigns, create content, and leverage AI-powered tools</p>
@@ -52,6 +59,7 @@ const CampaignManagement: React.FC = () => {
           <BlogCreator />
         </TabsContent>
       </Tabs>
+      <FloatingHelpButton helpSection="campaigns" />
     </div>
   );
 };
