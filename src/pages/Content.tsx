@@ -18,9 +18,7 @@ import ContentWorkflowFeatures from '@/components/content/ContentWorkflowFeature
 import ContentTemplates from '@/components/content/ContentTemplates';
 import ContentIdeasManager from '@/components/content/ContentIdeasManager';
 import ContentSchedulingDialog from '@/components/content/ContentSchedulingDialog';
-import { HelpButton } from '@/components/common/HelpButton';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
-import { helpContent } from '@/config/helpContent';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Content: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -59,10 +57,6 @@ const Content: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <HelpButton
-        title={helpContent.content.title}
-        content={helpContent.content.content}
-      />
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -127,7 +121,7 @@ const Content: React.FC = () => {
           </Tabs>
         </div>
       </div>
-      <FloatingHelpButton helpSection="content" />
+      <PageHelpModal helpKey="content" />
     </div>
   );
 };

@@ -11,9 +11,7 @@ import PlatformOptimization from '@/components/social/PlatformOptimization';
 import SocialHeader from '@/components/social/SocialHeader';
 import SocialStatsCards from '@/components/social/SocialStatsCards';
 import PlatformConnectionBanner from '@/components/social/PlatformConnectionBanner';
-import { HelpButton } from '@/components/common/HelpButton';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
-import { helpContent } from '@/config/helpContent';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Social: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -50,10 +48,6 @@ const Social: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <HelpButton
-        title={helpContent.social.title}
-        content={helpContent.social.content}
-      />
       <SocialHeader 
         onCreatePost={handleCreatePost}
         onSchedulePosts={handleSchedulePosts}
@@ -103,7 +97,7 @@ const Social: React.FC = () => {
           </Tabs>
         </div>
       </div>
-      <FloatingHelpButton helpSection="social" />
+      <PageHelpModal helpKey="social" />
     </div>
   );
 };

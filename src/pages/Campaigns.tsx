@@ -10,9 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusIcon, SearchIcon, FilterIcon, Zap, Settings, BarChart3 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { Campaign } from '@/lib/api-client-interface';
-import { HelpButton } from '@/components/common/HelpButton';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
-import { helpContent } from '@/config/helpContent';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Campaigns: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -75,10 +73,6 @@ const Campaigns: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <HelpButton
-        title={helpContent.campaigns.title}
-        content={helpContent.campaigns.content}
-      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -230,7 +224,7 @@ const Campaigns: React.FC = () => {
             )}
         </div>
       </div>
-      <FloatingHelpButton helpSection="campaigns" />
+      <PageHelpModal helpKey="campaigns" />
     </div>
   );
 };

@@ -24,9 +24,7 @@ import OnboardingFlow from '@/components/settings/OnboardingFlow';
 import SystemPreferences from '@/components/settings/SystemPreferences';
 import AccountSettings from '@/components/settings/AccountSettings';
 import { useUserRole } from '@/hooks/useUserRole';
-import { HelpButton } from '@/components/common/HelpButton';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
-import { helpContent } from '@/config/helpContent';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('workspace');
@@ -103,10 +101,6 @@ const Settings: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6 bg-white min-h-screen">
-      <HelpButton
-        title={helpContent.settings.title}
-        content={helpContent.settings.content}
-      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-black">Settings</h1>
@@ -215,7 +209,7 @@ const Settings: React.FC = () => {
 
       {/* System Preferences Footer */}
       <SystemPreferences />
-      <FloatingHelpButton helpSection="settings" />
+      <PageHelpModal helpKey="settings" />
     </div>
   );
 };

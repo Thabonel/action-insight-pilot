@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import CreativeBriefBuilder from '@/components/creative/CreativeBriefBuilder';
 import CreativeWorkflowPipeline from '@/components/creative/CreativeWorkflowPipeline';
 import { FileText, GitBranch, BarChart3 } from 'lucide-react';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const CreativeWorkflow: React.FC = () => {
   const [activeTab, setActiveTab] = useState('briefs');
@@ -54,7 +54,7 @@ const CreativeWorkflow: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-      <FloatingHelpButton helpSection="creativeWorkflow" />
+      <PageHelpModal helpKey="creativeWorkflow" />
     </div>
   );
 };

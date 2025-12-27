@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +32,6 @@ import {
   FormInput,
   ExternalLink
 } from 'lucide-react';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 
 const LeadCaptureForms: React.FC = () => {
   const navigate = useNavigate();
@@ -470,7 +470,7 @@ const LeadCaptureForms: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <FloatingHelpButton helpSection="leadCaptureForms" />
+      <PageHelpModal helpKey="leadCaptureForms" />
     </div>
   );
 };

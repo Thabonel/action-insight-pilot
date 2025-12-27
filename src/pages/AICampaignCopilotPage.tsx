@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import AICampaignCopilot from '@/components/AICampaignCopilot';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const AICampaignCopilotPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ const AICampaignCopilotPage: React.FC = () => {
         initialBrief={initialBrief}
         onSave={handleSaveCampaign}
       />
-      <FloatingHelpButton helpSection="aiCampaignCopilot" />
+      <PageHelpModal helpKey="aiCampaignCopilot" />
     </div>
   );
 };
