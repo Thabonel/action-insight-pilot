@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import CompetitorTracker from '@/components/competitive/CompetitorTracker';
 import CreativeAnalytics from '@/components/competitive/CreativeAnalytics';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const CompetitiveIntelligence: React.FC = () => {
   return (
@@ -20,7 +20,7 @@ const CompetitiveIntelligence: React.FC = () => {
         <CompetitorTracker />
         <CreativeAnalytics />
       </div>
-      <FloatingHelpButton helpSection="competitiveIntelligence" />
+      <PageHelpModal helpKey="competitiveIntelligence" />
     </div>
   );
 };

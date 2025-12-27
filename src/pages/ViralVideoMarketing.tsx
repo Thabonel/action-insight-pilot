@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Video, MessageCircle, Mail, TrendingUp, Settings, Play, Users, Target, Sparkles } from 'lucide-react';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import ViralContentGenerator from '@/components/viral/ViralContentGenerator';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const ViralVideoMarketing: React.FC = () => {
   const [activeKeywords, setActiveKeywords] = useState(['YT', 'AI', 'GUIDE', 'FREE']);
@@ -385,7 +385,7 @@ const ViralVideoMarketing: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      <FloatingHelpButton helpSection="viralVideoMarketing" />
+      <PageHelpModal helpKey="viralVideoMarketing" />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const CustomerSegmentation: React.FC = () => {
   return (
@@ -19,7 +19,7 @@ const CustomerSegmentation: React.FC = () => {
           <p className="text-gray-500">Customer segmentation features coming soon...</p>
         </CardContent>
       </Card>
-      <FloatingHelpButton helpSection="customerSegmentation" />
+      <PageHelpModal helpKey="customerSegmentation" />
     </div>
   );
 };

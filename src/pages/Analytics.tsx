@@ -5,17 +5,11 @@ import IntelligentDashboards from '@/components/analytics/IntelligentDashboards'
 import PerformanceInsights from '@/components/analytics/PerformanceInsights';
 import PredictiveAnalytics from '@/components/analytics/PredictiveAnalytics';
 import ReportingFeatures from '@/components/analytics/ReportingFeatures';
-import { HelpButton } from '@/components/common/HelpButton';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
-import { helpContent } from '@/config/helpContent';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Analytics: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
-      <HelpButton
-        title={helpContent.analytics.title}
-        content={helpContent.analytics.content}
-      />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Analytics & Insights</h1>
         <p className="text-gray-600 mt-2">AI-powered analytics that predict performance and suggest optimizations</p>
@@ -43,7 +37,7 @@ const Analytics: React.FC = () => {
 
       {/* Reporting Features */}
       <ReportingFeatures />
-      <FloatingHelpButton helpSection="analytics" />
+      <PageHelpModal helpKey="analytics" />
     </div>
   );
 };

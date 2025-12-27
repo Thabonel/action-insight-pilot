@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import EmailAIAssistant from '@/components/email/EmailAIAssistant';
 import IntelligentCampaignBuilder from '@/components/email/IntelligentCampaignBuilder';
 import RealTimeMetricsDashboard from '@/components/email/RealTimeMetricsDashboard';
 import BehavioralAutomation from '@/components/email/BehavioralAutomation';
 import EmailWorkflowFeatures from '@/components/email/EmailWorkflowFeatures';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Email: React.FC = () => {
   // Mock campaign ID - replace with actual campaign selection
@@ -40,7 +40,7 @@ const Email: React.FC = () => {
         {/* Workflow Features */}
         <EmailWorkflowFeatures />
       </div>
-      <FloatingHelpButton helpSection="email" />
+      <PageHelpModal helpKey="email" />
     </div>
   );
 };

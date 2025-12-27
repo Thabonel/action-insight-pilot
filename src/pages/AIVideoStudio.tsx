@@ -26,9 +26,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { HelpButton } from '@/components/common/HelpButton';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
-import { helpContent } from '@/config/helpContent';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 interface Scene {
   visual: string;
@@ -332,10 +330,6 @@ const AIVideoStudio: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-      <HelpButton
-        title={helpContent.aiVideoStudio.title}
-        content={helpContent.aiVideoStudio.content}
-      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -655,7 +649,7 @@ const AIVideoStudio: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      <FloatingHelpButton helpSection="aiVideoStudio" />
+      <PageHelpModal helpKey="aiVideoStudio" />
     </div>
   );
 };

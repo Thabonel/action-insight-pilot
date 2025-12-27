@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PlusIcon, PlayIcon, PauseIcon, EditIcon } from 'lucide-react';
-import { FloatingHelpButton } from '@/components/common/FloatingHelpButton';
 import VisualWorkflowBuilder from '@/components/workflows/VisualWorkflowBuilder';
 import { Workflow, WorkflowStep } from '@/lib/api-client-interface';
+import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Workflows: React.FC = () => {
   // Mock workflow data
@@ -168,7 +168,7 @@ const Workflows: React.FC = () => {
           </div>
         </div>
       </div>
-      <FloatingHelpButton helpSection="workflows" />
+      <PageHelpModal helpKey="workflows" />
     </div>
   );
 };
