@@ -55,6 +55,10 @@ npm run build
 - **[Deployment](./DEPLOYMENT.md)** - Deployment and hosting
 - **[Troubleshooting](./TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Contributing](./CONTRIBUTING.md)** - Contribution guidelines
+- **[Changelog](./CHANGELOG.md)** - Version history and release notes
+
+### Component Documentation
+- **[PageHelpModal](./components/PAGE-HELP-MODAL.md)** - In-app help system component
 
 ## Technology Stack
 

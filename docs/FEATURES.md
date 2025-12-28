@@ -495,6 +495,30 @@ const { data: campaigns } = await supabase
 
 ---
 
+### In-App Help System
+
+**Description**: Context-sensitive help modal on every page providing instant access to documentation.
+
+**Key Features**:
+- Bottom-right floating help button on all pages
+- Modal popup (no navigation disruption)
+- Page-specific documentation and tutorials
+- Comprehensive guides for all features
+- Keyboard accessible and screen reader compatible
+
+**Implementation**:
+- Unified `PageHelpModal` component (`src/components/common/PageHelpModal.tsx`)
+- Centralized help content (`src/config/helpContent.tsx`)
+- Applied consistently across all 26 application pages
+
+**User Benefits**:
+- Learn features without leaving current page
+- Quick access to contextual help
+- Reduces learning curve
+- Improves feature discovery
+
+---
+
 ## Accessibility Features
 
 ### WCAG Compliance
