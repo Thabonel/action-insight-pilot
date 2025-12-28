@@ -84,8 +84,14 @@ supabase/functions/    # Serverless edge functions
 **Features:** Lead scoring, enrichment, activity tracking
 
 ### 6. Social Media
-**Files:** `src/components/social/`, `backend/social_connectors/`  
+**Files:** `src/components/social/`, `backend/social_connectors/`
 **Integrations:** Twitter, Facebook, LinkedIn, Instagram (via OAuth)
+
+### 7. In-App Help System
+**File:** `src/components/common/PageHelpModal.tsx`
+**Content:** `src/config/helpContent.tsx`
+**Features:** Context-sensitive help modal on every page, accessible via bottom-right floating button
+**Usage:** `<PageHelpModal helpKey="campaigns" />` - helpKey matches entries in helpContent.tsx
 
 ## Database Schema
 

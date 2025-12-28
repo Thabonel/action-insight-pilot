@@ -80,7 +80,18 @@ When you first sign in, an onboarding tour automatically begins to walk you thro
 - Review best practices guide
 
 ## Getting Help
-- Built-in help system
+
+### Built-in Help System
+Every page in the platform includes a help button (? icon) in the bottom-right corner. Click it to:
+- View page-specific documentation
+- Learn how to use features
+- Follow step-by-step tutorials
+- Access tips and best practices
+
+The help modal opens instantly without leaving your current page, keeping you in your workflow.
+
+### Additional Resources
 - Video tutorials
 - Community forum
+- Help Center page at `/help`
 - Support contact information
