@@ -64,7 +64,14 @@ const UserRoleManagement: React.FC = () => {
           )
         `);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          console.log('User roles table not yet configured - this is an enterprise feature');
+          setUsers([]);
+          return;
+        }
+        throw error;
+      }
 
       setUsers(data || []);
     } catch (error) {
