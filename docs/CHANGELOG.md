@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Quick Action Buttons on Campaign Cards** - Campaign list view now includes status-specific action buttons
+  - Launch button for draft campaigns (green)
+  - Pause button for active campaigns (yellow)
+  - Resume button for paused campaigns (blue)
+  - One-click campaign control without navigation
+  - Real-time list refresh after actions
+  - Loading state with spinner feedback
+
+### Changed
+- **Campaign Details Action Buttons** - Improved visibility and UX of campaign control buttons
+  - Action buttons now remain visible during edit mode (previously hidden)
+  - Buttons disabled when editing with helpful tooltips
+  - Improved button styling with color coding (green Launch, yellow Pause, blue Resume)
+  - Increased button size to "lg" for better prominence
+  - Added title tooltips explaining button states
+
+### Fixed
+- **Campaign Control Visibility Issue** - Fixed major UX problem where users couldn't find campaign controls
+  - Original issue: "it is not clear in the interface how to start a campaign, how to stop a campaign etc"
+  - Solution: Added quick actions to list view and kept details page buttons visible during edit
+  - Users can now launch/pause/resume campaigns with one click from list view
+
+### Technical Details
+- **Files Modified**: 3
+  - `src/pages/CampaignDetails.tsx` - Removed !isEditing condition, added disabled states and tooltips
+  - `src/components/campaigns/CampaignCard.tsx` - Added quick action buttons and API handlers
+  - `src/components/campaigns/CampaignOverview.tsx` - Wired refresh callback
+- **Net Code Change**: +189 lines (217 insertions, 28 deletions)
+- **Commit**: `2c270d8 - Improve Campaign Control Visibility - Quick UX Fixes`
+
 ## [1.1.0] - 2025-12-28
 
 ### Added
