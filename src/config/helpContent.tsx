@@ -29,23 +29,36 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Conversational Dashboard',
     content: (
       <div className="space-y-4">
-        <p>Your AI-powered conversational marketing dashboard powered by Claude Opus 4.5 - the most advanced AI model for marketing strategy and analysis.</p>
+        <p>Your AI-powered conversational marketing assistant - chat naturally to get insights, ask questions, or create campaigns without any marketing knowledge.</p>
 
-        <h3 className="font-semibold text-lg mt-4">How to Use</h3>
+        <h3 className="font-semibold text-lg mt-4">Create Campaigns Through Conversation</h3>
+        <p>Perfect for non-marketers! Simply tell the AI you want to create a campaign, and it will guide you through a friendly conversation:</p>
         <ul className="list-disc pl-5 space-y-2">
-          <li>Type your marketing questions or requests in the chat</li>
-          <li>Get instant AI-powered answers and recommendations from Claude Opus 4.5</li>
-          <li>Ask for campaign suggestions, content ideas, or analytics insights</li>
-          <li>Use natural language - no need for specific commands</li>
+          <li>AI asks simple questions about your product, audience, budget, and goals</li>
+          <li>You answer in plain language - no marketing jargon needed</li>
+          <li>AI automatically creates and launches your campaign when you're ready</li>
+          <li>Campaign appears in your Autopilot Dashboard with real-time results</li>
         </ul>
 
-        <h3 className="font-semibold text-lg mt-4">Example Questions</h3>
+        <h3 className="font-semibold text-lg mt-4">How to Get Started</h3>
+        <p>Just type natural requests like:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>"I want to create a campaign"</li>
+          <li>"Help me market my product"</li>
+          <li>"I need to advertise my service"</li>
+          <li>"Create a new campaign for me"</li>
+        </ul>
+
+        <h3 className="font-semibold text-lg mt-4">Other Things You Can Ask</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li>"Show me my campaign performance this month"</li>
-          <li>"Create a social media content calendar"</li>
           <li>"What are my top performing campaigns?"</li>
-          <li>"Generate ideas for Facebook ads"</li>
+          <li>"Give me content ideas for social media"</li>
+          <li>"How can I improve my marketing results?"</li>
         </ul>
+
+        <h3 className="font-semibold text-lg mt-4">Requirements</h3>
+        <p>Make sure you have added your Anthropic Claude or Google Gemini API key in Settings - Integrations. The AI uses the latest available models to provide the best assistance.</p>
       </div>
     ),
   },
