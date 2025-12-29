@@ -1,23 +1,28 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Brain, 
-  Zap, 
-  Target, 
-  MessageSquare, 
-  BarChart3, 
+import {
+  Brain,
+  Zap,
+  Target,
+  MessageSquare,
+  BarChart3,
   Save,
   Lightbulb,
   Clock,
   TrendingUp
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const AIBehaviorSettings: React.FC = () => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [aiSettings, setAiSettings] = useState({
     creativity: [75],
     speed: [60],
@@ -42,9 +47,76 @@ const AIBehaviorSettings: React.FC = () => {
     }
   });
 
-  const handleSave = () => {
-    console.log('Saving AI behavior settings:', aiSettings);
-    // Implementation would save to backend
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('preference_data')
+        .eq('user_id', user.id)
+        .eq('preference_category', 'ai_behavior')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading AI settings:', error);
+        return;
+      }
+
+      if (data?.preference_data) {
+        setAiSettings(data.preference_data);
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to save settings",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          preference_category: 'ai_behavior',
+          preference_data: aiSettings,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Settings Saved",
+        description: "Your AI behavior settings have been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error saving AI settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save AI settings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toneOptions = [
@@ -321,9 +393,13 @@ const AIBehaviorSettings: React.FC = () => {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="flex items-center space-x-2">
+        <Button
+          onClick={handleSave}
+          disabled={saving || loading}
+          className="flex items-center space-x-2"
+        >
           <Save className="h-4 w-4" />
-          <span>Save AI Settings</span>
+          <span>{saving ? 'Saving...' : 'Save AI Settings'}</span>
         </Button>
       </div>
     </div>
