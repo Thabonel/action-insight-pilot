@@ -24,7 +24,11 @@ import {
   Share2,
   FileText,
   Eye,
-  BarChart3
+  BarChart3,
+  Rocket,
+  Pause,
+  Play,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -51,6 +55,7 @@ interface CampaignCardProps {
   isSelectedForComparison: boolean;
   onToggleComparison: (campaignId: string) => void;
   isComparisonDisabled: boolean;
+  onRefresh?: () => void;
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({
@@ -59,9 +64,11 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
   isSelectedForComparison,
   onToggleComparison,
   isComparisonDisabled,
+  onRefresh,
 }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [actionLoading, setActionLoading] = React.useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -131,6 +138,117 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
       description: `"${campaign.name}" has been duplicated.`,
     });
     onUpdate();
+  };
+
+  const handleQuickLaunch = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActionLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/campaigns/${campaign.id}/launch`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Campaign Launched!",
+          description: `"${campaign.name}" is now active.`,
+        });
+        onRefresh?.();
+      } else {
+        const error = await response.text();
+        toast({
+          title: "Launch Failed",
+          description: error || "Failed to launch campaign",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to launch campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleQuickPause = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActionLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/campaigns/${campaign.id}/pause`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Campaign Paused",
+          description: `"${campaign.name}" has been paused.`,
+        });
+        onRefresh?.();
+      } else {
+        const error = await response.text();
+        toast({
+          title: "Pause Failed",
+          description: error || "Failed to pause campaign",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to pause campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleQuickResume = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActionLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/campaigns/${campaign.id}/resume`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Campaign Resumed",
+          description: `"${campaign.name}" is now active.`,
+        });
+        onRefresh?.();
+      } else {
+        const error = await response.text();
+        toast({
+          title: "Resume Failed",
+          description: error || "Failed to resume campaign",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resume campaign",
+        variant: "destructive",
+      });
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   // Calculate metrics
@@ -256,16 +374,71 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
           </div>
         </div>
 
-        {/* Action Button */}
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full"
-          onClick={handleViewDetails}
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          View Details
-        </Button>
+        {/* Quick Action Buttons */}
+        <div className="flex gap-2">
+          {/* Status-specific quick action */}
+          {campaign.status.toLowerCase() === 'draft' && (
+            <Button
+              size="sm"
+              onClick={handleQuickLaunch}
+              disabled={actionLoading}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+            >
+              {actionLoading ? (
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              ) : (
+                <Rocket className="h-3 w-3 mr-1" />
+              )}
+              Launch
+            </Button>
+          )}
+
+          {campaign.status.toLowerCase() === 'active' && (
+            <Button
+              size="sm"
+              onClick={handleQuickPause}
+              disabled={actionLoading}
+              variant="outline"
+              className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+            >
+              {actionLoading ? (
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              ) : (
+                <Pause className="h-3 w-3 mr-1" />
+              )}
+              Pause
+            </Button>
+          )}
+
+          {campaign.status.toLowerCase() === 'paused' && (
+            <Button
+              size="sm"
+              onClick={handleQuickResume}
+              disabled={actionLoading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {actionLoading ? (
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              ) : (
+                <Play className="h-3 w-3 mr-1" />
+              )}
+              Resume
+            </Button>
+          )}
+
+          {/* View Details button - always shown */}
+          <Button
+            variant="outline"
+            size="sm"
+            className={campaign.status.toLowerCase() === 'draft' ||
+                       campaign.status.toLowerCase() === 'active' ||
+                       campaign.status.toLowerCase() === 'paused' ? 'flex-1' : 'w-full'}
+            onClick={handleViewDetails}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Details
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

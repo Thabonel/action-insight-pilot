@@ -257,6 +257,7 @@ const CampaignOverview: React.FC = () => {
                   key={campaign.id}
                   campaign={campaign}
                   onUpdate={reload}
+                  onRefresh={reload}
                   isSelectedForComparison={selectedCampaignsForComparison.includes(campaign.id || '')}
                   onToggleComparison={toggleCampaignComparison}
                   isComparisonDisabled={selectedCampaignsForComparison.length >= 4 && !selectedCampaignsForComparison.includes(campaign.id || '')}
