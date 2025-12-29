@@ -813,23 +813,25 @@ const CampaignDetails: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            {!isEditing && id && id !== 'new' ? (
+            {/* Campaign Control Buttons - Always visible, disabled when editing */}
+            {id && id !== 'new' && (
               <>
-                {/* Campaign Control Buttons - Show based on status */}
                 {formData.status === 'draft' && (
                   <Button
                     onClick={handleLaunch}
-                    disabled={launching}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    disabled={launching || isEditing}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                    size="lg"
+                    title={isEditing ? "Save changes before launching" : "Launch this campaign"}
                   >
                     {launching ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Launching...
                       </>
                     ) : (
                       <>
-                        <Rocket className="mr-2 h-4 w-4" />
+                        <Rocket className="mr-2 h-5 w-5" />
                         Launch Campaign
                       </>
                     )}
@@ -839,17 +841,21 @@ const CampaignDetails: React.FC = () => {
                 {formData.status === 'active' && (
                   <>
                     <Button
-                      variant="outline"
                       onClick={handlePause}
-                      disabled={launching}
+                      disabled={launching || isEditing}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      size="lg"
+                      title={isEditing ? "Save changes before pausing" : "Pause this campaign"}
                     >
-                      <Pause className="mr-2 h-4 w-4" />
-                      Pause
+                      <Pause className="mr-2 h-5 w-5" />
+                      Pause Campaign
                     </Button>
                     <Button
                       variant="outline"
                       onClick={handleStop}
-                      disabled={launching}
+                      disabled={launching || isEditing}
+                      className="border-red-500 text-red-600 hover:bg-red-50"
+                      title={isEditing ? "Save changes before stopping" : "Stop this campaign"}
                     >
                       <StopCircle className="mr-2 h-4 w-4" />
                       Stop
@@ -861,32 +867,41 @@ const CampaignDetails: React.FC = () => {
                   <>
                     <Button
                       onClick={handleResume}
-                      disabled={launching}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      disabled={launching || isEditing}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                      size="lg"
+                      title={isEditing ? "Save changes before resuming" : "Resume this campaign"}
                     >
                       {launching ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                           Resuming...
                         </>
                       ) : (
                         <>
-                          <Play className="mr-2 h-4 w-4" />
-                          Resume
+                          <Play className="mr-2 h-5 w-5" />
+                          Resume Campaign
                         </>
                       )}
                     </Button>
                     <Button
                       variant="outline"
                       onClick={handleStop}
-                      disabled={launching}
+                      disabled={launching || isEditing}
+                      className="border-red-500 text-red-600 hover:bg-red-50"
+                      title={isEditing ? "Save changes before stopping" : "Stop this campaign"}
                     >
                       <StopCircle className="mr-2 h-4 w-4" />
                       Stop
                     </Button>
                   </>
                 )}
+              </>
+            )}
 
+            {/* Edit Mode vs View Mode Buttons */}
+            {!isEditing && id && id !== 'new' ? (
+              <>
                 <Button variant="outline" onClick={() => navigate(`/app/campaigns/${id}/dashboard`)}>
                   <BarChart3 className="mr-2 h-4 w-4" />
                   View Dashboard
