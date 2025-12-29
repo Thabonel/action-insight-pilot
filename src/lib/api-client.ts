@@ -746,7 +746,8 @@ export class ApiClient {
       const { data, error } = await supabase.functions.invoke('dashboard-chat', {
         body: {
           query,
-          context
+          context,
+          conversationId: context?.conversationId || null
         }
       });
 

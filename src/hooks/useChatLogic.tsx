@@ -17,6 +17,7 @@ export const useChatLogic = ({ onChatUpdate }: { onChatUpdate?: (chatHistory: Ch
   const [chatMessage, setChatMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Mock user - in a real app this would come from auth
@@ -35,24 +36,42 @@ export const useChatLogic = ({ onChatUpdate }: { onChatUpdate?: (chatHistory: Ch
     };
 
     try {
-      const result = await apiClient.queryAgent(chatMessage) as ApiResponse<any>;
-      
+      const result = await apiClient.queryAgent(chatMessage, { conversationId }) as ApiResponse<any>;
+
       if (result.success) {
         const responseData = result.data || { message: 'No response received' };
+
+        // Store conversation ID if returned
+        if (responseData.conversationId) {
+          setConversationId(responseData.conversationId);
+        }
+
         const updatedMessage = {
           ...newMessage,
           response: responseData.message || 'Response received'
         };
-        
+
         const updatedHistory = [...chatHistory, updatedMessage];
         setChatHistory(updatedHistory);
         onChatUpdate?.(updatedHistory);
-        
+
         setMessages(prev => [
           ...prev,
           { role: 'user', content: chatMessage },
           { role: 'assistant', content: updatedMessage.response }
         ]);
+
+        // Show success toast if campaign was created
+        if (responseData.campaignCreated) {
+          toast({
+            title: "Campaign Created!",
+            description: "Your campaign has been created and launched successfully. Check your Autopilot Dashboard for results.",
+            duration: 5000,
+          });
+
+          // Reset conversation after campaign creation
+          setConversationId(null);
+        }
       } else {
         toast({
           title: "Error",

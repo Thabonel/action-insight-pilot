@@ -11,6 +11,7 @@ This file provides essential context for Claude Code when working on this projec
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Shadcn/ui
 - **Backend**: FastAPI (Python), deployed on Render
 - **Database**: PostgreSQL via Supabase
+  - **Supabase Project**: `kciuuxoqxfsogjuqflou` (https://kciuuxoqxfsogjuqflou.supabase.co)
 - **AI Services**: Anthropic Claude API (primary), Google Gemini API (visual AI) - user-provided keys
 - **Deployment**: Frontend on Vercel/Netlify, Backend on Render
 
@@ -643,11 +644,16 @@ SELECT * FROM log_autopilot_activity(
 
 ### Environment Variables
 
+**Supabase Project**: `kciuuxoqxfsogjuqflou`
+- Dashboard: https://supabase.com/dashboard/project/kciuuxoqxfsogjuqflou
+- URL: https://kciuuxoqxfsogjuqflou.supabase.co
+
 **Frontend** (`.env`):
 ```
-VITE_BACKEND_URL=https://your-backend.onrender.com
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_SUPABASE_PROJECT_ID=kciuuxoqxfsogjuqflou
+VITE_SUPABASE_URL=https://kciuuxoqxfsogjuqflou.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+VITE_BACKEND_URL=https://wheels-wins-orchestrator.onrender.com
 ```
 
 **Backend** (`backend/.env`):
