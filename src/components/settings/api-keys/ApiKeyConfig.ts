@@ -42,11 +42,11 @@ export const aiServices: ApiKeyConfig[] = [
   {
     id: 'blotato_api_key',
     name: 'Blotato API Key',
-    description: 'For video enhancement and processing',
+    description: 'Optional paid service for instant TikTok publishing ($29/mo). Alternative: Use free Direct TikTok API (requires 2-8 week approval). Sign up at https://blotato.com',
     placeholder: 'blt_...',
     icon: '🎥',
     required: false,
-    validation: (value) => value.length > 8
+    validation: (value) => value.startsWith('blt_') && value.length > 12
   }
 ];
 

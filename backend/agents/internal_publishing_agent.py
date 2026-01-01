@@ -7,7 +7,7 @@ import requests
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
-import openai
+import anthropic
 from pydantic import BaseModel
 from .base_agent import BaseAgent
 
@@ -57,7 +57,7 @@ class PublishRequest(BaseModel):
     account_id: str
 
 class InternalPublisherAgent(BaseAgent):
-    def __init__(self, openai_api_key: str, supabase_client):
+    def __init__(self, anthropic_api_key: str, supabase_client):
         super().__init__(
             name="InternalPublisherAgent",
             description="AI agent for creating and publishing video content",
@@ -68,16 +68,16 @@ class InternalPublisherAgent(BaseAgent):
                 "Track video performance"
             ]
         )
-        self.openai_client = openai.AsyncOpenAI(api_key=openai_api_key)
+        self.anthropic_client = anthropic.AsyncAnthropic(api_key=anthropic_api_key)
         self.supabase = supabase_client
         self.json2video_key = os.getenv("JSON2VIDEO_API_KEY")
         self.blotato_key = os.getenv("BLOTATO_API_KEY")
-        
+
         # In-memory storage (replace with Supabase in production)
         self.videos_store: Dict[str, VideoProject] = {}
         self.publish_history: List[Dict[str, Any]] = []
 
-    async def generate_video_script(self, 
+    async def generate_video_script(self,
                                   prompt: str,
                                   target_audience: str = "general",
                                   duration: int = 60,
@@ -96,21 +96,22 @@ For each scene, provide:
 
 Format as a structured list of scenes."""
 
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4",
+            response = await self.anthropic_client.messages.create(
+                model="claude-opus-4.5",
+                max_tokens=2000,
+                system=system_prompt,
                 messages=[
-                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Create a video script for: {prompt}"}
                 ],
                 temperature=0.7
             )
-            
-            # Parse response into scenes (simplified - you'd want better parsing)
-            content = response.choices[0].message.content
+
+            # Parse response into scenes
+            content = response.content[0].text
             scenes = self._parse_scenes(content)
-            
+
             return scenes
-            
+
         except Exception as e:
             self.logger.error(f"Error generating script: {str(e)}")
             raise
@@ -423,15 +424,41 @@ Format as a structured list of scenes."""
     async def _save_to_supabase(self, project_id: str, data: Dict[str, Any]):
         """Save video project to Supabase"""
         try:
-            # Would implement Supabase storage
-            pass
+            if not self.supabase:
+                self.logger.warning("Supabase client not initialized, skipping save")
+                return
+
+            # Get the video project from in-memory store
+            video = self.videos_store.get(project_id)
+            if not video:
+                self.logger.warning(f"Project {project_id} not found in store")
+                return
+
+            # Prepare data for Supabase
+            update_data = {
+                "status": video.status.value if hasattr(video.status, 'value') else str(video.status),
+                "updated_at": datetime.now().isoformat(),
+                **data  # Merge additional data
+            }
+
+            # Update ai_video_projects table
+            result = self.supabase.table('ai_video_projects')\
+                .update(update_data)\
+                .eq('id', project_id)\
+                .execute()
+
+            if result.data:
+                self.logger.info(f"Successfully saved project {project_id} to Supabase")
+            else:
+                self.logger.warning(f"No rows updated for project {project_id}")
+
         except Exception as e:
             self.logger.error(f"Error saving to Supabase: {str(e)}")
 
 # Usage example:
 async def main():
     agent = InternalPublisherAgent(
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
         supabase_client=None  # Your Supabase client
     )
     
