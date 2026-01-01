@@ -27,6 +27,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
+import { VideoPublishingUI, PlatformResult } from '@/components/publishing/VideoPublishingUI';
 
 interface Scene {
   visual: string;
@@ -71,6 +72,9 @@ const AIVideoStudio: React.FC = () => {
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [generatingImages, setGeneratingImages] = useState(false);
   const [generatingVideo, setGeneratingVideo] = useState(false);
+
+  // Publishing state
+  const [showPublishing, setShowPublishing] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
@@ -647,6 +651,29 @@ const AIVideoStudio: React.FC = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Publishing Section */}
+          {videoUrl && projectId && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Publish to Social Media</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <VideoPublishingUI
+                  videoProjectId={projectId}
+                  videoUrl={videoUrl}
+                  defaultCaption={goal}
+                  onPublishComplete={(results: PlatformResult[]) => {
+                    console.log('Publishing complete:', results);
+                    toast({
+                      title: "Publishing Complete",
+                      description: `Published to ${results.filter(r => r.status === 'published').length} platform(s)`,
+                    });
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
       <PageHelpModal helpKey="aiVideoStudio" />
