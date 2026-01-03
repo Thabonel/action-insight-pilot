@@ -41,8 +41,7 @@ interface Campaign {
   status: string;
   type: string;
   total_budget: number;
-  spent: number;
-  auto_managed: boolean;
+  budget_spent: number;
   created_at: string;
 }
 
@@ -92,9 +91,8 @@ const SimpleDashboard: React.FC = () => {
       // Fetch campaigns
       const { data: campaignsData, error: campaignsError } = await supabase
         .from('campaigns')
-        .select('id, name, status, type, total_budget, spent, auto_managed, created_at')
+        .select('id, name, status, type, total_budget, budget_spent, created_at')
         .eq('created_by', user?.id)
-        .eq('auto_managed', true)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -323,7 +321,7 @@ const SimpleDashboard: React.FC = () => {
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <span className="capitalize">{campaign.type.replace('_', ' ')}</span>
                         <span>Budget: ${campaign.total_budget?.toLocaleString() || 0}</span>
-                        <span>Spent: ${campaign.spent?.toLocaleString() || 0}</span>
+                        <span>Spent: ${campaign.budget_spent?.toLocaleString() || 0}</span>
                       </div>
                     </div>
                     <Badge variant="outline" className="text-xs">
