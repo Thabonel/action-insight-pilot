@@ -998,10 +998,15 @@ export class ApiClient {
 
   // User Preferences methods
   async getUserPreferences(category?: string): Promise<ApiResponse<UserPreferences>> {
-    let query = supabase.from('user_preferences').select('*');
-    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    let query = supabase.from('user_preferences').select('*').eq('user_id', user.id);
+
     if (category) {
-      query = query.eq('category', category);
+      query = query.eq('preference_category', category);
     }
 
     const { data, error } = await query.maybeSingle();
@@ -1014,12 +1019,20 @@ export class ApiClient {
   }
 
   async updateUserPreferences(category: string, preferences: Partial<UserPreferences>): Promise<ApiResponse<UserPreferences>> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
     const { data, error } = await supabase
       .from('user_preferences')
       .upsert({
-        category,
+        user_id: user.id,
+        preference_category: category,
         preference_data: preferences,
         updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,preference_category'
       })
       .select()
       .maybeSingle();
