@@ -2,8 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Send, Zap, Calendar, Loader2 } from 'lucide-react';
+import { MentionInput } from './MentionInput';
 
 interface Platform {
   id: string;
@@ -16,6 +16,10 @@ interface Platform {
 interface PostCreationFormProps {
   postContent: string;
   setPostContent: (content: string) => void;
+  mentions?: string[];
+  hashtags?: string[];
+  onMentionsChange?: (mentions: string[]) => void;
+  onHashtagsChange?: (hashtags: string[]) => void;
   selectedPlatforms: string[];
   onTogglePlatform: (platformId: string) => void;
   onPostNow: () => void;
@@ -28,6 +32,8 @@ interface PostCreationFormProps {
 const PostCreationForm: React.FC<PostCreationFormProps> = ({
   postContent,
   setPostContent,
+  onMentionsChange,
+  onHashtagsChange,
   selectedPlatforms,
   onTogglePlatform,
   onPostNow,
@@ -36,6 +42,12 @@ const PostCreationForm: React.FC<PostCreationFormProps> = ({
   isScheduling,
   platforms
 }) => {
+  const handleContentChange = (content: string, mentions: string[], hashtags: string[]) => {
+    setPostContent(content);
+    onMentionsChange?.(mentions);
+    onHashtagsChange?.(hashtags);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -47,11 +59,13 @@ const PostCreationForm: React.FC<PostCreationFormProps> = ({
       <CardContent className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">Post Content</label>
-          <Textarea
-            placeholder="What would you like to share? AI will optimize for each platform..."
+          <MentionInput
             value={postContent}
-            onChange={(e) => setPostContent(e.target.value)}
+            onChange={handleContentChange}
+            platform={selectedPlatforms[0] || 'twitter'}
+            placeholder="What would you like to share? Use @ to mention and # for hashtags..."
             className="min-h-24"
+            disabled={isPosting || isScheduling}
           />
         </div>
 
