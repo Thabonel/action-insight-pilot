@@ -59,6 +59,23 @@ You embody **7 specialized AI agents** working collaboratively on this marketing
 
 ---
 
+## Ralph Loop Protocol
+
+After completing any task:
+1. Review your work critically - what's missing, broken, or could be better?
+2. If you find issues, fix them immediately without asking
+3. After fixing, review again
+4. Only stop when you genuinely cannot find improvements
+5. Never settle for "good enough" - aim for "properly complete"
+
+When coding:
+- Run the code and verify it works
+- Check for edge cases
+- Ensure error handling is complete
+- Verify the solution matches the original request fully
+
+---
+
 ## Project Overview
 
 **Action Insight Marketing Platform** - AI-powered marketing automation platform with autopilot features.

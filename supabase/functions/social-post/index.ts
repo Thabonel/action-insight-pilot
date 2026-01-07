@@ -10,6 +10,8 @@ interface PostContent {
   image?: string
   video?: string
   url?: string
+  mentions?: string[]
+  hashtags?: string[]
 }
 
 function decryptToken(encryptedToken: string): string {
@@ -233,6 +235,70 @@ Deno.serve(async (req) => {
           success: true,
           data: postResult
         })
+
+        // Track mention and hashtag usage after successful post
+        try {
+          if (content.mentions && content.mentions.length > 0) {
+            for (const mention of content.mentions) {
+              // Validate mention format
+              const cleanHandle = mention.replace('@', '').trim()
+              if (cleanHandle.length === 0 || cleanHandle.length > 50) {
+                console.warn(`[Tracking] Invalid mention format: ${mention}`)
+                continue
+              }
+
+              try {
+                await supabase.rpc('increment_mention_usage', {
+                  p_user_id: user.id,
+                  p_platform: platform,
+                  p_mention_handle: cleanHandle,
+                  p_display_name: null
+                })
+              } catch (mentionError) {
+                console.error(`[Tracking] Failed to track mention ${mention}:`, mentionError)
+              }
+            }
+          }
+
+          if (content.hashtags && content.hashtags.length > 0) {
+            for (const tag of content.hashtags) {
+              // Validate hashtag format
+              const cleanTag = tag.trim()
+              if (!cleanTag.startsWith('#') || cleanTag.length < 2 || cleanTag.length > 100) {
+                console.warn(`[Tracking] Invalid hashtag format: ${tag}`)
+                continue
+              }
+
+              try {
+                // First try to get existing record to increment
+                const { data: existing } = await supabase
+                  .from('hashtag_suggestions')
+                  .select('usage_count')
+                  .eq('user_id', user.id)
+                  .eq('hashtag', cleanTag)
+                  .eq('platform', platform)
+                  .single()
+
+                const newUsageCount = existing ? existing.usage_count + 1 : 1
+
+                await supabase.from('hashtag_suggestions').upsert({
+                  user_id: user.id,
+                  hashtag: cleanTag,
+                  platform: platform,
+                  usage_count: newUsageCount,
+                  last_used_at: new Date().toISOString()
+                }, {
+                  onConflict: 'user_id,hashtag,platform',
+                  ignoreDuplicates: false
+                })
+              } catch (hashtagError) {
+                console.error(`[Tracking] Failed to track hashtag ${tag}:`, hashtagError)
+              }
+            }
+          }
+        } catch (trackingError) {
+          console.error(`Error tracking mentions/hashtags for ${platform}:`, trackingError)
+        }
 
       } catch (error) {
         console.error(`Error posting to ${platform}:`, error)
