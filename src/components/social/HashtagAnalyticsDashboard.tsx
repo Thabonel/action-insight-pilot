@@ -90,11 +90,12 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
       if (analyticsError) throw analyticsError;
 
       setAnalytics(analyticsData || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching hashtag analytics:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load analytics';
       toast({
         title: 'Failed to load analytics',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {

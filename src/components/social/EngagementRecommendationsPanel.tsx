@@ -93,7 +93,7 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
           });
 
           if (hashtagData?.predictions) {
-            const poorPerformers = hashtagData.predictions.filter((p: any) =>
+            const poorPerformers = hashtagData.predictions.filter((p: Record<string, unknown>) =>
               p.recommendation === 'poor'
             );
 
@@ -109,7 +109,7 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
               });
             }
 
-            const excellentPerformers = hashtagData.predictions.filter((p: any) =>
+            const excellentPerformers = hashtagData.predictions.filter((p: Record<string, unknown>) =>
               p.recommendation === 'excellent'
             );
 
@@ -191,11 +191,12 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
       });
 
       setRecommendations(recs.slice(0, 5)); // Top 5 recommendations
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating recommendations:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate recommendations';
       toast({
         title: 'Failed to generate recommendations',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {

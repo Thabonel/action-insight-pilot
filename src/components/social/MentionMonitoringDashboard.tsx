@@ -80,11 +80,12 @@ export const MentionMonitoringDashboard: React.FC = () => {
       if (!countError) {
         setUnreadCount(countData || 0);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching mentions:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load mentions';
       toast({
         title: 'Failed to load mentions',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -115,11 +116,12 @@ export const MentionMonitoringDashboard: React.FC = () => {
         title: 'Marked as read',
         description: 'Mention has been marked as read'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error marking as read:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mark as read';
       toast({
         title: 'Failed to mark as read',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }
@@ -142,11 +144,12 @@ export const MentionMonitoringDashboard: React.FC = () => {
         title: 'Marked as responded',
         description: 'Mention has been marked as responded'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error marking as responded:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mark as responded';
       toast({
         title: 'Failed to mark as responded',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }
