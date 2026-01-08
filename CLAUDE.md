@@ -808,6 +808,53 @@ npm run knip
 3. Run migration
 4. Document in `APPLY_MIGRATIONS.md` if critical
 
+## 🚀 Deployment Workflow
+
+### Pre-Deployment Quality Gates
+
+All code pushed to `main` must pass:
+1. TypeScript type checking
+2. ESLint linting
+3. Frontend tests (Vitest)
+4. Backend tests (Pytest)
+5. Production build
+6. **Manual approval** (type 'DEPLOY')
+
+### Quick Commands
+
+```bash
+# Run all checks manually
+npm run quality:check:full
+
+# Push to production (triggers hook)
+git push origin main
+
+# Rollback (emergency)
+git revert <bad-commit>
+git push origin main --no-verify
+```
+
+### Rollback Procedures
+
+**Option 1: Git Revert (Recommended)**
+```bash
+git log --oneline -10
+git revert <bad-commit-hash>
+git push origin main --no-verify
+```
+
+**Option 2: Force Rollback (Emergency)**
+```bash
+git reset --hard <good-commit>
+git push origin main --force --no-verify
+```
+
+**Option 3: Platform Rollback**
+- Vercel/Netlify: Dashboard → Deployments → Rollback
+- Render: Dashboard → Deploys → Redeploy
+
+---
+
 ### Deploying
 
 **Frontend** (Vercel/Netlify):
