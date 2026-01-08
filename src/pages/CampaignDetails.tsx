@@ -234,21 +234,21 @@ const CampaignDetails: React.FC = () => {
             
             primaryKPI: result.data.primaryKPI || '',
             kpiTargets: {
-              revenue: (result.data.kpiTargets as any)?.revenue?.toString() || '',
-              leads: (result.data.kpiTargets as any)?.leads?.toString() || '',
-              conversion: (result.data.kpiTargets as any)?.conversion?.toString() || '',
-              roi: (result.data.kpiTargets as any)?.roi?.toString() || '',
-              impressions: (result.data.kpiTargets as any)?.impressions?.toString() || '',
-              clicks: (result.data.kpiTargets as any)?.clicks?.toString() || ''
+              revenue: (result.data.kpiTargets as KPITargets)?.revenue?.toString() || '',
+              leads: (result.data.kpiTargets as KPITargets)?.leads?.toString() || '',
+              conversion: (result.data.kpiTargets as KPITargets)?.conversion?.toString() || '',
+              roi: (result.data.kpiTargets as KPITargets)?.roi?.toString() || '',
+              impressions: (result.data.kpiTargets as KPITargets)?.impressions?.toString() || '',
+              clicks: (result.data.kpiTargets as KPITargets)?.clicks?.toString() || ''
             },
-            
+
             totalBudget: result.data.totalBudget?.toString() || '',
             budgetBreakdown: {
-              media: (result.data.budgetBreakdown as any)?.media?.toString() || '',
-              content: (result.data.budgetBreakdown as any)?.content?.toString() || '',
-              technology: (result.data.budgetBreakdown as any)?.technology?.toString() || '',
-              personnel: (result.data.budgetBreakdown as any)?.personnel?.toString() || '',
-              contingency: (result.data.budgetBreakdown as any)?.contingency?.toString() || ''
+              media: (result.data.budgetBreakdown as BudgetBreakdown)?.media?.toString() || '',
+              content: (result.data.budgetBreakdown as BudgetBreakdown)?.content?.toString() || '',
+              technology: (result.data.budgetBreakdown as BudgetBreakdown)?.technology?.toString() || '',
+              personnel: (result.data.budgetBreakdown as BudgetBreakdown)?.personnel?.toString() || '',
+              contingency: (result.data.budgetBreakdown as BudgetBreakdown)?.contingency?.toString() || ''
             },
             startDate: result.data.startDate || '',
             endDate: result.data.endDate || '',
@@ -401,7 +401,7 @@ const CampaignDetails: React.FC = () => {
     }
   };
 
-  const updateField = (field: string, value: any) => {
+  const updateField = (field: string, value: string | number | string[] | Record<string, unknown>) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when field is updated
     if (errors[field]) {
@@ -415,7 +415,7 @@ const CampaignDetails: React.FC = () => {
     trackFieldFocus(fieldName);
   }, [trackFieldFocus]);
 
-  const handleFieldBlur = useCallback((fieldName: string, value: any) => {
+  const handleFieldBlur = useCallback((fieldName: string, value: string | number | string[] | Record<string, unknown>) => {
     const startTime = fieldTimers.current[fieldName];
     if (startTime) {
       const timeSpent = Date.now() - startTime;
@@ -482,7 +482,7 @@ const CampaignDetails: React.FC = () => {
     }
   };
 
-  const updateNestedField = (parent: string, field: string, value: any) => {
+  const updateNestedField = (parent: string, field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [parent]: { ...prev[parent], [field]: value }

@@ -26,13 +26,13 @@ interface GTMInputs {
 }
 
 interface MarketResearchData {
-  competitors: any[];
-  marketSize: any;
-  industryTrends: any[];
-  pricingBenchmarks: any[];
+  competitors: unknown[]
+  marketSize: unknown
+  industryTrends: unknown[]
+  pricingBenchmarks: unknown[]
 }
 
-async function searchMarketData(query: string): Promise<any> {
+async function searchMarketData(query: string): Promise<string> {
   try {
     // Use Perplexity API for real-time market research
     const perplexityKey = Deno.env.get('PERPLEXITY_API_KEY');
@@ -320,13 +320,14 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in GTM planner:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI') || error.message?.includes('PERPLEXITY')
+    const errorMessage = error instanceof Error ? error.message : ''
+    const publicError = errorMessage?.includes('API key') || errorMessage?.includes('OPENAI') || errorMessage?.includes('PERPLEXITY')
       ? 'Configuration error - please contact support'
-      : error.message?.includes('Missing required field')
-      ? error.message
+      : errorMessage?.includes('Missing required field')
+      ? errorMessage
       : 'An error occurred generating GTM strategy';
     return new Response(
       JSON.stringify({ error: publicError }),

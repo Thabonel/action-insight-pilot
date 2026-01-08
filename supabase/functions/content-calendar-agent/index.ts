@@ -199,10 +199,11 @@ Format as JSON:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in content-calendar-agent:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('Claude') || error.message?.includes('Anthropic')
+    const errorMessage = error instanceof Error ? error.message : ''
+    const publicError = errorMessage?.includes('API key') || errorMessage?.includes('Claude') || errorMessage?.includes('Anthropic')
       ? 'Configuration error - please contact support'
       : 'An error occurred generating content calendar';
     return new Response(JSON.stringify({ error: publicError }), {

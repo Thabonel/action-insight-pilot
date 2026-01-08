@@ -36,8 +36,58 @@ import {
   Zap
 } from 'lucide-react';
 
+interface AnalyticsData {
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  revenue: number;
+  cost: number;
+  ctr: number;
+  conversionRate: number;
+  cpc: number;
+  cpa: number;
+  roas: number;
+  roi: number;
+  dailyData: Array<{
+    date: string;
+    impressions: number;
+    clicks: number;
+    conversions: number;
+    cost: number;
+    revenue: number;
+  }>;
+  channelPerformance: Array<{
+    channel: string;
+    impressions: number;
+    clicks: number;
+    conversions: number;
+  }>;
+  audienceData: {
+    demographics: Array<{
+      segment: string;
+      percentage: number;
+      conversions: number;
+    }>;
+    locations: Array<{
+      location: string;
+      percentage: number;
+      revenue: number;
+    }>;
+  };
+  recentActivities: Array<{
+    message: string;
+    timestamp: string;
+    impact: 'positive' | 'negative' | 'neutral';
+  }>;
+  recommendations: Array<{
+    title: string;
+    description: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+}
+
 // Real analytics data generator based on campaign metrics
-const generateAnalyticsData = (campaign: Campaign) => {
+const generateAnalyticsData = (campaign: Campaign): AnalyticsData => {
   const daysRunning = campaign.startDate ? 
     Math.floor((new Date().getTime() - new Date(campaign.startDate).getTime()) / (1000 * 3600 * 24)) : 0;
   
@@ -108,7 +158,7 @@ const CampaignDashboard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30d');
   const [refreshing, setRefreshing] = useState(false);
@@ -459,7 +509,7 @@ const CampaignDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {analytics.recentActivities.map((activity: any, index: number) => (
+                  {analytics.recentActivities.map((activity, index) => (
                     <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                       <div className={`p-1 rounded-full ${
                         activity.impact === 'positive' ? 'bg-green-100' :
@@ -493,7 +543,7 @@ const CampaignDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {analytics.audienceData.demographics.map((demo: any, index: number) => (
+                    {analytics.audienceData.demographics.map((demo, index) => (
                       <div key={index}>
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-sm font-medium">Age {demo.segment}</span>
@@ -516,7 +566,7 @@ const CampaignDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {analytics.audienceData.locations.map((location: any, index: number) => (
+                    {analytics.audienceData.locations.map((location, index) => (
                       <div key={index}>
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-sm font-medium">{location.location}</span>
@@ -542,7 +592,7 @@ const CampaignDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {analytics.channelPerformance.map((channel: any, index: number) => (
+                  {analytics.channelPerformance.map((channel, index) => (
                     <div key={index} className="p-4 border rounded-lg">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="font-medium">{channel.channel}</h4>
@@ -664,7 +714,7 @@ const CampaignDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {analytics.recommendations.map((rec: any, index: number) => (
+                    {analytics.recommendations.map((rec, index) => (
                       <div key={index} className={`p-3 rounded-lg border-l-4 ${
                         rec.priority === 'high' ? 'border-red-500 bg-red-50' :
                         rec.priority === 'medium' ? 'border-yellow-500 bg-yellow-50' :

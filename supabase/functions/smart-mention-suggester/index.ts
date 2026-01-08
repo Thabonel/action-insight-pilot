@@ -182,11 +182,12 @@ Return ONLY valid JSON array. Example:
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate suggestions'
     console.error('[Smart Suggester] Error:', error)
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to generate suggestions',
+        error: errorMessage,
         suggestions: []
       }),
       {
@@ -198,7 +199,7 @@ Return ONLY valid JSON array. Example:
 })
 
 async function getHistoricalSuggestions(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   platform: string
 ) {
@@ -210,7 +211,7 @@ async function getHistoricalSuggestions(
     .order('usage_count', { ascending: false })
     .limit(5)
 
-  const suggestions = historicalMentions?.map((m: any) => ({
+  const suggestions = historicalMentions?.map((m) => ({
     handle: m.mention_handle,
     reason: `Previously used ${m.usage_count}x`,
     confidence: Math.min(m.usage_count / 10, 1),

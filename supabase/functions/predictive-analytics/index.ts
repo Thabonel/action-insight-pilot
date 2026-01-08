@@ -64,10 +64,11 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in predictive-analytics:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+    const errorMessage = error instanceof Error ? error.message : ''
+    const publicError = errorMessage?.includes('API key') || errorMessage?.includes('OPENAI')
       ? 'Configuration error - please contact support'
       : 'An error occurred generating predictions';
     return new Response(JSON.stringify({ error: publicError }), {
@@ -77,7 +78,7 @@ serve(async (req) => {
   }
 });
 
-async function generatePredictionsWithAI(campaign: any, historicalData: any[], predictionType: string): Promise<any> {
+async function generatePredictionsWithAI(campaign: Record<string, unknown>, historicalData: unknown[], predictionType: string): Promise<unknown> {
   const prompt = `
 As an expert marketing data scientist, analyze the historical campaign data and predict outcomes for the new campaign.
 

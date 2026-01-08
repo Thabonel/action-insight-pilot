@@ -64,11 +64,12 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
       }
 
       setApprovals(filteredData);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching approvals:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to load approvals',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -97,11 +98,12 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
       });
 
       await fetchApprovals();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error approving:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to approve',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -134,11 +136,12 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
 
       setRejectionReason({ ...rejectionReason, [approvalId]: '' });
       await fetchApprovals();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error rejecting:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to reject',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {

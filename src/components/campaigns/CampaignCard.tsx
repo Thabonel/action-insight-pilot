@@ -33,6 +33,26 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
+interface TargetAudience {
+  demographics?: Record<string, unknown>;
+  interests?: string[];
+  location?: string[];
+}
+
+interface CampaignContent {
+  headline?: string;
+  body?: string;
+  assets?: string[];
+}
+
+interface CampaignMetrics {
+  reach?: number;
+  impressions?: number;
+  clicks?: number;
+  conversion_rate?: number;
+  revenue_generated?: number;
+}
+
 interface Campaign {
   id: string;
   name: string;
@@ -44,9 +64,9 @@ interface Campaign {
   created_by: string;
   budget_allocated?: number;
   budget_spent?: number;
-  target_audience?: any;
-  content?: any;
-  metrics?: any;
+  target_audience?: TargetAudience;
+  content?: CampaignContent;
+  metrics?: CampaignMetrics;
 }
 
 interface CampaignCardProps {

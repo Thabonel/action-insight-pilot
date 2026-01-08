@@ -101,7 +101,7 @@ const SimpleDashboard: React.FC = () => {
       } else {
         setCampaigns(campaignsData || []);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setIsLoading(false);

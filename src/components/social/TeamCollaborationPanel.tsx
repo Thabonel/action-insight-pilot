@@ -16,12 +16,24 @@ import {
   Share2
 } from 'lucide-react';
 
+interface MentionData {
+  handle: string
+  reason: string
+}
+
+interface HashtagData {
+  hashtag: string
+  reasoning: string
+}
+
+type RecommendationData = MentionData | HashtagData
+
 interface ShareRecommendation {
   id: string
   user_id: string
   shared_with_user_id: string
   recommendation_type: 'mention' | 'hashtag'
-  recommendation_data: any
+  recommendation_data: RecommendationData
   shared_at: string
   is_accepted: boolean | null
   accepted_at: string | null
@@ -31,7 +43,7 @@ interface ShareRecommendation {
 interface TeamCollaborationPanelProps {
   currentRecommendation?: {
     type: 'mention' | 'hashtag'
-    data: any
+    data: RecommendationData
   }
 }
 
@@ -67,11 +79,12 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
       if (error) throw error;
 
       setShares(data || []);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching shares:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to load shared recommendations',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -121,11 +134,12 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
       setShareEmail('');
       setShareNotes('');
       setShowShareForm(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sharing recommendation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to share',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -157,11 +171,12 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
       });
 
       await fetchShares();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error responding to share:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to respond',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -171,9 +186,11 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
 
   const getRecommendationDisplay = (share: ShareRecommendation) => {
     if (share.recommendation_type === 'mention') {
-      return `@${share.recommendation_data.handle} - ${share.recommendation_data.reason}`;
+      const data = share.recommendation_data as MentionData;
+      return `@${data.handle} - ${data.reason}`;
     } else {
-      return `${share.recommendation_data.hashtag} - ${share.recommendation_data.reasoning}`;
+      const data = share.recommendation_data as HashtagData;
+      return `${data.hashtag} - ${data.reasoning}`;
     }
   };
 

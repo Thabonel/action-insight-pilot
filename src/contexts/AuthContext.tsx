@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError as SupabaseAuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { AuthResponse } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error?: any }>;
-  signUp: (email: string, password: string) => Promise<{ error?: any }>;
+  signIn: (email: string, password: string) => Promise<AuthResponse>;
+  signUp: (email: string, password: string) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -53,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string): Promise<{ error?: any }> => {
+  const signIn = async (email: string, password: string): Promise<AuthResponse> => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -70,11 +71,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Sign in error:', error);
       setLoading(false);
-      return { error };
+      return { error: error as SupabaseAuthError };
     }
   };
 
-  const signUp = async (email: string, password: string): Promise<{ error?: any }> => {
+  const signUp = async (email: string, password: string): Promise<AuthResponse> => {
     setLoading(true);
     try {
       const { validatePasswordStrength, validateEmail } = await import('@/lib/validation/input-sanitizer');
@@ -100,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
       }
 
-      const { data: validationData, error: validationError } = await supabase.functions.invoke(
+      const { data: validationData, error: validationError } = await supabase.functions.invoke<{ success: boolean; errors?: string[] }>(
         'validate-user-registration',
         {
           body: { email, password }
@@ -135,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Sign up error:', error);
       setLoading(false);
-      return { error };
+      return { error: error as SupabaseAuthError };
     }
   };
 

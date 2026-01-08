@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,7 +9,7 @@ const corsHeaders = {
 
 interface DocumentChunk {
   content: string
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 serve(async (req) => {
@@ -51,11 +51,12 @@ serve(async (req) => {
       default:
         throw new Error('Invalid action')
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     console.error('Knowledge processor error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
+      JSON.stringify({ error: errorMessage }),
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
@@ -63,7 +64,7 @@ serve(async (req) => {
   }
 })
 
-async function createKnowledgeBucket(supabaseClient: any, userId: string, payload: any) {
+async function createKnowledgeBucket(supabaseClient: SupabaseClient, userId: string, payload: Record<string, unknown>) {
   const { name, bucket_type, description, campaign_id } = payload
 
   const { data, error } = await supabaseClient
@@ -86,7 +87,7 @@ async function createKnowledgeBucket(supabaseClient: any, userId: string, payloa
   )
 }
 
-async function uploadDocument(supabaseClient: any, userId: string, payload: any) {
+async function uploadDocument(supabaseClient: SupabaseClient, userId: string, payload: Record<string, unknown>) {
   const { bucket_id, title, content, file_name, file_type, file_size } = payload
 
   // Verify bucket ownership
@@ -125,7 +126,7 @@ async function uploadDocument(supabaseClient: any, userId: string, payload: any)
   )
 }
 
-async function processDocumentBackground(supabaseClient: any, documentId: string, content: string) {
+async function processDocumentBackground(supabaseClient: SupabaseClient, documentId: string, content: string): Promise<void> {
   try {
     // Get document and bucket info
     const { data: document } = await supabaseClient
@@ -292,7 +293,7 @@ async function hashString(str: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
-async function searchKnowledge(supabaseClient: any, userId: string, payload: any) {
+async function searchKnowledge(supabaseClient: SupabaseClient, userId: string, payload: Record<string, unknown>) {
   const { query, bucket_type, campaign_id, limit = 10 } = payload
 
   // Generate embedding for query
@@ -317,7 +318,7 @@ async function searchKnowledge(supabaseClient: any, userId: string, payload: any
 
   // Log access
   if (data && data.length > 0) {
-    const accessLogs = data.map((chunk: any) => ({
+    const accessLogs = data.map((chunk) => ({
       bucket_id: chunk.bucket_id,
       document_id: chunk.document_id,
       chunk_id: chunk.chunk_id,
@@ -337,7 +338,7 @@ async function searchKnowledge(supabaseClient: any, userId: string, payload: any
   )
 }
 
-async function getKnowledgeBuckets(supabaseClient: any, userId: string) {
+async function getKnowledgeBuckets(supabaseClient: SupabaseClient, userId: string) {
   const { data, error } = await supabaseClient
     .from('knowledge_buckets')
     .select(`
@@ -356,7 +357,7 @@ async function getKnowledgeBuckets(supabaseClient: any, userId: string) {
   )
 }
 
-async function getDocuments(supabaseClient: any, userId: string, payload: any) {
+async function getDocuments(supabaseClient: SupabaseClient, userId: string, payload: Record<string, unknown>) {
   const { bucket_id } = payload
 
   // Verify bucket ownership
@@ -383,7 +384,7 @@ async function getDocuments(supabaseClient: any, userId: string, payload: any) {
   )
 }
 
-async function processDocument(supabaseClient: any, userId: string, payload: any) {
+async function processDocument(supabaseClient: SupabaseClient, userId: string, payload: Record<string, unknown>) {
   const { document_id } = payload
 
   // Verify document ownership

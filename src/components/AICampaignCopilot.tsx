@@ -75,7 +75,7 @@ interface AIGeneration {
 
 interface AICampaignCopilotProps {
   initialBrief?: CampaignBrief;
-  onSave?: (campaign: any) => void;
+  onSave?: (campaign: AIGeneration) => void;
 }
 
 const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onSave }) => {
@@ -176,9 +176,43 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
         throw new Error(contentData?.error || contentError?.message || 'Failed to generate content calendar');
       }
 
+      // Define API response interfaces
+      interface PersonaAPIResponse {
+        id: string;
+        name: string;
+        demographics?: { age: string };
+        description: string;
+        painPoints?: string[];
+        motivations?: string[];
+      }
+
+      interface ChannelAPIResponse {
+        channel: string;
+        budgetPercentage: number;
+        rationale: string;
+      }
+
+      interface MessagingPillarAPIResponse {
+        id: string;
+        title: string;
+        description: string;
+        emotionalAppeal?: string;
+      }
+
+      interface ContentItemAPIResponse {
+        date: string;
+        content?: Array<{
+          id?: string;
+          platform?: string;
+          contentType?: string;
+          title?: string;
+          description?: string;
+        }>;
+      }
+
       // Transform the AI responses to match our interface
       const aiGeneration: AIGeneration = {
-        personas: audienceData.personas.map((p: any) => ({
+        personas: (audienceData.personas as PersonaAPIResponse[]).map((p) => ({
           id: p.id,
           name: p.name,
           age: p.demographics?.age || 'Not specified',
@@ -188,27 +222,27 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
           reasoning: audienceData.reasoning || 'Generated based on campaign brief and historical data'
         })),
         channelMix: {
-          channels: channelData.channelMix.map((c: any) => ({
+          channels: (channelData.channelMix as ChannelAPIResponse[]).map((c) => ({
             name: c.channel,
             allocation: c.budgetPercentage,
             reasoning: c.rationale
           })),
           totalBudget: parseFloat(brief.budget.replace(/[^\d.]/g, '')) || 0
         },
-        messagingPillars: messagingData.messagingPillars.map((p: any) => ({
+        messagingPillars: (messagingData.messagingPillars as MessagingPillarAPIResponse[]).map((p) => ({
           id: p.id,
           title: p.title,
           description: p.description,
           tone: p.emotionalAppeal || 'Professional',
           reasoning: messagingData.reasoning || 'Aligned with audience insights and channel strategy'
         })),
-        contentCalendar: contentData.contentCalendar.slice(0, 10).map((c: any) => ({
-          id: c.content[0]?.id || Math.random().toString(),
+        contentCalendar: (contentData.contentCalendar as ContentItemAPIResponse[]).slice(0, 10).map((c) => ({
+          id: c.content?.[0]?.id || Math.random().toString(),
           date: c.date,
-          platform: c.content[0]?.platform || 'Multi-channel',
-          contentType: c.content[0]?.contentType || 'Mixed',
-          title: c.content[0]?.title || 'Content piece',
-          description: c.content[0]?.description || '',
+          platform: c.content?.[0]?.platform || 'Multi-channel',
+          contentType: c.content?.[0]?.contentType || 'Mixed',
+          title: c.content?.[0]?.title || 'Content piece',
+          description: c.content?.[0]?.description || '',
           reasoning: contentData.reasoning || 'Optimized for audience engagement and channel performance'
         }))
       };

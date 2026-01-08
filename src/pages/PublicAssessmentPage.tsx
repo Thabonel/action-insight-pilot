@@ -87,7 +87,7 @@ export default function PublicAssessmentPage() {
     setCurrentStep('questions');
   };
 
-  const handleAnswer = (questionId: string, value: any) => {
+  const handleAnswer = (questionId: string, value: string | number | string[]) => {
     setAnswers(prev => ({
       ...prev,
       [questionId]: value
@@ -143,9 +143,10 @@ export default function PublicAssessmentPage() {
 
       setResult(data);
       setCurrentStep('results');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error submitting assessment:', err);
-      setError(err.message || 'Failed to submit your responses. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit your responses. Please try again.';
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }

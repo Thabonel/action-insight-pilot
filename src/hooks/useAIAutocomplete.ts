@@ -7,7 +7,7 @@ export interface AutocompleteContext {
   industry?: string;
   product?: string;
   targetAudience?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const useAIAutocomplete = (

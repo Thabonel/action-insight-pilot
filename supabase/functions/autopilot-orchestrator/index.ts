@@ -1,6 +1,64 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+
+interface AutopilotConfig {
+  id: string
+  user_id: string
+  is_active: boolean
+  business_description?: string
+  target_audience?: string
+  business_type?: string
+  monthly_budget: number
+  ai_strategy?: {
+    channels: ChannelStrategy[]
+    targetAudience?: string
+  }
+  brand_kit?: {
+    primary_color?: string
+    secondary_color?: string
+    logo_url?: string
+  }
+  metadata?: Record<string, unknown>
+  last_optimized_at?: string
+}
+
+interface ChannelStrategy {
+  name: string
+  budgetPercentage: number
+  rationale: string
+}
+
+interface Campaign {
+  id: string
+  created_by: string
+  name: string
+  description: string
+  type: string
+  status: string
+  total_budget: number
+  spent?: number
+  start_date: string
+  end_date: string
+  auto_managed: boolean
+  metadata?: Record<string, unknown>
+  campaign_metrics?: CampaignMetric[]
+}
+
+interface CampaignMetric {
+  metric_date: string
+  conversion_rate?: number
+  spend?: number
+  conversions?: number
+  engagement_rate?: number
+}
+
+interface ProcessResult {
+  userId: string
+  success: boolean
+  action?: string
+  error?: string
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,19 +89,20 @@ serve(async (req) => {
 
     console.log(`Found ${activeConfigs?.length || 0} active autopilot users`);
 
-    const results = [];
+    const results: ProcessResult[] = [];
 
     // Process each user's autopilot
-    for (const config of activeConfigs || []) {
+    for (const config of (activeConfigs || []) as AutopilotConfig[]) {
       try {
         const result = await processAutopilot(supabase, config);
         results.push(result);
-      } catch (error) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         console.error(`Error processing autopilot for user ${config.user_id}:`, error);
         results.push({
           userId: config.user_id,
           success: false,
-          error: error.message
+          error: errorMessage
         });
       }
     }
@@ -56,16 +115,17 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     console.error('Error in autopilot-orchestrator:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
-async function processAutopilot(supabase: any, config: any) {
+async function processAutopilot(supabase: SupabaseClient, config: AutopilotConfig): Promise<ProcessResult> {
   const userId = config.user_id;
   const configId = config.id;
 
@@ -107,7 +167,7 @@ async function processAutopilot(supabase: any, config: any) {
   };
 }
 
-async function createInitialCampaigns(supabase: any, userId: string, configId: string, config: any) {
+async function createInitialCampaigns(supabase: SupabaseClient, userId: string, configId: string, config: AutopilotConfig): Promise<void> {
   const strategy = config.ai_strategy;
 
   if (!strategy?.channels || !Array.isArray(strategy.channels)) {
@@ -166,7 +226,7 @@ async function createInitialCampaigns(supabase: any, userId: string, configId: s
   }
 }
 
-async function createCampaignTasks(supabase: any, campaignId: string, userId: string, channel: any) {
+async function createCampaignTasks(supabase: SupabaseClient, campaignId: string, userId: string, channel: ChannelStrategy): Promise<void> {
   const tasks = [
     {
       campaign_id: campaignId,
@@ -206,7 +266,7 @@ async function createCampaignTasks(supabase: any, campaignId: string, userId: st
   }
 }
 
-async function createCampaignAssessment(supabase: any, userId: string, campaignId: string, configId: string, config: any) {
+async function createCampaignAssessment(supabase: SupabaseClient, userId: string, campaignId: string, configId: string, config: AutopilotConfig): Promise<void> {
   try {
     console.log(`Generating assessment for campaign ${campaignId}...`);
 
@@ -274,7 +334,7 @@ async function createCampaignAssessment(supabase: any, userId: string, campaignI
   }
 }
 
-async function optimizeCampaigns(supabase: any, userId: string, configId: string) {
+async function optimizeCampaigns(supabase: SupabaseClient, userId: string, configId: string): Promise<void> {
   // Get user's active campaigns
   const { data: campaigns } = await supabase
     .from('campaigns')
@@ -285,10 +345,10 @@ async function optimizeCampaigns(supabase: any, userId: string, configId: string
 
   if (!campaigns || campaigns.length === 0) return;
 
-  for (const campaign of campaigns) {
+  for (const campaign of campaigns as Campaign[]) {
     // Get recent metrics
     const recentMetrics = campaign.campaign_metrics
-      ?.sort((a: any, b: any) => new Date(b.metric_date).getTime() - new Date(a.metric_date).getTime())
+      ?.sort((a, b) => new Date(b.metric_date).getTime() - new Date(a.metric_date).getTime())
       .slice(0, 7); // Last 7 days
 
     if (!recentMetrics || recentMetrics.length === 0) {
@@ -297,11 +357,11 @@ async function optimizeCampaigns(supabase: any, userId: string, configId: string
     }
 
     // Calculate performance
-    const avgConversionRate = recentMetrics.reduce((sum: number, m: any) =>
+    const avgConversionRate = recentMetrics.reduce((sum, m) =>
       sum + (m.conversion_rate || 0), 0) / recentMetrics.length;
-    const totalSpend = recentMetrics.reduce((sum: number, m: any) =>
+    const totalSpend = recentMetrics.reduce((sum, m) =>
       sum + (m.spend || 0), 0);
-    const totalConversions = recentMetrics.reduce((sum: number, m: any) =>
+    const totalConversions = recentMetrics.reduce((sum, m) =>
       sum + (m.conversions || 0), 0);
 
     // Optimization logic
@@ -352,7 +412,7 @@ async function optimizeCampaigns(supabase: any, userId: string, configId: string
     }
 
     // NEW: Check if video ads would improve engagement
-    const avgEngagement = recentMetrics.reduce((sum: number, m: any) =>
+    const avgEngagement = recentMetrics.reduce((sum, m) =>
       sum + (m.engagement_rate || 0), 0) / recentMetrics.length;
 
     if (avgEngagement < 2.0 && shouldGenerateVideoAds(campaign)) {
@@ -362,7 +422,7 @@ async function optimizeCampaigns(supabase: any, userId: string, configId: string
   }
 }
 
-async function syncLeadsToInbox(supabase: any, userId: string) {
+async function syncLeadsToInbox(supabase: SupabaseClient, userId: string): Promise<void> {
   // Get recent leads not yet in autopilot inbox
   const { data: newLeads } = await supabase
     .from('leads')
@@ -379,7 +439,7 @@ async function syncLeadsToInbox(supabase: any, userId: string) {
     .select('lead_id')
     .eq('user_id', userId);
 
-  const existingLeadIds = new Set(existingInboxLeads?.map((l: any) => l.lead_id) || []);
+  const existingLeadIds = new Set(existingInboxLeads?.map((l) => l.lead_id) || []);
 
   // Add new leads to inbox
   const leadsToAdd = newLeads
@@ -408,7 +468,7 @@ async function syncLeadsToInbox(supabase: any, userId: string) {
   }
 }
 
-async function processAssessmentWorkflows(supabase: any, userId: string, configId: string) {
+async function processAssessmentWorkflows(supabase: SupabaseClient, userId: string, configId: string): Promise<void> {
   try {
     // Get recent assessment responses (last 7 days)
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -436,7 +496,7 @@ async function processAssessmentWorkflows(supabase: any, userId: string, configI
       const category = response.result_category;
 
       // Apply score-based tags
-      let newTags = lead.tags || [];
+      const newTags = lead.tags || [];
 
       if (score >= 75) {
         // High score - ready to buy
@@ -522,7 +582,7 @@ function mapChannelToType(channelName: string): string {
 // VIDEO GENERATION FUNCTIONS
 // ============================================================================
 
-function shouldGenerateVideoAds(campaign: any): boolean {
+function shouldGenerateVideoAds(campaign: Campaign): boolean {
   // Only generate for video-friendly channels
   const videoChannels = ['LinkedIn', 'Facebook', 'TikTok', 'YouTube', 'Instagram', 'social'];
   const campaignName = campaign.name?.toLowerCase() || '';
@@ -539,7 +599,7 @@ function shouldGenerateVideoAds(campaign: any): boolean {
   return remainingBudget >= estimatedCost;
 }
 
-async function tryGenerateVideoAds(supabase: any, userId: string, campaign: any, configId: string) {
+async function tryGenerateVideoAds(supabase: SupabaseClient, userId: string, campaign: Campaign, configId: string): Promise<void> {
   try {
     // Check if user has Gemini API key
     const { data: apiKeys } = await supabase

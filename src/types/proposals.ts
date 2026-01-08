@@ -34,7 +34,13 @@ export interface Proposal {
 export interface GeneratedProposal {
   id: string;
   template_type: string;
-  client_info: any;
+  client_info: {
+    company_name: string;
+    contact_name: string;
+    email: string;
+    phone: string;
+    industry: string;
+  };
   content: {
     executive_summary: string;
     proposed_services: string;

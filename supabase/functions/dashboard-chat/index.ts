@@ -344,7 +344,7 @@ async function createAndLaunchCampaign(
   // Determine campaign type and channels based on goals and budget
   const budget = data.budget || 500;
   let channels = [];
-  let type = 'digital';
+  const type = 'digital';
 
   if (budget < 300) {
     channels = ['social'];

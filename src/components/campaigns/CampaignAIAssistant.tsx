@@ -48,7 +48,15 @@ const CampaignAIAssistant: React.FC = () => {
     }
   }, []);
 
-  const handleSuggestionClick = (suggestion: any) => {
+  interface Suggestion {
+    id: number;
+    type: string;
+    message: string;
+    confidence: number;
+    icon: React.ComponentType<{ className?: string }>;
+  }
+
+  const handleSuggestionClick = (suggestion: Suggestion) => {
     behaviorTracker.trackAction('planning', 'campaign_ai_assistant', {
       suggestionType: suggestion.type,
       suggestionId: suggestion.id

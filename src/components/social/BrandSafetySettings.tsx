@@ -67,11 +67,12 @@ export const BrandSafetySettings: React.FC = () => {
       if (error) throw error;
 
       setFilters(data || []);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching filters:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to load brand safety filters',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -112,10 +113,13 @@ export const BrandSafetySettings: React.FC = () => {
       setNewFilter({ type: 'blocked_handle', value: '', reason: '' });
       setShowAddForm(false);
       await fetchFilters();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding filter:', error);
 
-      if (error.code === '23505') {
+      const isDuplicateError = error && typeof error === 'object' && 'code' in error && error.code === '23505';
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+
+      if (isDuplicateError) {
         toast({
           title: 'Filter already exists',
           description: 'This filter has already been added',
@@ -124,7 +128,7 @@ export const BrandSafetySettings: React.FC = () => {
       } else {
         toast({
           title: 'Failed to add filter',
-          description: error.message,
+          description: errorMessage,
           variant: 'destructive'
         });
       }
@@ -152,11 +156,12 @@ export const BrandSafetySettings: React.FC = () => {
       });
 
       await fetchFilters();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error toggling filter:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to toggle filter',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -183,11 +188,12 @@ export const BrandSafetySettings: React.FC = () => {
       });
 
       await fetchFilters();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting filter:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: 'Failed to delete filter',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {

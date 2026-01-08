@@ -48,7 +48,7 @@ const Proposals: React.FC = () => {
     exportProposal
   } = useProposals();
 
-  const handleInputChange = (section: string, field: string, value: any) => {
+  const handleInputChange = (section: string, field: string, value: string | number | string[]) => {
     setFormData(prev => ({
       ...prev,
       [section]: {
@@ -69,7 +69,12 @@ const Proposals: React.FC = () => {
     }
   };
 
-  const handleSuggestionSelect = (content: any) => {
+  interface ContentSuggestion {
+    content: string;
+    tags?: string[];
+  }
+
+  const handleSuggestionSelect = (content: ContentSuggestion) => {
     // Update form data with selected content
     setFormData(prev => ({
       ...prev,

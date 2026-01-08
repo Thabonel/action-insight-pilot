@@ -1,15 +1,28 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface AnalyticsEventData {
+  timestamp?: string;
+  url?: string;
+  user_agent?: string;
+  field_name?: string;
+  is_empty?: boolean;
+  time_spent_ms?: number;
+  assistance_type?: string;
+  success?: boolean;
+  error_message?: string;
+  [key: string]: unknown;
+}
+
 interface AnalyticsEvent {
   event_type: string;
-  event_data: any;
+  event_data: AnalyticsEventData;
   user_id?: string;
   session_id?: string;
 }
 
 export const useAnalytics = () => {
-  const trackEvent = useCallback(async (eventType: string, eventData: any = {}) => {
+  const trackEvent = useCallback(async (eventType: string, eventData: AnalyticsEventData = {}) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       

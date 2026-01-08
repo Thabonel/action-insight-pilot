@@ -1,13 +1,13 @@
 import React from 'react';
 
-interface GridProps {
-  // Add your props here
+interface GridProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
 }
 
-const Grid: React.FC<GridProps> = () => {
+const Grid: React.FC<GridProps> = ({ children, ...props }) => {
   return (
-    <div>
-      {/* Add your grid content here */}
+    <div {...props}>
+      {children || null}
     </div>
   );
 };

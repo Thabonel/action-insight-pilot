@@ -16,14 +16,20 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface ImpactMetrics {
+  leads_generated?: number;
+  roi_improvement?: number;
+  cost_saved?: number;
+}
+
 interface Activity {
   id: string;
   activity_type: string;
   activity_description: string;
   entity_type: string;
   entity_id: string;
-  metadata: any;
-  impact_metrics: any;
+  metadata: Record<string, unknown>;
+  impact_metrics: ImpactMetrics | null;
   created_at: string;
 }
 

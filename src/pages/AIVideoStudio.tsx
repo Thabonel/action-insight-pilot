@@ -132,11 +132,12 @@ const AIVideoStudio: React.FC = () => {
         description: `Created ${data.scenes.length} scenes. Estimated cost: $${data.estimated_cost.toFixed(2)}`,
       });
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error generating plan:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate video plan';
       toast({
         title: "Generation Failed",
-        description: error.message || 'Failed to generate video plan',
+        description: errorMessage,
         variant: "destructive"
       });
       setStatus('failed');
@@ -190,11 +191,12 @@ const AIVideoStudio: React.FC = () => {
         description: `Created ${data.image_urls.length} images. Cost: $${data.cost_usd.toFixed(2)}`,
       });
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error generating images:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate images';
       toast({
         title: "Image Generation Failed",
-        description: error.message || 'Failed to generate images',
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -256,11 +258,12 @@ const AIVideoStudio: React.FC = () => {
       // Start polling for status
       pollVideoStatus(projectId);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error generating video:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start video generation';
       toast({
         title: "Video Generation Failed",
-        description: error.message || 'Failed to start video generation',
+        description: errorMessage,
         variant: "destructive"
       });
       setStatus('failed');
@@ -318,7 +321,7 @@ const AIVideoStudio: React.FC = () => {
   // SCENE EDITING
   // ============================================================================
 
-  const updateScene = (index: number, field: keyof Scene, value: any) => {
+  const updateScene = (index: number, field: keyof Scene, value: string | number) => {
     const updatedScenes = [...scenes];
     updatedScenes[index] = { ...updatedScenes[index], [field]: value };
     setScenes(updatedScenes);
@@ -367,7 +370,7 @@ const AIVideoStudio: React.FC = () => {
       )}
 
       {/* 3-Panel Tabs */}
-      <Tabs value={activePanel} onValueChange={(value: any) => setActivePanel(value)}>
+      <Tabs value={activePanel} onValueChange={(value) => setActivePanel(value as typeof activePanel)}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="prompt" className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
@@ -405,7 +408,7 @@ const AIVideoStudio: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="platform">Platform</Label>
-                  <Select value={platform} onValueChange={(value: any) => setPlatform(value)}>
+                  <Select value={platform} onValueChange={(value) => setPlatform(value as typeof platform)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
