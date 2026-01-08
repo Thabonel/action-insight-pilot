@@ -142,7 +142,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           success: false,
-          error: `TikTok API error: ${initData.error.message || initData.error.code}`
+          error: `TikTok API error: ${initData.error instanceof Error ? error.message : String(error) || initData.error.code}`
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -240,12 +240,12 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[TikTok Direct] Unexpected error:', error)
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'An unexpected error occurred',
+        error: error instanceof Error ? error.message : String(error) || 'An unexpected error occurred',
         code: 'INTERNAL_ERROR'
       }),
       {

@@ -2,6 +2,34 @@
 import { ClientCore } from './client-core';
 import { EmailMethods } from './email-methods';
 
+export interface EmailCampaignData {
+  [key: string]: unknown;
+}
+
+export interface EmailData {
+  [key: string]: unknown;
+}
+
+export interface TemplateVersionData {
+  [key: string]: unknown;
+}
+
+export interface WebhookData {
+  [key: string]: unknown;
+}
+
+export interface EventMetadata {
+  [key: string]: unknown;
+}
+
+export interface AudienceData {
+  [key: string]: unknown;
+}
+
+export interface EmailOptions {
+  [key: string]: unknown;
+}
+
 export class EmailApi extends ClientCore {
   private emailMethods: EmailMethods;
 
@@ -19,7 +47,7 @@ export class EmailApi extends ClientCore {
     return this.emailMethods.getEmailCampaigns();
   }
 
-  async createEmailCampaign(campaignData: any) {
+  async createEmailCampaign(campaignData: EmailCampaignData) {
     return this.emailMethods.createEmailCampaign(campaignData);
   }
 
@@ -27,11 +55,11 @@ export class EmailApi extends ClientCore {
     return this.emailMethods.getEmailAnalytics();
   }
 
-  async sendEmail(emailData: any) {
+  async sendEmail(emailData: EmailData) {
     return this.emailMethods.sendEmail(emailData);
   }
 
-  async createEmailTemplateVersion(templateId: string, versionData: any) {
+  async createEmailTemplateVersion(templateId: string, versionData: TemplateVersionData) {
     return this.emailMethods.createEmailTemplateVersion(templateId, versionData);
   }
 
@@ -39,7 +67,7 @@ export class EmailApi extends ClientCore {
     return this.emailMethods.getEmailTemplateVersions(templateId);
   }
 
-  async sendPersonalizedEmail(emailData: any) {
+  async sendPersonalizedEmail(emailData: EmailData) {
     return this.emailMethods.sendPersonalizedEmail(emailData);
   }
 
@@ -47,15 +75,15 @@ export class EmailApi extends ClientCore {
     return this.emailMethods.getEmailRealTimeMetrics(campaignId, timeRange);
   }
 
-  async registerEmailWebhook(webhookData: any) {
+  async registerEmailWebhook(webhookData: WebhookData) {
     return this.emailMethods.registerEmailWebhook(webhookData);
   }
 
-  async trackEmailEvent(emailId: string, eventType: string, metadata?: any) {
+  async trackEmailEvent(emailId: string, eventType: string, metadata?: EventMetadata) {
     return this.emailMethods.trackEmailEvent(emailId, eventType, metadata);
   }
 
-  async generateEmailContent(campaignType: string, audience: any, options?: any) {
+  async generateEmailContent(campaignType: string, audience: AudienceData, options?: EmailOptions) {
     return this.emailMethods.generateEmailContent(campaignType, audience, options);
   }
 
@@ -63,7 +91,7 @@ export class EmailApi extends ClientCore {
     return this.emailMethods.generateABVariants(baseMessage);
   }
 
-  async suggestSendTime(audienceProfile: any) {
+  async suggestSendTime(audienceProfile: AudienceData) {
     return this.emailMethods.suggestSendTime(audienceProfile);
   }
 }

@@ -1,11 +1,12 @@
 
 import React from 'react';
+import { User } from '@supabase/supabase-js';
 
 interface ChatInputProps {
   chatMessage: string;
   setChatMessage: (message: string) => void;
   onSubmit: (e: React.FormEvent) => void;
-  user: any;
+  user: User | null;
   isTyping: boolean;
 }
 

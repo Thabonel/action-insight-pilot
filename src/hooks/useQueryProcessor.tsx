@@ -6,7 +6,7 @@ import { QueryProcessor } from '@/lib/utils/query-processor';
 export const useQueryProcessor = () => {
   const { toast } = useToast();
 
-  const processQueryWithRealAI = async (userQuery: string, context: any[]) => {
+  const processQueryWithRealAI = async (userQuery: string, context: Record<string, unknown>[]) => {
     try {
       console.log('Processing query with local backend...');
       

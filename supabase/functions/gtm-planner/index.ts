@@ -91,7 +91,7 @@ async function searchMarketData(query: string): Promise<string> {
 
     const data = await response.json();
     return data.choices[0].message.content;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Market research error:', error);
     return `Unable to fetch real-time data for: ${query}`;
   }
@@ -323,7 +323,7 @@ serve(async (req) => {
   } catch (error: unknown) {
     console.error('Error in GTM planner:', error);
     // Return generic error to client, log full error server-side
-    const errorMessage = error instanceof Error ? error.message : ''
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : ''
     const publicError = errorMessage?.includes('API key') || errorMessage?.includes('OPENAI') || errorMessage?.includes('PERPLEXITY')
       ? 'Configuration error - please contact support'
       : errorMessage?.includes('Missing required field')

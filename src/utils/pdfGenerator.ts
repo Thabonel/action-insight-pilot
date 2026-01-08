@@ -79,7 +79,38 @@ export const generatePDF = async (
   }
 };
 
-export const generateProposalPDF = async (proposal: any): Promise<void> => {
+interface PricingItem {
+  item: string;
+  description: string;
+  price: number;
+}
+
+interface TimelinePhase {
+  phase: string;
+  duration: string;
+  deliverables: string[];
+}
+
+interface ProposalTerms {
+  payment_terms: string;
+  warranty?: string;
+}
+
+interface ProposalContent {
+  title?: string;
+  executive_summary?: string;
+  content?: string;
+}
+
+interface Proposal {
+  id?: string;
+  content?: ProposalContent;
+  pricing?: PricingItem[];
+  timeline?: TimelinePhase[];
+  terms?: ProposalTerms;
+}
+
+export const generateProposalPDF = async (proposal: Proposal): Promise<void> => {
   // Create a temporary element with the proposal content
   const tempElement = document.createElement('div');
   tempElement.id = 'proposal-pdf-content';
@@ -115,7 +146,7 @@ export const generateProposalPDF = async (proposal: any): Promise<void> => {
             </tr>
           </thead>
           <tbody>
-            ${proposal.pricing.map((item: any) => `
+            ${proposal.pricing.map((item) => `
               <tr>
                 <td style="padding: 12px; border: 1px solid #ddd;">${item.item}</td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${item.description}</td>
@@ -125,7 +156,7 @@ export const generateProposalPDF = async (proposal: any): Promise<void> => {
             <tr style="background-color: #f9f9f9; font-weight: bold;">
               <td colspan="2" style="padding: 12px; border: 1px solid #ddd;">Total</td>
               <td style="padding: 12px; border: 1px solid #ddd; text-align: right;">
-                $${proposal.pricing.reduce((sum: number, item: any) => sum + item.price, 0).toLocaleString()}
+                $${proposal.pricing.reduce((sum, item) => sum + item.price, 0).toLocaleString()}
               </td>
             </tr>
           </tbody>
@@ -136,7 +167,7 @@ export const generateProposalPDF = async (proposal: any): Promise<void> => {
     ${proposal.timeline && proposal.timeline.length > 0 ? `
       <div style="margin-bottom: 30px;">
         <h3 style="color: #1a1a1a; font-size: 18px; margin-bottom: 15px;">Project Timeline</h3>
-        ${proposal.timeline.map((phase: any) => `
+        ${proposal.timeline.map((phase) => `
           <div style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
               <h4 style="margin: 0; color: #1a1a1a;">${phase.phase}</h4>

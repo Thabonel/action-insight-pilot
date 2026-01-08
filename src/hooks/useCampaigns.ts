@@ -8,9 +8,9 @@ interface Campaign extends ApiCampaign {
   created_by: string
   start_date?: string
   end_date?: string
-  target_audience?: any
-  content?: any
-  settings?: any
+  target_audience?: Record<string, unknown>
+  content?: Record<string, unknown>
+  settings?: Record<string, unknown>
 }
 
 // Map database types to our interface types
@@ -52,7 +52,7 @@ const mapInterfaceTypeToDatabase = (interfaceType: Campaign['type']): string => 
 }
 
 // Helper function to safely parse metrics from database Json type
-const parseMetrics = (metrics: any): Campaign['metrics'] => {
+const parseMetrics = (metrics: unknown): Campaign['metrics'] => {
   if (!metrics) return undefined
   
   if (typeof metrics === 'string') {
@@ -101,25 +101,25 @@ export function useCampaigns() {
         status: mapDatabaseStatusToInterface(campaign.status),
         metrics: parseMetrics(campaign.metrics),
         // Properly parse demographics JSON field
-        demographics: typeof campaign.demographics === 'object' && campaign.demographics !== null 
-          ? campaign.demographics as any
+        demographics: typeof campaign.demographics === 'object' && campaign.demographics !== null
+          ? campaign.demographics as Record<string, unknown>
           : {},
         // Properly parse other JSONB fields
         kpi_targets: typeof campaign.kpi_targets === 'object' && campaign.kpi_targets !== null
-          ? campaign.kpi_targets as any
+          ? campaign.kpi_targets as Record<string, unknown>
           : {},
         budget_breakdown: typeof campaign.budget_breakdown === 'object' && campaign.budget_breakdown !== null
-          ? campaign.budget_breakdown as any
+          ? campaign.budget_breakdown as Record<string, unknown>
           : {},
         channels: Array.isArray(campaign.channels) ? campaign.channels.map(c => String(c)) : [],
         content: typeof campaign.content === 'object' && campaign.content !== null
-          ? campaign.content as any
+          ? campaign.content as Record<string, unknown>
           : {},
         settings: typeof campaign.settings === 'object' && campaign.settings !== null
-          ? campaign.settings as any
+          ? campaign.settings as Record<string, unknown>
           : {},
         compliance_checklist: typeof campaign.compliance_checklist === 'object' && campaign.compliance_checklist !== null
-          ? campaign.compliance_checklist as any
+          ? campaign.compliance_checklist as Record<string, unknown>
           : {},
         // Ensure all required fields are present
         created_at: campaign.created_at || new Date().toISOString(),

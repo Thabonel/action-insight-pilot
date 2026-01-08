@@ -6,9 +6,9 @@ export interface AIFeedbackData {
   userId: string;
   sessionId?: string;
   interactionType: 'edit' | 'approve' | 'regenerate' | 'reject';
-  originalSuggestion: any;
-  userModification?: any;
-  contextData: any;
+  originalSuggestion: Record<string, unknown>;
+  userModification?: Record<string, unknown>;
+  contextData: Record<string, unknown>;
   feedbackScore?: number; // 1-5 rating
 }
 
@@ -50,9 +50,9 @@ export const useAIFeedback = () => {
   };
 
   const recordEdit = async (
-    originalSuggestion: any, 
-    userModification: any, 
-    contextData: any, 
+    originalSuggestion: Record<string, unknown>,
+    userModification: Record<string, unknown>,
+    contextData: Record<string, unknown>,
     sessionId?: string
   ) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -95,9 +95,9 @@ export const useAIFeedback = () => {
   };
 
   const recordRating = async (
-    originalSuggestion: any, 
-    rating: number, 
-    contextData: any, 
+    originalSuggestion: Record<string, unknown>,
+    rating: number,
+    contextData: Record<string, unknown>,
     sessionId?: string
   ) => {
     const { data: { user } } = await supabase.auth.getUser();

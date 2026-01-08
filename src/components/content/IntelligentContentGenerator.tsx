@@ -63,7 +63,7 @@ const IntelligentContentGenerator: React.FC = () => {
         key_messages: brief.key_messages
       };
       
-      const result = await apiClient.generateContent(contentBrief) as ApiResponse<any>;
+      const result = await apiClient.generateContent(contentBrief) as ApiResponse<{ content?: string }>;
       
       if (result.success && result.data) {
         setGeneratedContent(result.data.content || 'Content generated successfully');

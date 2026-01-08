@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
             )
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('[Brand Safety] Invalid URL:', url)
       }
     }
@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
     )
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to check brand safety'
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Failed to check brand safety'
     console.error('[Brand Safety] Error:', error)
     return new Response(
       JSON.stringify({

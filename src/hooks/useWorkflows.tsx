@@ -89,11 +89,11 @@ export const useWorkflows = () => {
     }
   };
 
-  const executeWorkflow = async (id: string, input?: any) => {
+  const executeWorkflow = async (id: string, input?: Record<string, unknown>) => {
     try {
       setLoading(true);
       const workflowMethods = apiClient.workflows;
-      const result = await workflowMethods.execute(id, input) as ApiResponse<any>;
+      const result = await workflowMethods.execute(id, input) as ApiResponse<Record<string, unknown>>;
       
       if (result.success) {
         return { success: true, data: result.data };

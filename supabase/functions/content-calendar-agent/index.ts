@@ -202,7 +202,7 @@ Format as JSON:
   } catch (error: unknown) {
     console.error('Error in content-calendar-agent:', error);
     // Return generic error to client, log full error server-side
-    const errorMessage = error instanceof Error ? error.message : ''
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : ''
     const publicError = errorMessage?.includes('API key') || errorMessage?.includes('Claude') || errorMessage?.includes('Anthropic')
       ? 'Configuration error - please contact support'
       : 'An error occurred generating content calendar';

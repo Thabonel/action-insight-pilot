@@ -239,11 +239,11 @@ Format as JSON:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in performance-tracker-agent:', error);
     return new Response(JSON.stringify({
       error: 'An error occurred creating performance tracking framework',
-      message: error.message
+      message: error instanceof Error ? error.message : String(error)
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

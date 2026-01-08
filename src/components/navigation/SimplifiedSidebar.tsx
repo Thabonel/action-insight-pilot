@@ -167,13 +167,23 @@ export const SimplifiedSidebar: React.FC<SimplifiedSidebarProps> = ({
     return false;
   };
 
-  const shouldShowItem = (item: any) => {
+  interface NavigationItem {
+    title: string;
+    url: string;
+    icon: React.ComponentType<{ className?: string }>;
+    description: string;
+    userTypes: string[];
+    complexity: string;
+    badge?: string;
+  }
+
+  const shouldShowItem = (item: NavigationItem) => {
     // Show if user type matches or item is for all users
     const userTypeMatch = item.userTypes.includes('all') || item.userTypes.includes(userType);
-    
+
     // Filter complex features for beginners
     if (!showComplexFeatures && item.complexity === 'advanced') return false;
-    
+
     return userTypeMatch;
   };
 

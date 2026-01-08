@@ -33,10 +33,10 @@ export const useSystemMetrics = () => {
       setError(null);
 
       // Fetch email analytics
-      const emailResult = await apiClient.getEmailMetrics() as ApiResponse<any>;
+      const emailResult = await apiClient.getEmailMetrics() as ApiResponse<Record<string, unknown>>;
       
       // Fetch general analytics
-      const analyticsResult = await apiClient.getAnalytics() as ApiResponse<any>;
+      const analyticsResult = await apiClient.getAnalytics() as ApiResponse<Record<string, unknown>>;
 
       if (emailResult.success && analyticsResult.success) {
         // Transform email data to metrics format

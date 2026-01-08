@@ -373,12 +373,12 @@ serve(async (req) => {
             error: `Platform ${platform} not yet supported`
           })
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(`[Publish Video] Error publishing to ${platform}:`, error)
         publishResults.push({
           platform,
           status: 'failed',
-          error: error.message || 'Unknown error'
+          error: error instanceof Error ? error.message : String(error) || 'Unknown error'
         })
       }
     }
@@ -434,12 +434,12 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Publish Video] Unexpected error:', error)
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'An unexpected error occurred',
+        error: error instanceof Error ? error.message : String(error) || 'An unexpected error occurred',
         code: 'INTERNAL_ERROR'
       }),
       {

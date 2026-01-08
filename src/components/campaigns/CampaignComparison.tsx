@@ -34,6 +34,13 @@ import {
   Cell
 } from 'recharts';
 
+interface CampaignMetrics {
+  conversion_rate?: number;
+  reach?: number;
+  cost_per_acquisition?: number;
+  return_on_investment?: number;
+}
+
 interface Campaign {
   id: string;
   name: string;
@@ -45,9 +52,14 @@ interface Campaign {
   created_by: string;
   budget_allocated?: number;
   budget_spent?: number;
-  target_audience?: any;
-  content?: any;
-  metrics?: any;
+  target_audience?: Record<string, unknown>;
+  content?: Record<string, unknown>;
+  metrics?: CampaignMetrics;
+}
+
+interface PerformanceDataPoint {
+  day: string;
+  [key: string]: string | number;
 }
 
 interface CampaignComparisonProps {
@@ -64,9 +76,9 @@ const CampaignComparison: React.FC<CampaignComparisonProps> = ({
   onRemoveCampaign,
 }) => {
   // Use actual campaign metrics instead of mock data
-  const combinedPerformanceData = campaigns.length > 0 
+  const combinedPerformanceData: PerformanceDataPoint[] = campaigns.length > 0
     ? Array.from({ length: 7 }, (_, i) => {
-        const dataPoint: any = { day: `Day ${i + 1}` };
+        const dataPoint: PerformanceDataPoint = { day: `Day ${i + 1}` };
         campaigns.forEach(campaign => {
           // Use actual metrics if available
           const conversionRate = campaign.metrics?.conversion_rate || 0;

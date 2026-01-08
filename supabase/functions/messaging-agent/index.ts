@@ -182,10 +182,10 @@ Format as JSON:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in messaging-agent:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+    const publicError = error instanceof Error ? error.message : String(error)?.includes('API key') || error instanceof Error ? error.message : String(error)?.includes('OPENAI')
       ? 'Configuration error - please contact support'
       : 'An error occurred generating messaging strategy';
     return new Response(JSON.stringify({ error: publicError }), {

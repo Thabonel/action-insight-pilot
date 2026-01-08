@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
     throw new Error(`Invalid action: ${action}`)
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to process approval workflow'
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Failed to process approval workflow'
     console.error('[Approval Workflow] Error:', error)
     return new Response(
       JSON.stringify({

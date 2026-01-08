@@ -76,7 +76,9 @@ What's your experience with ${topic}? Drop it below! 👇`;
     toast.success('Copied to clipboard!');
   };
 
-  const filteredPrompts = getPromptsByPlatform(platform as any);
+  type ViralPlatform = 'universal' | 'twitter' | 'linkedin' | 'instagram' | 'tiktok' | 'facebook';
+
+  const filteredPrompts = getPromptsByPlatform(platform as ViralPlatform);
   const hookPrompts = getPromptsByCategory('hook');
   const engagementPrompts = getPromptsByCategory('engagement');
 

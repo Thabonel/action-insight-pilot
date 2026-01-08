@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
 import { Send, Sparkles, Loader2, AlertTriangle, RotateCcw, Save, CheckCircle, Edit, X, ExternalLink } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,32 @@ interface ChatMessage {
   response?: string;
 }
 
+interface CampaignTypeOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
+interface LatestMetadata {
+  campaignTypeOptions?: CampaignTypeOption[];
+  [key: string]: unknown;
+}
+
+interface ParsedCampaignData {
+  name?: string;
+  type?: string;
+  total_budget?: number;
+  start_date?: string;
+  end_date?: string;
+  target_audience?: string;
+  primary_objective?: string;
+  channel?: string;
+  channels?: string[];
+  kpi_targets?: Record<string, string | number>;
+  content?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 interface ConversationalChatInterfaceProps {
   chatHistory: ChatMessage[];
   isProcessing: boolean;
@@ -24,14 +51,13 @@ interface ConversationalChatInterfaceProps {
   setQuery: (query: string) => void;
   handleQuerySubmit: (e: React.FormEvent) => void;
   handleSuggestionClick: (suggestion: string) => void;
-  user: any;
-  latestMetadata?: any;
-  // Campaign flow props
+  user: User | null;
+  latestMetadata?: LatestMetadata;
   isCampaignFlow?: boolean;
   currentQuestion?: string;
   progress?: { current: number; total: number; percentage: number };
   campaignCreationStatus?: 'idle' | 'in_progress' | 'creating' | 'completed' | 'error';
-  collectedAnswers?: Record<string, any>;
+  collectedAnswers?: Record<string, string | number | boolean | string[]>;
   onAnswerProvided?: (answer: string) => void;
   onCampaignFlowReset?: () => void;
 }
@@ -58,9 +84,9 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   const [campaignCreated, setCampaignCreated] = useState(false);
   const [createdCampaignId, setCreatedCampaignId] = useState<string | null>(null);
   const [campaignError, setCampaignError] = useState<string | null>(null);
-  const [failedCampaignData, setFailedCampaignData] = useState<any>(null);
+  const [failedCampaignData, setFailedCampaignData] = useState<ParsedCampaignData | null>(null);
   const [showCampaignPreview, setShowCampaignPreview] = useState(false);
-  const [previewCampaignData, setPreviewCampaignData] = useState<any>(null);
+  const [previewCampaignData, setPreviewCampaignData] = useState<ParsedCampaignData | null>(null);
   const [suggestedTemplates, setSuggestedTemplates] = useState<CampaignTemplate[]>([]);
 
   // Function to detect if conversation contains enough campaign information
@@ -141,7 +167,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   };
 
   // Save failed campaign data to localStorage
-  const saveFailedCampaignToStorage = (campaignData: any, conversationText: string) => {
+  const saveFailedCampaignToStorage = (campaignData: ParsedCampaignData, conversationText: string) => {
     const failedAttempt = {
       id: Date.now(),
       timestamp: new Date().toISOString(),
@@ -152,12 +178,12 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
 
     const existingAttempts = JSON.parse(localStorage.getItem('failedCampaignAttempts') || '[]');
     existingAttempts.push(failedAttempt);
-    
+
     // Keep only the last 5 attempts to avoid storage bloat
     if (existingAttempts.length > 5) {
       existingAttempts.splice(0, existingAttempts.length - 5);
     }
-    
+
     localStorage.setItem('failedCampaignAttempts', JSON.stringify(existingAttempts));
   };
 
@@ -206,20 +232,20 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   };
 
   // Function to create campaign from parsed data with brief generation
-  const createCampaignFromData = async (campaignData: any) => {
+  const createCampaignFromData = async (campaignData: ParsedCampaignData) => {
     setIsCreatingCampaign(true);
     setCampaignError(null);
-    
+
     try {
       // Generate campaign brief
       const { generateCampaignBrief } = await import('@/lib/campaign-brief-generator');
       const brief = generateCampaignBrief(campaignData);
-      
+
       // Add brief to campaign content
       const updatedCampaignData = {
         ...campaignData,
         content: {
-          ...campaignData.content,
+          ...(campaignData.content || {}),
           brief: brief
         }
       };
@@ -299,19 +325,19 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
   };
 
   // Enhanced campaign preview formatting
-  const formatCampaignPreview = (campaign: any) => {
+  const formatCampaignPreview = (campaign: ParsedCampaignData) => {
     const formatBudget = (amount: number) => `$${amount.toLocaleString()}`;
     const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString();
-    const formatKPITargets = (kpiTargets: Record<string, any>) => {
+    const formatKPITargets = (kpiTargets?: Record<string, string | number>) => {
       if (!kpiTargets || Object.keys(kpiTargets).length === 0) return 'Not specified';
-      
-      const formattedTargets = [];
+
+      const formattedTargets: string[] = [];
       if (kpiTargets.leads) formattedTargets.push(`${kpiTargets.leads} leads ${kpiTargets.leads_period ? `per ${kpiTargets.leads_period}` : ''}`);
       if (kpiTargets.conversion_rate) formattedTargets.push(`${kpiTargets.conversion_rate}% conversion rate`);
       if (kpiTargets.engagement_rate) formattedTargets.push(`${kpiTargets.engagement_rate}% engagement rate`);
       if (kpiTargets.email_open_rate) formattedTargets.push(`${kpiTargets.email_open_rate}% email open rate`);
       if (kpiTargets.email_click_rate) formattedTargets.push(`${kpiTargets.email_click_rate}% email click rate`);
-      
+
       return formattedTargets.length > 0 ? formattedTargets.join(', ') : 'Not specified';
     };
 
@@ -424,7 +450,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                      <div className="mt-3 pt-3 border-t border-gray-200">
                        <p className="text-xs font-medium text-gray-700 mb-2">Select a campaign type:</p>
                        <div className="grid grid-cols-2 gap-2">
-                         {latestMetadata.campaignTypeOptions.map((option: any) => (
+                         {latestMetadata.campaignTypeOptions.map((option: CampaignTypeOption) => (
                            <button
                              key={option.value}
                              onClick={() => handleSuggestionClick(`${option.label} campaign - ${option.description}`)}

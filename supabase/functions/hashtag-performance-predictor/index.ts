@@ -141,11 +141,11 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Performance Predictor] Error:', error)
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to predict performance',
+        error: error instanceof Error ? error.message : String(error) || 'Failed to predict performance',
         predictions: []
       }),
       {

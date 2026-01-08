@@ -1,6 +1,10 @@
 
 import { BaseApiClient } from './base-api-client';
-import { ContentService } from './content-service';
+import { ContentService, ContentBrief } from './content-service';
+
+export interface ContentData {
+  [key: string]: unknown;
+}
 
 export class ContentMethods extends BaseApiClient {
   private content: ContentService;
@@ -10,11 +14,11 @@ export class ContentMethods extends BaseApiClient {
     this.content = new ContentService(this.httpClient);
   }
 
-  async generateContent(brief: any) {
+  async generateContent(brief: ContentBrief) {
     return this.content.generateContent(brief);
   }
 
-  async createContent(contentData: any) {
+  async createContent(contentData: ContentData) {
     return this.content.createContent(contentData);
   }
 

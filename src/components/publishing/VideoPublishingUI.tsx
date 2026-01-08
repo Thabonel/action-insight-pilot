@@ -130,11 +130,12 @@ export function VideoPublishingUI({
       } else {
         throw new Error(data.error || 'Publishing failed')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('[VideoPublishingUI] Publishing error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
-        title: '❌ Publishing failed',
-        description: error.message || 'An unexpected error occurred',
+        title: 'Publishing failed',
+        description: errorMessage,
         variant: 'destructive'
       })
     } finally {

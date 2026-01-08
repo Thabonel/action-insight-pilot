@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,14 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Send, 
-  Mic, 
-  Paperclip, 
-  MoreVertical, 
+import {
+  Send,
+  Mic,
+  Paperclip,
+  MoreVertical,
   MessageSquare,
   Bot,
-  User,
+  User as UserIcon,
   Clock,
   Trash2,
   Edit3,
@@ -29,7 +30,7 @@ interface EnhancedChatInterfaceProps {
   setQuery: (query: string) => void;
   handleQuerySubmit: (e: React.FormEvent) => void;
   handleSuggestionClick: (suggestion: string) => void;
-  user: any;
+  user: User | null;
   chatSessions?: ChatSession[];
   onCreateNewSession?: () => void;
   onSelectSession?: (sessionId: string) => void;
@@ -197,9 +198,9 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                 <Avatar className="h-8 w-8">
                   {message.role === 'user' ? (
                     <>
-                      <AvatarImage src={user?.avatar} />
+                      <AvatarImage src={user?.user_metadata?.avatar_url} />
                       <AvatarFallback>
-                        <User className="h-4 w-4" />
+                        <UserIcon className="h-4 w-4" />
                       </AvatarFallback>
                     </>
                   ) : (

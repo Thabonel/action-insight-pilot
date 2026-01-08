@@ -4,10 +4,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Bot, Clock, Target, TrendingUp, Mail, Zap } from 'lucide-react';
+import { Bot, Clock, Target, TrendingUp, Mail, Zap, LucideIcon } from 'lucide-react';
+
+interface EmailInsights {
+  optimalSendTime: string;
+  bestPerformingType: string;
+  avgOpenRate: string;
+  avgClickRate: string;
+  conversionAccuracy: number;
+  learningStatus: string;
+}
+
+interface EmailSuggestion {
+  id: number;
+  type: 'timing' | 'subject' | 'content';
+  message: string;
+  confidence: number;
+  icon: LucideIcon;
+  action: string;
+}
+
+interface QuickAction {
+  label: string;
+  accuracy: number;
+}
 
 const EmailAIAssistant: React.FC = () => {
-  const [insights] = useState({
+  const [insights] = useState<EmailInsights>({
     optimalSendTime: '10:30 AM',
     bestPerformingType: 'Educational',
     avgOpenRate: '32.4%',
@@ -16,7 +39,7 @@ const EmailAIAssistant: React.FC = () => {
     learningStatus: 'Analyzing send patterns'
   });
 
-  const [suggestions] = useState([
+  const [suggestions] = useState<EmailSuggestion[]>([
     {
       id: 1,
       type: 'timing',
@@ -43,14 +66,14 @@ const EmailAIAssistant: React.FC = () => {
     }
   ]);
 
-  const [quickActions] = useState([
+  const [quickActions] = useState<QuickAction[]>([
     { label: "Optimize all campaign times", accuracy: 94 },
     { label: "Generate A/B test variations", accuracy: 91 },
     { label: "Create high-converting sequence", accuracy: 88 },
     { label: "Analyze campaign performance", accuracy: 96 }
   ]);
 
-  const handleSuggestionClick = (suggestion: any) => {
+  const handleSuggestionClick = (suggestion: EmailSuggestion) => {
     behaviorTracker.trackAction('feature_use', 'email_ai_suggestion', {
       suggestionType: suggestion.type,
       suggestionId: suggestion.id,

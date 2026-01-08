@@ -140,7 +140,7 @@ export class EnhancedSocialService {
     return this.httpClient.request(`/api/social/ab-testing/${testId}/results`);
   }
 
-  async updateVariantMetrics(testId: string, variantId: string, metricsUpdate: any) {
+  async updateVariantMetrics(testId: string, variantId: string, metricsUpdate: Record<string, unknown>) {
     return this.httpClient.request(`/api/social/ab-testing/${testId}/variants/${variantId}/metrics`, {
       method: 'PATCH',
       body: JSON.stringify(metricsUpdate),

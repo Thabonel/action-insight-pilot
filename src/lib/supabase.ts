@@ -44,7 +44,7 @@ export class AuthService {
     return { user, error };
   }
 
-  static onAuthStateChange(callback: (user: any) => void) {
+  static onAuthStateChange(callback: (user: unknown) => void) {
     return supabase.auth.onAuthStateChange((event, session) => {
       callback(session?.user || null);
     });

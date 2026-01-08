@@ -224,40 +224,44 @@ Return JSON in this exact format:
         assessment: parsedAssessment,
         metadata: {
           questionsGenerated: parsedAssessment.questions.length,
-          bestPracticeCount: parsedAssessment.questions.filter((q: any) => q.category === 'best_practice').length,
-          qualificationCount: parsedAssessment.questions.filter((q: any) => q.category === 'qualification').length,
+          bestPracticeCount: parsedAssessment.questions.filter((q: Record<string, unknown>) => q.category === 'best_practice').length,
+          qualificationCount: parsedAssessment.questions.filter((q: Record<string, unknown>) => q.category === 'qualification').length,
           generatedAt: new Date().toISOString()
         }
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
 
-    } catch (parseError) {
+    } catch (parseError: unknown) {
       console.error('JSON parsing failed:', parseError);
       console.error('Raw content:', generatedContent);
+
+      const parseErrorMessage = parseError instanceof Error ? parseError.message : 'Unknown parsing error';
 
       return new Response(JSON.stringify({
         success: false,
         error: 'Failed to parse generated assessment',
-        details: parseError.message,
-        raw_content: generatedContent.substring(0, 500) // First 500 chars for debugging
+        details: parseErrorMessage,
+        raw_content: generatedContent.substring(0, 500)
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in assessment-generator function:', error);
-    console.error('Error stack:', error.stack);
+    if (error instanceof Error) {
+      console.error('Error stack:', error.stack);
+    }
 
-    const errorMessage = error.message || 'An error occurred generating assessment';
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'An error occurred generating assessment';
     const isConfigError = errorMessage.includes('API key') || errorMessage.includes('configured');
 
     return new Response(JSON.stringify({
       success: false,
       error: errorMessage,
-      hint: isConfigError ? 'Check that OPENAI_API_KEY is set in Supabase Edge Function environment variables' : undefined
+      hint: isConfigError ? 'Check that ANTHROPIC_API_KEY is set in Supabase Edge Function environment variables' : undefined
     }), {
       status: isConfigError ? 503 : 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -9,46 +9,58 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Global type extension for singleton pattern
+interface GlobalWithSupabase {
+  supabase?: ReturnType<typeof createClient<Database>>;
+}
+
 // Single instance pattern to prevent multiple client warnings
-const _supabase = (globalThis as any).supabase ?? createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-if (process.env.NODE_ENV !== "production") (globalThis as any).supabase = _supabase;
+const _globalThis = globalThis as unknown as GlobalWithSupabase;
+const _supabase = _globalThis.supabase ?? createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+if (process.env.NODE_ENV !== "production") _globalThis.supabase = _supabase;
 export const supabase = _supabase;
+
+interface SocialContent {
+  message?: string;
+  imageUrl?: string;
+  [key: string]: unknown;
+}
 
 // OAuth and social media helper functions
 export const oauthService = {
-  async initiateOAuth(platform: string) {
+  async initiateOAuth(platform: string): Promise<unknown> {
     const { data, error } = await supabase.functions.invoke('oauth-initiate', {
       body: { platform }
     })
-    
+
     if (error) throw error
     return data
   },
 
-  async getConnections() {
+  async getConnections(): Promise<unknown> {
     const { data, error } = await supabase.functions.invoke('social-connections', {
       method: 'GET'
     })
-    
+
     if (error) throw error
     return data
   },
 
-  async disconnectPlatform(platform: string) {
+  async disconnectPlatform(platform: string): Promise<unknown> {
     const { data, error } = await supabase.functions.invoke('social-connections', {
       method: 'DELETE',
       body: { platform }
     })
-    
+
     if (error) throw error
     return data
   },
 
-  async postToSocial(platforms: string[], content: any) {
+  async postToSocial(platforms: string[], content: SocialContent): Promise<unknown> {
     const { data, error } = await supabase.functions.invoke('social-post', {
       body: { platforms, content }
     })
-    
+
     if (error) throw error
     return data
   }

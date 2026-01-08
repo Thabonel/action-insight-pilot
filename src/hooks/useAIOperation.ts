@@ -2,19 +2,19 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-interface UseAIOperationOptions {
-  onSuccess?: (data: any) => void;
+interface UseAIOperationOptions<T = unknown> {
+  onSuccess?: (data: T) => void;
   onError?: (error: string) => void;
   successMessage?: string;
 }
 
-export function useAIOperation<T = any>(options: UseAIOperationOptions = {}) {
+export function useAIOperation<T = unknown>(options: UseAIOperationOptions<T> = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<T | null>(null);
   const { toast } = useToast();
 
-  const execute = useCallback(async (operation: () => Promise<any>) => {
+  const execute = useCallback(async (operation: () => Promise<{ success: boolean; data?: T; error?: string }>) => {
     setLoading(true);
     setError(null);
     

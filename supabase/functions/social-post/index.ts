@@ -21,7 +21,7 @@ function decryptToken(encryptedToken: string): string {
 }
 
 async function postToFacebook(accessToken: string, content: PostContent, pageId?: string) {
-  const postData: any = {
+  const postData: Record<string, unknown> = {
     message: content.text
   }
 
@@ -300,12 +300,12 @@ Deno.serve(async (req) => {
           console.error(`Error tracking mentions/hashtags for ${platform}:`, trackingError)
         }
 
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(`Error posting to ${platform}:`, error)
         results.push({
           platform,
           success: false,
-          error: error.message
+          error: error instanceof Error ? error.message : String(error)
         })
       }
     }
@@ -323,7 +323,7 @@ Deno.serve(async (req) => {
   } catch (error: unknown) {
     console.error('Social post error:', error)
     // Return generic error to client, log full error server-side
-    const errorMessage = error instanceof Error ? error.message : ''
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : ''
     const publicError = errorMessage?.includes('authorization') || errorMessage?.includes('token')
       ? 'Authentication required'
       : errorMessage?.includes('platforms')

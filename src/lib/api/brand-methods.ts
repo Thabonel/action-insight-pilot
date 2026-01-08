@@ -17,16 +17,18 @@ export interface BrandVoiceAnalysis {
   flagged_phrases: string[];
 }
 
+export interface BrandVoiceProfile {
+  tone: string;
+  personality: string[];
+  vocabulary: string[];
+  style_guidelines: Record<string, unknown>;
+}
+
 export interface BrandDocument {
   id: string;
   name: string;
   content: string;
-  voice_profile: {
-    tone: string;
-    personality: string[];
-    vocabulary: string[];
-    style_guidelines: any;
-  };
+  voice_profile: BrandVoiceProfile;
 }
 
 export class BrandMethods extends BaseApiClient {

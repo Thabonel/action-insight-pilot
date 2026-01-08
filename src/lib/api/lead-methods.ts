@@ -2,6 +2,10 @@
 import { BaseApiClient } from './base-api-client';
 import { LeadsService } from './leads-service';
 
+export interface LeadData {
+  [key: string]: unknown;
+}
+
 export class LeadMethods extends BaseApiClient {
   private leads: LeadsService;
 
@@ -22,7 +26,7 @@ export class LeadMethods extends BaseApiClient {
     return this.leads.getLeadAnalytics();
   }
 
-  async createLead(leadData: any) {
+  async createLead(leadData: LeadData) {
     return this.leads.createLead(leadData);
   }
 

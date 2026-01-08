@@ -1,27 +1,40 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+export interface AgentResponseData {
+  type?: string;
+  title?: string;
+  explanation?: string;
+  businessImpact?: string;
+  nextActions?: string[];
+  data?: unknown;
+  response?: string;
+  suggestions?: string[];
+  followUp?: string[];
+  metadata?: Record<string, unknown>;
+}
+
 export interface ChatSession {
   id: string;
   user_id: string;
   title: string;
   created_at: string;
   updated_at: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface ChatMessage {
   id: string;
   session_id: string;
   user_message: string;
-  ai_response: any;
+  ai_response: AgentResponseData;
   agent_type?: string;
   timestamp: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export class ChatHistoryService {
-  static async createSession(userId: string, title: string, metadata?: Record<string, any>): Promise<ChatSession | null> {
+  static async createSession(userId: string, title: string, metadata?: Record<string, unknown>): Promise<ChatSession | null> {
     try {
       const { data, error } = await supabase
         .from('chat_sessions')
@@ -41,7 +54,7 @@ export class ChatHistoryService {
 
       return {
         ...data,
-        metadata: data.metadata as Record<string, any>
+        metadata: (data.metadata as Record<string, unknown>) || {}
       };
     } catch (error) {
       console.error('Error in createSession:', error);
@@ -64,7 +77,7 @@ export class ChatHistoryService {
 
       return (data || []).map(session => ({
         ...session,
-        metadata: session.metadata as Record<string, any>
+        metadata: (session.metadata as Record<string, unknown>) || {}
       }));
     } catch (error) {
       console.error('Error in getUserSessions:', error);
@@ -75,9 +88,9 @@ export class ChatHistoryService {
   static async addMessage(
     sessionId: string,
     userMessage: string,
-    aiResponse: any,
+    aiResponse: AgentResponseData,
     agentType?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<ChatMessage | null> {
     try {
       const { data, error } = await supabase
@@ -105,8 +118,8 @@ export class ChatHistoryService {
 
       return {
         ...data,
-        ai_response: data.ai_response as any,
-        metadata: data.metadata as Record<string, any>
+        ai_response: (data.ai_response as AgentResponseData) || {},
+        metadata: (data.metadata as Record<string, unknown>) || {}
       };
     } catch (error) {
       console.error('Error in addMessage:', error);
@@ -129,8 +142,8 @@ export class ChatHistoryService {
 
       return (data || []).map(message => ({
         ...message,
-        ai_response: message.ai_response as any,
-        metadata: message.metadata as Record<string, any>
+        ai_response: (message.ai_response as AgentResponseData) || {},
+        metadata: (message.metadata as Record<string, unknown>) || {}
       }));
     } catch (error) {
       console.error('Error in getSessionMessages:', error);

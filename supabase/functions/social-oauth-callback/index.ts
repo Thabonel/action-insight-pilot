@@ -257,14 +257,14 @@ serve(async (req) => {
       headers: { 'Content-Type': 'text/html' }
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('OAuth callback error:', error)
     // Return generic error to user, log full error server-side
-    const publicError = error.message?.includes('credentials')
+    const publicError = error instanceof Error ? error.message : String(error)?.includes('credentials')
       ? 'Platform configuration error'
-      : error.message?.includes('state')
+      : error instanceof Error ? error.message : String(error)?.includes('state')
       ? 'Invalid or expired authorization'
-      : error.message?.includes('Token exchange')
+      : error instanceof Error ? error.message : String(error)?.includes('Token exchange')
       ? 'Authorization failed'
       : 'Failed to complete authorization';
     return new Response(`

@@ -8,7 +8,7 @@ export interface CampaignBrief {
   objectives: string[];
   targetAudience: {
     primary: string;
-    demographics: Record<string, any>;
+    demographics: Record<string, unknown>;
     psychographics: string[];
   };
   strategy: {
@@ -28,8 +28,8 @@ export interface CampaignBrief {
     milestones: Array<{ date: string; description: string }>;
   };
   kpiTargets: {
-    primary: Record<string, any>;
-    secondary: Record<string, any>;
+    primary: Record<string, unknown>;
+    secondary: Record<string, unknown>;
     measurementPeriod: string;
   };
   deliverables: string[];
@@ -76,13 +76,13 @@ function generateExecutiveSummary(campaign: Campaign): string {
 
 function generateObjectives(campaign: Campaign): string[] {
   const objectives = [];
-  
+
   if (campaign.primary_objective) {
     objectives.push(`Primary: ${campaign.primary_objective}`);
   }
-  
+
   // Extract objectives from KPI targets
-  const kpiTargets = campaign.kpi_targets as Record<string, any> || {};
+  const kpiTargets = campaign.kpi_targets as Record<string, unknown> || {};
   if (kpiTargets.leads) {
     objectives.push(`Generate ${kpiTargets.leads} qualified leads ${kpiTargets.leads_period ? `per ${kpiTargets.leads_period}` : ''}`);
   }
@@ -104,7 +104,7 @@ function generateObjectives(campaign: Campaign): string[] {
 }
 
 function generateTargetAudience(campaign: Campaign): CampaignBrief['targetAudience'] {
-  const demographics = campaign.demographics as Record<string, any> || {};
+  const demographics = campaign.demographics as Record<string, unknown> || {};
   
   return {
     primary: campaign.target_audience || 'Primary target demographic',
@@ -120,7 +120,7 @@ function generateTargetAudience(campaign: Campaign): CampaignBrief['targetAudien
 
 function generateStrategy(campaign: Campaign): CampaignBrief['strategy'] {
   const channels = Array.isArray(campaign.channels) ? campaign.channels.map(String) : [campaign.channel].filter(Boolean);
-  const content = campaign.content as Record<string, any> || {};
+  const content = campaign.content as Record<string, unknown> || {};
   
   return {
     approach: generateStrategicApproach(campaign),
@@ -141,10 +141,10 @@ function generateBudgetSection(campaign: Campaign): CampaignBrief['budget'] {
 }
 
 function generateKPITargets(campaign: Campaign): CampaignBrief['kpiTargets'] {
-  const kpiTargets = campaign.kpi_targets as Record<string, any> || {};
-  
-  const primary: Record<string, any> = {};
-  const secondary: Record<string, any> = {};
+  const kpiTargets = campaign.kpi_targets as Record<string, unknown> || {};
+
+  const primary: Record<string, unknown> = {};
+  const secondary: Record<string, unknown> = {};
   
   // Categorize KPIs
   ['leads', 'conversions', 'conversion_rate'].forEach(key => {
@@ -221,7 +221,7 @@ function generateRiskMitigation(campaign: Campaign): string[] {
 
 function generateSuccessCriteria(campaign: Campaign): string[] {
   const criteria = [];
-  const kpiTargets = campaign.kpi_targets as Record<string, any> || {};
+  const kpiTargets = campaign.kpi_targets as Record<string, unknown> || {};
   
   if (kpiTargets.leads) {
     criteria.push(`Achievement of ${kpiTargets.leads} qualified leads target`);
@@ -324,7 +324,7 @@ function generateStrategicApproach(campaign: Campaign): string {
   return approaches[campaign.type || 'other'] || 'Integrated marketing approach combining multiple touchpoints for maximum impact';
 }
 
-function generateMessaging(content: Record<string, any>, type: string | null): string[] {
+function generateMessaging(content: Record<string, unknown>, type: string | null): string[] {
   const messaging = [];
   
   if (content.message) {

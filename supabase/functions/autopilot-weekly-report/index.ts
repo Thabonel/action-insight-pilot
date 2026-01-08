@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,7 +34,7 @@ serve(async (req) => {
       try {
         const report = await generateWeeklyReport(supabase, config);
         reports.push(report);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(`Error generating report for user ${config.user_id}:`, error);
       }
     }
@@ -47,16 +47,23 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in autopilot-weekly-report:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
-async function generateWeeklyReport(supabase: any, config: any) {
+interface AutopilotConfig {
+  id: string;
+  user_id: string;
+  [key: string]: unknown;
+}
+
+async function generateWeeklyReport(supabase: SupabaseClient, config: AutopilotConfig): Promise<unknown> {
   const userId = config.user_id;
   const weekStart = getMonday(new Date());
   const weekEnd = new Date(weekStart);
@@ -86,9 +93,9 @@ async function generateWeeklyReport(supabase: any, config: any) {
     .lte('metric_date', weekEnd.toISOString())
     .in('campaign_id', await getAutopilotCampaignIds(supabase, userId));
 
-  const totalSpend = weekMetrics?.reduce((sum: number, m: any) => sum + (m.spend || 0), 0) || 0;
-  const totalConversions = weekMetrics?.reduce((sum: number, m: any) => sum + (m.conversions || 0), 0) || 0;
-  const totalRevenue = weekMetrics?.reduce((sum: number, m: any) => sum + (m.revenue || 0), 0) || 0;
+  const totalSpend = weekMetrics?.reduce((sum: number, m: Record<string, unknown>) => sum + (Number(m.spend) || 0), 0) || 0;
+  const totalConversions = weekMetrics?.reduce((sum: number, m: Record<string, unknown>) => sum + (Number(m.conversions) || 0), 0) || 0;
+  const totalRevenue = weekMetrics?.reduce((sum: number, m: Record<string, unknown>) => sum + (Number(m.revenue) || 0), 0) || 0;
 
   const roi = totalSpend > 0 ? totalRevenue / totalSpend : 0;
 
@@ -102,11 +109,11 @@ async function generateWeeklyReport(supabase: any, config: any) {
 
   let topChannel = 'N/A';
   if (campaigns && campaigns.length > 0) {
-    const channelPerformance = campaigns.map((c: any) => ({
-      name: c.name,
-      conversions: c.campaign_metrics?.reduce((sum: number, m: any) => sum + (m.conversions || 0), 0) || 0
+    const channelPerformance = campaigns.map((c: Record<string, unknown>) => ({
+      name: c.name as string,
+      conversions: Array.isArray(c.campaign_metrics) ? (c.campaign_metrics as Record<string, unknown>[]).reduce((sum: number, m: Record<string, unknown>) => sum + (Number(m.conversions) || 0), 0) : 0
     }));
-    channelPerformance.sort((a: any, b: any) => b.conversions - a.conversions);
+    channelPerformance.sort((a: { name: string; conversions: number }, b: { name: string; conversions: number }) => b.conversions - a.conversions);
     topChannel = channelPerformance[0]?.name || 'N/A';
   }
 
@@ -132,7 +139,7 @@ async function generateWeeklyReport(supabase: any, config: any) {
         : totalLeads < 10
         ? 'Early stage - AI is optimizing targeting to improve lead flow.'
         : 'Campaigns are performing well. AI is continuously optimizing for better results.',
-      top_activities: activities?.slice(0, 5).map((a: any) => a.activity_description) || []
+      top_activities: activities?.slice(0, 5).map((a: Record<string, unknown>) => a.activity_description as string) || []
     }
   };
 
@@ -170,14 +177,14 @@ async function generateWeeklyReport(supabase: any, config: any) {
   };
 }
 
-async function getAutopilotCampaignIds(supabase: any, userId: string): Promise<string[]> {
+async function getAutopilotCampaignIds(supabase: SupabaseClient, userId: string): Promise<string[]> {
   const { data } = await supabase
     .from('campaigns')
     .select('id')
     .eq('created_by', userId)
     .eq('auto_managed', true);
 
-  return data?.map((c: any) => c.id) || [];
+  return data?.map((c: Record<string, unknown>) => c.id) || [];
 }
 
 function getMonday(date: Date): Date {

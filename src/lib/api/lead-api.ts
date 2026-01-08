@@ -2,6 +2,10 @@
 import { ClientCore } from './client-core';
 import { LeadMethods } from './lead-methods';
 
+export interface LeadData {
+  [key: string]: unknown;
+}
+
 export class LeadApi extends ClientCore {
   private leadMethods: LeadMethods;
 
@@ -27,7 +31,7 @@ export class LeadApi extends ClientCore {
     return this.leadMethods.getLeadAnalytics();
   }
 
-  async createLead(leadData: any) {
+  async createLead(leadData: LeadData) {
     return this.leadMethods.createLead(leadData);
   }
 

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { User } from '@supabase/supabase-js';
 import ChatMessage from './ChatMessage';
 import EmptyChatState from './EmptyChatState';
 import TypingIndicator from './TypingIndicator';
@@ -16,7 +17,7 @@ interface ChatHistoryProps {
   chatHistory: ChatMessageData[];
   isTyping: boolean;
   currentMessage: string;
-  user: any;
+  user: User | null;
 }
 
 const ChatHistory: React.FC<ChatHistoryProps> = ({

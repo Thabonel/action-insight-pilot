@@ -2,13 +2,23 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse, IntegrationConnection } from '@/lib/api-client-interface';
 
+interface MCPConnectorConfig {
+  [key: string]: unknown;
+}
+
 interface MCPConnector {
   id: string;
   name: string;
   type: string;
   status: 'connected' | 'disconnected' | 'error';
   description: string;
-  config: any;
+  config: MCPConnectorConfig;
+}
+
+interface MCPTestResult {
+  status: string;
+  message: string;
+  responseTime: number;
 }
 
 export class MCPService {
@@ -82,7 +92,7 @@ export class MCPService {
     }
   }
 
-  async testConnector(id: string): Promise<ApiResponse<any>> {
+  async testConnector(_id: string): Promise<ApiResponse<MCPTestResult>> {
     try {
       return {
         success: true,

@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { 
-  Zap, 
-  Copy, 
-  TrendingUp, 
-  Calendar, 
+import {
+  Zap,
+  Copy,
+  TrendingUp,
+  Calendar,
   Share2,
   RefreshCw,
   Target,
@@ -17,8 +17,18 @@ import {
   CheckCircle
 } from 'lucide-react';
 
+interface Workflow {
+  id: number;
+  name: string;
+  description: string;
+  confidence: number;
+  estimatedTime: string;
+  icon: React.ComponentType<{ className?: string }>;
+  action: string;
+}
+
 const ContentWorkflowFeatures: React.FC = () => {
-  const [workflows] = useState([
+  const [workflows] = useState<Workflow[]>([
     {
       id: 1,
       name: "Create Similar to Top Performer",
@@ -102,7 +112,7 @@ const ContentWorkflowFeatures: React.FC = () => {
     }
   ]);
 
-  const handleWorkflowStart = (workflow: any) => {
+  const handleWorkflowStart = (workflow: Workflow) => {
     behaviorTracker.trackAction('feature_use', 'content_workflow_start', {
       workflowId: workflow.id,
       workflowName: workflow.name,

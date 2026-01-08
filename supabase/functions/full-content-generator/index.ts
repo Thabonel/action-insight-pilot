@@ -86,12 +86,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in full-content-generator:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+    const publicError = error instanceof Error ? error.message : String(error)?.includes('API key') || error instanceof Error ? error.message : String(error)?.includes('OPENAI')
       ? 'Configuration error - please contact support'
-      : error.message?.includes('not found')
+      : error instanceof Error ? error.message : String(error)?.includes('not found')
       ? 'Campaign not found'
       : 'An error occurred generating content';
     return new Response(JSON.stringify({ error: publicError }), {
@@ -101,7 +101,7 @@ serve(async (req) => {
   }
 });
 
-async function buildContentPrompt(contentType: string, brief: any, messagingStrategy: any, targetPersona: any, campaign: any): Promise<string> {
+async function buildContentPrompt(contentType: string, brief: Record<string, unknown>, messagingStrategy: Record<string, unknown>, targetPersona: Record<string, unknown>, campaign: Record<string, unknown>): Promise<string> {
   const baseContext = `
 Campaign Brief: ${JSON.stringify(brief, null, 2)}
 Target Persona: ${JSON.stringify(targetPersona, null, 2)}
@@ -197,10 +197,10 @@ Return as JSON with title, content, and cta fields.`;
   }
 }
 
-function parseGeneratedContent(content: string, contentType: string): any {
+function parseGeneratedContent(content: string, contentType: string): Record<string, unknown> {
   try {
     return JSON.parse(content);
-  } catch (error) {
+  } catch (error: unknown) {
     // Fallback if JSON parsing fails
     return {
       title: `Generated ${contentType}`,

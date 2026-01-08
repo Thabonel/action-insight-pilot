@@ -2,6 +2,14 @@
 import { BaseApiClient } from './base-api-client';
 import { AgentsService } from './agents-service';
 
+export interface LeadData {
+  [key: string]: unknown;
+}
+
+export interface CampaignData {
+  [key: string]: unknown;
+}
+
 export class AgentMethods extends BaseApiClient {
   private agents: AgentsService;
 
@@ -10,7 +18,7 @@ export class AgentMethods extends BaseApiClient {
     this.agents = new AgentsService(this.httpClient);
   }
 
-  async executeAgentTask(agentType: string, taskType: string, inputData: any) {
+  async executeAgentTask(agentType: string, taskType: string, inputData: Record<string, unknown>) {
     return this.agents.executeTask({
       agent_type: agentType,
       task_type: taskType,
@@ -18,15 +26,15 @@ export class AgentMethods extends BaseApiClient {
     });
   }
 
-  async scoreLeads(leads?: any[]) {
+  async scoreLeads(leads?: LeadData[]) {
     return this.agents.scoreLeads(leads);
   }
 
-  async enrichLeads(leadData: any) {
+  async enrichLeads(leadData: LeadData) {
     return this.agents.enrichLeads(leadData);
   }
 
-  async optimizeCampaign(campaignData: any) {
+  async optimizeCampaign(campaignData: CampaignData) {
     return this.agents.optimizeCampaign(campaignData);
   }
 }

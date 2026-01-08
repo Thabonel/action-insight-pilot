@@ -1,5 +1,6 @@
 
 import { HttpClient } from '../http-client';
+import { Campaign } from '../api-client-interface';
 
 export class CampaignsService {
   constructor(private httpClient: HttpClient) {}
@@ -8,14 +9,14 @@ export class CampaignsService {
     return this.httpClient.request('/api/campaigns');
   }
 
-  async createCampaign(campaignData: any) {
+  async createCampaign(campaignData: Partial<Campaign>) {
     return this.httpClient.request('/api/campaigns', {
       method: 'POST',
       body: JSON.stringify(campaignData),
     });
   }
 
-  async bulkCreateCampaigns(campaigns: any[]) {
+  async bulkCreateCampaigns(campaigns: Partial<Campaign>[]) {
     return this.httpClient.request('/api/campaigns/bulk/create', {
       method: 'POST',
       body: JSON.stringify({ campaigns }),
@@ -26,7 +27,7 @@ export class CampaignsService {
     return this.httpClient.request(`/api/campaigns/${id}`);
   }
 
-  async updateCampaign(id: string, updates: any) {
+  async updateCampaign(id: string, updates: Partial<Campaign>) {
     return this.httpClient.request(`/api/campaigns/${id}`, {
       method: 'PUT',
       body: JSON.stringify(updates),

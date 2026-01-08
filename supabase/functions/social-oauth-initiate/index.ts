@@ -131,7 +131,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('OAuth initiate error:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),

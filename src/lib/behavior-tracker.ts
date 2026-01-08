@@ -3,7 +3,7 @@ export interface UserAction {
   id: string;
   type: 'planning' | 'execution' | 'navigation' | 'feature_use' | 'success' | 'error';
   feature: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   timestamp: Date;
   sessionId: string;
   duration?: number;
@@ -60,7 +60,7 @@ export class UserBehaviorTracker {
     });
   }
 
-  trackAction(type: UserAction['type'], feature: string, details: Record<string, any> = {}): void {
+  trackAction(type: UserAction['type'], feature: string, details: Record<string, unknown> = {}): void {
     const action: UserAction = {
       id: `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,

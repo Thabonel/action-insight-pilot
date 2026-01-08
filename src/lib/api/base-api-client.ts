@@ -1,6 +1,6 @@
 
 export class BaseApiClient {
-  protected httpClient: any;
+  protected httpClient: unknown;
 
   constructor() {
     // No HTTP client - use Supabase directly

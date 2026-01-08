@@ -23,7 +23,7 @@ export const useConversationalDashboard = () => {
       setLoading(true);
       setError(null);
       
-      const result = await apiClient.getBlogAnalytics() as ApiResponse<any>;
+      const result = await apiClient.getBlogAnalytics() as ApiResponse<{ views?: number; engagement?: number; leads?: number }>;
       
       if (result.success && result.data) {
         const mockInsights: DashboardInsights = {
@@ -49,7 +49,7 @@ export const useConversationalDashboard = () => {
   const askQuestion = async (question: string) => {
     try {
       setLoading(true);
-      const result = await apiClient.queryAgent(question) as ApiResponse<any>;
+      const result = await apiClient.queryAgent(question) as ApiResponse<{ message?: string }>;
       
       if (result.success) {
         return result.data?.message || 'Question processed successfully';

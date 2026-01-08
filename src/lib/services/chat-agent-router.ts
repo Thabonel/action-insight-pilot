@@ -1,9 +1,10 @@
 
 import { ConversationalService } from './conversational-service';
 import { QueryProcessor } from '@/lib/utils/query-processor';
+import type { AgentContext, AgentResponse } from '@/types/agent-router';
 
 export class ChatAgentRouter {
-  static async routeQuery(userQuery: string, userId: string, context: any[] = []): Promise<any> {
+  static async routeQuery(userQuery: string, userId: string, context: AgentContext[] = []): Promise<AgentResponse> {
     try {
       console.log('Routing query:', userQuery);
       

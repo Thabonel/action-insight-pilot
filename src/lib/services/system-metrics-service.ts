@@ -38,7 +38,12 @@ export class SystemMetricsService {
     }
   }
 
-  async getSystemStats(): Promise<ApiResponse<any>> {
+  async getSystemStats(): Promise<ApiResponse<{
+    totalCampaigns: number;
+    activeCampaigns: number;
+    totalLeads: number;
+    newLeadsThisMonth: number;
+  }>> {
     try {
       const data = {
         totalCampaigns: 50,
@@ -58,7 +63,14 @@ export class SystemMetricsService {
     }
   }
 
-  async getAnalyticsOverview(): Promise<ApiResponse<any>> {
+  async getAnalyticsOverview(): Promise<ApiResponse<{
+    overview: {
+      totalRevenue: number;
+      conversionRate: number;
+      customerAcquisitionCost: number;
+      lifetimeValue: number;
+    };
+  }>> {
     try {
       const data = {
         overview: {
@@ -80,7 +92,11 @@ export class SystemMetricsService {
     }
   }
 
-  async exportAnalyticsReport(format: string): Promise<ApiResponse<any>> {
+  async exportAnalyticsReport(format: string): Promise<ApiResponse<{
+    format: string;
+    exported: boolean;
+    downloadUrl: string;
+  }>> {
     try {
       const data = {
         format,

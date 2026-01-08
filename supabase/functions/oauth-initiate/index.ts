@@ -124,12 +124,12 @@ Deno.serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('OAuth initiate error:', error)
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('authorization')
+    const publicError = error instanceof Error ? error.message : String(error)?.includes('authorization')
       ? 'Authentication required'
-      : error.message?.includes('Invalid platform')
+      : error instanceof Error ? error.message : String(error)?.includes('Invalid platform')
       ? 'Invalid platform specified'
       : 'Failed to initiate OAuth flow';
     return new Response(

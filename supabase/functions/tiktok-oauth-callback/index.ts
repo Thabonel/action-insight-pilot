@@ -175,11 +175,11 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[TikTok OAuth] Unexpected error:', error)
     return new Response(
       JSON.stringify({
-        error: error.message || 'An unexpected error occurred',
+        error: error instanceof Error ? error.message : String(error) || 'An unexpected error occurred',
         code: 'INTERNAL_ERROR'
       }),
       {

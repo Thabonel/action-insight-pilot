@@ -8,11 +8,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { PlusCircle, Target, Users, MessageSquare, Calendar, Zap } from 'lucide-react';
 
+interface ModuleContent {
+  primary?: string;
+  secondary?: string[];
+  success_metrics?: string[];
+  demographics?: string;
+  psychographics?: string;
+  pain_points?: string[];
+  main_message?: string;
+  supporting_messages?: string[];
+  tone?: string;
+  ai_suggestion?: {
+    hook: string;
+    body: string;
+    cta: string;
+  };
+}
+
 interface BriefModule {
   id: string;
   type: 'objective' | 'audience' | 'messaging' | 'creative' | 'timeline' | 'kpis';
   title: string;
-  content: any;
+  content: ModuleContent;
   isComplete: boolean;
 }
 
@@ -67,7 +84,7 @@ const CreativeBriefBuilder: React.FC = () => {
     kpis: Zap
   };
 
-  const updateModuleContent = (moduleId: string, field: string, value: any) => {
+  const updateModuleContent = (moduleId: string, field: string, value: string | string[]) => {
     setBrief(prev => ({
       ...prev,
       modules: prev.modules.map(module => 

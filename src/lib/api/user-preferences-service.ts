@@ -5,7 +5,7 @@ export interface UserPreference {
   id: string;
   user_id: string;
   preference_category: string;
-  preference_data: Record<string, any>;
+  preference_data: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -14,13 +14,13 @@ export class UserPreferencesService {
   constructor(private httpClient: HttpClient) {}
 
   async getUserPreferences(category?: string) {
-    const endpoint = category 
+    const endpoint = category
       ? `/api/user-preferences?category=${category}`
       : '/api/user-preferences';
     return this.httpClient.request<UserPreference[]>(endpoint);
   }
 
-  async updateUserPreferences(category: string, data: Record<string, any>) {
+  async updateUserPreferences(category: string, data: Record<string, unknown>) {
     return this.httpClient.request<UserPreference>('/api/user-preferences', {
       method: 'POST',
       body: JSON.stringify({
@@ -34,7 +34,7 @@ export class UserPreferencesService {
     return this.getUserPreferences('workspace');
   }
 
-  async updateWorkspaceSettings(settings: Record<string, any>) {
+  async updateWorkspaceSettings(settings: Record<string, unknown>) {
     return this.updateUserPreferences('workspace', settings);
   }
 
@@ -42,7 +42,7 @@ export class UserPreferencesService {
     return this.getUserPreferences('ai_behavior');
   }
 
-  async updateAIBehaviorSettings(settings: Record<string, any>) {
+  async updateAIBehaviorSettings(settings: Record<string, unknown>) {
     return this.updateUserPreferences('ai_behavior', settings);
   }
 
@@ -50,7 +50,7 @@ export class UserPreferencesService {
     return this.getUserPreferences('system');
   }
 
-  async updateSystemPreferences(preferences: Record<string, any>) {
+  async updateSystemPreferences(preferences: Record<string, unknown>) {
     return this.updateUserPreferences('system', preferences);
   }
 }

@@ -6,9 +6,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
+interface ProposalTemplate {
+  key?: string;
+  name: string;
+  description?: string;
+  category?: string;
+  content?: string;
+}
+
 interface TemplateSelectionProps {
   selectedTemplate: string;
-  templates: Record<string, any>;
+  templates: Record<string, ProposalTemplate>;
   loading: boolean;
   backendAvailable?: boolean;
   onTemplateChange: (value: string) => void;
@@ -33,7 +41,7 @@ const TemplateSelection: React.FC<TemplateSelectionProps> = ({
     }
     acc[category].push({ key, ...template });
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, ProposalTemplate[]>);
 
   const formatCategoryName = (category: string) => {
     return category.split('_').map(word => 

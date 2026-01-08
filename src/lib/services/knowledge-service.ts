@@ -10,7 +10,7 @@ export interface KnowledgeBucket {
   created_by: string
   created_at: string
   updated_at: string
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   knowledge_documents?: KnowledgeDocument[]
 }
 
@@ -28,7 +28,7 @@ export interface KnowledgeDocument {
   created_by: string
   created_at: string
   updated_at: string
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 export interface KnowledgeChunk {
@@ -40,7 +40,7 @@ export interface KnowledgeChunk {
   chunk_content: string
   chunk_index: number
   similarity_score: number
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
 }
 
 export class KnowledgeService {

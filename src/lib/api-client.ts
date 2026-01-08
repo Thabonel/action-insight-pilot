@@ -19,7 +19,7 @@ export class ApiClient {
   }
 
   // Helper function to convert database record to Campaign interface
-  private dbToCampaign(record: any): Campaign {
+  private dbToCampaign(record: Record<string, unknown>): Campaign {
     return {
       id: record.id,
       name: record.name,
@@ -106,7 +106,7 @@ export class ApiClient {
   }
 
   // Helper function to convert Campaign interface to database record
-  private campaignToDb(campaign: any): any {
+  private campaignToDb(campaign: Record<string, unknown>): Record<string, unknown> {
     return {
       // Required fields
       name: campaign.name,
@@ -234,7 +234,7 @@ export class ApiClient {
     }
   }
 
-  async createCampaign(campaignData: any): Promise<ApiResponse<Campaign>> {
+  async createCampaign(campaignData: Partial<Campaign>): Promise<ApiResponse<Campaign>> {
     try {
       // Validation
       if (!campaignData.name || campaignData.name.trim() === '') {
@@ -529,7 +529,7 @@ export class ApiClient {
   }
 
   // Campaign Control Methods
-  async launchCampaign(id: string): Promise<ApiResponse<any>> {
+  async launchCampaign(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     try {
       const token = await this.getAuthToken();
 
@@ -566,7 +566,7 @@ export class ApiClient {
     }
   }
 
-  async pauseCampaign(id: string): Promise<ApiResponse<any>> {
+  async pauseCampaign(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     try {
       const token = await this.getAuthToken();
 
@@ -603,7 +603,7 @@ export class ApiClient {
     }
   }
 
-  async resumeCampaign(id: string): Promise<ApiResponse<any>> {
+  async resumeCampaign(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     try {
       const token = await this.getAuthToken();
 
@@ -640,7 +640,7 @@ export class ApiClient {
     }
   }
 
-  async stopCampaign(id: string): Promise<ApiResponse<any>> {
+  async stopCampaign(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     try {
       const token = await this.getAuthToken();
 
@@ -677,7 +677,7 @@ export class ApiClient {
     }
   }
 
-  async createCampaignFromAI(parsedCampaignData: any): Promise<ApiResponse<Campaign>> {
+  async createCampaignFromAI(parsedCampaignData: Record<string, unknown>): Promise<ApiResponse<Campaign>> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -739,7 +739,7 @@ export class ApiClient {
   }
 
   // Dashboard AI Chat via Lovable AI
-  async queryAgent(query: string, context?: any): Promise<ApiResponse<any>> {
+  async queryAgent(query: string, context?: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     try {
       console.log('Calling dashboard chat with query:', query);
 
@@ -862,7 +862,7 @@ export class ApiClient {
   }
 
   // Content Methods
-  async createContent(contentData: any): Promise<ApiResponse<any>> {
+  async createContent(contentData: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     console.log('Creating content:', contentData);
     return {
       success: true,
@@ -874,7 +874,7 @@ export class ApiClient {
     };
   }
 
-  async generateContent(brief: ContentBrief): Promise<ApiResponse<any>> {
+  async generateContent(brief: ContentBrief): Promise<ApiResponse<Record<string, unknown>>> {
     return {
       success: true,
       data: {
@@ -884,7 +884,7 @@ export class ApiClient {
     };
   }
 
-  async generateEmailContent(brief: any): Promise<ApiResponse<any>> {
+  async generateEmailContent(brief: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     return {
       success: true,
       data: {
@@ -895,7 +895,7 @@ export class ApiClient {
     };
   }
 
-  async getContentCalendar(): Promise<ApiResponse<any>> {
+  async getContentCalendar(): Promise<ApiResponse<Record<string, unknown>[]>> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -934,7 +934,7 @@ export class ApiClient {
   }
 
   // Lead Methods
-  async getLeads(): Promise<ApiResponse<any[]>> {
+  async getLeads(): Promise<ApiResponse<Record<string, unknown>[]>> {
     console.log('Getting leads');
     return {
       success: true,
@@ -945,7 +945,7 @@ export class ApiClient {
     };
   }
 
-  async scoreLeads(): Promise<ApiResponse<any>> {
+  async scoreLeads(): Promise<ApiResponse<Record<string, unknown>>> {
     console.log('Scoring leads');
     return {
       success: true,
@@ -957,7 +957,7 @@ export class ApiClient {
   }
 
   // Analytics Methods
-  async getAnalytics(): Promise<ApiResponse<any>> {
+  async getAnalytics(): Promise<ApiResponse<Record<string, unknown>>> {
     console.log('Getting analytics');
     return {
       success: true,
@@ -971,7 +971,7 @@ export class ApiClient {
   }
 
   // Other Methods (keeping existing implementations for compatibility)
-  async getEmailMetrics(): Promise<ApiResponse<any>> {
+  async getEmailMetrics(): Promise<ApiResponse<Record<string, unknown>>> {
     return {
       success: true,
       data: {
@@ -988,11 +988,11 @@ export class ApiClient {
     };
   }
 
-  async getRealTimeMetrics(): Promise<ApiResponse<any>> {
+  async getRealTimeMetrics(): Promise<ApiResponse<Record<string, unknown>>> {
     return this.getEmailMetrics();
   }
 
-  async getEmailAnalytics(): Promise<ApiResponse<any>> {
+  async getEmailAnalytics(): Promise<ApiResponse<Record<string, unknown>>> {
     return this.getEmailMetrics();
   }
 
@@ -1110,12 +1110,12 @@ export class ApiClient {
     return { success: true, data: undefined };
   }
 
-  async executeWorkflow(id: string, data?: any): Promise<ApiResponse<any>> {
+  async executeWorkflow(id: string, data?: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     return { success: true, data: { executed: true } };
   }
 
   // Social media methods
-  async scheduleSocialPost(postData: any): Promise<ApiResponse<any>> {
+  async scheduleSocialPost(postData: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     return {
       success: true,
       data: { id: '1', status: 'scheduled', ...postData }
@@ -1184,7 +1184,7 @@ export class ApiClient {
   }
 
   // Chat/Agent methods
-  async callGeneralCampaignAgent(message: string, context?: any): Promise<ApiResponse<any>> {
+  async callGeneralCampaignAgent(message: string, context?: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     return {
       success: true,
       data: {
@@ -1214,7 +1214,7 @@ export class ApiClient {
       connectService: (service: string, apiKey?: string) => this.createConnection({ service_name: service }),
       syncService: (id: string) => Promise.resolve({ success: true, data: { synced_at: new Date().toISOString() } }),
       disconnectService: (id: string) => this.deleteConnection(id),
-      createWebhook: (webhook: any) => Promise.resolve({ success: true, data: { id: '1', ...webhook } }),
+      createWebhook: (webhook: Record<string, unknown>) => Promise.resolve({ success: true, data: { id: '1', ...webhook } }),
       deleteWebhook: (id: string) => Promise.resolve({ success: true, data: undefined }),
       testWebhook: (id: string) => Promise.resolve({ success: true, data: { status: 'ok' } })
     };
@@ -1226,7 +1226,7 @@ export class ApiClient {
       create: (workflow: Partial<Workflow>) => this.createWorkflow(workflow),
       update: (id: string, workflow: Partial<Workflow>) => this.updateWorkflow(id, workflow),
       delete: (id: string) => this.deleteWorkflow(id),
-      execute: (id: string, data?: any) => this.executeWorkflow(id, data)
+      execute: (id: string, data?: Record<string, unknown>) => this.executeWorkflow(id, data)
     };
   }
 
@@ -1242,9 +1242,9 @@ export class ApiClient {
       syncPlatformData: (platform: string) => Promise.resolve({ success: true, data: { synced_at: new Date().toISOString() } }),
       testPlatformConnection: (platform: string) => Promise.resolve({ success: true, data: { status: 'connected' } }),
       getSocialMediaPosts: () => Promise.resolve({ success: true, data: [] }),
-      createSocialPost: (postData: any) => this.scheduleSocialPost(postData),
+      createSocialPost: (postData: Record<string, unknown>) => this.scheduleSocialPost(postData),
       getSocialAnalytics: () => Promise.resolve({ success: true, data: { followers: 100, engagement: 5.2 } }),
-      generateSocialContent: (brief: any) => Promise.resolve({ success: true, data: { content: 'Generated content', hashtags: [] } })
+      generateSocialContent: (brief: Record<string, unknown>) => Promise.resolve({ success: true, data: { content: 'Generated content', hashtags: [] } })
     };
   }
 

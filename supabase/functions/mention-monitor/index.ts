@@ -10,7 +10,7 @@ interface PlatformConnection {
   platform_name: string
   access_token_encrypted: string
   platform_user_id: string
-  connection_metadata: any
+  connection_metadata: Record<string, unknown>
 }
 
 interface DiscoveredMention {
@@ -77,12 +77,12 @@ async function searchTwitterMentions(
     // Map users by ID for lookup
     const usersMap = new Map()
     if (data.includes?.users) {
-      data.includes.users.forEach((user: any) => {
+      data.includes.users.forEach((user: Record<string, unknown>) => {
         usersMap.set(user.id, user.username)
       })
     }
 
-    return data.data.map((tweet: any) => ({
+    return data.data.map((tweet: Record<string, unknown>) => ({
       id: tweet.id,
       url: `https://twitter.com/i/web/status/${tweet.id}`,
       author: usersMap.get(tweet.author_id) || tweet.author_id,
@@ -94,7 +94,7 @@ async function searchTwitterMentions(
       },
       created_at: tweet.created_at
     }))
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Twitter] Error searching mentions:', error)
     return []
   }
@@ -127,7 +127,7 @@ async function searchFacebookMentions(
       return []
     }
 
-    return data.data.map((post: any) => ({
+    return data.data.map((post: Record<string, unknown>) => ({
       id: post.id,
       url: `https://www.facebook.com/${post.id}`,
       author: post.from?.name || post.from?.id || 'Unknown',
@@ -139,7 +139,7 @@ async function searchFacebookMentions(
       },
       created_at: post.created_time
     }))
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Facebook] Error searching mentions:', error)
     return []
   }
@@ -174,8 +174,8 @@ async function searchLinkedInMentions(
     }
 
     return data.elements
-      .filter((share: any) => share.text?.text?.includes('@'))
-      .map((share: any) => ({
+      .filter((share: Record<string, unknown>) => share.text?.text?.includes('@'))
+      .map((share: Record<string, unknown>) => ({
         id: share.id,
         url: `https://www.linkedin.com/feed/update/${share.id}`,
         author: share.owner || 'Unknown',
@@ -187,7 +187,7 @@ async function searchLinkedInMentions(
         },
         created_at: new Date(share.created?.time || Date.now()).toISOString()
       }))
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[LinkedIn] Error searching mentions:', error)
     return []
   }
@@ -239,17 +239,21 @@ Deno.serve(async (req) => {
 
         // Search for mentions on each platform
         switch (conn.platform_name) {
-          case 'twitter':
+          case 'twitter': {
             mentions = await searchTwitterMentions(accessToken, conn.platform_user_id)
             break
-          case 'facebook':
-            const pageId = conn.connection_metadata?.facebook_page_id || conn.platform_user_id
+          }
+          case 'facebook': {
+            const metadata = conn.connection_metadata as Record<string, unknown> | undefined;
+            const pageId = metadata?.facebook_page_id as string || conn.platform_user_id
             mentions = await searchFacebookMentions(accessToken, pageId)
             break
-          case 'linkedin':
+          }
+          case 'linkedin': {
             const personUrn = `urn:li:person:${conn.platform_user_id}`
             mentions = await searchLinkedInMentions(accessToken, personUrn)
             break
+          }
         }
 
         console.log(`[Mention Monitor] Found ${mentions.length} mentions on ${conn.platform_name}`)
@@ -320,7 +324,7 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'
     console.error('[Mention Monitor] Error:', error)
     return new Response(
       JSON.stringify({ error: errorMessage }),

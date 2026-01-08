@@ -191,11 +191,11 @@ Deno.serve(async (req) => {
       }
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('OAuth callback error:', error)
     
     // Redirect back to app with error
-    const redirectUrl = `${req.headers.get('origin')}/app/connect-platforms?error=${encodeURIComponent(error.message)}`
+    const redirectUrl = `${req.headers.get('origin')}/app/connect-platforms?error=${encodeURIComponent(error instanceof Error ? error.message : String(error))}`
     
     return new Response(null, {
       status: 302,

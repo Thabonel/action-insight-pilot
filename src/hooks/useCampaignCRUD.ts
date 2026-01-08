@@ -12,7 +12,7 @@ export const useCampaignCRUD = () => {
     setIsLoading(true);
     try {
       // Prepare updates for database
-      const dbUpdates: any = {
+      const dbUpdates: Record<string, unknown> = {
         ...updates,
         updated_at: new Date().toISOString()
       };
@@ -92,10 +92,10 @@ export const useCampaignCRUD = () => {
     budget_allocated?: number;
     start_date?: string;
     end_date?: string;
-    target_audience?: any;
-    content?: any;
-    settings?: any;
-    metrics?: any;
+    target_audience?: Record<string, unknown>;
+    content?: Record<string, unknown>;
+    settings?: Record<string, unknown>;
+    metrics?: Record<string, unknown>;
   }) => {
     setIsLoading(true);
     try {

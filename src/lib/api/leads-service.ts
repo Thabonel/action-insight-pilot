@@ -1,6 +1,10 @@
 
 import { HttpClient } from '../http-client';
 
+export interface LeadData {
+  [key: string]: unknown;
+}
+
 export class LeadsService {
   constructor(private httpClient: HttpClient) {}
 
@@ -16,7 +20,7 @@ export class LeadsService {
     return this.httpClient.request('/api/leads/analytics/overview');
   }
 
-  async createLead(leadData: any) {
+  async createLead(leadData: LeadData) {
     return this.httpClient.request('/api/leads', {
       method: 'POST',
       body: JSON.stringify(leadData),

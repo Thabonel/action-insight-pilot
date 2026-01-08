@@ -90,7 +90,7 @@ export class ProfileService {
       // Transform the data to match UserPreference interface
       return (data || []).map(item => ({
         ...item,
-        preference_data: item.preference_data as Record<string, any>
+        preference_data: (item.preference_data as Record<string, unknown>) || {}
       }));
     } catch (error) {
       console.error('Error in getUserPreferences:', error);
@@ -101,7 +101,7 @@ export class ProfileService {
   static async updateUserPreference(
     userId: string,
     category: string,
-    preferenceData: Record<string, any>
+    preferenceData: Record<string, unknown>
   ): Promise<UserPreference | null> {
     try {
       const { data, error } = await supabase
@@ -122,7 +122,7 @@ export class ProfileService {
       // Transform the data to match UserPreference interface
       return {
         ...data,
-        preference_data: data.preference_data as Record<string, any>
+        preference_data: (data.preference_data as Record<string, unknown>) || {}
       };
     } catch (error) {
       console.error('Error in updateUserPreference:', error);

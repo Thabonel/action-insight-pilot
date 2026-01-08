@@ -205,7 +205,7 @@ export const useDataPrivacy = () => {
 
   const logPrivacyEvent = useCallback(async (
     eventType: string,
-    details: Record<string, any>
+    details: Record<string, unknown>
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();

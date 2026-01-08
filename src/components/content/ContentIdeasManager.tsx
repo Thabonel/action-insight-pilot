@@ -9,8 +9,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useContentIdeas } from '@/contexts/ContentIdeasContext';
 import { Lightbulb, Plus, Trash2, TrendingUp, Video } from 'lucide-react';
 
+interface ContentIdea {
+  id: string;
+  title: string;
+  description: string;
+  source: string;
+  trending: number;
+  tags: string[];
+  createdAt: string;
+}
+
 interface ContentIdeasManagerProps {
-  onVideoGenerate?: (ideas: any[]) => void;
+  onVideoGenerate?: (ideas: ContentIdea[]) => void;
 }
 
 const ContentIdeasManager: React.FC<ContentIdeasManagerProps> = ({ onVideoGenerate }) => {

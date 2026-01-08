@@ -18,6 +18,15 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface RepurposedVariant {
+  id: string;
+  formatId: string;
+  content: string | string[];
+  createdAt: string;
+  wordCount: number;
+  characterCount: number;
+}
+
 export interface ContentRepurposingEngineProps {
   contentId: string;
   title: string;
@@ -30,7 +39,7 @@ export const ContentRepurposingEngine: React.FC<ContentRepurposingEngineProps> =
   content
 }) => {
   const [activeFormat, setActiveFormat] = useState<string | null>(null);
-  const [variants, setVariants] = useState<any[]>([]);
+  const [variants, setVariants] = useState<RepurposedVariant[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
@@ -192,7 +201,7 @@ Best regards,
     }
   };
 
-  const copyToClipboard = (content: any) => {
+  const copyToClipboard = (content: string | string[]) => {
     const text = typeof content === 'string' ? content : content.join('\n\n');
     navigator.clipboard.writeText(text);
     toast({
@@ -201,7 +210,7 @@ Best regards,
     });
   };
 
-  const exportVariant = (variant: any) => {
+  const exportVariant = (variant: RepurposedVariant) => {
     const format = repurposingOptions.find(opt => opt.id === variant.formatId);
     const content = typeof variant.content === 'string' ? variant.content : variant.content.join('\n\n');
     

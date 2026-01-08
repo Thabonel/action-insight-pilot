@@ -19,7 +19,7 @@ export class ProposalApi extends ClientCore {
     return this.proposalMethods.getProposalTemplates();
   }
 
-  async generateProposal(proposalData: any) {
+  async generateProposal(proposalData: Record<string, unknown>) {
     return this.proposalMethods.generateProposal(proposalData);
   }
 

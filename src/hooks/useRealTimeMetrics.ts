@@ -10,7 +10,7 @@ export const useRealTimeMetrics = () => {
   const fetchMetrics = async () => {
     try {
       setLoading(true);
-      const result = await apiClient.getEmailMetrics() as ApiResponse<any>;
+      const result = await apiClient.getEmailMetrics() as ApiResponse<Record<string, unknown>>;
       
       if (result.success && result.data) {
         // Transform the data to match EmailMetrics interface

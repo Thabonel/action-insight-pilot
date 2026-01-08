@@ -14,7 +14,7 @@ export class SocialApi {
     }
   }
 
-  async createPost(postData: any) {
+  async createPost(postData: Record<string, unknown>) {
     try {
       const socialMethods = apiClient.socialPlatforms;
       const result = await socialMethods.createSocialPost(postData);
@@ -36,12 +36,12 @@ export class SocialApi {
     }
   }
 
-  async generateContent(brief: any) {
+  async generateContent(brief: Record<string, unknown>) {
     try {
       const socialMethods = apiClient.socialPlatforms;
       const result = await socialMethods.generateSocialContent(brief);
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating social content:', error);
       return { success: false, error: 'Failed to generate content' };
     }

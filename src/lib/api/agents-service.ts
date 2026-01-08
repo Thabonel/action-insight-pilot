@@ -4,14 +4,18 @@ import { HttpClient } from '../http-client';
 export interface AgentTaskRequest {
   agent_type: string;
   task_type: string;
-  input_data: Record<string, any>;
+  input_data: Record<string, unknown>;
 }
 
 export interface AgentTaskResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   task_id?: string;
+}
+
+export interface LeadData {
+  [key: string]: unknown;
 }
 
 export class AgentsService {
@@ -24,7 +28,7 @@ export class AgentsService {
     });
   }
 
-  async generateEmailContent(campaignType: string, audience: Record<string, any>): Promise<any> {
+  async generateEmailContent(campaignType: string, audience: Record<string, unknown>): Promise<AgentTaskResponse> {
     return this.executeTask({
       agent_type: 'content_creator',
       task_type: 'create_email_content',
@@ -35,7 +39,7 @@ export class AgentsService {
     });
   }
 
-  async generateABVariants(baseMessage: string): Promise<any> {
+  async generateABVariants(baseMessage: string): Promise<AgentTaskResponse> {
     return this.executeTask({
       agent_type: 'campaign_manager',
       task_type: 'generate_ab_variants',
@@ -43,7 +47,7 @@ export class AgentsService {
     });
   }
 
-  async suggestSendTime(audienceProfile: Record<string, any>): Promise<any> {
+  async suggestSendTime(audienceProfile: Record<string, unknown>): Promise<AgentTaskResponse> {
     return this.executeTask({
       agent_type: 'campaign_manager',
       task_type: 'suggest_send_time',
@@ -51,7 +55,7 @@ export class AgentsService {
     });
   }
 
-  async scoreLeads(leads?: any[]): Promise<any> {
+  async scoreLeads(leads?: LeadData[]): Promise<AgentTaskResponse> {
     return this.executeTask({
       agent_type: 'lead_generator',
       task_type: 'score_leads',
@@ -59,7 +63,7 @@ export class AgentsService {
     });
   }
 
-  async enrichLeads(leadData: Record<string, any>): Promise<any> {
+  async enrichLeads(leadData: Record<string, unknown>): Promise<AgentTaskResponse> {
     return this.executeTask({
       agent_type: 'lead_generator',
       task_type: 'enrich_lead',
@@ -67,7 +71,7 @@ export class AgentsService {
     });
   }
 
-  async optimizeCampaign(campaignData: Record<string, any>): Promise<any> {
+  async optimizeCampaign(campaignData: Record<string, unknown>): Promise<AgentTaskResponse> {
     return this.executeTask({
       agent_type: 'campaign_manager',
       task_type: 'optimize_campaign',
@@ -75,7 +79,7 @@ export class AgentsService {
     });
   }
 
-  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string): Promise<any> {
+  async generateSocialContent(platform: string, contentTheme: string, brandVoice?: string): Promise<AgentTaskResponse> {
     return this.executeTask({
       agent_type: 'social_media_manager',
       task_type: 'create_social_post',

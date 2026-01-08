@@ -31,11 +31,16 @@ const SocialPlatformConnectors: React.FC = () => {
     }
   };
 
+  interface ConnectionResponse {
+    success: boolean;
+    message?: string;
+  }
+
   const handleConnect = async (platform: string) => {
     try {
       setActionLoading(platform);
-      const result = await apiClient.socialPlatforms.initiatePlatformConnection(platform) as ApiResponse<any>;
-      
+      const result = await apiClient.socialPlatforms.initiatePlatformConnection(platform) as ApiResponse<ConnectionResponse>;
+
       if (result.success) {
         toast({
           title: "Platform Connected",

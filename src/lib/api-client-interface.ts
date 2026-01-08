@@ -1,5 +1,5 @@
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -29,7 +29,7 @@ export interface Workflow {
 export interface WorkflowStep {
   id: string;
   type: string;
-  config: any;
+  config: Record<string, unknown>;
   order: number;
   title?: string;
   description?: string;
@@ -94,7 +94,7 @@ export interface IntegrationConnection {
   name: string;
   type: string;
   status: 'connected' | 'disconnected' | 'error';
-  config: any;
+  config: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   service_name?: string;
@@ -217,7 +217,7 @@ export interface WorkflowMethods {
   create: (workflow: Partial<Workflow>) => Promise<ApiResponse<Workflow>>;
   update: (id: string, workflow: Partial<Workflow>) => Promise<ApiResponse<Workflow>>;
   delete: (id: string) => Promise<ApiResponse<void>>;
-  execute: (id: string, input?: any) => Promise<ApiResponse<any>>;
+  execute: (id: string, input?: Record<string, unknown>) => Promise<ApiResponse<unknown>>;
 }
 
 export interface UserPreferences {
@@ -225,7 +225,7 @@ export interface UserPreferences {
   notifications?: boolean;
   language?: string;
   timezone?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface UserPreferencesMethods {
@@ -239,11 +239,11 @@ export interface IntegrationMethods {
   getWebhooks: () => Promise<ApiResponse<Webhook[]>>;
   createWebhook: (data: Partial<Webhook>) => Promise<ApiResponse<Webhook>>;
   deleteWebhook: (id: string) => Promise<ApiResponse<void>>;
-  testWebhook: (id: string) => Promise<ApiResponse<any>>;
+  testWebhook: (id: string) => Promise<ApiResponse<{ status: string; message: string }>>;
   getConnections: () => Promise<ApiResponse<IntegrationConnection[]>>;
-  connectService: (service: string, apiKey: string) => Promise<ApiResponse<any>>;
-  syncService: (service: string) => Promise<ApiResponse<any>>;
-  disconnectService: (service: string) => Promise<ApiResponse<any>>;
+  connectService: (service: string, apiKey: string) => Promise<ApiResponse<{ connected: boolean; service: string }>>;
+  syncService: (service: string) => Promise<ApiResponse<{ synced: boolean; service: string }>>;
+  disconnectService: (service: string) => Promise<ApiResponse<{ disconnected: boolean; service: string }>>;
 }
 
 export interface ChatSession {
@@ -258,7 +258,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   query?: string;
   response?: string;
 }

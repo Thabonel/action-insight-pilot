@@ -19,9 +19,19 @@ interface ContentBrief {
   cta?: string;
 }
 
+interface GeneratedContent {
+  content: string;
+  title: string;
+  cta?: string;
+  tags?: string[];
+  seo_score: number;
+  readability_score: number;
+  engagement_prediction: number;
+}
+
 interface LiveContentSuggestionsProps {
   brief: ContentBrief;
-  onSuggestionSelect?: (content: any) => void;
+  onSuggestionSelect?: (content: GeneratedContent) => void;
 }
 
 const LiveContentSuggestions: React.FC<LiveContentSuggestionsProps> = ({ 
@@ -36,6 +46,7 @@ const LiveContentSuggestions: React.FC<LiveContentSuggestionsProps> = ({
     if (brief.title && brief.target_audience) {
       generateContent(brief);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brief.title, brief.target_audience, brief.content_type]);
 
   const handleCopyContent = async () => {

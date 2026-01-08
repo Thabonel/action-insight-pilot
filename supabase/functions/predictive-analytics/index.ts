@@ -67,7 +67,7 @@ serve(async (req) => {
   } catch (error: unknown) {
     console.error('Error in predictive-analytics:', error);
     // Return generic error to client, log full error server-side
-    const errorMessage = error instanceof Error ? error.message : ''
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : ''
     const publicError = errorMessage?.includes('API key') || errorMessage?.includes('OPENAI')
       ? 'Configuration error - please contact support'
       : 'An error occurred generating predictions';

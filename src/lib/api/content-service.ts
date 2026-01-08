@@ -13,6 +13,10 @@ export interface ContentBrief {
   cta?: string;
 }
 
+export interface ContentData {
+  [key: string]: unknown;
+}
+
 export class ContentService {
   constructor(private httpClient: HttpClient) {}
 
@@ -23,7 +27,7 @@ export class ContentService {
     });
   }
 
-  async createContent(contentData: any) {
+  async createContent(contentData: ContentData) {
     return this.httpClient.request('/api/content/create', {
       method: 'POST',
       body: JSON.stringify(contentData),

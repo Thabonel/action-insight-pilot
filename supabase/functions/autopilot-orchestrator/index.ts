@@ -97,7 +97,7 @@ serve(async (req) => {
         const result = await processAutopilot(supabase, config);
         results.push(result);
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'
         console.error(`Error processing autopilot for user ${config.user_id}:`, error);
         results.push({
           userId: config.user_id,
@@ -116,7 +116,7 @@ serve(async (req) => {
     });
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'
     console.error('Error in autopilot-orchestrator:', error);
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
@@ -329,7 +329,7 @@ async function createCampaignAssessment(supabase: SupabaseClient, userId: string
 
     console.log(`Assessment linked to campaign. URL: /a/${assessmentId}`);
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error creating assessment for campaign ${campaignId}:`, error);
   }
 }
@@ -550,7 +550,7 @@ async function processAssessmentWorkflows(supabase: SupabaseClient, userId: stri
 
     console.log(`Processed assessment workflows for ${recentResponses.length} leads`);
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error processing assessment workflows:', error);
   }
 }
@@ -687,7 +687,7 @@ async function tryGenerateVideoAds(supabase: SupabaseClient, userId: string, cam
       }
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error in tryGenerateVideoAds for campaign ${campaign.id}:`, error);
   }
 }

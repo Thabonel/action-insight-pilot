@@ -14,6 +14,14 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface WritingSuggestion {
+  type: string;
+  title: string;
+  description: string;
+  location: string;
+  confidence: number;
+}
+
 export interface AIWritingAssistantProps {
   content: string;
   onContentUpdate: (newContent: string) => void;
@@ -28,7 +36,7 @@ export const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
   onToggle
 }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<WritingSuggestion[]>([]);
   const { toast } = useToast();
 
   const analyzeSuggestions = async () => {
@@ -120,7 +128,7 @@ export const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
     }
   };
 
-  const applySuggestion = (suggestion: any) => {
+  const applySuggestion = (suggestion: WritingSuggestion) => {
     // Simulate applying suggestion
     toast({
       title: "Suggestion applied",
