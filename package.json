@@ -10,7 +10,16 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "knip": "knip",
-    "knip:production": "echo '⚠️  Knip is disabled in production environments' && exit 1"
+    "knip:production": "echo '⚠️  Knip is disabled in production environments' && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "quality:check:full": "npm run type-check && npm run lint && npm run test",
+    "backend:test": "cd backend && pytest --verbose",
+    "backend:lint": "cd backend && flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics",
+    "deploy:check": "npm run quality:check:full && npm run backend:test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -76,6 +85,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@rollup/rollup-darwin-x64": "^4.55.1",
+    "@swc/core-darwin-x64": "^1.15.8",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
@@ -98,5 +109,8 @@
   "main": "eslint.config.js",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "optionalDependencies": {
+    "@rollup/rollup-darwin-x64": "^4.55.1"
+  }
 }
