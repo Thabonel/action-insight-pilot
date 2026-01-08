@@ -45,11 +45,12 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
       }
 
       setAnalytics(data.analytics);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unable to load performance data.";
       console.error('Error loading analytics:', error);
       toast({
         title: "Failed to Load Analytics",
-        description: error.message || "Unable to load performance data.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -361,7 +362,7 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recent_responses.slice(0, 5).map((response: any) => (
+              {recent_responses.slice(0, 5).map((response: { response_id: string; lead_email: string | null; submitted_at: string; result_category: string; result_label: string; score: number }) => (
                 <div key={response.response_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium text-gray-900">{response.lead_email || 'Anonymous'}</p>

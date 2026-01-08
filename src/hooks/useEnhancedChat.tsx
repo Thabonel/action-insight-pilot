@@ -5,12 +5,16 @@ import { apiClient } from '@/lib/api-client';
 import { ApiResponse, ResearchNote } from '@/lib/api-client-interface';
 import { supabase } from '@/integrations/supabase/client';
 
+interface MessageMetadata {
+  [key: string]: unknown;
+}
+
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: MessageMetadata;
   query?: string;
   agentType?: string;
   response?: string;
@@ -81,7 +85,7 @@ export const useEnhancedChat = () => {
     })();
   }, []);
 
-  const sendMessage = useCallback(async (content: string, context?: any) => {
+  const sendMessage = useCallback(async (content: string, context?: Record<string, unknown>) => {
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
@@ -188,7 +192,13 @@ export const useEnhancedChat = () => {
         body: { conversationId: sessionId }
       });
       if (!error && data?.messages) {
-        const msgs = (data.messages as any[]).map(m => ({
+        interface StoredMessage {
+          id: string;
+          role: 'user' | 'assistant';
+          content: string;
+          timestamp: string;
+        }
+        const msgs = (data.messages as StoredMessage[]).map(m => ({
           id: m.id,
           role: m.role,
           content: m.content,

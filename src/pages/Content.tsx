@@ -40,9 +40,9 @@ const Content: React.FC = () => {
     });
   };
 
-  const handleVideoGenerate = (ideas: any[]) => {
+  const handleVideoGenerate = (ideas: ContentIdea[]) => {
     toast({
-      title: "Video Generation Started", 
+      title: "Video Generation Started",
       description: `Generating video from ${ideas.length} content ideas`,
     });
   };

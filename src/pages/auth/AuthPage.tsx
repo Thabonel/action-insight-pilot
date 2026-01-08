@@ -105,10 +105,11 @@ const AuthPage: React.FC = () => {
         });
         navigate('/app/conversational-dashboard');
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Could not sign in. Please check your email and password, or try resetting your password.";
       toast({
         title: "Authentication Error",
-        description: error.message || "Could not sign in. Please check your email and password, or try resetting your password.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

@@ -20,10 +20,17 @@ interface GTMInputs {
   budgetCeiling: number;
 }
 
+interface GTMResearchData {
+  marketAnalysis?: Record<string, unknown>;
+  competitorData?: Record<string, unknown>;
+  targetAudience?: Record<string, unknown>;
+  channels?: Record<string, unknown>;
+}
+
 interface GTMStrategy {
   id: string;
   strategy_content: string;
-  research_data: any;
+  research_data: GTMResearchData;
   created_at: string;
   product_name: string;
 }
@@ -138,9 +145,10 @@ export const MarketingAIGTMPlanner = () => {
       }
     } catch (error) {
       console.error('Error generating strategy:', error);
-      toast({ 
-        title: "Error", 
-        description: error.message || "Failed to generate GTM strategy. Please try again.",
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate GTM strategy. Please try again.";
+      toast({
+        title: "Error",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

@@ -175,11 +175,12 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to check brand safety'
     console.error('[Brand Safety] Error:', error)
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to check brand safety',
+        error: errorMessage,
         is_safe: true, // Fail safe - don't block if check fails
         blocked_items: [],
         warnings: ['Brand safety check failed - manual review recommended']

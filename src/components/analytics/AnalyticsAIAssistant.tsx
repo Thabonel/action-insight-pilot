@@ -70,7 +70,7 @@ const AnalyticsAIAssistant: React.FC = () => {
     }
   ]);
 
-  const handleQuestionClick = (question: any) => {
+  const handleQuestionClick = (question: { id: number; question: string; answer: string; confidence: number; category: string }) => {
     behaviorTracker.trackAction('feature_use', 'analytics_ai_question', {
       questionId: question.id,
       category: question.category,
@@ -78,7 +78,7 @@ const AnalyticsAIAssistant: React.FC = () => {
     });
   };
 
-  const handleRecommendationClick = (rec: any) => {
+  const handleRecommendationClick = (rec: { id: number; type: string; title: string; description: string; impact: string; effort: string; icon: React.ComponentType<{ className?: string }> }) => {
     behaviorTracker.trackAction('feature_use', 'analytics_recommendation', {
       recommendationType: rec.type,
       recommendationId: rec.id,

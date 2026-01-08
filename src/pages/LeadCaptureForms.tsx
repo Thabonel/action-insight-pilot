@@ -36,10 +36,10 @@ import {
 const LeadCaptureForms: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [forms, setForms] = useState<any[]>([]);
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [forms, setForms] = useState<LeadCaptureForm[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedForm, setSelectedForm] = useState<any>(null);
+  const [selectedForm, setSelectedForm] = useState<LeadCaptureForm | null>(null);
   const [showEmbedCode, setShowEmbedCode] = useState(false);
   const [embedCode, setEmbedCode] = useState({ embed_code: '', iframe_code: '', direct_url: '' });
 

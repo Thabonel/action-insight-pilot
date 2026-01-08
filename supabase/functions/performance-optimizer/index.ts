@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -61,10 +61,11 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in performance-optimizer:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('Claude') || error.message?.includes('Anthropic')
+    const errorMessage = error instanceof Error ? error.message : ''
+    const publicError = errorMessage?.includes('API key') || errorMessage?.includes('Claude') || errorMessage?.includes('Anthropic')
       ? 'Configuration error - please contact support'
       : 'An error occurred analyzing performance';
     return new Response(JSON.stringify({ error: publicError }), {
@@ -74,7 +75,7 @@ serve(async (req) => {
   }
 });
 
-async function analyzePerformanceWithAI(campaign: any, metrics: any[], benchmarks: any[]): Promise<any> {
+async function analyzePerformanceWithAI(campaign: Record<string, unknown>, metrics: unknown[], benchmarks: unknown[]): Promise<unknown> {
   const prompt = `
 Analyze this campaign's performance against benchmarks and provide optimization recommendations:
 
@@ -122,7 +123,7 @@ Provide analysis in JSON format:
   return JSON.parse(data.content[0].text);
 }
 
-async function generateOptimizationSuggestions(analysis: any, campaign: any): Promise<any[]> {
+async function generateOptimizationSuggestions(analysis: Record<string, unknown>, campaign: Record<string, unknown>): Promise<unknown[]> {
   const suggestions = [];
 
   // Budget reallocation suggestions
@@ -161,7 +162,7 @@ async function generateOptimizationSuggestions(analysis: any, campaign: any): Pr
   return suggestions;
 }
 
-async function savePerformanceAnalysis(supabase: any, campaignId: string, analysis: any, optimizations: any[]): Promise<void> {
+async function savePerformanceAnalysis(supabase: SupabaseClient, campaignId: string, analysis: Record<string, unknown>, optimizations: unknown[]): Promise<void> {
   await supabase
     .from('campaign_performance_monitor')
     .insert({

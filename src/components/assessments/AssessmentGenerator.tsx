@@ -93,11 +93,12 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
         description: `Created ${assessment.questions?.length || 0} questions. Review and edit before publishing.`
       });
 
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate assessment. Please try again.";
       console.error('Error generating assessment:', error);
       toast({
         title: "Generation Failed",
-        description: error.message || "Failed to generate assessment. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -105,7 +106,7 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
     }
   };
 
-  const updateQuestion = (index: number, field: string, value: any) => {
+  const updateQuestion = (index: number, field: keyof AssessmentQuestion, value: string | AssessmentQuestion['options']) => {
     const updated = [...editedQuestions];
     updated[index] = { ...updated[index], [field]: value };
     setEditedQuestions(updated);
@@ -167,11 +168,12 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
         onAssessmentCreated(generated.id);
       }
 
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to publish assessment.";
       console.error('Error publishing assessment:', error);
       toast({
         title: "Publishing Failed",
-        description: error.message || "Failed to publish assessment.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

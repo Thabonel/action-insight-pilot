@@ -91,11 +91,12 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
 
       setAiStrategy(strategy);
       setStep(4);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error generating strategy:', error);
       toast({
         title: 'Strategy Generation Failed',
-        description: error.message || 'Failed to generate marketing strategy',
+        description: errorMessage || 'Failed to generate marketing strategy',
         variant: 'destructive'
       });
     } finally {
@@ -138,11 +139,12 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
       });
 
       onComplete();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error activating autopilot:', error);
       toast({
         title: 'Activation Failed',
-        description: error.message || 'Failed to activate autopilot',
+        description: errorMessage || 'Failed to activate autopilot',
         variant: 'destructive'
       });
     }

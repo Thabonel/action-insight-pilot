@@ -185,7 +185,7 @@ export const useProposals = () => {
     }
   };
 
-  const generatePDFExport = async (proposal: any) => {
+  const generatePDFExport = async (proposal: GeneratedProposal) => {
     // Basic text export for now - could be enhanced with proper PDF generation
     return `
 PROPOSAL FOR ${proposal.client_info?.company_name || proposal.client_name}
@@ -207,7 +207,7 @@ ${proposal.terms?.warranty || ''}
     `;
   };
 
-  const generateWordExport = async (proposal: any) => {
+  const generateWordExport = async (proposal: GeneratedProposal) => {
     return generatePDFExport(proposal); // Same content for now
   };
 
@@ -229,7 +229,7 @@ ${proposal.terms?.warranty || ''}
         template_type: proposal.template_type,
         status: proposal.status,
         created_at: proposal.created_at,
-        value: proposal.pricing?.reduce((total: number, item: any) => total + (item.price * (item.quantity || 1)), 0) || 0
+        value: proposal.pricing?.reduce((total: number, item) => total + (item.price * (item.quantity || 1)), 0) || 0
       }));
 
       setProposals(mappedProposals);

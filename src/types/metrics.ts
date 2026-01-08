@@ -11,9 +11,25 @@ export interface SystemMetric {
   performance: number;
 }
 
+export interface Campaign {
+  id: string;
+  name: string;
+  status: string;
+  budget?: number;
+  [key: string]: unknown;
+}
+
+export interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  score?: number;
+  [key: string]: unknown;
+}
+
 export interface MetricApiData {
-  campaigns?: any[];
-  leads?: any[];
+  campaigns?: Campaign[];
+  leads?: Lead[];
   emailStats?: { totalSent?: number; openRate?: number };
   socialStats?: { posts?: number; engagement?: number };
   analyticsStats?: { engagement?: number };

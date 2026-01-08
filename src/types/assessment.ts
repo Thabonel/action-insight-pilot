@@ -70,11 +70,16 @@ export interface AssessmentResponse {
   result: AssessmentResult;
 }
 
+export interface AssessmentAnswer {
+  value: string | string[] | number;
+  points?: number;
+}
+
 export interface AssessmentSubmission {
   email: string;
   name?: string;
   phone?: string;
-  answers: Record<string, any>;
+  answers: Record<string, AssessmentAnswer>;
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
@@ -83,6 +88,14 @@ export interface AssessmentSubmission {
   referrer?: string;
   device_type?: string;
   started_at?: string;
+}
+
+export interface RecentResponse {
+  id: string;
+  email: string;
+  score: number;
+  completed_at: string;
+  [key: string]: unknown;
 }
 
 export interface AssessmentAnalytics {
@@ -100,7 +113,7 @@ export interface AssessmentAnalytics {
     medium: number;
     low: number;
   };
-  recent_responses: any[];
+  recent_responses: RecentResponse[];
 }
 
 export interface DailyAnalytics {

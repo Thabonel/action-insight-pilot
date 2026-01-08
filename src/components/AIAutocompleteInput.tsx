@@ -102,7 +102,7 @@ export const AIAutocompleteInput: React.FC<AIAutocompleteInputProps> = ({
     <div className="relative">
       <div className="relative">
         <InputComponent
-          ref={inputRef as any}
+          ref={inputRef as React.RefObject<HTMLInputElement & HTMLTextAreaElement>}
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDown}

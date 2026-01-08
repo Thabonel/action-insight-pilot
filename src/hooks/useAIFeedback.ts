@@ -36,7 +36,7 @@ export const useAIFeedback = () => {
     }
   };
 
-  const recordApproval = async (originalSuggestion: any, contextData: any, sessionId?: string) => {
+  const recordApproval = async (originalSuggestion: Record<string, unknown>, contextData: Record<string, unknown>, sessionId?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -68,7 +68,7 @@ export const useAIFeedback = () => {
     });
   };
 
-  const recordRegeneration = async (originalSuggestion: any, contextData: any, sessionId?: string) => {
+  const recordRegeneration = async (originalSuggestion: Record<string, unknown>, contextData: Record<string, unknown>, sessionId?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -81,7 +81,7 @@ export const useAIFeedback = () => {
     });
   };
 
-  const recordRejection = async (originalSuggestion: any, contextData: any, sessionId?: string) => {
+  const recordRejection = async (originalSuggestion: Record<string, unknown>, contextData: Record<string, unknown>, sessionId?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 

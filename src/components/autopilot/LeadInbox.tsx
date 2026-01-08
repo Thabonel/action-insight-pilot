@@ -51,11 +51,12 @@ const LeadInbox: React.FC = () => {
       if (error) throw error;
 
       setLeads(data || []);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error fetching leads:', error);
       toast({
         title: 'Failed to load leads',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {
@@ -106,11 +107,12 @@ const LeadInbox: React.FC = () => {
         title: 'Lead updated',
         description: `Lead marked as ${newStatus}`,
       });
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error updating lead:', error);
       toast({
         title: 'Update failed',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }
