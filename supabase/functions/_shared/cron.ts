@@ -33,9 +33,9 @@ Cron Schedule Format:
 * * * * *
 
 Examples:
-'0 2 * * *'   - Every day at 2:00 AM
-'0 9 * * 1'   - Every Monday at 9:00 AM
-'*/15 * * * *' - Every 15 minutes
-'0 */6 * * *' - Every 6 hours
-'0 0 1 * *'   - First day of every month at midnight
+'0 2 * * *'     - Every day at 2:00 AM
+'0 9 * * 1'     - Every Monday at 9:00 AM
+'*\/15 * * * *' - Every 15 minutes
+'0 *\/6 * * *'  - Every 6 hours
+'0 0 1 * *'     - First day of every month at midnight
 */

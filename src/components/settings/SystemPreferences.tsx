@@ -26,7 +26,7 @@ interface SystemPreference {
   name: string;
   description: string;
   type: 'boolean' | 'select' | 'number';
-  value: any;
+  value: string | number | boolean;
   options?: string[];
 }
 
@@ -98,16 +98,16 @@ const SystemPreferences: React.FC = () => {
     }
   };
 
-  const updatePreference = async (id: string, value: any) => {
+  const updatePreference = async (id: string, value: string | number | boolean) => {
     try {
       setSaving(id);
-      
-      const updatedPrefs = preferences.map(pref => 
+
+      const updatedPrefs = preferences.map(pref =>
         pref.id === id ? { ...pref, value } : pref
       );
       setPreferences(updatedPrefs);
 
-      const prefData: Record<string, any> = {};
+      const prefData: Record<string, string | number | boolean> = {};
       updatedPrefs.forEach(pref => {
         prefData[pref.id] = pref.value;
       });
@@ -148,10 +148,10 @@ const SystemPreferences: React.FC = () => {
           ...pref,
           value: getDefaultValue(pref.type)
         }));
-        
+
         setPreferences(defaultPrefs);
-        
-        const prefData: Record<string, any> = {};
+
+        const prefData: Record<string, string | number | boolean> = {};
         defaultPrefs.forEach(pref => {
           prefData[pref.id] = pref.value;
         });

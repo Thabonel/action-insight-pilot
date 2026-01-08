@@ -189,11 +189,11 @@ async function handleContentCreatorTasks(
   anthropicKey?: string
 ): Promise<unknown> {
   switch (task_type) {
-    case 'create_email_content':
-      const emailPrompt = `Create an engaging email for a ${input_data.campaign_type} campaign targeting ${input_data.target_audience}. 
-      Template style: ${input_data.template}. 
+    case 'create_email_content': {
+      const emailPrompt = `Create an engaging email for a ${input_data.campaign_type} campaign targeting ${input_data.target_audience}.
+      Template style: ${input_data.template}.
       Campaign name: ${input_data.campaign_name}.
-      
+
       Return JSON with: { "content": "email body", "subject_lines": [{"text": "subject", "score": 85}] }`;
 
       const emailContent = await callAI([
@@ -206,6 +206,7 @@ async function handleContentCreatorTasks(
       } catch {
         return { content: emailContent, subject_lines: [] };
       }
+    }
 
     default:
       throw new Error(`Unknown content creator task: ${task_type}`);
@@ -219,9 +220,9 @@ async function handleCampaignManagerTasks(
   anthropicKey?: string
 ): Promise<unknown> {
   switch (task_type) {
-    case 'generate_ab_variants':
+    case 'generate_ab_variants': {
       const abPrompt = `Generate 3 A/B test variants for this subject line: "${input_data.base_message}"
-      
+
       Return JSON with: { "variants": [{"text": "variant", "score": 85}] }`;
 
       const abContent = await callAI([
@@ -234,8 +235,9 @@ async function handleCampaignManagerTasks(
       } catch {
         return { variants: [] };
       }
+    }
 
-    case 'suggest_send_time':
+    case 'suggest_send_time': {
       const times = ['Tuesday 10:30 AM', 'Wednesday 2:00 PM', 'Thursday 9:00 AM'];
       const randomTime = times[Math.floor(Math.random() * times.length)];
       const improvement = Math.floor(Math.random() * 20) + 10;
@@ -245,6 +247,7 @@ async function handleCampaignManagerTasks(
         improvement: improvement,
         confidence: 87
       };
+    }
 
     default:
       throw new Error(`Unknown campaign manager task: ${task_type}`);
@@ -290,10 +293,10 @@ async function handleSocialMediaTasks(
   anthropicKey?: string
 ): Promise<unknown> {
   switch (task_type) {
-    case 'create_social_post':
-      const socialPrompt = `Create engaging ${input_data.platform} content about "${input_data.content_theme}" 
+    case 'create_social_post': {
+      const socialPrompt = `Create engaging ${input_data.platform} content about "${input_data.content_theme}"
       with a ${input_data.brand_voice} tone.
-      
+
       Return JSON with: { "content": "post content", "hashtags": ["tag1", "tag2"], "optimal_time": "time" }`;
 
       const socialContent = await callAI([
@@ -306,6 +309,7 @@ async function handleSocialMediaTasks(
       } catch {
         return { content: socialContent, hashtags: [], optimal_time: '10:00 AM' };
       }
+    }
 
     default:
       throw new Error(`Unknown social media task: ${task_type}`);

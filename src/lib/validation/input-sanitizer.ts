@@ -35,17 +35,18 @@ export const sanitizeHTML = (input: string): string => {
     '=': '&#61;'
   };
   
-  return input.replace(/[&<>"'`=\/]/g, (match) => htmlEntities[match] || match);
+  return input.replace(/[&<>"'`=/]/g, (match) => htmlEntities[match] || match);
 };
 
 // Validate and sanitize text input
 export const sanitizeTextInput = (input: string, maxLength: number = 500): string => {
   if (typeof input !== 'string') return '';
-  
+
   return input
     .trim()
     .substring(0, maxLength)
-    .replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001F\u007F]/g, ''); // Remove control characters
 };
 
 // Validate UUID format

@@ -25,7 +25,7 @@ export default function PublicAssessmentPage() {
   const [assessment, setAssessment] = useState<AssessmentTemplate | null>(null);
   const [currentStep, setCurrentStep] = useState<'landing' | 'questions' | 'email' | 'results'>('landing');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');

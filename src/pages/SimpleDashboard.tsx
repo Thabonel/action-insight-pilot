@@ -129,11 +129,12 @@ const SimpleDashboard: React.FC = () => {
           ? 'Your marketing campaigns are now running automatically'
           : 'All automated marketing has been paused',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error toggling autopilot:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update autopilot';
       toast({
         title: 'Failed to update autopilot',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }

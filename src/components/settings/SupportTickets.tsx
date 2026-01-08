@@ -257,7 +257,7 @@ const SupportTickets: React.FC = () => {
                     <label className="block text-sm font-medium mb-2">Status</label>
                     <Select
                       value={selectedTicket.status}
-                      onValueChange={(value) => updateTicket(selectedTicket.id, { status: value as any })}
+                      onValueChange={(value) => updateTicket(selectedTicket.id, { status: value as SupportTicket['status'] })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -275,7 +275,7 @@ const SupportTickets: React.FC = () => {
                     <label className="block text-sm font-medium mb-2">Priority</label>
                     <Select
                       value={selectedTicket.priority}
-                      onValueChange={(value) => updateTicket(selectedTicket.id, { priority: value as any })}
+                      onValueChange={(value) => updateTicket(selectedTicket.id, { priority: value as SupportTicket['priority'] })}
                     >
                       <SelectTrigger>
                         <SelectValue />
