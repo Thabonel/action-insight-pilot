@@ -6,13 +6,33 @@ import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Palette, Target, Zap, TrendingUp } from 'lucide-react';
 
+interface CreativeElement {
+  element: string;
+  performance: number;
+  usage: number;
+  color: string;
+}
+
+interface ThemeData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface PerformanceData {
+  metric: string;
+  yours: number;
+  competitor: number;
+  industry: number;
+}
+
 const CreativeAnalytics: React.FC = () => {
   const [activeView, setActiveView] = useState<'elements' | 'themes' | 'performance'>('elements');
 
   // Creative analytics data will come from database
-  const [creativeElements] = useState<any[]>([]);
-  const [themeData] = useState<any[]>([]);
-  const [performanceData] = useState<any[]>([]);
+  const [creativeElements] = useState<CreativeElement[]>([]);
+  const [themeData] = useState<ThemeData[]>([]);
+  const [performanceData] = useState<PerformanceData[]>([]);
 
   const getPerformanceColor = (value: number, baseline: number) => {
     if (value > baseline * 1.1) return 'text-green-600';

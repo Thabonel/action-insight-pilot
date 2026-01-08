@@ -19,7 +19,7 @@ export class WorkflowMethods extends BaseApiClient {
     throw new Error('delete not implemented - use Supabase client directly');
   }
 
-  async execute(id: string, input?: any): Promise<ApiResponse<any>> {
+  async execute(id: string, input?: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('execute not implemented - use Supabase client directly');
   }
 }

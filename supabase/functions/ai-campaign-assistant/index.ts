@@ -154,11 +154,11 @@ Create detailed buyer personas. Return them as a JSON array of objects with the 
       });
     }
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in ai-campaign-assistant function:', error);
     console.error('Error stack:', error.stack);
 
-    const errorMessage = error.message || 'An error occurred generating campaign content';
+    const errorMessage = error instanceof Error ? error.message : String(error) || 'An error occurred generating campaign content';
     const isConfigError = errorMessage.includes('API key') || errorMessage.includes('configured');
 
     return new Response(JSON.stringify({

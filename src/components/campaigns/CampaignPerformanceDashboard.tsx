@@ -5,6 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Target, Calendar, DollarSign } from 'lucide-react';
 
+interface CampaignMetrics {
+  conversion_rate?: number;
+  reach?: number;
+  impressions?: number;
+  clicks?: number;
+  cost_per_acquisition?: number;
+  return_on_investment?: number;
+}
+
 interface Campaign {
   id: string;
   name: string;
@@ -14,8 +23,33 @@ interface Campaign {
   type?: 'social_media' | 'email' | 'content' | 'paid_ads' | 'seo' | 'other';
   budget_allocated?: number;
   budget_spent?: number;
-  metrics?: any;
+  metrics?: CampaignMetrics;
   channel: string;
+}
+
+interface ChartDataPoint {
+  name: string;
+  fullName: string;
+  reach: number;
+  engagement: number;
+  conversions: number;
+  cost: number;
+  clicks: number;
+  roi: number;
+}
+
+interface TrendDataPoint {
+  date: string;
+  performance: number;
+  campaigns: number;
+  roi: number;
+  conversions: number;
+}
+
+interface ChannelData {
+  name: string;
+  value: number;
+  campaigns: number;
 }
 
 interface CampaignPerformanceDashboardProps {
@@ -26,7 +60,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const CampaignPerformanceDashboard: React.FC<CampaignPerformanceDashboardProps> = ({ campaigns }) => {
   // Transform real campaign data for charts
-  const chartData = campaigns.slice(0, 5).map((campaign, index) => ({
+  const chartData: ChartDataPoint[] = campaigns.slice(0, 5).map((campaign) => ({
     name: campaign.name.length > 15 ? campaign.name.substring(0, 15) + '...' : campaign.name,
     fullName: campaign.name,
     reach: Math.floor(Math.random() * 50000) + 10000,
@@ -45,7 +79,7 @@ const CampaignPerformanceDashboard: React.FC<CampaignPerformanceDashboardProps> 
     (chartData.reduce((sum, campaign) => sum + campaign.engagement, 0) / chartData.length).toFixed(1) : '0.0';
 
   // Performance trend data based on campaign creation dates
-  const trendData = campaigns.slice(-7).map((campaign, index) => {
+  const trendData: TrendDataPoint[] = campaigns.slice(-7).map((campaign, index) => {
     const date = new Date(campaign.created_at);
     return {
       date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -65,9 +99,9 @@ const CampaignPerformanceDashboard: React.FC<CampaignPerformanceDashboardProps> 
     acc[channel].value += campaign.budget_spent || Math.floor(Math.random() * 5000) + 1000;
     acc[channel].campaigns += 1;
     return acc;
-  }, {} as Record<string, { name: string; value: number; campaigns: number }>);
+  }, {} as Record<string, ChannelData>);
 
-  const channelChartData = Object.values(channelData);
+  const channelChartData: ChannelData[] = Object.values(channelData);
 
   // Top performing campaigns
   const topCampaigns = chartData

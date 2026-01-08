@@ -8,8 +8,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { Search, Sparkles, Target, TrendingUp, Filter } from 'lucide-react';
 
+interface SearchCriteria {
+  industry: string;
+  companySize: string;
+  location: string;
+  jobTitle: string;
+  technology: string;
+}
+
+interface LeadSearchResult {
+  id: number;
+  name: string;
+  company: string;
+  title: string;
+  score: number;
+  conversionProbability: number;
+  source: string;
+  matchReason: string;
+}
+
+interface AISuggestion {
+  criteria: string;
+  conversionRate: string;
+  reasoning: string;
+}
+
 const AdaptiveLeadSearch: React.FC = () => {
-  const [searchCriteria, setSearchCriteria] = useState({
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     industry: '',
     companySize: '',
     location: '',
@@ -17,7 +42,7 @@ const AdaptiveLeadSearch: React.FC = () => {
     technology: ''
   });
 
-  const [searchResults, setSearchResults] = useState([
+  const [searchResults, setSearchResults] = useState<LeadSearchResult[]>([
     {
       id: 1,
       name: 'John Smith',
@@ -50,7 +75,7 @@ const AdaptiveLeadSearch: React.FC = () => {
     }
   ]);
 
-  const [aiSuggestions] = useState([
+  const [aiSuggestions] = useState<AISuggestion[]>([
     {
       criteria: 'SaaS companies, 50-200 employees, Marketing VP/Director',
       conversionRate: '34%',
@@ -75,7 +100,7 @@ const AdaptiveLeadSearch: React.FC = () => {
     });
   };
 
-  const handleAISuggestionClick = (suggestion: any) => {
+  const handleAISuggestionClick = (suggestion: AISuggestion) => {
     behaviorTracker.trackAction('feature_use', 'ai_search_suggestion', {
       criteria: suggestion.criteria,
       expectedConversionRate: suggestion.conversionRate

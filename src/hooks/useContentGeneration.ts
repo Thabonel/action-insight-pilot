@@ -42,10 +42,10 @@ export function useContentGeneration() {
         key_messages: brief.key_messages
       };
 
-      const response = await apiClient.generateContent(fullBrief) as ApiResponse<any>;
+      const response = await apiClient.generateContent(fullBrief) as ApiResponse<GeneratedContent>;
 
       if (response.success && response.data) {
-        const responseData = response.data as any;
+        const responseData = response.data;
         
         const generatedContent: GeneratedContent = {
           id: responseData.id || '',

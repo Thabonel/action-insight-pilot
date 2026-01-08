@@ -131,7 +131,7 @@ export class SocialPlatformsService {
     return data;
   }
 
-  async testPlatformConnection(platform: string): Promise<{ success: boolean; data: any }> {
+  async testPlatformConnection(platform: string): Promise<{ success: boolean; data: Record<string, unknown> }> {
     try {
       // Get the current session to validate authentication
       const { data: { session } } = await supabase.auth.getSession();

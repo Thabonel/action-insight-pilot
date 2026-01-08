@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { 
-  Play, 
-  Pause, 
-  Settings, 
-  Search, 
-  Mail, 
-  Phone, 
+import {
+  Play,
+  Pause,
+  Settings,
+  Search,
+  Mail,
+  Phone,
   Calendar,
   RefreshCw,
   Target,
@@ -21,8 +21,36 @@ import {
   Zap
 } from 'lucide-react';
 
+interface Workflow {
+  id: number;
+  name: string;
+  description: string;
+  status: 'active' | 'paused';
+  lastRun: string;
+  results: number;
+  successRate: number;
+  trigger: string;
+  action: string;
+}
+
+interface QuickAction {
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  confidence: number;
+  estimatedResults: number;
+  action: string;
+}
+
+interface SearchCriteria {
+  minScore: string;
+  industry: string;
+  companySize: string;
+  source: string;
+}
+
 const LeadWorkflowAutomation: React.FC = () => {
-  const [activeWorkflows] = useState([
+  const [activeWorkflows] = useState<Workflow[]>([
     {
       id: 1,
       name: 'Find Similar High Converters',
@@ -69,7 +97,7 @@ const LeadWorkflowAutomation: React.FC = () => {
     }
   ]);
 
-  const [quickActions] = useState([
+  const [quickActions] = useState<QuickAction[]>([
     {
       label: 'Find 50 more leads like best converters',
       description: 'Search for leads matching your top 10 converting profiles',
@@ -112,14 +140,14 @@ const LeadWorkflowAutomation: React.FC = () => {
     }
   ]);
 
-  const [searchCriteria, setSearchCriteria] = useState({
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     minScore: '85',
     industry: '',
     companySize: '',
     source: ''
   });
 
-  const handleWorkflowToggle = (workflowId: number, currentStatus: string) => {
+  const handleWorkflowToggle = (workflowId: number, currentStatus: Workflow['status']) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     behaviorTracker.trackAction('feature_use', 'workflow_toggle', {
       workflowId,
@@ -128,7 +156,7 @@ const LeadWorkflowAutomation: React.FC = () => {
     });
   };
 
-  const handleQuickAction = (action: any) => {
+  const handleQuickAction = (action: QuickAction) => {
     behaviorTracker.trackAction('feature_use', 'lead_automation_quick_action', {
       action: action.action,
       confidence: action.confidence,
@@ -143,11 +171,11 @@ const LeadWorkflowAutomation: React.FC = () => {
     });
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: Workflow['status']) => {
     return status === 'active' ? 'bg-green-500' : 'bg-yellow-500';
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: Workflow['status']) => {
     return status === 'active' ? 'Active' : 'Paused';
   };
 

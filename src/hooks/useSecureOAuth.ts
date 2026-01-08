@@ -5,13 +5,13 @@ import { useSecurityContext } from '@/contexts/SecurityContext';
 interface OAuthProvider {
   provider: 'google' | 'facebook' | 'twitter' | 'linkedin_oidc' | 'github';
   scopes?: string[];
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 interface SecureOAuthResult {
   success: boolean;
   error?: string;
-  session?: any;
+  session?: Record<string, unknown>;
 }
 
 export const useSecureOAuth = () => {

@@ -32,7 +32,7 @@ serve(async (req) => {
       .limit(20);
 
     let historyText = (history || [])
-      .map((m: any) => `${m.role}: ${m.content}`)
+      .map((m: Record<string, unknown>) => `${m.role}: ${m.content}`)
       .join('\n');
 
     if (estimateTokenCount(historyText) > 1500) {
@@ -51,12 +51,12 @@ serve(async (req) => {
 
     const knowledgeContext = chunks && chunks.length
       ? '\n\nRelevant knowledge:\n' +
-        chunks.map((c: any) => `- ${c.chunk_content}`).join('\n')
+        chunks.map((c: Record<string, unknown>) => `- ${c.chunk_content}`).join('\n')
       : '';
 
     const messages = [
       { role: 'system', content: `You are a helpful marketing assistant.${knowledgeContext}` },
-      ...(history || []).map((m: any) => ({ role: m.role, content: m.content })),
+      ...(history || []).map((m: Record<string, unknown>) => ({ role: m.role, content: m.content })),
       { role: 'user', content: message },
     ];
 
@@ -79,7 +79,7 @@ serve(async (req) => {
     });
 
     if (chunks && chunks.length) {
-      const refs = chunks.map((c: any) => ({
+      const refs = chunks.map((c: Record<string, unknown>) => ({
         conversation_id: conversationId,
         chunk_id: c.chunk_id,
       }));
@@ -90,10 +90,10 @@ serve(async (req) => {
       JSON.stringify({ response: aiResponse }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('chat-ai error:', error);
     // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI')
+    const publicError = error instanceof Error ? error.message : String(error)?.includes('API key') || error instanceof Error ? error.message : String(error)?.includes('OPENAI')
       ? 'Configuration error - please contact support'
       : 'An error occurred processing your message';
     return new Response(
@@ -103,7 +103,7 @@ serve(async (req) => {
   }
 });
 
-async function callOpenAI(messages: any[], apiKey: string): Promise<string> {
+async function callOpenAI(messages: Record<string, unknown>[], apiKey: string): Promise<string> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {

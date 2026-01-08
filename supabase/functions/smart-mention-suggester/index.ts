@@ -183,7 +183,7 @@ Return ONLY valid JSON array. Example:
     )
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to generate suggestions'
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Failed to generate suggestions'
     console.error('[Smart Suggester] Error:', error)
     return new Response(
       JSON.stringify({

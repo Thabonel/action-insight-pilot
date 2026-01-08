@@ -8,7 +8,7 @@ export class WorkflowService {
     return this.httpClient.request('/api/workflow/list');
   }
 
-  async createWorkflow(workflowData: any) {
+  async createWorkflow(workflowData: Record<string, unknown>) {
     return this.httpClient.request('/api/workflow/create', {
       method: 'POST',
       body: JSON.stringify(workflowData),

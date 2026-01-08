@@ -13,7 +13,7 @@ interface ModelConfig {
   capabilities: Record<string, boolean>;
   pricing: Record<string, number>;
   context_window: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 const modelCache = new Map<string, { data: ModelConfig; expires: number }>();
@@ -135,7 +135,7 @@ serve(async (req) => {
         throw error;
       }
 
-      const providers: Record<string, any> = {};
+      const providers: Record<string, unknown> = {};
       for (const config of configs || []) {
         if (!providers[config.provider]) {
           providers[config.provider] = {};
@@ -288,9 +288,10 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
         );
-      } catch (error) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Validation failed';
         return new Response(
-          JSON.stringify({ success: false, valid: false, error: error.message }),
+          JSON.stringify({ success: false, valid: false, error: errorMessage }),
           {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
@@ -314,11 +315,13 @@ serve(async (req) => {
         status: 404,
       }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in ai-model-config:', error);
 
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'An unexpected error occurred';
+
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: errorMessage }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,

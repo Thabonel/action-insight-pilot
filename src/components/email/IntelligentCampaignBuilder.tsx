@@ -54,8 +54,8 @@ const IntelligentCampaignBuilder: React.FC = () => {
     try {
       console.log('Generating email campaign with brief:', brief);
       const briefText = `Subject: ${brief.subject}, Audience: ${brief.audience}, Goal: ${brief.goal}, Tone: ${brief.tone}, Key Points: ${brief.keyPoints.join(', ')}`;
-      const result = await apiClient.generateEmailContent(briefText) as ApiResponse<any>;
-      
+      const result = await apiClient.generateEmailContent(briefText) as ApiResponse<{ content?: string }>;
+
       if (result.success && result.data) {
         setGeneratedContent(result.data.content || 'Email content generated successfully');
         toast({
@@ -71,9 +71,10 @@ const IntelligentCampaignBuilder: React.FC = () => {
       }
     } catch (error) {
       console.error('Campaign generation error:', error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

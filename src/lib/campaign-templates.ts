@@ -258,9 +258,9 @@ export function findRelevantTemplates(userInput: string, limit: number = 3): Cam
     .map(item => item.template);
 }
 
-export function applyCampaignTemplate(template: CampaignTemplate, userContext: any = {}) {
+export function applyCampaignTemplate(template: CampaignTemplate, userContext: Record<string, unknown> = {}) {
   return {
-    name: userContext.name || `${template.name} Campaign`,
+    name: userContext.name as string || `${template.name} Campaign`,
     type: template.template.type,
     channel: template.template.channel,
     description: userContext.description || template.description,

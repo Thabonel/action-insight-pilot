@@ -136,7 +136,7 @@ serve(async (req) => {
 
       let errorMessage = 'Failed to create Instagram media container'
       if (errorData.error?.message) {
-        errorMessage = errorData.error.message
+        errorMessage = errorData.error instanceof Error ? error.message : String(error)
       }
 
       return new Response(
@@ -286,12 +286,12 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Instagram Publish] Unexpected error:', error)
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'An unexpected error occurred',
+        error: error instanceof Error ? error.message : String(error) || 'An unexpected error occurred',
         code: 'INTERNAL_ERROR'
       }),
       {

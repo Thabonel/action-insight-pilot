@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 interface UseErrorHandlerReturn {
   error: string | null;
   loading: boolean;
-  handleError: (error: any) => void;
+  handleError: (error: unknown) => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
   withErrorHandling: <T>(fn: () => Promise<T>) => Promise<T | null>;
@@ -16,7 +16,7 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleError = (error: any) => {
+  const handleError = (error: unknown) => {
     let errorMessage = 'An unexpected error occurred';
     
     if (typeof error === 'string') {

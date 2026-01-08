@@ -68,7 +68,7 @@ async function searchCompetitorMentionsTwitter(
 
       const usersMap = new Map()
       if (data.includes?.users) {
-        data.includes.users.forEach((user: any) => {
+        data.includes.users.forEach((user: Record<string, unknown>) => {
           usersMap.set(user.id, user.username)
         })
       }
@@ -90,7 +90,7 @@ async function searchCompetitorMentionsTwitter(
           platform: 'twitter'
         })
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`[Twitter] Error searching competitor ${handle}:`, error)
     }
   }
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
           continue
         }
 
-        const competitorHandles = competitors.map((c: any) => c.mention_handle)
+        const competitorHandles = competitors.map((c: Record<string, unknown>) => c.mention_handle)
         console.log(`[Competitor Tracker] Tracking ${competitorHandles.length} competitors for user ${conn.user_id}`)
 
         const accessToken = decryptToken(conn.access_token_encrypted)
@@ -211,10 +211,10 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[Competitor Tracker] Error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -36,7 +36,7 @@ export const useChatLogic = ({ onChatUpdate }: { onChatUpdate?: (chatHistory: Ch
     };
 
     try {
-      const result = await apiClient.queryAgent(chatMessage, { conversationId }) as ApiResponse<any>;
+      const result = await apiClient.queryAgent(chatMessage, { conversationId }) as ApiResponse<{ message: string; conversationId?: string; campaignCreated?: boolean }>;
 
       if (result.success) {
         const responseData = result.data || { message: 'No response received' };
@@ -95,7 +95,7 @@ export const useChatLogic = ({ onChatUpdate }: { onChatUpdate?: (chatHistory: Ch
   const sendMessage = async (message: string, agentType: string) => {
     setLoading(true);
     try {
-      const result = await apiClient.queryAgent(message) as ApiResponse<any>;
+      const result = await apiClient.queryAgent(message) as ApiResponse<{ message: string }>;
       
       if (result.success) {
         const responseData = result.data || { message: 'No response received' };
@@ -123,10 +123,10 @@ export const useChatLogic = ({ onChatUpdate }: { onChatUpdate?: (chatHistory: Ch
     }
   };
 
-  const sendCampaignMessage = async (message: string, campaigns: any[]) => {
+  const sendCampaignMessage = async (message: string, campaigns: Record<string, unknown>[]) => {
     setLoading(true);
     try {
-      const result = await apiClient.callGeneralCampaignAgent(message, campaigns) as ApiResponse<any>;
+      const result = await apiClient.callGeneralCampaignAgent(message, campaigns) as ApiResponse<{ message: string }>;
       
       if (result.success) {
         const responseData = result.data || { message: 'No response received' };
@@ -154,10 +154,10 @@ export const useChatLogic = ({ onChatUpdate }: { onChatUpdate?: (chatHistory: Ch
     }
   };
 
-  const processQuery = async (query: string, context?: any) => {
+  const processQuery = async (query: string, context?: Record<string, unknown>) => {
     setLoading(true);
     try {
-      const result = await apiClient.queryAgent(query, context) as ApiResponse<any>;
+      const result = await apiClient.queryAgent(query, context) as ApiResponse<{ message: string }>;
       
       if (result.success) {
         return {

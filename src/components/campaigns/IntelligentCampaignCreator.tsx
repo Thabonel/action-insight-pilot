@@ -130,9 +130,9 @@ const IntelligentCampaignCreator: React.FC = () => {
       };
       
       console.log('Sending to API:', campaignData);
-      
-      const result = await apiClient.createCampaign(campaignData) as ApiResponse<any>;
-      
+
+      const result = await apiClient.createCampaign(campaignData) as ApiResponse<Record<string, unknown>>;
+
       console.log('API Response:', result);
       
       if (result.success && result.data) {

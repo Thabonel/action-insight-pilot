@@ -28,6 +28,19 @@ export interface AnalyticsData {
   last_updated: string;
 }
 
+export interface SystemStats {
+  totalCampaigns: number;
+  activeCampaigns: number;
+  totalLeads: number;
+  newLeadsThisMonth: number;
+}
+
+export interface ExportReport {
+  format: string;
+  exported: boolean;
+  downloadUrl: string;
+}
+
 export class AnalyticsService {
   constructor(private httpClient: HttpClient) {}
 
@@ -48,17 +61,17 @@ export class AnalyticsService {
 
   async getInsights(): Promise<ApiResponse<AnalyticsInsight[]>> {
     try {
-      const response = await this.httpClient.request<any>('/api/analytics/insights');
-      
+      const response = await this.httpClient.request<unknown>('/api/analytics/insights');
+
       if (response && typeof response === 'object' && 'success' in response && 'data' in response) {
         return response as ApiResponse<AnalyticsInsight[]>;
       }
-      
+
       return {
         success: true,
         data: Array.isArray(response) ? response : []
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
         data: [],
@@ -67,13 +80,13 @@ export class AnalyticsService {
     }
   }
 
-  async getAnalyticsOverview(): Promise<ApiResponse<any>> {
+  async getAnalyticsOverview(): Promise<ApiResponse<AnalyticsData>> {
     return this.getAnalytics();
   }
 
-  async getSystemStats(): Promise<ApiResponse<any>> {
+  async getSystemStats(): Promise<ApiResponse<SystemStats>> {
     try {
-      const data = {
+      const data: SystemStats = {
         totalCampaigns: 50,
         activeCampaigns: 12,
         totalLeads: 1500,
@@ -83,7 +96,7 @@ export class AnalyticsService {
         success: true,
         data,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get system stats',
@@ -91,9 +104,9 @@ export class AnalyticsService {
     }
   }
 
-  async exportAnalyticsReport(format: string): Promise<ApiResponse<any>> {
+  async exportAnalyticsReport(format: string): Promise<ApiResponse<ExportReport>> {
     try {
-      const data = {
+      const data: ExportReport = {
         format,
         exported: true,
         downloadUrl: '/reports/analytics.pdf'
@@ -102,7 +115,7 @@ export class AnalyticsService {
         success: true,
         data,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to export analytics report',

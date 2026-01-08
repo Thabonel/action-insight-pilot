@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,12 +60,13 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in ai-autocomplete:', error);
-    // Return generic error to client, log full error server-side
-    const publicError = error.message?.includes('API key') || error.message?.includes('OPENAI') 
-      ? 'Configuration error - please contact support'
-      : 'An error occurred generating suggestions';
+
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'An error occurred generating suggestions';
+    const isConfigError = errorMessage.includes('API key') || errorMessage.includes('OPENAI');
+    const publicError = isConfigError ? 'Configuration error - please contact support' : errorMessage;
+
     return new Response(JSON.stringify({ error: publicError }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -73,14 +74,20 @@ serve(async (req) => {
   }
 });
 
+interface Campaign {
+  [key: string]: unknown;
+  content?: Record<string, unknown>;
+  settings?: Record<string, unknown>;
+}
+
 async function generateSmartSuggestions(
   field: string,
   currentValue: string,
-  context: any,
+  context: Record<string, unknown>,
   userId: string,
-  userHistory: any[],
-  patterns: any[],
-  successfulFeedback: any[]
+  userHistory: Campaign[],
+  patterns: unknown[],
+  successfulFeedback: Array<{ original_suggestion?: Record<string, unknown> }>
 ): Promise<string[]> {
 
   // Extract relevant historical data
@@ -122,35 +129,40 @@ async function generateSmartSuggestions(
   }
 }
 
-function extractHistoricalValues(field: string, userHistory: any[]): string[] {
+function extractHistoricalValues(field: string, userHistory: Campaign[]): string[] {
   const values: string[] = [];
   
   userHistory.forEach(campaign => {
-    if (campaign[field]) {
-      values.push(campaign[field]);
+    const fieldValue = campaign[field];
+    if (typeof fieldValue === 'string') {
+      values.push(fieldValue);
     }
-    
-    // Also check in nested objects
-    if (campaign.content && campaign.content[field]) {
-      values.push(campaign.content[field]);
+
+    if (campaign.content && typeof campaign.content === 'object') {
+      const contentValue = campaign.content[field];
+      if (typeof contentValue === 'string') {
+        values.push(contentValue);
+      }
     }
-    
-    if (campaign.settings && campaign.settings[field]) {
-      values.push(campaign.settings[field]);
+
+    if (campaign.settings && typeof campaign.settings === 'object') {
+      const settingsValue = campaign.settings[field];
+      if (typeof settingsValue === 'string') {
+        values.push(settingsValue);
+      }
     }
   });
-  
-  // Remove duplicates and return unique values
+
   return [...new Set(values)].filter(v => v && v.length > 2);
 }
 
-function extractSuccessfulPatterns(field: string, successfulFeedback: any[]): any[] {
+function extractSuccessfulPatterns(field: string, successfulFeedback: Array<{ original_suggestion?: Record<string, unknown> }>): unknown[] {
   return successfulFeedback
     .filter(f => f.original_suggestion && f.original_suggestion[field])
     .map(f => f.original_suggestion[field]);
 }
 
-function generateCampaignNameSuggestions(currentValue: string, context: any, history: string[]): string[] {
+function generateCampaignNameSuggestions(currentValue: string, context: Record<string, unknown>, history: string[]): string[] {
   const suggestions: string[] = [];
   
   // Add relevant historical names
@@ -192,7 +204,7 @@ function generateCampaignNameSuggestions(currentValue: string, context: any, his
   return suggestions.slice(0, 5);
 }
 
-function generateDescriptionSuggestions(currentValue: string, context: any, history: string[]): string[] {
+function generateDescriptionSuggestions(currentValue: string, context: Record<string, unknown>, history: string[]): string[] {
   const suggestions: string[] = [];
   
   // Template-based suggestions
@@ -217,7 +229,7 @@ function generateDescriptionSuggestions(currentValue: string, context: any, hist
   return suggestions.slice(0, 5);
 }
 
-function generateAudienceSuggestions(currentValue: string, context: any, history: string[]): string[] {
+function generateAudienceSuggestions(currentValue: string, context: Record<string, unknown>, history: string[]): string[] {
   const suggestions: string[] = [];
   
   // Industry-specific audiences
@@ -244,7 +256,7 @@ function generateAudienceSuggestions(currentValue: string, context: any, history
   return suggestions.slice(0, 5);
 }
 
-function generateObjectiveSuggestions(currentValue: string, context: any, history: string[]): string[] {
+function generateObjectiveSuggestions(currentValue: string, context: Record<string, unknown>, history: string[]): string[] {
   const suggestions = [
     'Increase brand awareness and recognition',
     'Generate qualified leads and prospects',
@@ -264,7 +276,7 @@ function generateObjectiveSuggestions(currentValue: string, context: any, histor
   return suggestions.slice(0, 5);
 }
 
-function generateBudgetSuggestions(currentValue: string, context: any, history: string[]): string[] {
+function generateBudgetSuggestions(currentValue: string, context: Record<string, unknown>, history: string[]): string[] {
   const suggestions: string[] = [];
   
   // Common budget ranges
@@ -283,7 +295,7 @@ function generateBudgetSuggestions(currentValue: string, context: any, history: 
   return suggestions.slice(0, 5);
 }
 
-function generateChannelSuggestions(currentValue: string, context: any, history: string[]): string[] {
+function generateChannelSuggestions(currentValue: string, context: Record<string, unknown>, history: string[]): string[] {
   const suggestions = [
     'Email marketing',
     'Social media (LinkedIn, Twitter)',
@@ -300,12 +312,12 @@ function generateChannelSuggestions(currentValue: string, context: any, history:
   return suggestions.slice(0, 5);
 }
 
-function generateGenericSuggestions(currentValue: string, context: any, history: string[]): string[] {
+function generateGenericSuggestions(currentValue: string, context: Record<string, unknown>, history: string[]): string[] {
   // Return most relevant historical values
   return history.slice(0, 5);
 }
 
-async function generateMentionSuggestions(currentValue: string, context: any, userId: string): Promise<string[]> {
+async function generateMentionSuggestions(currentValue: string, context: Record<string, unknown>, userId: string): Promise<string[]> {
   const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
   const platform = context?.platform || 'twitter';
 
@@ -323,14 +335,14 @@ async function generateMentionSuggestions(currentValue: string, context: any, us
   }
 
   // Filter by current input
-  const filtered = mentions.filter(m =>
+  const filtered = mentions.filter((m: { mention_handle: string }) =>
     m.mention_handle.toLowerCase().includes(currentValue.toLowerCase())
   );
 
-  return filtered.map(m => `@${m.mention_handle}`).slice(0, 5);
+  return filtered.map((m: { mention_handle: string }) => `@${m.mention_handle}`).slice(0, 5);
 }
 
-async function generateHashtagSuggestions(currentValue: string, context: any, userId: string): Promise<string[]> {
+async function generateHashtagSuggestions(currentValue: string, context: Record<string, unknown>, userId: string): Promise<string[]> {
   const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
   const platform = context?.platform || 'twitter';
   const postContent = context?.postContent || '';
@@ -344,14 +356,13 @@ async function generateHashtagSuggestions(currentValue: string, context: any, us
     .order('avg_engagement_rate', { ascending: false, nullsLast: true })
     .limit(5);
 
-  const historicalHashtags = historical?.map(h => h.hashtag) || [];
+  const historicalHashtags = historical?.map((h: { hashtag: string }) => h.hashtag) || [];
 
-  // 2. Generate AI hashtags using Claude API if postContent is provided
   let aiHashtags: string[] = [];
-  if (postContent && postContent.length > 10) {
+  if (typeof postContent === 'string' && postContent.length > 10) {
     try {
       aiHashtags = await generateAIHashtags(postContent, platform, userId, supabase);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[Hashtag AI] Error generating AI hashtags:', error);
     }
   }
@@ -374,7 +385,7 @@ async function generateAIHashtags(
   postContent: string,
   platform: string,
   userId: string,
-  supabase: any
+  supabase: SupabaseClient
 ): Promise<string[]> {
   // Get user's Claude API key
   const { data: secrets, error: secretError } = await supabase

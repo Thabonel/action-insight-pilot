@@ -189,7 +189,7 @@ Format as JSON:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     // Log detailed error server-side only
     console.error('Error in channel-strategy-agent:', error);
     

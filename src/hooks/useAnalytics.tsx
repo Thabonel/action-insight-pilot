@@ -3,6 +3,14 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 
+interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  score?: number;
+  [key: string]: unknown;
+}
+
 interface AnalyticsData {
   totalUsers: number;
   activeFeatures: string[];
@@ -16,7 +24,7 @@ interface AnalyticsData {
     uptime: number;
     lastCheck: Date;
   };
-  leads?: any[];
+  leads?: Lead[];
 }
 
 export const useAnalytics = () => {
@@ -31,8 +39,8 @@ export const useAnalytics = () => {
 
       // Fetch both analytics and leads data
       const [analyticsResult, leadsResult] = await Promise.all([
-        apiClient.getAnalytics() as Promise<ApiResponse<any>>,
-        apiClient.getLeads() as Promise<ApiResponse<any>>
+        apiClient.getAnalytics() as Promise<ApiResponse<Record<string, unknown>>>,
+        apiClient.getLeads() as Promise<ApiResponse<Lead[]>>
       ]);
 
       if (analyticsResult.success) {

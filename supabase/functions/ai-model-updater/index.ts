@@ -17,7 +17,7 @@ interface ModelInfo {
   };
   max_tokens?: number;
   context_window?: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 serve(async (req) => {
@@ -30,7 +30,7 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  const errors: any[] = [];
+  const errors: Record<string, unknown>[] = [];
   const providersChecked: string[] = [];
   const discoveredModels: ModelInfo[] = [];
 
@@ -44,9 +44,10 @@ serve(async (req) => {
         discoveredModels.push(...openaiModels);
         providersChecked.push('openai');
         console.log(`Discovered ${openaiModels.length} OpenAI models`);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error discovering OpenAI models:', error);
-        errors.push({ provider: 'openai', error: error.message });
+        const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
+        errors.push({ provider: 'openai', error: errorMessage });
       }
     }
 
@@ -57,9 +58,10 @@ serve(async (req) => {
         discoveredModels.push(...anthropicModels);
         providersChecked.push('anthropic');
         console.log(`Discovered ${anthropicModels.length} Anthropic models`);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error discovering Anthropic models:', error);
-        errors.push({ provider: 'anthropic', error: error.message });
+        const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
+        errors.push({ provider: 'anthropic', error: errorMessage });
       }
     }
 
@@ -70,9 +72,10 @@ serve(async (req) => {
         discoveredModels.push(...geminiModels);
         providersChecked.push('google');
         console.log(`Discovered ${geminiModels.length} Google models`);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error discovering Google models:', error);
-        errors.push({ provider: 'google', error: error.message });
+        const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
+        errors.push({ provider: 'google', error: errorMessage });
       }
     }
 
@@ -83,9 +86,10 @@ serve(async (req) => {
         discoveredModels.push(...mistralModels);
         providersChecked.push('mistral');
         console.log(`Discovered ${mistralModels.length} Mistral models`);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error discovering Mistral models:', error);
-        errors.push({ provider: 'mistral', error: error.message });
+        const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
+        errors.push({ provider: 'mistral', error: errorMessage });
       }
     }
 
@@ -193,22 +197,25 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Fatal error in AI model updater:', error);
 
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     const executionTime = Date.now() - startTime;
+
     await supabase.from('ai_model_update_logs').insert({
       models_discovered: 0,
       models_added: 0,
       models_deprecated: 0,
       providers_checked: providersChecked,
-      errors: [{ error: error.message, stack: error.stack }],
+      errors: [{ error: errorMessage, stack: errorStack }],
       execution_time_ms: executionTime,
       status: 'failed',
     });
 
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: errorMessage }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
@@ -336,8 +343,9 @@ async function discoverAnthropicModels(apiKey: string): Promise<ModelInfo[]> {
           },
         });
       }
-    } catch (error) {
-      console.log(`Could not validate ${model.name}: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error';
+      console.log(`Could not validate ${model.name}: ${errorMessage}`);
     }
   }
 

@@ -1,17 +1,57 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 
+export interface ConversationalContext {
+  chatHistory?: Array<{ role: string; content: string }>;
+  previousQuery?: string;
+  isFollowUp?: boolean;
+  [key: string]: unknown;
+}
+
 export interface ConversationalQuery {
   query: string;
-  context?: any;
+  context?: ConversationalContext;
   sessionId?: string;
+}
+
+export interface ConversationalMetadata {
+  isCampaignFlow?: boolean;
+  hasBasicInfo?: boolean;
+  hasKPITargets?: boolean;
+  hasBudget?: boolean;
+  isMultiChannel?: boolean;
+  campaignTypeOptions?: Array<{
+    label: string;
+    value: string;
+    description: string;
+  }>;
+  [key: string]: unknown;
 }
 
 export interface ConversationalResponse {
   response: string;
   suggestions?: string[];
   followUp?: string[];
-  metadata?: any;
+  metadata?: ConversationalMetadata;
+}
+
+export interface CampaignData {
+  id: string;
+  name: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+export interface DashboardActivity {
+  type: string;
+  message: string;
+  timestamp: Date;
+}
+
+export interface DashboardTrends {
+  positive: number;
+  negative: number;
+  neutral: number;
 }
 
 export class ConversationalService {
@@ -19,19 +59,19 @@ export class ConversationalService {
     return 'mock-auth-token';
   }
 
-  static async fetchCampaignData(): Promise<any[]> {
+  static async fetchCampaignData(): Promise<CampaignData[]> {
     const result = await apiClient.getCampaigns();
-    return result.data || [];
+    return (result.data as CampaignData[]) || [];
   }
 
-  static async callDailyFocusAgent(userQuery: string): Promise<ApiResponse<any>> {
+  static async callDailyFocusAgent(userQuery: string): Promise<ApiResponse<{ response: string }>> {
     return {
       success: true,
       data: { response: `Daily focus response to: ${userQuery}` }
     };
   }
 
-  static async callGeneralCampaignAgent(userQuery: string): Promise<ApiResponse<any>> {
+  static async callGeneralCampaignAgent(userQuery: string): Promise<ApiResponse<{ response: string }>> {
     return {
       success: true,
       data: { response: `Campaign agent response to: ${userQuery}` }
@@ -70,7 +110,7 @@ export class ConversationalService {
     }
   }
 
-  async generateSuggestions(context: any): Promise<string[]> {
+  async generateSuggestions(_context: ConversationalContext): Promise<string[]> {
     return [
       'How can I improve my campaign performance?',
       'What are my best performing content pieces?',
@@ -91,7 +131,12 @@ export class ConversationalService {
     });
   }
 
-  async getDashboardInsights(): Promise<ApiResponse<any>> {
+  async getDashboardInsights(): Promise<ApiResponse<{
+    totalActions: number;
+    recentActivities: DashboardActivity[];
+    suggestions: string[];
+    trends: DashboardTrends;
+  }>> {
     return {
       success: true,
       data: {
@@ -110,13 +155,13 @@ export class ConversationalService {
     };
   }
 
-  async generateResponse(query: string, context?: any): Promise<ApiResponse<ConversationalResponse>> {
+  async generateResponse(query: string, context?: ConversationalContext): Promise<ApiResponse<ConversationalResponse>> {
     // Enhanced response generation with KPI target questions
     const response = await this.generateCampaignResponse(query, context);
     return response;
   }
 
-  async generateCampaignResponse(query: string, context?: any): Promise<ApiResponse<ConversationalResponse>> {
+  async generateCampaignResponse(query: string, context?: ConversationalContext): Promise<ApiResponse<ConversationalResponse>> {
     const lowerQuery = query.toLowerCase();
     
     // Check if this is campaign creation flow
@@ -130,10 +175,10 @@ export class ConversationalService {
     return this.processQuery({ query, context });
   }
 
-  async handleCampaignFlow(query: string, context?: any): Promise<ApiResponse<ConversationalResponse>> {
+  async handleCampaignFlow(query: string, context?: ConversationalContext): Promise<ApiResponse<ConversationalResponse>> {
     const lowerQuery = query.toLowerCase();
     const chatHistory = context?.chatHistory || [];
-    
+
     // Determine what information we have and what we need
     const hasBasicInfo = this.hasBasicCampaignInfo(chatHistory);
     const hasKPITargets = this.hasKPITargets(chatHistory);
@@ -322,9 +367,9 @@ Ready to create the campaign? I'll generate a complete campaign plan that includ
     };
   }
 
-  private detectMultiChannel(chatHistory: any[]): boolean {
-    const text = chatHistory.map((msg: any) => msg.content).join(' ').toLowerCase();
-    return text.includes('multi-channel') || 
+  private detectMultiChannel(chatHistory: Array<{ role: string; content: string }>): boolean {
+    const text = chatHistory.map(msg => msg.content).join(' ').toLowerCase();
+    return text.includes('multi-channel') ||
            text.includes('multiple channels') ||
            text.includes('cross-channel') ||
            (text.includes('email') && text.includes('social')) ||
@@ -332,23 +377,23 @@ Ready to create the campaign? I'll generate a complete campaign plan that includ
            (text.split('campaign').length > 2); // Multiple mentions of different campaign types
   }
 
-  private hasBasicCampaignInfo(chatHistory: any[]): boolean {
-    const text = chatHistory.map((msg: any) => msg.content).join(' ').toLowerCase();
+  private hasBasicCampaignInfo(chatHistory: Array<{ role: string; content: string }>): boolean {
+    const text = chatHistory.map(msg => msg.content).join(' ').toLowerCase();
     return text.includes('campaign') && (
       text.includes('email') || text.includes('social') || text.includes('launch') ||
       text.includes('marketing') || text.includes('promotion') || text.includes('brand')
     );
   }
 
-  private hasKPITargets(chatHistory: any[]): boolean {
-    const text = chatHistory.map((msg: any) => msg.content).join(' ').toLowerCase();
+  private hasKPITargets(chatHistory: Array<{ role: string; content: string }>): boolean {
+    const text = chatHistory.map(msg => msg.content).join(' ').toLowerCase();
     return text.includes('leads') || text.includes('conversion') || text.includes('engagement') ||
            text.includes('open rate') || text.includes('click rate') || text.includes('kpi') ||
            /\d+\s*(leads?|conversions?|%|percent)/.test(text);
   }
 
-  private hasBudgetInfo(chatHistory: any[]): boolean {
-    const text = chatHistory.map((msg: any) => msg.content).join(' ').toLowerCase();
+  private hasBudgetInfo(chatHistory: Array<{ role: string; content: string }>): boolean {
+    const text = chatHistory.map(msg => msg.content).join(' ').toLowerCase();
     return text.includes('budget') || text.includes('spend') || /\$\d+/.test(text);
   }
 }

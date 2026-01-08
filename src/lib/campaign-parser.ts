@@ -13,12 +13,12 @@ export interface ParsedCampaign {
   total_budget?: number;
   start_date?: string;
   end_date?: string;
-  demographics?: Record<string, any>;
+  demographics?: Record<string, unknown>;
   channels?: string[];
-  kpi_targets?: Record<string, any>;
-  budget_breakdown?: Record<string, any>;
-  content?: Record<string, any>;
-  settings?: Record<string, any>;
+  kpi_targets?: Record<string, unknown>;
+  budget_breakdown?: Record<string, unknown>;
+  content?: Record<string, unknown>;
+  settings?: Record<string, unknown>;
   channel_budget_allocation?: Record<string, number>;
   parent_campaign_id?: string;
   campaign_group_id?: string;
@@ -158,7 +158,7 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
   }
 
   // Extract demographics
-  const demographics: Record<string, any> = {};
+  const demographics: Record<string, unknown> = {};
   
   // Age patterns
   const ageMatch = text.match(/age[s]?\s*[:\s]*([0-9\-\s]+)/);
@@ -232,7 +232,7 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
   }
 
   // Extract KPI targets
-  const kpiTargets: Record<string, any> = {};
+  const kpiTargets: Record<string, unknown> = {};
   
   // Lead generation targets
   const leadsMatch = text.match(/([0-9,]+)\s*(?:qualified\s+)?leads?\s*(?:per\s+month|monthly|per\s+week|weekly)?/i);
@@ -327,7 +327,7 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
   }
 
   // Extract budget breakdown
-  const budgetBreakdown: Record<string, any> = {};
+  const budgetBreakdown: Record<string, unknown> = {};
   
   const adSpendMatch = text.match(/([0-9,]+)\s*(?:for\s+)?(?:ad\s+spend|advertising)/i);
   if (adSpendMatch) {
@@ -344,7 +344,7 @@ export function parseCampaignFromConversation(conversationText: string): ParsedC
   }
 
   // Extract content details
-  const content: Record<string, any> = {};
+  const content: Record<string, unknown> = {};
   
   const messageMatch = text.match(/message[:\s]+([^.\n]+)/i);
   if (messageMatch) {
@@ -481,7 +481,7 @@ export function applySmartDefaults(campaign: ParsedCampaign): ParsedCampaign {
 
   // Smart default for KPI targets based on campaign type
   if (!result.kpi_targets || Object.keys(result.kpi_targets).length === 0) {
-    const defaultKPIs: Record<string, Record<string, any>> = {
+    const defaultKPIs: Record<string, Record<string, unknown>> = {
       'email': {
         open_rate: 25,
         click_through_rate: 3.5,
@@ -755,10 +755,10 @@ function getChannelType(channel: string): 'email' | 'social_media' | 'other' | '
   return channelTypeMap[channel] || 'other';
 }
 
-function filterKPITargetsForChannel(kpiTargets: Record<string, any> | undefined, channel: string): Record<string, any> {
+function filterKPITargetsForChannel(kpiTargets: Record<string, unknown> | undefined, channel: string): Record<string, unknown> {
   if (!kpiTargets) return {};
   
-  const filtered: Record<string, any> = {};
+  const filtered: Record<string, unknown> = {};
   
   // Include universal targets
   if (kpiTargets.leads) filtered.leads = kpiTargets.leads;
@@ -782,7 +782,7 @@ function filterKPITargetsForChannel(kpiTargets: Record<string, any> | undefined,
   return filtered;
 }
 
-function customizeContentForChannel(content: Record<string, any> | undefined, channel: string): Record<string, any> {
+function customizeContentForChannel(content: Record<string, unknown> | undefined, channel: string): Record<string, unknown> {
   if (!content) return {};
   
   const customized = { ...content };

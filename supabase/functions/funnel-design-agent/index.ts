@@ -219,11 +219,11 @@ Format as JSON with complete funnel structure:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in funnel-design-agent:', error);
     return new Response(JSON.stringify({
       error: 'An error occurred designing the marketing funnel',
-      message: error.message
+      message: error instanceof Error ? error.message : String(error)
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

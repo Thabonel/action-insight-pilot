@@ -2,14 +2,50 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+interface AnalyticsData {
+  totalVisits?: number;
+  conversionRate?: number;
+  [key: string]: unknown;
+}
+
+interface CampaignsData {
+  total?: number;
+  active?: number;
+  [key: string]: unknown;
+}
+
+interface LeadsData {
+  total?: number;
+  converted?: number;
+  [key: string]: unknown;
+}
+
+interface EmailData {
+  sent?: number;
+  opened?: number;
+  [key: string]: unknown;
+}
+
+interface SocialData {
+  followers?: number;
+  engagement?: number;
+  [key: string]: unknown;
+}
+
+interface SystemStatsData {
+  uptime?: number;
+  performance?: number;
+  [key: string]: unknown;
+}
+
 interface PerformanceChartProps {
   dashboardData: {
-    analytics: any;
-    campaigns: any;
-    leads: any;
-    email: any;
-    social: any;
-    systemStats: any;
+    analytics: AnalyticsData;
+    campaigns: CampaignsData;
+    leads: LeadsData;
+    email: EmailData;
+    social: SocialData;
+    systemStats: SystemStatsData;
   };
 }
 

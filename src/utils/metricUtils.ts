@@ -11,16 +11,25 @@ export const getColorClasses = (color: string) => {
   return colors[color as keyof typeof colors] || colors.blue;
 };
 
+interface Campaign {
+  status: string;
+  [key: string]: unknown;
+}
+
+interface Lead {
+  [key: string]: unknown;
+}
+
 export const calculateMetrics = (data: {
-  campaigns: any[];
-  leads: any[];
+  campaigns: Campaign[];
+  leads: Lead[];
   emailStats: { totalSent?: number; openRate?: number };
   socialStats: { posts?: number; engagement?: number };
   analyticsStats: { engagement?: number };
   systemHealth: { uptime_percentage?: number; status?: string };
 }) => {
-  const activeCampaigns = Array.isArray(data.campaigns) 
-    ? data.campaigns.filter((c: any) => c.status === 'active').length 
+  const activeCampaigns = Array.isArray(data.campaigns)
+    ? data.campaigns.filter((c) => c.status === 'active').length
     : 0;
   const totalLeads = Array.isArray(data.leads) ? data.leads.length : 0;
   const emailOpenRate = data.emailStats.openRate || 0;

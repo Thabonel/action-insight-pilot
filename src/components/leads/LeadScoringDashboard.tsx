@@ -11,7 +11,36 @@ import { Star, TrendingUp, Users, Target, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-const MOCK_LEADS = [
+interface Lead {
+  id: number | string;
+  name: string;
+  company: string;
+  title: string;
+  score: number;
+  grade: string;
+  conversionProbability: number;
+  timeToConvert: string;
+  source: string;
+  industry: string;
+  companySize: string;
+  engagement: string;
+  factors: string[];
+}
+
+interface DatabaseLead {
+  id: string;
+  full_name?: string;
+  email?: string;
+  company_name?: string;
+  job_title?: string;
+  score?: number;
+  conversion_probability?: number;
+  source?: string;
+  industry?: string;
+  engagement_level?: string;
+}
+
+const MOCK_LEADS: Lead[] = [
   {
     id: 1,
     name: 'Emily Chen',
@@ -61,7 +90,7 @@ const MOCK_LEADS = [
 
 const LeadScoringDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [leads, setLeads] = useState<any[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -79,7 +108,7 @@ const LeadScoringDashboard: React.FC = () => {
         if (error) throw error;
 
         // Transform database leads to match component structure
-        const transformedLeads = data?.map((lead: any) => ({
+        const transformedLeads = data?.map((lead: DatabaseLead): Lead => ({
           id: lead.id,
           name: lead.full_name || lead.email,
           company: lead.company_name || 'Unknown',
@@ -149,7 +178,7 @@ const LeadScoringDashboard: React.FC = () => {
     return 'bg-red-500';
   };
 
-  const handleLeadClick = (lead: any) => {
+  const handleLeadClick = (lead: Lead) => {
     behaviorTracker.trackAction('feature_use', 'lead_scoring_view', {
       leadId: lead.id,
       score: lead.score,

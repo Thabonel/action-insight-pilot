@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -82,18 +82,29 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in ai-feedback-loop:', error);
-    // Return generic error to client, log full error server-side
-    const publicError = 'Failed to process feedback';
-    return new Response(JSON.stringify({ error: publicError }), {
+
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Failed to process feedback';
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
 
-async function processLearningFromFeedback(supabase: any, feedback: any) {
+interface FeedbackData {
+  id: string;
+  interaction_type: string;
+  context_data: Record<string, unknown>;
+  original_suggestion: unknown;
+  user_modification: unknown;
+  feedback_score?: number;
+  timestamp: string;
+}
+
+async function processLearningFromFeedback(supabase: SupabaseClient, feedback: FeedbackData): Promise<void> {
   try {
     const agentType = determineAgentType(feedback.context_data);
     if (!agentType) return;
@@ -146,12 +157,12 @@ async function processLearningFromFeedback(supabase: any, feedback: any) {
         });
     }
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error processing learning from feedback:', error);
   }
 }
 
-function determineAgentType(contextData: any): string | null {
+function determineAgentType(contextData: Record<string, unknown>): string | null {
   if (!contextData) return null;
   
   if (contextData.type?.includes('audience') || contextData.personas) return 'audience';
@@ -162,8 +173,8 @@ function determineAgentType(contextData: any): string | null {
   return null;
 }
 
-function extractLearningPattern(feedback: any): any {
-  const pattern: any = {
+function extractLearningPattern(feedback: FeedbackData): Record<string, unknown> {
+  const pattern: Record<string, unknown> = {
     interactionType: feedback.interaction_type,
     timestamp: feedback.timestamp,
     context: feedback.context_data
@@ -184,8 +195,8 @@ function extractLearningPattern(feedback: any): any {
   return pattern;
 }
 
-function findDifferences(original: any, modified: any): any {
-  const differences: any = {};
+function findDifferences(original: unknown, modified: unknown): Record<string, unknown> {
+  const differences: Record<string, unknown> = {};
   
   if (typeof original === 'object' && typeof modified === 'object') {
     for (const key in modified) {
@@ -230,21 +241,21 @@ function updateSuccessRate(currentRate: number, usageCount: number, interactionT
   return newSuccessCount / newUsageCount;
 }
 
-function getInitialConfidence(feedback: any): number {
+function getInitialConfidence(feedback: FeedbackData): number {
   if (feedback.interaction_type === 'approve') return 0.7;
   if (feedback.feedback_score && feedback.feedback_score >= 4) return 0.6;
   if (feedback.interaction_type === 'edit') return 0.4;
   return 0.3;
 }
 
-function getInitialSuccessRate(feedback: any): number {
+function getInitialSuccessRate(feedback: FeedbackData): number {
   if (feedback.interaction_type === 'approve') return 1.0;
   if (feedback.feedback_score && feedback.feedback_score >= 4) return 0.8;
   if (feedback.interaction_type === 'edit') return 0.6;
   return 0.2;
 }
 
-function mergePatternData(existing: any, newData: any): any {
+function mergePatternData(existing: Record<string, unknown>, newData: Record<string, unknown>): Record<string, unknown> {
   // Simple merge strategy - in production, this would be more sophisticated
   return {
     ...existing,

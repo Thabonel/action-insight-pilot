@@ -104,7 +104,7 @@ export const useEnhancedChat = () => {
     }
 
     try {
-      const result = await apiClient.queryAgent(content, { ...(context || {}), conversationId: currentSession?.id }) as ApiResponse<any>;
+      const result = await apiClient.queryAgent(content, { ...(context || {}), conversationId: currentSession?.id }) as ApiResponse<{ message?: string; conversationId?: string }>;
       
       if (result.success && result.data) {
         const assistantMessage: ChatMessage = {

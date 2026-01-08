@@ -220,7 +220,7 @@ Format as JSON:
     });
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'
     console.error('Error in competitor-gap-agent:', error);
     return new Response(JSON.stringify({
       error: 'An error occurred analyzing competitive gaps',

@@ -48,7 +48,7 @@ const ContentSchedulingDialog: React.FC<ContentSchedulingDialogProps> = ({
         platform,
         scheduled_for: scheduledDateTime,
         status: 'scheduled'
-      }) as ApiResponse<any>;
+      }) as ApiResponse<{ id: string; title: string; scheduled_for: string }>;
 
       if (response.success) {
         toast({

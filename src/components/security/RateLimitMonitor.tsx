@@ -6,16 +6,24 @@ import { Button } from '@/components/ui/button';
 import { useRateLimiter } from '@/hooks/useRateLimiter';
 import { Activity, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 
+interface RateLimitStatus {
+  blocked: boolean;
+  remainingRequests: number;
+  maxRequests: number;
+  requests: number;
+  resetTime?: string;
+}
+
 const RateLimitMonitor: React.FC = () => {
   const { getRateLimitStatus, resetLimits } = useRateLimiter();
   const [endpoints, setEndpoints] = useState([
     'ai-api', 'social-post', 'auth-attempt', 'general'
   ]);
-  const [statuses, setStatuses] = useState<Record<string, any>>({});
+  const [statuses, setStatuses] = useState<Record<string, RateLimitStatus>>({});
 
   useEffect(() => {
     const updateStatuses = () => {
-      const newStatuses: Record<string, any> = {};
+      const newStatuses: Record<string, RateLimitStatus> = {};
       endpoints.forEach(endpoint => {
         newStatuses[endpoint] = getRateLimitStatus(endpoint);
       });
@@ -27,13 +35,13 @@ const RateLimitMonitor: React.FC = () => {
     return () => clearInterval(interval);
   }, [endpoints, getRateLimitStatus]);
 
-  const getStatusColor = (status: any) => {
+  const getStatusColor = (status: RateLimitStatus) => {
     if (status.blocked) return 'destructive';
     if (status.remainingRequests < status.maxRequests * 0.2) return 'outline';
     return 'default';
   };
 
-  const getUsagePercentage = (status: any) => {
+  const getUsagePercentage = (status: RateLimitStatus) => {
     return ((status.requests / status.maxRequests) * 100);
   };
 

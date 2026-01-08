@@ -136,13 +136,13 @@ serve(async (req) => {
       }
     );
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Validation error:', error);
 
     return new Response(
       JSON.stringify({
         success: false,
-        errors: ['Validation failed: ' + (error.message || 'Unknown error')]
+        errors: ['Validation failed: ' + (error instanceof Error ? error.message : String(error) || 'Unknown error')]
       }),
       {
         status: 500,

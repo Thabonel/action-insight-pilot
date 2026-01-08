@@ -49,7 +49,16 @@ const SocialAIAssistant: React.FC = () => {
     { label: "Analyze competitor posts", confidence: 92 }
   ]);
 
-  const handleSuggestionClick = (suggestion: any) => {
+  interface Suggestion {
+    id: number;
+    type: string;
+    message: string;
+    confidence: number;
+    icon: React.ComponentType<{ className?: string }>;
+    action: string;
+  }
+
+  const handleSuggestionClick = (suggestion: Suggestion) => {
     behaviorTracker.trackAction('feature_use', 'social_ai_suggestion', {
       suggestionType: suggestion.type,
       suggestionId: suggestion.id,

@@ -7,11 +7,26 @@ export interface SecretMetadata {
   updated_at: string;
   last_used_at: string | null;
   is_active: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
+}
+
+interface SecretFunctionRequestData {
+  serviceName: string;
+  value?: string;
+}
+
+interface SecretFunctionResponse {
+  secrets?: SecretMetadata[];
+  value?: string;
+  error?: string;
 }
 
 export class SecretsService {
-  private static async callSecretFunction(action: string, data?: any, params?: URLSearchParams) {
+  private static async callSecretFunction(
+    action: string,
+    data?: SecretFunctionRequestData,
+    params?: URLSearchParams
+  ): Promise<SecretFunctionResponse> {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {

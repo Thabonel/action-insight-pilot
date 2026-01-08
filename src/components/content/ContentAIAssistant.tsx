@@ -6,6 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 import { Bot, TrendingUp, Target, Lightbulb, FileText, Zap } from 'lucide-react';
 
+interface AISuggestion {
+  id: number;
+  type: string;
+  message: string;
+  confidence: number;
+  icon: React.ComponentType<{ className?: string }>;
+  action: string;
+}
+
 const ContentAIAssistant: React.FC = () => {
   const [insights] = useState({
     topContentType: 'How-to Guides',
@@ -15,7 +24,7 @@ const ContentAIAssistant: React.FC = () => {
     learningStatus: 'Continuously improving'
   });
 
-  const [suggestions] = useState([
+  const [suggestions] = useState<AISuggestion[]>([
     {
       id: 1,
       type: 'topic',
@@ -49,7 +58,7 @@ const ContentAIAssistant: React.FC = () => {
     { label: "Schedule for best time", confidence: 92 }
   ]);
 
-  const handleSuggestionClick = (suggestion: any) => {
+  const handleSuggestionClick = (suggestion: AISuggestion) => {
     behaviorTracker.trackAction('feature_use', 'content_ai_suggestion', {
       suggestionType: suggestion.type,
       suggestionId: suggestion.id,

@@ -257,7 +257,17 @@ Most issues resolved by refreshing page, checking internet connection, and verif
     }
   }
   
-  static async searchPlatformDocumentation(query: string): Promise<any[]> {
+  static async searchPlatformDocumentation(query: string): Promise<Array<{
+    chunk_id: string;
+    bucket_id: string;
+    document_id: string;
+    bucket_name: string;
+    document_title: string;
+    chunk_content: string;
+    chunk_index: number;
+    similarity_score: number;
+    metadata: Record<string, unknown>;
+  }>> {
     try {
       return await KnowledgeService.searchKnowledge(
         query,

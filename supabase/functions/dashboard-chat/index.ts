@@ -8,23 +8,10 @@ const corsHeaders = {
 };
 
 interface ChatContext {
-  campaigns?: any[];
-  autopilotConfig?: any;
-  recentActivity?: any[];
-  conversationCampaign?: any;
-}
-
-interface ConversationCampaign {
-  id: string;
-  status: string;
-  current_step: string;
-  collected_data: {
-    product?: string;
-    audience?: string;
-    budget?: number;
-    goals?: string;
-    timeline?: string;
-  };
+  campaigns?: Record<string, unknown>[];
+  autopilotConfig?: Record<string, unknown>;
+  recentActivity?: Record<string, unknown>[];
+  conversationCampaign?: ConversationCampaign;
 }
 
 const CAMPAIGN_CREATION_STEPS = [
@@ -176,12 +163,12 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('dashboard-chat error:', error);
     return new Response(
       JSON.stringify({
         error: 'An unexpected error occurred',
-        message: error instanceof Error ? error.message : 'Failed to process chat'
+        message: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Failed to process chat'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -211,7 +198,7 @@ function detectCampaignCreationIntent(query: string): boolean {
 }
 
 async function getConversationCampaign(
-  supabase: any,
+  supabase: Record<string, unknown>,
   userId: string,
   conversationId: string
 ): Promise<ConversationCampaign | null> {
@@ -234,7 +221,7 @@ async function getConversationCampaign(
 }
 
 async function createConversationCampaign(
-  supabase: any,
+  supabase: Record<string, unknown>,
   userId: string,
   conversationId: string
 ): Promise<ConversationCampaign> {
@@ -261,8 +248,8 @@ async function createConversationCampaign(
 }
 
 async function updateConversationWithResponse(
-  supabase: any,
-  conversation: ConversationCampaign,
+  supabase: Record<string, unknown>,
+  conversation: Record<string, unknown>,
   userResponse: string
 ): Promise<ConversationCampaign> {
   const currentStep = conversation.current_step;
@@ -276,10 +263,11 @@ async function updateConversationWithResponse(
     case 'audience':
       collectedData.audience = userResponse.trim();
       break;
-    case 'budget':
+    case 'budget': {
       const budgetMatch = userResponse.match(/(\d+)/);
       collectedData.budget = budgetMatch ? parseInt(budgetMatch[1]) : 500;
       break;
+    }
     case 'goals':
       collectedData.goals = userResponse.trim();
       break;
@@ -335,15 +323,15 @@ function isConfirmation(query: string): boolean {
 }
 
 async function createAndLaunchCampaign(
-  supabase: any,
+  supabase: Record<string, unknown>,
   userId: string,
-  conversation: ConversationCampaign
-): Promise<any> {
+  conversation: Record<string, unknown>
+): Promise<Record<string, unknown>> {
   const data = conversation.collected_data;
 
   // Determine campaign type and channels based on goals and budget
   const budget = data.budget || 500;
-  let channels = [];
+  let channels: string[] = [];
   const type = 'digital';
 
   if (budget < 300) {
@@ -432,7 +420,7 @@ function getEndDate(timeline?: string): string {
   return endDate.toISOString();
 }
 
-async function enrichContext(supabase: any, userId: string, providedContext?: any): Promise<ChatContext> {
+async function enrichContext(supabase: Record<string, unknown>, userId: string, providedContext?: Record<string, unknown>): Promise<ChatContext> {
   const context: ChatContext = {};
 
   try {
@@ -461,7 +449,7 @@ async function enrichContext(supabase: any, userId: string, providedContext?: an
       .limit(5);
 
     context.recentActivity = recentActivity || [];
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error enriching context:', error);
   }
 

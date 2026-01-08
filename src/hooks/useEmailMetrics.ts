@@ -12,7 +12,7 @@ export const useEmailMetrics = () => {
       setLoading(true);
       setError(null);
       
-      const result = await apiClient.getEmailAnalytics() as ApiResponse<any>;
+      const result = await apiClient.getEmailAnalytics() as ApiResponse<Record<string, unknown>>;
       
       if (result.success && result.data) {
         // Transform the data to match EmailMetrics interface

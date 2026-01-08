@@ -4,19 +4,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { 
-  FileText, 
-  Star, 
-  TrendingUp, 
-  Target, 
+import {
+  FileText,
+  Star,
+  TrendingUp,
+  Target,
   Zap,
   Copy,
   Eye,
   Clock
 } from 'lucide-react';
 
+interface Template {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  successRate: number;
+  avgEngagement: number;
+  estimatedTime: string;
+  uses: number;
+  preview: string;
+  tags: string[];
+}
+
 const ContentTemplates: React.FC = () => {
-  const [templates] = useState([
+  const [templates] = useState<Template[]>([
     {
       id: 1,
       name: "Ultimate How-To Guide Template",
@@ -74,7 +87,7 @@ const ContentTemplates: React.FC = () => {
     { name: "Customer Success Story", category: "Social Proof", score: 90 }
   ]);
 
-  const handleTemplateUse = (template: any) => {
+  const handleTemplateUse = (template: Template) => {
     behaviorTracker.trackAction('feature_use', 'content_template_use', {
       templateId: template.id,
       templateName: template.name,
@@ -82,7 +95,7 @@ const ContentTemplates: React.FC = () => {
     });
   };
 
-  const handleTemplatePreview = (template: any) => {
+  const handleTemplatePreview = (template: Template) => {
     behaviorTracker.trackAction('feature_use', 'content_template_preview', {
       templateId: template.id,
       templateName: template.name

@@ -21,7 +21,7 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export const useConversationalDashboard = () => {
@@ -36,7 +36,7 @@ export const useConversationalDashboard = () => {
   const [query, setQuery] = useState('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [latestMetadata, setLatestMetadata] = useState<any>(null);
+  const [latestMetadata, setLatestMetadata] = useState<Record<string, unknown> | null>(null);
 
   const user = { id: 'user-1', name: 'User' };
 

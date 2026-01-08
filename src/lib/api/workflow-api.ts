@@ -6,7 +6,7 @@ export class WorkflowApi extends ClientCore {
     return this.httpClient.request('/api/workflows/list');
   }
 
-  async createWorkflow(workflowData: any) {
+  async createWorkflow(workflowData: Record<string, unknown>) {
     return this.httpClient.request('/api/workflows/create', {
       method: 'POST',
       body: JSON.stringify(workflowData),
@@ -23,7 +23,7 @@ export class WorkflowApi extends ClientCore {
     return this.httpClient.request(`/api/workflows/${workflowId}/status`);
   }
 
-  async updateWorkflow(workflowId: string, updates: any) {
+  async updateWorkflow(workflowId: string, updates: Record<string, unknown>) {
     return this.httpClient.request(`/api/workflows/${workflowId}`, {
       method: 'PUT',
       body: JSON.stringify(updates),

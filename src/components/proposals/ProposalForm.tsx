@@ -9,13 +9,20 @@ import ProjectDetails from './form/ProjectDetails';
 import BudgetAndTranscript from './form/BudgetAndTranscript';
 import StatusAlert from './form/StatusAlert';
 
+interface ProposalTemplate {
+  name: string;
+  description?: string;
+  category?: string;
+  content?: string;
+}
+
 interface ProposalFormProps {
   formData: ProposalFormData;
-  templates: Record<string, any>;
+  templates: Record<string, ProposalTemplate>;
   loading: boolean;
   templatesLoading: boolean;
   backendAvailable?: boolean;
-  onInputChange: (section: string, field: string, value: any) => void;
+  onInputChange: (section: string, field: string, value: string | number) => void;
   onFormDataChange: (data: Partial<ProposalFormData>) => void;
   onSubmit: () => void;
 }

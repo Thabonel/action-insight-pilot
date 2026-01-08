@@ -7,11 +7,11 @@ export class IntegrationMethods extends BaseApiClient {
     throw new Error('getConnections not implemented - use Supabase client directly');
   }
 
-  async createConnection(data: any): Promise<ApiResponse<any>> {
+  async createConnection(data: Record<string, unknown>): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('createConnection not implemented - use Supabase client directly');
   }
 
-  async deleteConnection(id: string): Promise<ApiResponse<any>> {
+  async deleteConnection(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('deleteConnection not implemented - use Supabase client directly');
   }
 
@@ -23,23 +23,23 @@ export class IntegrationMethods extends BaseApiClient {
     throw new Error('createWebhook not implemented - use Supabase client directly');
   }
 
-  async deleteWebhook(id: string): Promise<ApiResponse<any>> {
+  async deleteWebhook(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('deleteWebhook not implemented - use Supabase client directly');
   }
 
-  async testWebhook(id: string): Promise<ApiResponse<any>> {
+  async testWebhook(id: string): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('testWebhook not implemented - use Supabase client directly');
   }
 
-  async connectService(service: string, apiKey: string): Promise<ApiResponse<any>> {
+  async connectService(service: string, apiKey: string): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('connectService not implemented - use Supabase client directly');
   }
 
-  async syncService(service: string): Promise<ApiResponse<any>> {
+  async syncService(service: string): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('syncService not implemented - use Supabase client directly');
   }
 
-  async disconnectService(service: string): Promise<ApiResponse<any>> {
+  async disconnectService(service: string): Promise<ApiResponse<Record<string, unknown>>> {
     throw new Error('disconnectService not implemented - use Supabase client directly');
   }
 }

@@ -32,7 +32,7 @@ export const useProposals = () => {
       category: template.category
     };
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, { id: string; name: string; description: string; sections: string[]; default_services: string[]; category: string }>);
 
   const generateProposal = async (formData: ProposalFormData) => {
     setLoading(true);
@@ -196,10 +196,10 @@ PROPOSED SERVICES:
 ${proposal.content?.proposed_services || ''}
 
 PRICING:
-${proposal.pricing?.map((item: any) => `${item.item}: $${item.price}`).join('\n') || ''}
+${(proposal.pricing as Array<{ item: string; price: number }>)?.map(item => `${item.item}: $${item.price}`).join('\n') || ''}
 
 TIMELINE:
-${proposal.timeline?.map((phase: any) => `${phase.phase}: ${phase.duration}`).join('\n') || ''}
+${(proposal.timeline as Array<{ phase: string; duration: string }>)?.map(phase => `${phase.phase}: ${phase.duration}`).join('\n') || ''}
 
 TERMS:
 ${proposal.terms?.payment_terms || ''}

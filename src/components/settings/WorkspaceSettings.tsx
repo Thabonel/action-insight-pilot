@@ -31,10 +31,14 @@ const WorkspaceSettings: React.FC = () => {
     setSettings(prev => ({ ...prev, [name]: value }));
   };
 
+  interface UserPreferenceData {
+    preference_data: WorkspaceSettingsProps;
+  }
+
   const updateSettings = async () => {
     try {
-      const response = await apiClient.userPreferences.updateUserPreferences('workspace', settings) as ApiResponse<any>;
-      
+      const response = await apiClient.userPreferences.updateUserPreferences('workspace', settings) as ApiResponse<WorkspaceSettingsProps>;
+
       if (response.success) {
         toast({
           title: "Settings Updated",
@@ -56,8 +60,8 @@ const WorkspaceSettings: React.FC = () => {
   const loadPreferences = async () => {
     try {
       setIsLoading(true);
-      const response = await apiClient.userPreferences.getUserPreferences('workspace') as ApiResponse<any>;
-      
+      const response = await apiClient.userPreferences.getUserPreferences('workspace') as ApiResponse<UserPreferenceData[]>;
+
       if (response.success && response.data && response.data.length > 0) {
         const prefs = response.data[0].preference_data;
         setSettings(prev => ({ ...prev, ...prefs }));
@@ -72,6 +76,7 @@ const WorkspaceSettings: React.FC = () => {
 
   useEffect(() => {
     loadPreferences();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

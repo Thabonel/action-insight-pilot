@@ -19,6 +19,16 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface Suggestion {
+  id: number;
+  type: string;
+  title: string;
+  description: string;
+  impact: string;
+  oneClick: boolean;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
 export interface AIOptimizationCoachProps {
   content: string;
   title: string;
@@ -44,7 +54,7 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
     conversionPotential: 'High'
   });
 
-  const [suggestions, setSuggestions] = useState([
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([
     {
       id: 1,
       type: 'improvement',
@@ -105,7 +115,7 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
     }
   }, [content]);
 
-  const applySuggestion = (suggestion: any) => {
+  const applySuggestion = (suggestion: Suggestion) => {
     if (suggestion.oneClick) {
       // Simulate applying the suggestion
       let updatedContent = content;

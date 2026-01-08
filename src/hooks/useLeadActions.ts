@@ -12,7 +12,7 @@ export const useLeadActions = () => {
   const scoreLeads = async (leadIds?: string[]) => {
     setLoading(true);
     try {
-      const result = await apiClient.scoreLeads() as ApiResponse<any>;
+      const result = await apiClient.scoreLeads() as ApiResponse<Record<string, unknown>>;
       if (result.success) {
         toast({
           title: "Leads Scored",

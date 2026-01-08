@@ -14,7 +14,7 @@ export class ProposalMethods extends BaseApiClient {
     return this.proposals.getProposalTemplates();
   }
 
-  async generateProposal(proposalData: any) {
+  async generateProposal(proposalData: Record<string, unknown>) {
     return this.proposals.generateProposal(proposalData);
   }
 

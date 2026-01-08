@@ -35,8 +35,8 @@ const LeadAIAssistant: React.FC = () => {
     setLoading(true);
     try {
       console.log('Analyzing leads with query:', query);
-      const result = await apiClient.queryAgent(query) as ApiResponse<any>;
-      
+      const result = await apiClient.queryAgent(query) as ApiResponse<{ message?: string }>;
+
       if (result.success && result.data) {
         // Transform the response into LeadInsight format
         const mockInsights: LeadInsight[] = [
@@ -76,8 +76,8 @@ const LeadAIAssistant: React.FC = () => {
     setLoading(true);
     try {
       console.log('Scoring leads...');
-      const result = await apiClient.scoreLeads() as ApiResponse<any>;
-      
+      const result = await apiClient.scoreLeads() as ApiResponse<Record<string, unknown>>;
+
       if (result.success) {
         toast({
           title: "Lead Scoring Complete",

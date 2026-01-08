@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
@@ -18,7 +18,12 @@ const AgentRequestSchema = z.object({
 interface AgentRequest {
   agent_type: string;
   task_type: string;
-  input_data: Record<string, any>;
+  input_data: Record<string, unknown>;
+}
+
+interface ChatMessage {
+  role: string;
+  content: string;
 }
 
 serve(async (req) => {
@@ -102,19 +107,19 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error) {
-    // Log detailed error server-side only
+  } catch (error: unknown) {
     console.error('Agent execution error:', error);
-    
-    // Return generic error to client
+
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'An error occurred processing your request';
+
     return new Response(
-      JSON.stringify({ success: false, error: 'An error occurred processing your request' }),
+      JSON.stringify({ success: false, error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
 
-async function callAI(messages: any[], openaiKey?: string, anthropicKey?: string) {
+async function callAI(messages: ChatMessage[], openaiKey?: string, anthropicKey?: string): Promise<string> {
   // Prefer Claude if available, fallback to OpenAI
   if (anthropicKey) {
     return await callClaude(messages, anthropicKey);
@@ -125,7 +130,7 @@ async function callAI(messages: any[], openaiKey?: string, anthropicKey?: string
   }
 }
 
-async function callOpenAI(messages: any[], openaiKey: string) {
+async function callOpenAI(messages: ChatMessage[], openaiKey: string): Promise<string> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -143,12 +148,11 @@ async function callOpenAI(messages: any[], openaiKey: string) {
     throw new Error(`OpenAI API error: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as { choices: Array<{ message: { content: string } }> };
   return data.choices[0].message.content;
 }
 
-async function callClaude(messages: any[], anthropicKey: string) {
-  // Convert OpenAI format to Claude format
+async function callClaude(messages: ChatMessage[], anthropicKey: string): Promise<string> {
   const systemMessage = messages.find(m => m.role === 'system')?.content || '';
   const userMessages = messages.filter(m => m.role !== 'system');
 
@@ -174,11 +178,16 @@ async function callClaude(messages: any[], anthropicKey: string) {
     throw new Error(`Claude API error: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as { content: Array<{ text: string }> };
   return data.content[0].text;
 }
 
-async function handleContentCreatorTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
+async function handleContentCreatorTasks(
+  task_type: string,
+  input_data: Record<string, unknown>,
+  openaiKey?: string,
+  anthropicKey?: string
+): Promise<unknown> {
   switch (task_type) {
     case 'create_email_content':
       const emailPrompt = `Create an engaging email for a ${input_data.campaign_type} campaign targeting ${input_data.target_audience}. 
@@ -193,7 +202,7 @@ async function handleContentCreatorTasks(task_type: string, input_data: any, ope
       ], openaiKey, anthropicKey);
 
       try {
-        return JSON.parse(emailContent);
+        return JSON.parse(emailContent) as { content: string; subject_lines: Array<{ text: string; score: number }> };
       } catch {
         return { content: emailContent, subject_lines: [] };
       }
@@ -203,7 +212,12 @@ async function handleContentCreatorTasks(task_type: string, input_data: any, ope
   }
 }
 
-async function handleCampaignManagerTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
+async function handleCampaignManagerTasks(
+  task_type: string,
+  input_data: Record<string, unknown>,
+  openaiKey?: string,
+  anthropicKey?: string
+): Promise<unknown> {
   switch (task_type) {
     case 'generate_ab_variants':
       const abPrompt = `Generate 3 A/B test variants for this subject line: "${input_data.base_message}"
@@ -216,13 +230,12 @@ async function handleCampaignManagerTasks(task_type: string, input_data: any, op
       ], openaiKey, anthropicKey);
 
       try {
-        return JSON.parse(abContent);
+        return JSON.parse(abContent) as { variants: Array<{ text: string; score: number }> };
       } catch {
         return { variants: [] };
       }
 
     case 'suggest_send_time':
-      // Simulate AI-powered send time optimization
       const times = ['Tuesday 10:30 AM', 'Wednesday 2:00 PM', 'Thursday 9:00 AM'];
       const randomTime = times[Math.floor(Math.random() * times.length)];
       const improvement = Math.floor(Math.random() * 20) + 10;
@@ -238,7 +251,12 @@ async function handleCampaignManagerTasks(task_type: string, input_data: any, op
   }
 }
 
-async function handleLeadGeneratorTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
+async function handleLeadGeneratorTasks(
+  task_type: string,
+  input_data: Record<string, unknown>,
+  openaiKey?: string,
+  anthropicKey?: string
+): Promise<unknown> {
   switch (task_type) {
     case 'score_leads':
       // Simulate AI lead scoring
@@ -265,7 +283,12 @@ async function handleLeadGeneratorTasks(task_type: string, input_data: any, open
   }
 }
 
-async function handleSocialMediaTasks(task_type: string, input_data: any, openaiKey?: string, anthropicKey?: string) {
+async function handleSocialMediaTasks(
+  task_type: string,
+  input_data: Record<string, unknown>,
+  openaiKey?: string,
+  anthropicKey?: string
+): Promise<unknown> {
   switch (task_type) {
     case 'create_social_post':
       const socialPrompt = `Create engaging ${input_data.platform} content about "${input_data.content_theme}" 
@@ -279,7 +302,7 @@ async function handleSocialMediaTasks(task_type: string, input_data: any, openai
       ], openaiKey, anthropicKey);
 
       try {
-        return JSON.parse(socialContent);
+        return JSON.parse(socialContent) as { content: string; hashtags: string[]; optimal_time: string };
       } catch {
         return { content: socialContent, hashtags: [], optimal_time: '10:00 AM' };
       }

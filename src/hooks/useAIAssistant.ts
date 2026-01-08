@@ -2,13 +2,20 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface Demographics {
+  ageRange?: string;
+  location?: string;
+  interests?: string[];
+  [key: string]: unknown;
+}
+
 interface AIAssistanceContext {
   campaignName?: string;
   campaignType?: string;
   targetAudience?: string;
   primaryObjective?: string;
   valueProposition?: string;
-  demographics?: any;
+  demographics?: Demographics;
   industry?: string;
 }
 

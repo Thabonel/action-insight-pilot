@@ -18,7 +18,7 @@ export interface IntegrationConnection {
   connection_status: 'connected' | 'disconnected' | 'error' | 'pending';
   last_sync_at?: string;
   sync_status: 'idle' | 'syncing' | 'error' | 'success';
-  configuration?: Record<string, any>;
+  configuration?: Record<string, unknown>;
   error_message?: string;
 }
 
@@ -26,7 +26,7 @@ export interface ConnectionResult {
   service: string;
   status: string;
   connected_at: string;
-  account_info?: Record<string, any>;
+  account_info?: Record<string, unknown>;
   message?: string;
 }
 
@@ -52,7 +52,7 @@ export class IntegrationsService {
   }
 
   async testWebhook(webhookId: string) {
-    return this.httpClient.request<any>(`/api/integrations/webhooks/${webhookId}/test`, {
+    return this.httpClient.request<Record<string, unknown>>(`/api/integrations/webhooks/${webhookId}/test`, {
       method: 'POST',
     });
   }
@@ -98,7 +98,7 @@ export class IntegrationsService {
     return this.httpClient.request<IntegrationConnection[]>('/api/integrations/connections');
   }
 
-  async createConnection(connectionData: { service_name: string; configuration: Record<string, any> }) {
+  async createConnection(connectionData: { service_name: string; configuration: Record<string, unknown> }) {
     return this.httpClient.request<ConnectionResult>('/api/integrations/connections', {
       method: 'POST',
       body: JSON.stringify(connectionData),
@@ -113,19 +113,19 @@ export class IntegrationsService {
   }
 
   async syncService(service: string) {
-    return this.httpClient.request<any>(`/api/integrations/${service}/sync`, {
+    return this.httpClient.request<Record<string, unknown>>(`/api/integrations/${service}/sync`, {
       method: 'POST',
     });
   }
 
   async deleteConnection(serviceId: string) {
-    return this.httpClient.request<any>(`/api/integrations/connections/${serviceId}`, {
+    return this.httpClient.request<Record<string, unknown>>(`/api/integrations/connections/${serviceId}`, {
       method: 'DELETE',
     });
   }
 
   async disconnectService(service: string) {
-    return this.httpClient.request<any>(`/api/integrations/${service}/disconnect`, {
+    return this.httpClient.request<Record<string, unknown>>(`/api/integrations/${service}/disconnect`, {
       method: 'DELETE',
     });
   }

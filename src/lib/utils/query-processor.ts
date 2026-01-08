@@ -1,16 +1,46 @@
 
+interface AgentResponseInput {
+  title?: string;
+  focus_summary?: string;
+  explanation?: string;
+  business_impact?: string;
+  recommended_actions?: string[];
+  priority_items?: unknown[];
+  query?: string;
+  next_actions?: string[];
+}
+
+interface CampaignDataItem {
+  id: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+interface FormattedAgentResponse {
+  type: string;
+  title: string;
+  explanation: string;
+  businessImpact: string;
+  nextActions: string[];
+  data?: unknown[];
+}
+
 export class QueryProcessor {
   static determineQueryType(query: string): string {
     const lowerQuery = query.toLowerCase();
-    
+
     if (lowerQuery.includes('focus') && (lowerQuery.includes('today') || lowerQuery.includes('should'))) {
       return 'daily_focus';
     }
-    
+
     return 'general';
   }
 
-  static formatAgentResponse(agentResponse: any, queryType: string, campaignData: any[]) {
+  static formatAgentResponse(
+    agentResponse: AgentResponseInput,
+    queryType: string,
+    campaignData: CampaignDataItem[]
+  ): FormattedAgentResponse {
     if (!agentResponse) {
       throw new Error('AI agent returned no data');
     }

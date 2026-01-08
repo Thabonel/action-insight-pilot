@@ -210,19 +210,19 @@ Deno.serve(async (req) => {
       default:
         throw new Error('Invalid action')
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in manage-user-secrets:', error)
     
     // Map errors to generic user messages while logging details server-side
     let userMessage = 'An error occurred';
     
-    if (error.message?.includes('Master key')) {
+    if (error instanceof Error ? error.message : String(error)?.includes('Master key')) {
       userMessage = 'Configuration error';
-    } else if (error.message?.includes('not found')) {
+    } else if (error instanceof Error ? error.message : String(error)?.includes('not found')) {
       userMessage = 'Secret not found';
-    } else if (error.message?.includes('Invalid action')) {
+    } else if (error instanceof Error ? error.message : String(error)?.includes('Invalid action')) {
       userMessage = 'Invalid request';
-    } else if (error.message?.includes('Authentication')) {
+    } else if (error instanceof Error ? error.message : String(error)?.includes('Authentication')) {
       userMessage = 'Authentication required';
     }
     

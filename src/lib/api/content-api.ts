@@ -1,6 +1,11 @@
 
 import { ClientCore } from './client-core';
 import { ContentMethods } from './content-methods';
+import { ContentBrief } from './content-service';
+
+export interface ContentData {
+  [key: string]: unknown;
+}
 
 export class ContentApi extends ClientCore {
   private contentMethods: ContentMethods;
@@ -15,11 +20,11 @@ export class ContentApi extends ClientCore {
     this.contentMethods.setToken(token);
   }
 
-  async generateContent(brief: any) {
+  async generateContent(brief: ContentBrief) {
     return this.contentMethods.generateContent(brief);
   }
 
-  async createContent(contentData: any) {
+  async createContent(contentData: ContentData) {
     return this.contentMethods.createContent(contentData);
   }
 

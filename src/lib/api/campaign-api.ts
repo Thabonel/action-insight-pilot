@@ -1,6 +1,7 @@
 
 import { ClientCore } from './client-core';
 import { CampaignMethods } from './campaign-methods';
+import { Campaign } from '../api-client-interface';
 
 export class CampaignApi extends ClientCore {
   private campaignMethods: CampaignMethods;
@@ -19,11 +20,11 @@ export class CampaignApi extends ClientCore {
     return this.campaignMethods.getCampaigns();
   }
 
-  async createCampaign(campaignData: any) {
+  async createCampaign(campaignData: Partial<Campaign>) {
     return this.campaignMethods.createCampaign(campaignData);
   }
 
-  async bulkCreateCampaigns(campaigns: any[]) {
+  async bulkCreateCampaigns(campaigns: Partial<Campaign>[]) {
     return this.campaignMethods.bulkCreateCampaigns(campaigns);
   }
 
@@ -31,7 +32,7 @@ export class CampaignApi extends ClientCore {
     return this.campaignMethods.getCampaignById(id);
   }
 
-  async updateCampaign(id: string, updates: any) {
+  async updateCampaign(id: string, updates: Partial<Campaign>) {
     return this.campaignMethods.updateCampaign(id, updates);
   }
 

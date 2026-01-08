@@ -24,7 +24,7 @@ export const useRetry = (): UseRetryReturn => {
     options: UseRetryOptions = {}
   ): Promise<T> => {
     const { maxRetries = 3, retryDelay = 1000, onRetry } = options;
-    let lastError: any;
+    let lastError: unknown;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {

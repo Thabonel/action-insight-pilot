@@ -41,9 +41,9 @@ export const useSocialPlatforms = () => {
     }
   };
 
-  const connectPlatform = async (platform: string, config: any = {}) => {
+  const connectPlatform = async (platform: string, config: Record<string, unknown> = {}) => {
     try {
-      const result = await apiClient.connectSocialPlatform({ platform, ...config }) as ApiResponse<any>;
+      const result = await apiClient.connectSocialPlatform({ platform, ...config }) as ApiResponse<Record<string, unknown>>;
       
       if (result.success) {
         await fetchPlatforms(); // Refresh the list

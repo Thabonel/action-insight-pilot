@@ -52,7 +52,7 @@ serve(async (req) => {
         throw new Error('Invalid action')
     }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Unknown error'
     console.error('Knowledge processor error:', error)
     return new Response(
       JSON.stringify({ error: errorMessage }),
@@ -184,13 +184,13 @@ async function processDocumentBackground(supabaseClient: SupabaseClient, documen
       .update({ status: 'ready', summary })
       .eq('id', documentId)
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Document processing error:', error)
     await supabaseClient
       .from('knowledge_documents')
       .update({ 
         status: 'failed',
-        processing_error: error.message 
+        processing_error: error instanceof Error ? error.message : String(error) 
       })
       .eq('id', documentId)
   }

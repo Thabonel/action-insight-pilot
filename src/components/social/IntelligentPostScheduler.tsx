@@ -41,17 +41,22 @@ const IntelligentPostScheduler: React.FC = () => {
       return;
     }
 
+    interface SchedulePostResponse {
+      id: string;
+      scheduled_time: string;
+    }
+
     setLoading(true);
     try {
       console.log('Scheduling post with data:', postData);
-      const result = await apiClient.scheduleSocialPost(postData) as ApiResponse<any>;
-      
+      const result = await apiClient.scheduleSocialPost(postData) as ApiResponse<SchedulePostResponse>;
+
       if (result.success && result.data) {
         toast({
           title: "Post Scheduled",
           description: `Post scheduled for ${postData.platform} at ${postData.scheduledTime}`,
         });
-        
+
         // Reset form
         setPostData({
           content: '',

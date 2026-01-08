@@ -28,7 +28,7 @@ export interface AIModelConfig {
   context_window?: number;
   discovered_at: string;
   last_validated_at?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -54,7 +54,7 @@ export interface ModelConfigResponse {
   capabilities?: ModelCapabilities;
   pricing?: ModelPricing;
   context_window?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   cached?: boolean;
   fallback?: boolean;
   warning?: string;

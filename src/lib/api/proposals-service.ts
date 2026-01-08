@@ -8,7 +8,7 @@ export class ProposalsService {
     return this.httpClient.request('/api/proposals/templates');
   }
 
-  async generateProposal(proposalData: any) {
+  async generateProposal(proposalData: Record<string, unknown>) {
     return this.httpClient.request('/api/proposals/generate', {
       method: 'POST',
       body: JSON.stringify(proposalData),
