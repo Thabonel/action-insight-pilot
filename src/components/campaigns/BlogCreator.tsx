@@ -14,7 +14,8 @@ import { ContentLibrary } from '@/components/content/ContentLibrary';
 import { AIOptimizationCoach } from '@/components/content/AIOptimizationCoach';
 import { BlogPerformanceDashboard } from '@/components/blog/BlogPerformanceDashboard';
 import IntegrationHub from '@/components/blog/IntegrationHub';
-import { Edit, Save, Sparkles, CheckCircle, Library, Share2, Brain, BarChart3 } from 'lucide-react';
+import { Edit, Save, Sparkles, CheckCircle, Library, Share2, BarChart3 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const BlogCreator: React.FC = () => {
   const [blogPost, setBlogPost] = useState({
@@ -143,7 +144,7 @@ const BlogCreator: React.FC = () => {
             variant="outline" 
             onClick={() => setShowOptimizationCoach(!showOptimizationCoach)}
           >
-            <Brain className="h-4 w-4 mr-2" />
+            <LogoMarkIcon className="h-4 w-4 mr-2" />
             AI Coach
           </Button>
         </div>

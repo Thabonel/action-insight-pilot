@@ -15,10 +15,10 @@ import {
   Link,
   LogOut,
   User,
-  Brain,
   Video,
   Sparkles
 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserMode } from '@/hooks/useUserMode';
 import ModeSwitcher from '@/components/layout/ModeSwitcher';
@@ -139,7 +139,7 @@ const Layout: React.FC = () => {
     {
       name: 'Knowledge',
       href: '/app/knowledge',
-      icon: Brain,
+      icon: LogoMarkIcon,
       description: 'AI knowledge base'
     },
     {

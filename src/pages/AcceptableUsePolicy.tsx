@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Brain, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const AcceptableUsePolicy: React.FC = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const AcceptableUsePolicy: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-blue-600" />
+              <LogoMarkIcon className="h-8 w-8" />
               <span className="text-xl font-bold text-black">AI Marketing Hub</span>
             </div>
             <Button variant="ghost" onClick={() => navigate('/')} className="text-black hover:text-blue-600">

@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import {
-  Brain,
   Zap,
   Target,
   MessageSquare,
@@ -16,6 +15,7 @@ import {
   Clock,
   TrendingUp
 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -141,7 +141,7 @@ const AIBehaviorSettings: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Brain className="h-5 w-5" />
+            <LogoMarkIcon className="h-5 w-5" />
             <span>AI Personality & Behavior</span>
           </CardTitle>
         </CardHeader>

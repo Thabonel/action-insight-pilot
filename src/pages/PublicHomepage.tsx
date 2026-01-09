@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { useNavigate } from 'react-router-dom';
 import SupportTicketDialog from '@/components/support/SupportTicketDialog';
 
@@ -69,7 +69,7 @@ const PublicHomepage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-blue-600" />
+              <LogoMarkIcon className="h-8 w-8" />
               <span className="text-xl font-bold text-black">AI Marketing Hub</span>
             </div>
             <div className="flex items-center space-x-4">
@@ -261,7 +261,7 @@ const PublicHomepage: React.FC = () => {
           <div className="flex flex-col space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                <Brain className="h-8 w-8 text-blue-600" />
+                <LogoMarkIcon className="h-8 w-8" />
                 <span className="text-xl font-bold text-black">AI Marketing Hub</span>
               </div>
               <div className="flex flex-wrap justify-center gap-6 text-sm">
