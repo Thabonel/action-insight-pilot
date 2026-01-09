@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import CampaignCard from '../CampaignCard'
 
 // Mock the campaign data
@@ -22,12 +23,20 @@ const mockCampaign = {
 
 describe('CampaignCard', () => {
   it('renders without crashing', () => {
-    const { container } = render(<CampaignCard campaign={mockCampaign} />)
+    const { container } = render(
+      <MemoryRouter>
+        <CampaignCard campaign={mockCampaign} />
+      </MemoryRouter>
+    )
     expect(container).toBeTruthy()
   })
 
   it('displays campaign name', () => {
-    const { getByText } = render(<CampaignCard campaign={mockCampaign} />)
+    const { getByText } = render(
+      <MemoryRouter>
+        <CampaignCard campaign={mockCampaign} />
+      </MemoryRouter>
+    )
     expect(getByText('Test Campaign')).toBeTruthy()
   })
 })
