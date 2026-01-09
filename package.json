@@ -88,8 +88,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@rollup/rollup-darwin-x64": "^4.55.1",
-    "@swc/core-darwin-x64": "^1.15.8",
+    "@swc/core": "^1.7.26",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
@@ -113,7 +112,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "optionalDependencies": {
-    "@rollup/rollup-darwin-x64": "^4.55.1"
-  }
+  "optionalDependencies": {}
 }
