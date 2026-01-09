@@ -17,7 +17,6 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Brain
 } from 'lucide-react';
 import SupportTickets from './SupportTickets';
 import { AIModelManager } from '@/components/admin/AIModelManager';

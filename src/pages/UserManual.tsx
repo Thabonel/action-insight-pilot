@@ -13,12 +13,12 @@ import {
   BarChart3, 
   Workflow,
   Settings,
-  Brain,
   Target,
   TrendingUp,
   MessageSquare,
   PlusCircle
 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const UserManual: React.FC = () => {
   return (
@@ -72,7 +72,7 @@ const UserManual: React.FC = () => {
                 <h4>Key Features</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <Brain className="h-6 w-6 text-blue-600 mb-2" />
+                    <LogoMarkIcon className="h-6 w-6 mb-2" />
                     <h5 className="font-semibold">AI-Powered Dashboard</h5>
                     <p className="text-sm">Conversational interface for natural language queries and insights</p>
                   </div>
@@ -115,7 +115,7 @@ const UserManual: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Brain className="h-6 w-6" />
+                  <LogoMarkIcon className="h-6 w-6" />
                   <span>AI Dashboard</span>
                 </CardTitle>
               </CardHeader>

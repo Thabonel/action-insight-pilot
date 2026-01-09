@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  Brain, 
   TrendingUp, 
   Clock, 
   Activity,
@@ -12,6 +11,7 @@ import {
   CheckCircle,
   ArrowRight
 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { RealInsights } from '@/types/insights';
 
 interface LearningInsightsProps {
@@ -78,7 +78,7 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
     switch (type) {
       case 'positive': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'warning': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'info': return <Brain className="h-4 w-4 text-blue-600" />;
+      case 'info': return <LogoMarkIcon className="h-4 w-4" />;
       default: return <Activity className="h-4 w-4 text-gray-600" />;
     }
   };
@@ -99,8 +99,8 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Brain className="h-5 w-5 animate-pulse" />
-            <span>Learning Insights</span>
+          <LogoMarkIcon className="h-5 w-5" />
+          <span>Learning Insights</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -121,7 +121,7 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Brain className="h-5 w-5" />
+          <LogoMarkIcon className="h-5 w-5" />
           <span>AI Insights</span>
         </CardTitle>
       </CardHeader>

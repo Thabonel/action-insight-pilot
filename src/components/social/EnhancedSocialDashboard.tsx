@@ -10,11 +10,11 @@ import {
   TrendingUp, 
   TestTube, 
   Image, 
-  Brain,
   Zap,
   Target,
   BarChart3
 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const EnhancedSocialDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('realtime');
@@ -53,7 +53,7 @@ const EnhancedSocialDashboard: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <Brain className="h-5 w-5 text-purple-600" />
+              <LogoMarkIcon className="h-5 w-5" />
               <div>
                 <p className="text-sm text-gray-600">AI Posts Generated</p>
                 <p className="text-2xl font-bold">47</p>
@@ -141,7 +141,7 @@ const EnhancedSocialDashboard: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Brain className="h-5 w-5" />
+                  <LogoMarkIcon className="h-5 w-5" />
                   <span>Multi-Model AI Generation</span>
                 </CardTitle>
               </CardHeader>

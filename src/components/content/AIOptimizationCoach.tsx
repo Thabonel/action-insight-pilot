@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  Brain, 
   TrendingUp, 
   Target, 
   Lightbulb, 
@@ -17,6 +16,7 @@ import {
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { useToast } from '@/hooks/use-toast';
 
 interface Suggestion {
@@ -159,7 +159,7 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-600" />
+            <LogoMarkIcon className="h-5 w-5" />
             AI Optimization Coach
           </CardTitle>
         </CardHeader>

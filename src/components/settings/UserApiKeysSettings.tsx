@@ -6,9 +6,9 @@ import {
   Key, 
   Video,
   Share2,
-  Brain,
   Globe
 } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 import SecurityBanner from './api-keys/SecurityBanner';
 import SectionBanner from './api-keys/SectionBanner';
 import ApiKeySection from './api-keys/ApiKeySection';
@@ -65,7 +65,7 @@ const UserApiKeysSettings: React.FC = () => {
         <Tabs defaultValue="ai-services" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="ai-services" className="flex items-center space-x-2">
-              <Brain className="h-4 w-4" />
+              <LogoMarkIcon className="h-4 w-4" />
               <span>AI Services</span>
             </TabsTrigger>
             <TabsTrigger value="social-platforms" className="flex items-center space-x-2">

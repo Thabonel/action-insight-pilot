@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { BarChart, TrendingUp, Target, AlertTriangle, Lightbulb, Brain } from 'lucide-react';
+import { BarChart, TrendingUp, Target, AlertTriangle, Lightbulb } from 'lucide-react';
+import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const AnalyticsAIAssistant: React.FC = () => {
   const [insights] = useState({
@@ -90,7 +91,7 @@ const AnalyticsAIAssistant: React.FC = () => {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Brain className="h-5 w-5 text-purple-600" />
+          <LogoMarkIcon className="h-5 w-5" />
           <span>Analytics AI Assistant</span>
         </CardTitle>
       </CardHeader>
