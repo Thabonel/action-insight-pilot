@@ -157,12 +157,12 @@ const Layout: React.FC = () => {
   const navItems = mode === 'simple' ? simpleNavItems : advancedNavItems;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-[#0B0D10]">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto">
+      <aside className="w-64 bg-white dark:bg-[#0B0D10] shadow-sm dark:shadow-none border-r border-gray-200 dark:border-[#273140] overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900">AI Boost Campaign</h2>
-          <p className="text-sm text-gray-600 mt-1">Intelligent Automation Platform</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-[#E9EEF5]">AI Boost Campaign</h2>
+          <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1">Intelligent Automation Platform</p>
 
           {/* Mode Switcher */}
           {!modeLoading && (
@@ -188,7 +188,7 @@ const Layout: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    className="w-full justify-start text-gray-600 dark:text-[#94A3B8] hover:text-gray-900 dark:hover:text-[#E9EEF5] hover:bg-gray-50 dark:hover:bg-[#1C2430]"
                     disabled={isLoggingOut}
                   >
                     <NeuralFlowIcon name="sign-out" size={16} className="mr-2" />
@@ -225,8 +225,8 @@ const Layout: React.FC = () => {
                   to={item.href}
                   className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-blue-50 dark:bg-[rgba(59,130,246,0.15)] text-blue-700 dark:text-[#60A5FA] border-r-2 border-blue-600 dark:border-[#3B82F6]'
+                      : 'text-gray-700 dark:text-[#94A3B8] hover:bg-gray-50 dark:hover:bg-[#1C2430] hover:text-gray-900 dark:hover:text-[#E9EEF5]'
                   }`}
                 >
                   <div className="mr-3 flex-shrink-0">
@@ -240,7 +240,7 @@ const Layout: React.FC = () => {
                       )}
                     </div>
                     <p className={`text-xs mt-0.5 truncate ${
-                      isActive ? 'text-blue-600' : 'text-gray-500'
+                      isActive ? 'text-blue-600 dark:text-[#60A5FA]' : 'text-gray-500 dark:text-[#64748B]'
                     }`}>
                       {item.description}
                     </p>
@@ -253,7 +253,7 @@ const Layout: React.FC = () => {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto bg-gray-50 dark:bg-[#0B0D10]">
         <div className="h-full">
           <Outlet />
         </div>
