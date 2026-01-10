@@ -14,7 +14,7 @@ const PrivacyPolicy: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <LogoMarkIcon className="h-8 w-8" />
-              <span className="text-xl font-bold text-black">AI Marketing Hub</span>
+              <span className="text-xl font-bold text-black">AI Boost Campaign</span>
             </div>
             <Button variant="ghost" onClick={() => navigate('/')} className="text-black hover:text-blue-600">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -32,7 +32,7 @@ const PrivacyPolicy: React.FC = () => {
           <section>
             <h2 className="text-2xl font-bold text-black mb-4">1. Introduction</h2>
             <p className="text-gray-700 mb-4">
-              AI Marketing Hub ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
+              AI Boost Campaign ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
             </p>
           </section>
 

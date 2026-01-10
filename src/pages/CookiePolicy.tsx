@@ -14,7 +14,7 @@ const CookiePolicy: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <LogoMarkIcon className="h-8 w-8" />
-              <span className="text-xl font-bold text-black">AI Marketing Hub</span>
+              <span className="text-xl font-bold text-black">AI Boost Campaign</span>
             </div>
             <Button variant="ghost" onClick={() => navigate('/')} className="text-black hover:text-blue-600">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -39,7 +39,7 @@ const CookiePolicy: React.FC = () => {
           <section>
             <h2 className="text-2xl font-bold text-black mb-4">2. How We Use Cookies</h2>
             <p className="text-gray-700 mb-4">
-              AI Marketing Hub uses cookies to:
+              AI Boost Campaign uses cookies to:
             </p>
             <ul className="list-disc pl-6 text-gray-700 space-y-2">
               <li>Keep you signed in to your account</li>

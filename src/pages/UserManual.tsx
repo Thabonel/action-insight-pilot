@@ -27,7 +27,7 @@ const UserManual: React.FC = () => {
       <div className="text-center space-y-4 mb-8">
         <div className="flex items-center justify-center space-x-3">
           <BookOpen className="h-8 w-8 text-blue-600" />
-          <h1 className="text-4xl font-bold text-gray-900">AI Marketing Hub</h1>
+          <h1 className="text-4xl font-bold text-gray-900">AI Boost Campaign</h1>
         </div>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
           Complete User Manual - Your comprehensive guide to mastering the AI-powered marketing automation platform
@@ -62,9 +62,9 @@ const UserManual: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="prose max-w-none">
-                <h3>Welcome to AI Marketing Hub</h3>
+                <h3>Welcome to AI Boost Campaign</h3>
                 <p>
-                  AI Marketing Hub is an intelligent marketing automation platform that combines AI-powered insights 
+                  AI Boost Campaign is an intelligent marketing automation platform that combines AI-powered insights 
                   with comprehensive campaign management tools. The platform offers both conversational AI interfaces 
                   and traditional dashboard views to accommodate different user preferences.
                 </p>
@@ -587,7 +587,7 @@ const UserManual: React.FC = () => {
       <div className="bg-gray-50 rounded-lg p-6 text-center space-y-4">
         <h3 className="text-lg font-semibold">Need Additional Help?</h3>
         <p className="text-sm text-gray-600">
-          This user manual covers the core functionality of AI Marketing Hub. For technical support, 
+          This user manual covers the core functionality of AI Boost Campaign. For technical support, 
           additional features, or custom integrations, please contact our support team.
         </p>
         <div className="flex justify-center space-x-4 text-sm">

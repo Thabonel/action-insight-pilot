@@ -14,7 +14,7 @@ const AcceptableUsePolicy: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <LogoMarkIcon className="h-8 w-8" />
-              <span className="text-xl font-bold text-black">AI Marketing Hub</span>
+              <span className="text-xl font-bold text-black">AI Boost Campaign</span>
             </div>
             <Button variant="ghost" onClick={() => navigate('/')} className="text-black hover:text-blue-600">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -32,7 +32,7 @@ const AcceptableUsePolicy: React.FC = () => {
           <section>
             <h2 className="text-2xl font-bold text-black mb-4">1. Purpose</h2>
             <p className="text-gray-700">
-              This Acceptable Use Policy ("Policy") describes prohibited uses of AI Marketing Hub ("Service"). By using the Service, you agree to comply with this Policy. Violation of this Policy may result in suspension or termination of your account.
+              This Acceptable Use Policy ("Policy") describes prohibited uses of AI Boost Campaign ("Service"). By using the Service, you agree to comply with this Policy. Violation of this Policy may result in suspension or termination of your account.
             </p>
           </section>
 

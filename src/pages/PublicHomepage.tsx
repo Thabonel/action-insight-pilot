@@ -70,7 +70,7 @@ const PublicHomepage: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <LogoMarkIcon className="h-8 w-8" />
-              <span className="text-xl font-bold text-black">AI Marketing Hub</span>
+              <span className="text-xl font-bold text-black">AI Boost Campaign</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button 
@@ -97,7 +97,7 @@ const PublicHomepage: React.FC = () => {
         <div className="absolute inset-0 z-0">
           <img
             src="https://kciuuxoqxfsogjuqflou.supabase.co/storage/v1/object/public/digital-assets/Marketing%20Hero.jpg"
-            alt="AI Marketing Hub"
+            alt="AI Boost Campaign"
             className="w-full h-full object-cover"
           />
           {/* Subtle vignette overlay */}
@@ -111,7 +111,7 @@ const PublicHomepage: React.FC = () => {
               Powered by Advanced AI
             </Badge>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
-              AI Marketing Hub
+              AI Boost Campaign
               <span className="block text-blue-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">Run Your Marketing on Autopilot</span>
             </h1>
             <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed font-medium drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
@@ -262,7 +262,7 @@ const PublicHomepage: React.FC = () => {
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center space-x-2 mb-4 md:mb-0">
                 <LogoMarkIcon className="h-8 w-8" />
-                <span className="text-xl font-bold text-black">AI Marketing Hub</span>
+                <span className="text-xl font-bold text-black">AI Boost Campaign</span>
               </div>
               <div className="flex flex-wrap justify-center gap-6 text-sm">
                 <button onClick={() => navigate('/privacy')} className="text-gray-600 hover:text-blue-600">
@@ -280,7 +280,7 @@ const PublicHomepage: React.FC = () => {
               </div>
             </div>
             <div className="text-center text-gray-600 text-sm">
-              © {new Date().getFullYear()} AI Marketing Hub. All rights reserved.
+              © {new Date().getFullYear()} AI Boost Campaign. All rights reserved.
             </div>
           </div>
         </div>

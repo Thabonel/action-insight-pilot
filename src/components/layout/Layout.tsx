@@ -170,7 +170,7 @@ const Layout: React.FC = () => {
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-sm border-r border-gray-200 overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900">AI Marketing Hub</h2>
+          <h2 className="text-xl font-bold text-gray-900">AI Boost Campaign</h2>
           <p className="text-sm text-gray-600 mt-1">Intelligent Automation Platform</p>
 
           {/* Mode Switcher */}
