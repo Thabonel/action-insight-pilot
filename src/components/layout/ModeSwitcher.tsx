@@ -9,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye } from 'lucide-react';
 import { useUserMode } from '@/hooks/useUserMode';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -96,7 +95,6 @@ const ModeSwitcher: React.FC = () => {
         <DropdownMenuSeparator />
 
         <div className="px-2 py-2 text-xs text-gray-500">
-          <Eye className="h-3 w-3 inline mr-1" />
           You can switch modes anytime
         </div>
       </DropdownMenuContent>
