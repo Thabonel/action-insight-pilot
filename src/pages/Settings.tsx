@@ -73,20 +73,20 @@ const Settings: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6 bg-white min-h-screen">
+      <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-600">Loading settings...</div>
+          <div className="text-gray-600 dark:text-[#94A3B8]">Loading settings...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 bg-white min-h-screen">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-black">Settings</h1>
-          <p className="text-gray-600 mt-2">Manage your workspace, integrations, and AI behavior</p>
+          <h1 className="text-3xl font-bold text-black dark:text-[#E9EEF5]">Settings</h1>
+          <p className="text-gray-600 dark:text-[#94A3B8] mt-2">Manage your workspace, integrations, and AI behavior</p>
         </div>
         <div className="flex space-x-2">
           <button
@@ -99,16 +99,16 @@ const Settings: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 lg:w-fit bg-gray-100">
+        <TabsList className="grid w-full grid-cols-7 lg:w-fit bg-gray-100 dark:bg-[#151A21]">
           {availableSections.map((section) => (
             <TabsTrigger
               key={section.id}
               value={section.id}
-              className="flex items-center space-x-2 text-black data-[state=active]:bg-white data-[state=active]:text-black"
+              className="flex items-center space-x-2 text-black dark:text-[#94A3B8] data-[state=active]:bg-white dark:data-[state=active]:bg-[#273140] data-[state=active]:text-black dark:data-[state=active]:text-[#E9EEF5]"
             >
               <span>{section.name}</span>
               {section.enterprise && (
-                <Badge variant="outline" className="text-xs ml-1">Pro</Badge>
+                <Badge variant="outline" className="text-xs ml-1 dark:border-[#273140] dark:text-[#94A3B8]">Pro</Badge>
               )}
             </TabsTrigger>
           ))}
@@ -119,21 +119,21 @@ const Settings: React.FC = () => {
           {availableSections.map((section) => (
             <Card
               key={section.id}
-              className={`cursor-pointer transition-all duration-200 hover:shadow-md bg-white border-gray-200 ${
+              className={`cursor-pointer transition-all duration-200 hover:shadow-md dark:hover:shadow-none bg-white dark:bg-[#151A21] border-gray-200 dark:border-[#273140] ${
                 activeTab === section.id ? 'ring-2 ring-blue-500' : ''
               }`}
               onClick={() => setActiveTab(section.id)}
             >
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
-                  <h3 className="font-medium text-black">{section.name}</h3>
+                  <h3 className="font-medium text-black dark:text-[#E9EEF5]">{section.name}</h3>
                   {section.enterprise && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs dark:bg-[#273140] dark:text-[#94A3B8]">
                       Enterprise
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mt-1">{section.description}</p>
+                <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1">{section.description}</p>
               </CardContent>
             </Card>
           ))}
