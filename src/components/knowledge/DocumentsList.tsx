@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { KnowledgeDocument, KnowledgeService } from '@/lib/services/knowledge-service'
 import { useKnowledgeDocuments } from '@/hooks/useKnowledge'
+import { DocumentViewerDialog } from './DocumentViewerDialog'
 
 interface DocumentsListProps {
   bucketId: string
@@ -12,21 +13,22 @@ interface DocumentsListProps {
 export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
   const { documents, reload, reprocessDocument } = useKnowledgeDocuments(bucketId)
   const [filter, setFilter] = useState('')
-  const [editing, setEditing] = useState<KnowledgeDocument | null>(null)
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [activeDoc, setActiveDoc] = useState<KnowledgeDocument | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
 
   useEffect(() => {
-    if (editing) {
-      setEditTitle(editing.title)
-      setEditContent(editing.content)
+    if (activeDoc) {
+      setEditTitle(activeDoc.title)
+      setEditContent(activeDoc.content)
     }
-  }, [editing])
+  }, [activeDoc])
 
   const onSave = async () => {
-    if (!editing) return
-    await KnowledgeService.updateDocument(editing.id, { title: editTitle, content: editContent })
-    setEditing(null)
+    if (!activeDoc) return
+    await KnowledgeService.updateDocument(activeDoc.id, { title: editTitle, content: editContent })
+    setViewerOpen(false)
     await reload()
   }
 
@@ -82,7 +84,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
                     <div className="text-sm text-muted-foreground line-clamp-2">{doc.content}</div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setEditing(doc)}>View</Button>
+                    <Button size="sm" variant="outline" onClick={() => { setActiveDoc(doc); setViewerOpen(true) }}>View</Button>
                     <Button size="sm" variant="outline" onClick={() => downloadDoc(doc)}>Download</Button>
                     <Button size="sm" variant="outline" onClick={() => reprocessDocument(doc.id)}>Reprocess</Button>
                     <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => onDelete(doc)}>Delete</Button>
@@ -93,23 +95,15 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
           </div>
         )}
 
-        {editing && (
-          <div className="mt-6 border rounded-lg p-4 bg-card">
-            <div className="mb-3">
-              <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-            </div>
-            <textarea
-              className="w-full h-64 rounded-md border p-3 bg-background"
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-            />
-            <div className="mt-3 flex gap-2">
-              <Button onClick={onSave}>Save</Button>
-              <Button variant="outline" onClick={() => downloadDoc(editing!, true)}>Download</Button>
-              <Button variant="outline" onClick={() => setEditing(null)}>Close</Button>
-            </div>
-          </div>
-        )}
+        <DocumentViewerDialog
+          open={viewerOpen}
+          onOpenChange={setViewerOpen}
+          document={activeDoc}
+          onSave={async (t, c) => { setEditTitle(t); setEditContent(c); await onSave(); }}
+          onDelete={async () => { if (activeDoc) await onDelete(activeDoc) }}
+          onReprocess={async () => { if (activeDoc) await reprocessDocument(activeDoc.id) }}
+          onDownload={(edited) => activeDoc && downloadDoc({ ...activeDoc, title: editTitle, content: editContent }, edited)}
+        />
       </CardContent>
     </Card>
   )
