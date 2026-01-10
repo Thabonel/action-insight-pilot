@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserMode } from '@/hooks/useUserMode';
@@ -25,22 +25,7 @@ const Layout: React.FC = () => {
   const { user, signOut } = useAuth();
   const { mode } = useUserMode();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const [subtitleWidth, setSubtitleWidth] = useState<number | null>(null);
-
-  useEffect(() => {
-    const el = titleRef.current;
-    if (!el) return;
-    const update = () => setSubtitleWidth(el.getBoundingClientRect().width);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener('resize', update);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', update);
-    };
-  }, [collapsed]);
+  
 
   const handleLogout = async () => {
     try {
@@ -197,11 +182,11 @@ const Layout: React.FC = () => {
               {/* Title row: logo + name on the same baseline */}
               <div className="flex items-baseline gap-1">
                 <LogoMarkIcon className="h-[1.35em] w-[1.35em] align-baseline relative top-[2px] -mr-0.5" />
-                <h2 ref={titleRef} className="text-xl font-bold leading-tight tracking-tight -ml-[2px] text-gray-900 dark:text-[#E9EEF5] whitespace-normal">
+                <h2 className="text-xl font-bold leading-tight tracking-tight -ml-[2px] text-gray-900 dark:text-[#E9EEF5] whitespace-normal">
                   I Boost Campaign
                 </h2>
               </div>
-              <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1" style={{ width: subtitleWidth ?? undefined }}>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1 max-w-[18ch]">
                 {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
               </p>
             </div>
