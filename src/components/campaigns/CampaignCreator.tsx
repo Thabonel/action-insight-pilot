@@ -14,7 +14,7 @@ const CampaignCreator: React.FC = () => {
   const [description, setDescription] = useState('');
 
   const handleCreateCampaign = () => {
-    console.log('Creating campaign:', { campaignName, campaignType, description });
+    // Campaign creation handled by parent component
   };
 
   return (

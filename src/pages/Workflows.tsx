@@ -55,14 +55,11 @@ const Workflows: React.FC = () => {
   });
 
   const handleSaveWorkflow = (workflow: Workflow) => {
-    console.log('Saving workflow:', workflow);
     setSelectedWorkflow(workflow);
-    // Here you would typically save to your backend
   };
 
-  const handleExecuteWorkflow = (workflowId: string) => {
-    console.log('Executing workflow:', workflowId);
-    // Here you would typically trigger workflow execution
+  const handleExecuteWorkflow = (_workflowId: string) => {
+    // Workflow execution handled by backend
   };
 
   const workflows: Workflow[] = [

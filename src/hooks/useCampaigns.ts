@@ -80,20 +80,16 @@ export function useCampaigns() {
     try {
       setIsLoading(true)
       setError(null)
-      console.log('Loading campaigns...')
-      
+
       const { data, error } = await supabase
         .from('campaigns')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Supabase error:', error)
         throw error
       }
-      
-      console.log('Campaigns loaded successfully:', data?.length || 0)
-      
+
       // Map database data to our interface with proper type conversion
       const mappedCampaigns: Campaign[] = (data || []).map(campaign => ({
         ...campaign,

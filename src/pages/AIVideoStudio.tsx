@@ -667,7 +667,6 @@ const AIVideoStudio: React.FC = () => {
                   videoUrl={videoUrl}
                   defaultCaption={goal}
                   onPublishComplete={(results: PlatformResult[]) => {
-                    console.log('Publishing complete:', results);
                     toast({
                       title: "Publishing Complete",
                       description: `Published to ${results.filter(r => r.status === 'published').length} platform(s)`,

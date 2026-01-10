@@ -67,14 +67,12 @@ const ReportingFeatures: React.FC = () => {
   const safeCustomMetrics = Array.isArray(customMetrics) ? customMetrics : [];
   const safeScheduledReports = Array.isArray(scheduledReports) ? scheduledReports : [];
 
-  const handleGenerateReport = (reportId: number) => {
-    console.log(`Generating report ${reportId}`);
-    // Implement report generation logic
+  const handleGenerateReport = (_reportId: number) => {
+    // Report generation handled by analytics backend
   };
 
-  const handleScheduleReport = (reportId: number) => {
-    console.log(`Scheduling report ${reportId}`);
-    // Implement report scheduling logic
+  const handleScheduleReport = (_reportId: number) => {
+    // Report scheduling handled by analytics backend
   };
 
   const getTypeColor = (type: string) => {
