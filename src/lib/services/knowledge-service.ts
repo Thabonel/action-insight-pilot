@@ -151,6 +151,41 @@ export class KnowledgeService {
     if (!data.success) throw new Error(data.error)
   }
 
+  static async updateDocument(document_id: string, updates: { title?: string; content?: string }): Promise<KnowledgeDocument> {
+    // Try edge function first for consistent processing, then fall back to direct table update
+    try {
+      const { data, error } = await supabase.functions.invoke('knowledge-processor', {
+        body: { action: 'update_document', document_id, ...updates }
+      })
+      if (!error && data?.success) return data.data as KnowledgeDocument
+    } catch {}
+
+    // Fallback direct update
+    const { data, error } = await (supabase as any)
+      .from('knowledge_documents')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', document_id)
+      .select('*')
+      .single()
+    if (error) throw error
+    return data as KnowledgeDocument
+  }
+
+  static async deleteDocument(document_id: string): Promise<void> {
+    try {
+      const { data, error } = await supabase.functions.invoke('knowledge-processor', {
+        body: { action: 'delete_document', document_id }
+      })
+      if (!error && data?.success) return
+    } catch {}
+
+    const { error } = await (supabase as any)
+      .from('knowledge_documents')
+      .delete()
+      .eq('id', document_id)
+    if (error) throw error
+  }
+
   static extractTextFromFile(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
