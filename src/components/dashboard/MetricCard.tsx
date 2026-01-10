@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp } from 'lucide-react';
 import { SystemMetric } from '@/types/metrics';
 import { getColorClasses } from '@/utils/metricUtils';
 
@@ -34,7 +33,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ metric }) => {
           <div className="flex items-baseline space-x-2">
             <span className="text-2xl font-bold text-slate-900">{metric.value}</span>
             {metric.trend === 'up' && (
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span className="text-green-500 font-bold">+</span>
             )}
             {metric.trend === 'loading' && (
               <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>

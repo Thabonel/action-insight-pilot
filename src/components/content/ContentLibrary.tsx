@@ -4,16 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  Filter, 
-  Calendar, 
-  TrendingUp, 
-  Clock,
-  Tag,
-  FileText,
-  Archive
-} from 'lucide-react';
 
 export interface ContentLibraryProps {
   onPostSelect: (postId: string) => void;
@@ -51,8 +41,8 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
     if (selectedFilter === 'high-performance') return post.performance === 'high';
     if (selectedFilter === 'needs-update') return post.needsUpdate;
     return true;
-  }).filter(post => 
-    searchTerm === '' || 
+  }).filter(post =>
+    searchTerm === '' ||
     post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     post.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -70,25 +60,20 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Archive className="h-5 w-5" />
-            Content Library
-          </CardTitle>
+          <CardTitle>Content Library</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Search and Filters */}
           <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <div className="flex-1">
               <Input
                 placeholder="Search posts by title, content, or tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
               />
             </div>
-            <Button variant="outline" size="icon">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline">
+              Filter
             </Button>
           </div>
 
@@ -115,7 +100,6 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
               </div>
             ) : filteredPosts.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>No content found. Start creating content to build your library.</p>
               </div>
             ) : (
@@ -129,22 +113,15 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
                   <h3 className="font-medium text-gray-900">{post.title}</h3>
                   {getPerformanceBadge(post.performance)}
                 </div>
-                
+
                 <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {post.publishDate}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <FileText className="h-4 w-4" />
-                    {post.category}
-                  </div>
+                  <span>{post.publishDate}</span>
+                  <span>{post.category}</span>
                 </div>
 
                 <div className="flex gap-2">
                   {post.tags.map((tag) => (
                     <Badge key={tag} variant="outline" className="text-xs">
-                      <Tag className="h-3 w-3 mr-1" />
                       {tag}
                     </Badge>
                   ))}
@@ -159,11 +136,9 @@ export const ContentLibrary: React.FC<ContentLibraryProps> = ({ onPostSelect }) 
             <h4 className="font-medium mb-3">Content Intelligence</h4>
             <div className="grid grid-cols-2 gap-4">
               <Button variant="outline" size="sm">
-                <TrendingUp className="h-4 w-4 mr-2" />
                 Generate FAQ
               </Button>
               <Button variant="outline" size="sm">
-                <Clock className="h-4 w-4 mr-2" />
                 Topic Clusters
               </Button>
             </div>

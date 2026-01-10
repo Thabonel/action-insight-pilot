@@ -3,14 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Rocket, Target, Mail, Users, Zap, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface QuickStartStep {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
   completed: boolean;
   action?: () => void;
 }
@@ -34,28 +32,24 @@ const ActionInsightQuickStart: React.FC = () => {
       id: 'setup',
       title: 'Define Your Product',
       description: 'Tell me about your business or service',
-      icon: <Target className="h-5 w-5" />,
       completed: completedSteps.has(0)
     },
     {
       id: 'audience',
       title: 'Identify Target Audience',
       description: 'Who are your ideal customers?',
-      icon: <Users className="h-5 w-5" />,
       completed: completedSteps.has(1)
     },
     {
       id: 'strategy',
       title: 'Create Marketing Strategy',
       description: 'Generate your custom marketing plan',
-      icon: <Rocket className="h-5 w-5" />,
       completed: completedSteps.has(2)
     },
     {
       id: 'launch',
       title: 'Launch First Campaign',
       description: 'Start your marketing automation',
-      icon: <Zap className="h-5 w-5" />,
       completed: completedSteps.has(3)
     }
   ];
@@ -201,7 +195,6 @@ const ActionInsightQuickStart: React.FC = () => {
         return (
           <div className="space-y-4">
             <div className="text-center py-6">
-              <Rocket className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Ready to Generate Your Strategy!</h3>
               <p className="text-muted-foreground mb-6">
                 I'll create a custom marketing strategy based on your inputs.
@@ -217,7 +210,6 @@ const ActionInsightQuickStart: React.FC = () => {
         return (
           <div className="space-y-4">
             <div className="text-center py-6">
-              <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Strategy Created!</h3>
               <p className="text-muted-foreground mb-6">
                 Your marketing strategy is ready. Now let's launch your first campaign.
@@ -254,7 +246,6 @@ const ActionInsightQuickStart: React.FC = () => {
       default:
         return (
           <div className="text-center py-6">
-            <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Quick Start Complete!</h3>
             <p className="text-muted-foreground">
               You're ready to start marketing effectively with Action Insight Pilot.
@@ -280,10 +271,7 @@ const ActionInsightQuickStart: React.FC = () => {
         <div className="lg:col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Progress
-              </CardTitle>
+              <CardTitle>Progress</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -307,7 +295,7 @@ const ActionInsightQuickStart: React.FC = () => {
                           : 'bg-muted-foreground/20 text-muted-foreground'
                       }`}
                     >
-                      {step.completed ? <CheckCircle className="h-4 w-4" /> : step.icon}
+                      <span className="text-xs font-medium">{index + 1}</span>
                     </div>
                     <div className="flex-1">
                       <div className="font-medium text-sm">{step.title}</div>
@@ -338,25 +326,19 @@ const ActionInsightQuickStart: React.FC = () => {
       {/* Quick Tips */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5" />
-            Quick Marketing Tips
-          </CardTitle>
+          <CardTitle>Quick Marketing Tips</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 bg-primary/10 rounded-lg">
-              <Target className="h-8 w-8 text-primary mx-auto mb-2" />
               <h4 className="font-semibold text-sm">Focus on Benefits</h4>
               <p className="text-xs text-muted-foreground">Show ROI, time savings, cost reduction</p>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
               <h4 className="font-semibold text-sm">Free Trial</h4>
               <p className="text-xs text-muted-foreground">Let customers experience the value</p>
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <Zap className="h-8 w-8 text-purple-600 mx-auto mb-2" />
               <h4 className="font-semibold text-sm">Case Studies</h4>
               <p className="text-xs text-muted-foreground">Prove success with real examples</p>
             </div>

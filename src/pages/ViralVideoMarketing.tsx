@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Video, MessageCircle, Mail, TrendingUp, Settings, Play, Users, Target, Sparkles } from 'lucide-react';
 import ViralContentGenerator from '@/components/viral/ViralContentGenerator';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
@@ -50,7 +49,6 @@ const ViralVideoMarketing: React.FC = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Videos Posted</CardTitle>
-                <Video className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">24</div>
@@ -61,7 +59,6 @@ const ViralVideoMarketing: React.FC = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Comments Tracked</CardTitle>
-                <MessageCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">1,247</div>
@@ -72,7 +69,6 @@ const ViralVideoMarketing: React.FC = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Emails Collected</CardTitle>
-                <Mail className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">342</div>
@@ -83,7 +79,6 @@ const ViralVideoMarketing: React.FC = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">8.4%</div>
@@ -95,10 +90,7 @@ const ViralVideoMarketing: React.FC = () => {
           {/* Active Keywords */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Active Keywords
-              </CardTitle>
+              <CardTitle>Active Keywords</CardTitle>
               <CardDescription>
                 Keywords that trigger email collection when commented
               </CardDescription>
@@ -132,30 +124,21 @@ const ViralVideoMarketing: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Play className="h-5 w-5" />
-                  Post New Video
-                </CardTitle>
+                <CardTitle>Post New Video</CardTitle>
                 <CardDescription>Upload and schedule a new viral video</CardDescription>
               </CardHeader>
             </Card>
 
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  View New Leads
-                </CardTitle>
+                <CardTitle>View New Leads</CardTitle>
                 <CardDescription>Review recently collected email addresses</CardDescription>
               </CardHeader>
             </Card>
 
             <Card className="cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Automation Settings
-                </CardTitle>
+                <CardTitle>Automation Settings</CardTitle>
                 <CardDescription>Configure comment monitoring and responses</CardDescription>
               </CardHeader>
             </Card>

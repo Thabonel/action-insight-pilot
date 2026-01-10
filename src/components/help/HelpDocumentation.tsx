@@ -4,22 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Search, 
-  BookOpen, 
-  PlayCircle, 
-  MessageSquare, 
-  ArrowRight,
-  Target,
-  Users,
-  BarChart3,
-  Zap,
-  Settings,
-  FileText,
-  HelpCircle,
-  Lightbulb,
-  Star
-} from 'lucide-react';
 
 interface HelpArticle {
   id: string;
@@ -29,7 +13,6 @@ interface HelpArticle {
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   readTime: string;
   tags: string[];
-  icon: React.ReactNode;
   content?: string;
 }
 
@@ -41,8 +24,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Getting Started',
     difficulty: 'Beginner',
     readTime: '5 min',
-    tags: ['campaigns', 'basics', 'setup'],
-    icon: <Target className="h-5 w-5" />
+    tags: ['campaigns', 'basics', 'setup']
   },
   {
     id: 'autopilot-setup',
@@ -51,8 +33,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Getting Started',
     difficulty: 'Beginner',
     readTime: '7 min',
-    tags: ['autopilot', 'ai', 'automation'],
-    icon: <Zap className="h-5 w-5" />
+    tags: ['autopilot', 'ai', 'automation']
   },
   {
     id: 'ai-api-keys',
@@ -61,8 +42,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Getting Started',
     difficulty: 'Beginner',
     readTime: '4 min',
-    tags: ['setup', 'api-keys', 'claude', 'gemini'],
-    icon: <Settings className="h-5 w-5" />
+    tags: ['setup', 'api-keys', 'claude', 'gemini']
   },
   {
     id: 'ai-video-studio',
@@ -71,8 +51,7 @@ const helpArticles: HelpArticle[] = [
     category: 'AI Features',
     difficulty: 'Intermediate',
     readTime: '10 min',
-    tags: ['video', 'ai', 'gemini', 'veo-3'],
-    icon: <PlayCircle className="h-5 w-5" />
+    tags: ['video', 'ai', 'gemini', 'veo-3']
   },
   {
     id: 'conversational-dashboard',
@@ -81,8 +60,7 @@ const helpArticles: HelpArticle[] = [
     category: 'AI Features',
     difficulty: 'Beginner',
     readTime: '5 min',
-    tags: ['ai', 'chat', 'claude', 'dashboard'],
-    icon: <MessageSquare className="h-5 w-5" />
+    tags: ['ai', 'chat', 'claude', 'dashboard']
   },
   {
     id: 'lead-management',
@@ -91,8 +69,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Lead Management',
     difficulty: 'Beginner',
     readTime: '3 min',
-    tags: ['leads', 'scoring', 'conversion'],
-    icon: <Users className="h-5 w-5" />
+    tags: ['leads', 'scoring', 'conversion']
   },
   {
     id: 'analytics-guide',
@@ -101,8 +78,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Analytics',
     difficulty: 'Intermediate',
     readTime: '8 min',
-    tags: ['analytics', 'metrics', 'performance', 'ai'],
-    icon: <BarChart3 className="h-5 w-5" />
+    tags: ['analytics', 'metrics', 'performance', 'ai']
   },
   {
     id: 'automation-workflows',
@@ -111,8 +87,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Automation',
     difficulty: 'Advanced',
     readTime: '12 min',
-    tags: ['automation', 'workflows', 'efficiency'],
-    icon: <Zap className="h-5 w-5" />
+    tags: ['automation', 'workflows', 'efficiency']
   },
   {
     id: 'budget-optimization',
@@ -121,8 +96,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Strategy',
     difficulty: 'Intermediate',
     readTime: '6 min',
-    tags: ['budget', 'roi', 'optimization', 'autopilot'],
-    icon: <Target className="h-5 w-5" />
+    tags: ['budget', 'roi', 'optimization', 'autopilot']
   },
   {
     id: 'integration-setup',
@@ -131,8 +105,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Integrations',
     difficulty: 'Intermediate',
     readTime: '8 min',
-    tags: ['integrations', 'social-media', 'platforms'],
-    icon: <Settings className="h-5 w-5" />
+    tags: ['integrations', 'social-media', 'platforms']
   },
   {
     id: 'simple-vs-advanced',
@@ -141,8 +114,7 @@ const helpArticles: HelpArticle[] = [
     category: 'Getting Started',
     difficulty: 'Beginner',
     readTime: '3 min',
-    tags: ['interface', 'modes', 'settings'],
-    icon: <Settings className="h-5 w-5" />
+    tags: ['interface', 'modes', 'settings']
   },
   {
     id: 'ai-content-generation',
@@ -151,26 +123,22 @@ const helpArticles: HelpArticle[] = [
     category: 'AI Features',
     difficulty: 'Beginner',
     readTime: '6 min',
-    tags: ['ai', 'content', 'claude', 'copywriting'],
-    icon: <FileText className="h-5 w-5" />
+    tags: ['ai', 'content', 'claude', 'copywriting']
   }
 ];
 
 const quickTips = [
   {
     title: 'Use descriptive campaign names',
-    description: 'Include date, channel, and goal for easy identification',
-    icon: <Lightbulb className="h-4 w-4 text-yellow-600" />
+    description: 'Include date, channel, and goal for easy identification'
   },
   {
     title: 'Review lead scores weekly',
-    description: 'High-scoring leads need immediate attention',
-    icon: <Star className="h-4 w-4 text-blue-600" />
+    description: 'High-scoring leads need immediate attention'
   },
   {
     title: 'Set realistic budgets',
-    description: 'Start small and scale successful campaigns',
-    icon: <Target className="h-4 w-4 text-green-600" />
+    description: 'Start small and scale successful campaigns'
   }
 ];
 
@@ -184,9 +152,9 @@ export const HelpDocumentation: React.FC = () => {
     const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          article.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -211,22 +179,19 @@ export const HelpDocumentation: React.FC = () => {
 
       {/* Search */}
       <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search for help articles, guides, or specific topics..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full"
-          />
-        </div>
+        <Input
+          placeholder="Search for help articles, guides, or specific topics..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
+        />
       </div>
 
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
         <TabsList className="grid grid-cols-4 lg:grid-cols-7 w-full">
           {categories.map(category => (
-            <TabsTrigger 
-              key={category} 
+            <TabsTrigger
+              key={category}
               value={category}
               className="text-xs"
             >
@@ -239,20 +204,14 @@ export const HelpDocumentation: React.FC = () => {
           {/* Quick Tips */}
           <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-800">
-                <Lightbulb className="h-5 w-5" />
-                Quick Tips
-              </CardTitle>
+              <CardTitle className="text-blue-800">Quick Tips</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {quickTips.map((tip, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-white/60 rounded-lg">
-                    {tip.icon}
-                    <div>
-                      <h4 className="font-medium text-sm text-blue-900">{tip.title}</h4>
-                      <p className="text-xs text-blue-700">{tip.description}</p>
-                    </div>
+                  <div key={index} className="p-3 bg-white/60 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-900">{tip.title}</h4>
+                    <p className="text-xs text-blue-700">{tip.description}</p>
                   </div>
                 ))}
               </div>
@@ -265,12 +224,9 @@ export const HelpDocumentation: React.FC = () => {
               <Card key={article.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {article.icon}
-                      <Badge className={getDifficultyColor(article.difficulty)}>
-                        {article.difficulty}
-                      </Badge>
-                    </div>
+                    <Badge className={getDifficultyColor(article.difficulty)}>
+                      {article.difficulty}
+                    </Badge>
                     <span className="text-xs text-muted-foreground">{article.readTime}</span>
                   </div>
                   <CardTitle className="text-lg">{article.title}</CardTitle>
@@ -279,7 +235,7 @@ export const HelpDocumentation: React.FC = () => {
                   <p className="text-muted-foreground text-sm mb-4">
                     {article.description}
                   </p>
-                  
+
                   <div className="flex flex-wrap gap-1 mb-4">
                     {article.tags.map((tag) => (
                       <Badge key={tag} variant="outline" className="text-xs">
@@ -287,10 +243,9 @@ export const HelpDocumentation: React.FC = () => {
                       </Badge>
                     ))}
                   </div>
-                  
-                  <Button variant="outline" className="w-full group">
+
+                  <Button variant="outline" className="w-full">
                     Read Article
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
               </Card>
@@ -299,7 +254,6 @@ export const HelpDocumentation: React.FC = () => {
 
           {filteredArticles.length === 0 && (
             <div className="text-center py-12">
-              <HelpCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-medium mb-2">No articles found</h3>
               <p className="text-muted-foreground">
                 Try adjusting your search terms or browse a different category
@@ -313,7 +267,6 @@ export const HelpDocumentation: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
         <Card className="text-center">
           <CardContent className="p-6">
-            <BookOpen className="h-8 w-8 mx-auto mb-3 text-primary" />
             <h3 className="font-medium mb-2">Full Documentation</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Complete API references and detailed guides
@@ -326,7 +279,6 @@ export const HelpDocumentation: React.FC = () => {
 
         <Card className="text-center">
           <CardContent className="p-6">
-            <PlayCircle className="h-8 w-8 mx-auto mb-3 text-primary" />
             <h3 className="font-medium mb-2">Video Tutorials</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Watch step-by-step video guides
@@ -339,7 +291,6 @@ export const HelpDocumentation: React.FC = () => {
 
         <Card className="text-center">
           <CardContent className="p-6">
-            <MessageSquare className="h-8 w-8 mx-auto mb-3 text-primary" />
             <h3 className="font-medium mb-2">Contact Support</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Get personalized help from our team

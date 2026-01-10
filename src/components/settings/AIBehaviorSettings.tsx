@@ -5,16 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import {
-  Zap,
-  Target,
-  MessageSquare,
-  BarChart3,
-  Save,
-  Lightbulb,
-  Clock,
-  TrendingUp
-} from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -214,7 +204,6 @@ const AIBehaviorSettings: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Zap className="h-5 w-5" />
             <span>Automation Preferences</span>
           </CardTitle>
         </CardHeader>
@@ -222,12 +211,6 @@ const AIBehaviorSettings: React.FC = () => {
           {Object.entries(aiSettings.automation).map(([key, enabled]) => (
             <div key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  {key === 'autoOptimize' && <TrendingUp className="h-4 w-4 text-blue-600" />}
-                  {key === 'autoSuggest' && <Lightbulb className="h-4 w-4 text-blue-600" />}
-                  {key === 'autoSchedule' && <Clock className="h-4 w-4 text-blue-600" />}
-                  {key === 'autoReport' && <BarChart3 className="h-4 w-4 text-blue-600" />}
-                </div>
                 <div>
                   <h4 className="font-medium">
                     {key === 'autoOptimize' && 'Auto-Optimize Campaigns'}
@@ -259,7 +242,6 @@ const AIBehaviorSettings: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <MessageSquare className="h-5 w-5" />
             <span>Communication Style</span>
           </CardTitle>
         </CardHeader>
@@ -328,7 +310,6 @@ const AIBehaviorSettings: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Target className="h-5 w-5" />
             <span>Advanced AI Configuration</span>
           </CardTitle>
         </CardHeader>
@@ -398,7 +379,6 @@ const AIBehaviorSettings: React.FC = () => {
           disabled={saving || loading}
           className="flex items-center space-x-2"
         >
-          <Save className="h-4 w-4" />
           <span>{saving ? 'Saving...' : 'Save AI Settings'}</span>
         </Button>
       </div>

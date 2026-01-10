@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PlusIcon, PlayIcon, PauseIcon, EditIcon } from 'lucide-react';
 import VisualWorkflowBuilder from '@/components/workflows/VisualWorkflowBuilder';
 import { Workflow, WorkflowStep } from '@/lib/api-client-interface';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
@@ -98,7 +97,6 @@ const Workflows: React.FC = () => {
             <p className="text-gray-600 mt-1">Automate your marketing processes</p>
           </div>
           <Button>
-            <PlusIcon className="h-4 w-4 mr-2" />
             Create Workflow
           </Button>
         </div>
@@ -132,14 +130,10 @@ const Workflows: React.FC = () => {
                     </p>
                     <div className="flex items-center space-x-2">
                       <Button size="sm" variant="outline">
-                        <EditIcon className="h-3 w-3" />
+                        Edit
                       </Button>
                       <Button size="sm" variant="outline">
-                        {workflow.status === 'active' ? (
-                          <PauseIcon className="h-3 w-3" />
-                        ) : (
-                          <PlayIcon className="h-3 w-3" />
-                        )}
+                        {workflow.status === 'active' ? 'Pause' : 'Play'}
                       </Button>
                     </div>
                   </div>

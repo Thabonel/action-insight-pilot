@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Bot, TrendingUp, Clock, Target, Share2, Zap } from 'lucide-react';
 
 const SocialAIAssistant: React.FC = () => {
   const [insights] = useState({
@@ -21,7 +20,6 @@ const SocialAIAssistant: React.FC = () => {
       type: 'timing',
       message: "Your LinkedIn posts get 40% more engagement at 10:30 AM",
       confidence: 94,
-      icon: Clock,
       action: "Schedule next post"
     },
     {
@@ -29,7 +27,6 @@ const SocialAIAssistant: React.FC = () => {
       type: 'content',
       message: "Video content gets 3x more engagement than images",
       confidence: 89,
-      icon: TrendingUp,
       action: "Create video post"
     },
     {
@@ -37,7 +34,6 @@ const SocialAIAssistant: React.FC = () => {
       type: 'platform',
       message: "Twitter threads perform 65% better than single tweets",
       confidence: 91,
-      icon: Target,
       action: "Create thread"
     }
   ]);
@@ -54,7 +50,6 @@ const SocialAIAssistant: React.FC = () => {
     type: string;
     message: string;
     confidence: number;
-    icon: React.ComponentType<{ className?: string }>;
     action: string;
   }
 
@@ -77,7 +72,6 @@ const SocialAIAssistant: React.FC = () => {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Bot className="h-5 w-5 text-blue-600" />
           <span>Social Media AI</span>
         </CardTitle>
       </CardHeader>
@@ -100,31 +94,27 @@ const SocialAIAssistant: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Smart Recommendations</h4>
           <div className="space-y-3">
-            {suggestions.map((suggestion) => {
-              const Icon = suggestion.icon;
-              return (
-                <div
-                  key={suggestion.id}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-start space-x-3">
-                    <Icon className="h-4 w-4 text-gray-600 mt-1" />
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-800">{suggestion.message}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="text-xs text-gray-500">
-                          {suggestion.confidence}% confidence
-                        </div>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          {suggestion.action}
-                        </Button>
+            {suggestions.map((suggestion) => (
+              <div
+                key={suggestion.id}
+                onClick={() => handleSuggestionClick(suggestion)}
+                className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-800">{suggestion.message}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="text-xs text-gray-500">
+                        {suggestion.confidence}% confidence
                       </div>
+                      <Button size="sm" variant="outline" className="text-xs">
+                        {suggestion.action}
+                      </Button>
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
 

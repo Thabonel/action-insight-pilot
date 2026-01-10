@@ -10,16 +10,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  ArrowLeft,
-  X,
-  TrendingUp,
-  Target,
-  DollarSign,
-  BarChart3,
-  Calendar,
-  Users
-} from 'lucide-react';
-import {
   LineChart,
   Line,
   XAxis,
@@ -123,16 +113,12 @@ const CampaignComparison: React.FC<CampaignComparisonProps> = ({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5" />
-                <span>Campaign Comparison</span>
-              </DialogTitle>
+              <DialogTitle>Campaign Comparison</DialogTitle>
               <DialogDescription>
                 Comparing {campaigns.length} campaigns side by side
               </DialogDescription>
             </div>
             <Button variant="outline" size="sm" onClick={onClose}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to List
             </Button>
           </div>
@@ -151,7 +137,7 @@ const CampaignComparison: React.FC<CampaignComparisonProps> = ({
                     className="absolute top-2 right-2 h-6 w-6 p-0"
                     onClick={() => onRemoveCampaign(campaign.id)}
                   >
-                    <X className="h-3 w-3" />
+                    x
                   </Button>
                   <CardHeader className="pb-3">
                     <div className="space-y-2">

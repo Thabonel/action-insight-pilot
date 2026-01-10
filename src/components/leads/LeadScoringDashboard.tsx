@@ -7,7 +7,6 @@ import { Progress } from '@/components/ui/progress';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Star, TrendingUp, Users, Target, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -193,7 +192,6 @@ const LeadScoringDashboard: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Star className="h-5 w-5 text-yellow-600" />
               <span>Lead Score Distribution</span>
             </CardTitle>
           </CardHeader>
@@ -222,7 +220,6 @@ const LeadScoringDashboard: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
               <span>Conversion Prediction Accuracy</span>
             </CardTitle>
           </CardHeader>
@@ -259,7 +256,6 @@ const LeadScoringDashboard: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-600" />
               <span>High-Score Leads</span>
             </div>
             <Badge variant="outline">Updated 5 min ago</Badge>

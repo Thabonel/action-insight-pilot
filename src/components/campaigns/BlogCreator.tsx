@@ -14,8 +14,6 @@ import { ContentLibrary } from '@/components/content/ContentLibrary';
 import { AIOptimizationCoach } from '@/components/content/AIOptimizationCoach';
 import { BlogPerformanceDashboard } from '@/components/blog/BlogPerformanceDashboard';
 import IntegrationHub from '@/components/blog/IntegrationHub';
-import { Edit, Save, Sparkles, CheckCircle, Library, Share2, BarChart3 } from 'lucide-react';
-import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const BlogCreator: React.FC = () => {
   const [blogPost, setBlogPost] = useState({
@@ -119,21 +117,18 @@ const BlogCreator: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
             Save Draft
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setShowAIAssistant(!showAIAssistant)}
           >
-            <Sparkles className="h-4 w-4 mr-2" />
             AI Assistant
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setShowOptimizationCoach(!showOptimizationCoach)}
           >
-            <LogoMarkIcon className="h-4 w-4 mr-2" />
             AI Coach
           </Button>
         </div>
@@ -142,27 +137,21 @@ const BlogCreator: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="dashboard" className="flex items-center space-x-2">
-            <BarChart3 className="h-4 w-4" />
             <span>Dashboard</span>
           </TabsTrigger>
           <TabsTrigger value="editor" className="flex items-center space-x-2">
-            <Edit className="h-4 w-4" />
             <span>Editor</span>
           </TabsTrigger>
           <TabsTrigger value="brand" className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4" />
             <span>Brand Voice</span>
           </TabsTrigger>
           <TabsTrigger value="publish" className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4" />
             <span>Publish Ready</span>
           </TabsTrigger>
           <TabsTrigger value="distribute" className="flex items-center space-x-2">
-            <Share2 className="h-4 w-4" />
             <span>Distribute</span>
           </TabsTrigger>
           <TabsTrigger value="library" className="flex items-center space-x-2">
-            <Library className="h-4 w-4" />
             <span>Library</span>
           </TabsTrigger>
         </TabsList>

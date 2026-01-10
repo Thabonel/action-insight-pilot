@@ -5,17 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { 
-  Star, 
-  Clock, 
-  TrendingUp, 
-  Target, 
-  Users, 
-  Download, 
-  Mail,
-  Phone,
-  Calendar
-} from 'lucide-react';
 
 const SmartLeadLists: React.FC = () => {
   const [leadLists] = useState([
@@ -26,7 +15,6 @@ const SmartLeadLists: React.FC = () => {
       count: 87,
       avgScore: 92,
       conversionRate: 34,
-      icon: Star,
       color: 'text-yellow-600 bg-yellow-50',
       leads: [
         { name: 'Sarah Chen', company: 'TechFlow', score: 95, reason: 'Perfect profile match' },
@@ -41,7 +29,6 @@ const SmartLeadLists: React.FC = () => {
       count: 234,
       avgScore: 76,
       conversionRate: 18,
-      icon: Clock,
       color: 'text-blue-600 bg-blue-50',
       leads: [
         { name: 'David Martinez', company: 'MidSize Inc', score: 78, reason: 'Needs more touchpoints' },
@@ -56,7 +43,6 @@ const SmartLeadLists: React.FC = () => {
       count: 56,
       avgScore: 89,
       conversionRate: 45,
-      icon: TrendingUp,
       color: 'text-green-600 bg-green-50',
       leads: [
         { name: 'Jennifer Lee', company: 'FastGrow', score: 91, reason: 'Active solution research' },
@@ -71,7 +57,6 @@ const SmartLeadLists: React.FC = () => {
       count: 43,
       avgScore: 85,
       conversionRate: 12,
-      icon: Target,
       color: 'text-purple-600 bg-purple-50',
       leads: [
         { name: 'Mark Thompson', company: 'Enterprise Plus', score: 87, reason: 'Large account potential' },
@@ -86,7 +71,6 @@ const SmartLeadLists: React.FC = () => {
       count: 78,
       avgScore: 68,
       conversionRate: 8,
-      icon: Users,
       color: 'text-gray-600 bg-gray-50',
       leads: [
         { name: 'Kevin Park', company: 'NewVertical', score: 72, reason: 'Different industry test' },
@@ -119,28 +103,28 @@ const SmartLeadLists: React.FC = () => {
     switch (listId) {
       case 'hot':
         return [
-          { label: 'Start Outreach', icon: Mail, variant: 'default' as const },
-          { label: 'Schedule Call', icon: Phone, variant: 'outline' as const }
+          { label: 'Start Outreach', variant: 'default' as const },
+          { label: 'Schedule Call', variant: 'outline' as const }
         ];
       case 'nurture':
         return [
-          { label: 'Add to Sequence', icon: Mail, variant: 'default' as const },
-          { label: 'Schedule Follow-up', icon: Calendar, variant: 'outline' as const }
+          { label: 'Add to Sequence', variant: 'default' as const },
+          { label: 'Schedule Follow-up', variant: 'outline' as const }
         ];
       case 'quick-wins':
         return [
-          { label: 'Immediate Contact', icon: Phone, variant: 'default' as const },
-          { label: 'Send Proposal', icon: Mail, variant: 'outline' as const }
+          { label: 'Immediate Contact', variant: 'default' as const },
+          { label: 'Send Proposal', variant: 'outline' as const }
         ];
       case 'strategic':
         return [
-          { label: 'Research Account', icon: Users, variant: 'default' as const },
-          { label: 'Plan Approach', icon: Target, variant: 'outline' as const }
+          { label: 'Research Account', variant: 'default' as const },
+          { label: 'Plan Approach', variant: 'outline' as const }
         ];
       default:
         return [
-          { label: 'Add to Campaign', icon: Mail, variant: 'default' as const },
-          { label: 'Mark for Review', icon: Clock, variant: 'outline' as const }
+          { label: 'Add to Campaign', variant: 'default' as const },
+          { label: 'Mark for Review', variant: 'outline' as const }
         ];
     }
   };
@@ -150,17 +134,13 @@ const SmartLeadLists: React.FC = () => {
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {leadLists.map((list) => {
-          const Icon = list.icon;
           return (
-            <Card 
+            <Card
               key={list.id}
               className="cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => handleListClick(list.id)}
             >
               <CardContent className="p-4">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 ${list.color}`}>
-                  <Icon className="h-6 w-6" />
-                </div>
                 <h3 className="font-semibold mb-1">{list.name}</h3>
                 <p className="text-2xl font-bold mb-1">{list.count}</p>
                 <div className="flex items-center justify-between text-sm">
@@ -183,16 +163,11 @@ const SmartLeadLists: React.FC = () => {
         >
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${list.color}`}>
-                  <list.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">{list.name}</h3>
-                  <p className="text-sm text-gray-600">{list.description}</p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold">{list.name}</h3>
+                <p className="text-sm text-gray-600">{list.description}</p>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <div className="text-right">
                   <p className="text-2xl font-bold">{list.count}</p>
@@ -203,7 +178,6 @@ const SmartLeadLists: React.FC = () => {
                   <p className="text-sm text-gray-600">conversion</p>
                 </div>
                 <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
               </div>
@@ -257,7 +231,6 @@ const SmartLeadLists: React.FC = () => {
                               variant={button.variant}
                               onClick={() => handleLeadAction(button.label, list.id, lead.name)}
                             >
-                              <button.icon className="h-3 w-3 mr-1" />
                               {button.label}
                             </Button>
                           ))}

@@ -3,19 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Share2, 
-  Video, 
-  Mail, 
-  Instagram, 
-  Mic,
-  Presentation,
-  HelpCircle,
-  FileText,
-  Download,
-  Edit,
-  Copy
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface RepurposedVariant {
@@ -48,63 +35,54 @@ export const ContentRepurposingEngine: React.FC<ContentRepurposingEngineProps> =
       id: 'twitter-thread',
       title: 'Twitter Thread',
       description: 'Convert to engaging Twitter thread',
-      icon: Share2,
       limit: '280 chars per tweet'
     },
     {
       id: 'linkedin-post',
       title: 'LinkedIn Post',
       description: 'Professional LinkedIn post format',
-      icon: Share2,
       limit: '1300 chars recommended'
     },
     {
       id: 'youtube-script',
       title: 'YouTube Script',
       description: 'Video script with timestamps',
-      icon: Video,
       limit: '8-12 minutes recommended'
     },
     {
       id: 'email-newsletter',
       title: 'Email Newsletter',
       description: 'Newsletter format with sections',
-      icon: Mail,
       limit: '500-800 words'
     },
     {
       id: 'instagram-quotes',
       title: 'Instagram Quotes',
       description: 'Key quotes for social posts',
-      icon: Instagram,
       limit: 'Visual-friendly text'
     },
     {
       id: 'podcast-outline',
       title: 'Podcast Outline',
       description: 'Episode structure and talking points',
-      icon: Mic,
       limit: '30-60 minute episode'
     },
     {
       id: 'slide-deck',
       title: 'Slide Deck',
       description: 'Presentation slides from headings',
-      icon: Presentation,
       limit: '10-15 slides'
     },
     {
       id: 'faq-section',
       title: 'FAQ Section',
       description: 'Questions and answers format',
-      icon: HelpCircle,
       limit: '5-10 Q&As'
     },
     {
       id: 'case-study',
       title: 'Case Study',
       description: 'Transform into case study format',
-      icon: FileText,
       limit: 'Problem-solution structure'
     }
   ];
@@ -234,7 +212,6 @@ Best regards,
     return (
       <Card>
         <CardContent className="py-8 text-center">
-          <Share2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
           <p className="text-gray-500">Add more content to enable repurposing features</p>
         </CardContent>
       </Card>
@@ -245,10 +222,7 @@ Best regards,
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Share2 className="h-5 w-5" />
-            Content Repurposing Engine
-          </CardTitle>
+          <CardTitle>Content Repurposing Engine</CardTitle>
           <p className="text-sm text-gray-600">
             Transform your blog post into multiple content formats
           </p>
@@ -256,12 +230,10 @@ Best regards,
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {repurposingOptions.map((option) => {
-              const IconComponent = option.icon;
               return (
                 <Card key={option.id} className="cursor-pointer hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3 mb-3">
-                      <IconComponent className="h-5 w-5 text-blue-500" />
                       <h4 className="font-medium">{option.title}</h4>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">{option.description}</p>
@@ -269,8 +241,8 @@ Best regards,
                       <Badge variant="outline" className="text-xs">
                         {option.limit}
                       </Badge>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         onClick={() => generateVariant(option.id)}
                         disabled={isGenerating && activeFormat === option.id}
                       >
@@ -294,26 +266,21 @@ Best regards,
             <div className="space-y-4">
               {variants.map((variant) => {
                 const format = repurposingOptions.find(opt => opt.id === variant.formatId);
-                const IconComponent = format?.icon || FileText;
-                
+
                 return (
                   <div key={variant.id} className="border rounded-lg p-4">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-2">
-                        <IconComponent className="h-4 w-4 text-blue-500" />
                         <h4 className="font-medium">{format?.title}</h4>
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => copyToClipboard(variant.content)}>
-                          <Copy className="h-4 w-4 mr-1" />
                           Copy
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => exportVariant(variant)}>
-                          <Download className="h-4 w-4 mr-1" />
                           Export
                         </Button>
                         <Button size="sm" variant="outline">
-                          <Edit className="h-4 w-4 mr-1" />
                           Edit
                         </Button>
                       </div>

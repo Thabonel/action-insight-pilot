@@ -23,30 +23,6 @@ import AIAssistanceButton from '@/components/AIAssistanceButton';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
 import { apiClient } from '@/lib/api-client';
 import { Campaign, ApiResponse } from '@/lib/api-client-interface';
-import {
-  Loader2,
-  ArrowLeft,
-  Save,
-  Copy,
-  Archive,
-  Trash2,
-  Edit3,
-  Target,
-  Users,
-  Calendar,
-  DollarSign,
-  BarChart3,
-  MessageSquare,
-  Share2,
-  FileText,
-  Shield,
-  Plus,
-  X,
-  Rocket,
-  Pause,
-  Play,
-  StopCircle
-} from 'lucide-react';
 
 const CampaignDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -740,7 +716,7 @@ const CampaignDetails: React.FC = () => {
                   onClick={() => onRemove(index)}
                   className="h-6 w-6 p-0"
                 >
-                  <X className="h-3 w-3" />
+                  x
                 </Button>
               )}
             </div>
@@ -755,7 +731,7 @@ const CampaignDetails: React.FC = () => {
                 onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
               />
               <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-                <Plus className="h-4 w-4" />
+                +
               </Button>
             </div>
           )}
@@ -768,7 +744,6 @@ const CampaignDetails: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin" />
           <span>Loading campaign details...</span>
         </div>
       </div>
@@ -800,7 +775,7 @@ const CampaignDetails: React.FC = () => {
               onClick={() => navigate('/app/campaign-management')}
               className="p-2"
             >
-              <ArrowLeft className="h-4 w-4" />
+              Back
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
@@ -824,17 +799,7 @@ const CampaignDetails: React.FC = () => {
                     size="lg"
                     title={isEditing ? "Save changes before launching" : "Launch this campaign"}
                   >
-                    {launching ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Launching...
-                      </>
-                    ) : (
-                      <>
-                        <Rocket className="mr-2 h-5 w-5" />
-                        Launch Campaign
-                      </>
-                    )}
+                    {launching ? 'Launching...' : 'Launch Campaign'}
                   </Button>
                 )}
 
@@ -847,7 +812,6 @@ const CampaignDetails: React.FC = () => {
                       size="lg"
                       title={isEditing ? "Save changes before pausing" : "Pause this campaign"}
                     >
-                      <Pause className="mr-2 h-5 w-5" />
                       Pause Campaign
                     </Button>
                     <Button
@@ -857,7 +821,6 @@ const CampaignDetails: React.FC = () => {
                       className="border-red-500 text-red-600 hover:bg-red-50"
                       title={isEditing ? "Save changes before stopping" : "Stop this campaign"}
                     >
-                      <StopCircle className="mr-2 h-4 w-4" />
                       Stop
                     </Button>
                   </>
@@ -872,17 +835,7 @@ const CampaignDetails: React.FC = () => {
                       size="lg"
                       title={isEditing ? "Save changes before resuming" : "Resume this campaign"}
                     >
-                      {launching ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Resuming...
-                        </>
-                      ) : (
-                        <>
-                          <Play className="mr-2 h-5 w-5" />
-                          Resume Campaign
-                        </>
-                      )}
+                      {launching ? 'Resuming...' : 'Resume Campaign'}
                     </Button>
                     <Button
                       variant="outline"
@@ -891,7 +844,6 @@ const CampaignDetails: React.FC = () => {
                       className="border-red-500 text-red-600 hover:bg-red-50"
                       title={isEditing ? "Save changes before stopping" : "Stop this campaign"}
                     >
-                      <StopCircle className="mr-2 h-4 w-4" />
                       Stop
                     </Button>
                   </>
@@ -903,23 +855,18 @@ const CampaignDetails: React.FC = () => {
             {!isEditing && id && id !== 'new' ? (
               <>
                 <Button variant="outline" onClick={() => navigate(`/app/campaigns/${id}/dashboard`)}>
-                  <BarChart3 className="mr-2 h-4 w-4" />
                   View Dashboard
                 </Button>
                 <Button variant="outline" onClick={handleDuplicate}>
-                  <Copy className="mr-2 h-4 w-4" />
                   Duplicate
                 </Button>
                 <Button variant="outline" onClick={handleArchive}>
-                  <Archive className="mr-2 h-4 w-4" />
                   Archive
                 </Button>
                 <Button variant="outline" onClick={() => setIsEditing(true)}>
-                  <Edit3 className="mr-2 h-4 w-4" />
                   Edit
                 </Button>
                 <Button variant="destructive" onClick={handleDelete}>
-                  <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </Button>
               </>
@@ -931,17 +878,7 @@ const CampaignDetails: React.FC = () => {
                   </Button>
                 )}
                 <Button onClick={handleSubmit} disabled={saving}>
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      {(!id || id === 'new') ? 'Create Campaign' : 'Save Changes'}
-                    </>
-                  )}
+                  {saving ? 'Saving...' : ((!id || id === 'new') ? 'Create Campaign' : 'Save Changes')}
                 </Button>
               </>
             )}
@@ -967,7 +904,6 @@ const CampaignDetails: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
                       Basic Information
                     </CardTitle>
                   </CardHeader>
@@ -1079,7 +1015,6 @@ const CampaignDetails: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5" />
                       Campaign Overview
                     </CardTitle>
                   </CardHeader>
@@ -1132,7 +1067,6 @@ const CampaignDetails: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
                       Campaign Objectives
                     </CardTitle>
                   </CardHeader>
@@ -1185,7 +1119,6 @@ const CampaignDetails: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5" />
                       Key Performance Indicators
                     </CardTitle>
                   </CardHeader>
@@ -1272,7 +1205,6 @@ const CampaignDetails: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
                       Target Audience & Demographics
                     </div>
                     {(isEditing || (!id || id === 'new')) && (
@@ -1366,7 +1298,6 @@ const CampaignDetails: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5" />
                       Budget Allocation
                     </CardTitle>
                   </CardHeader>
@@ -1456,7 +1387,6 @@ const CampaignDetails: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
                       Timeline & Summary
                     </CardTitle>
                   </CardHeader>
@@ -1523,7 +1453,6 @@ const CampaignDetails: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
                     Messaging & Content Strategy
                   </CardTitle>
                 </CardHeader>
@@ -1610,7 +1539,6 @@ const CampaignDetails: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Share2 className="h-5 w-5" />
                     Marketing Channels & Distribution
                   </CardTitle>
                 </CardHeader>
@@ -1680,7 +1608,6 @@ const CampaignDetails: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
                     Legal & Compliance
                   </CardTitle>
                 </CardHeader>

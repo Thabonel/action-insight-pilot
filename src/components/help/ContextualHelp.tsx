@@ -5,7 +5,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { HelpCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ContextualHelpProps {
@@ -25,12 +24,6 @@ export const ContextualHelp: React.FC<ContextualHelpProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const iconSize = {
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5',
-    lg: 'h-6 w-6'
-  };
-
   return (
     <TooltipProvider>
       <Tooltip open={isOpen} onOpenChange={setIsOpen}>
@@ -42,7 +35,7 @@ export const ContextualHelp: React.FC<ContextualHelpProps> = ({
               className="h-auto w-auto p-1 text-muted-foreground hover:text-foreground"
               onClick={() => setIsOpen(!isOpen)}
             >
-              <HelpCircle className={iconSize[size]} />
+              ?
             </Button>
           )}
         </TooltipTrigger>
@@ -58,7 +51,7 @@ export const ContextualHelp: React.FC<ContextualHelpProps> = ({
               className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground"
               onClick={() => setIsOpen(false)}
             >
-              <X className="h-3 w-3" />
+              x
             </Button>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">

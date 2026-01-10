@@ -5,15 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RealTimeSocialMetrics from './RealTimeSocialMetrics';
-import { 
-  Sparkles, 
-  TrendingUp, 
-  TestTube, 
-  Image, 
-  Zap,
-  Target,
-  BarChart3
-} from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const EnhancedSocialDashboard: React.FC = () => {
@@ -34,15 +25,12 @@ const EnhancedSocialDashboard: React.FC = () => {
         
         <div className="flex space-x-3">
           <Button variant="outline" size="sm">
-            <TestTube className="h-4 w-4 mr-2" />
             Create A/B Test
           </Button>
           <Button variant="outline" size="sm">
-            <Image className="h-4 w-4 mr-2" />
             Generate Images
           </Button>
           <Button size="sm">
-            <Sparkles className="h-4 w-4 mr-2" />
             AI Content
           </Button>
         </div>
@@ -65,39 +53,30 @@ const EnhancedSocialDashboard: React.FC = () => {
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <TestTube className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">A/B Tests Running</p>
-                <p className="text-2xl font-bold">3</p>
-                <p className="text-xs text-blue-600">2 conclusive</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">A/B Tests Running</p>
+              <p className="text-2xl font-bold">3</p>
+              <p className="text-xs text-blue-600">2 conclusive</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Trending Integration</p>
-                <p className="text-2xl font-bold">8</p>
-                <p className="text-xs text-green-600">Hot topics used</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Trending Integration</p>
+              <p className="text-2xl font-bold">8</p>
+              <p className="text-xs text-green-600">Hot topics used</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Target className="h-5 w-5 text-orange-600" />
-              <div>
-                <p className="text-sm text-gray-600">Avg ROI</p>
-                <p className="text-2xl font-bold">+47%</p>
-                <p className="text-xs text-green-600">Above target</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Avg ROI</p>
+              <p className="text-2xl font-bold">+47%</p>
+              <p className="text-xs text-green-600">Above target</p>
             </div>
           </CardContent>
         </Card>
@@ -119,7 +98,6 @@ const EnhancedSocialDashboard: React.FC = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center space-x-2">
-                  <Zap className="h-5 w-5" />
                   <span>Live Performance Metrics</span>
                 </CardTitle>
                 <Badge variant="outline" className="text-green-600 border-green-300">
@@ -168,7 +146,6 @@ const EnhancedSocialDashboard: React.FC = () => {
                 </div>
 
                 <Button className="w-full">
-                  <Sparkles className="h-4 w-4 mr-2" />
                   Generate New Content
                 </Button>
               </CardContent>
@@ -203,7 +180,6 @@ const EnhancedSocialDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <TestTube className="h-5 w-5" />
                 <span>A/B Test Performance</span>
               </CardTitle>
             </CardHeader>
@@ -236,7 +212,6 @@ const EnhancedSocialDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5" />
                 <span>Trending Topics Integration</span>
               </CardTitle>
             </CardHeader>
@@ -278,24 +253,20 @@ const EnhancedSocialDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Image className="h-5 w-5" />
                 <span>AI Image Generation</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <Button variant="outline">
-                  <Sparkles className="h-4 w-4 mr-2" />
                   DALL-E 3
                 </Button>
                 <Button variant="outline">
-                  <Zap className="h-4 w-4 mr-2" />
                   Stable Diffusion
                 </Button>
               </div>
-              
+
               <div className="text-center p-8 border-dashed border-2 rounded-lg">
-                <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="font-medium text-gray-600 mb-2">Generate Platform-Optimized Images</h3>
                 <p className="text-sm text-gray-500 mb-4">
                   Create custom visuals optimized for each social platform

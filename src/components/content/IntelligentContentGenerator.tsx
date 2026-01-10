@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse, ContentBrief } from '@/lib/api-client-interface';
-import { Loader2, Sparkles } from 'lucide-react';
 
 const IntelligentContentGenerator: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -95,7 +94,6 @@ const IntelligentContentGenerator: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5" />
             <span>Intelligent Content Generator</span>
           </CardTitle>
         </CardHeader>
@@ -146,17 +144,7 @@ const IntelligentContentGenerator: React.FC = () => {
           </div>
 
           <Button onClick={generateContent} disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Content
-              </>
-            )}
+            {loading ? 'Generating...' : 'Generate Content'}
           </Button>
         </CardContent>
       </Card>

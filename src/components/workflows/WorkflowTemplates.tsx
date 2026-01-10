@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Rocket, Users, Share2, Calendar, Star } from 'lucide-react';
 
 const WorkflowTemplates: React.FC = () => {
   const templates = [
@@ -11,7 +10,6 @@ const WorkflowTemplates: React.FC = () => {
       id: 1,
       name: 'Product Launch Campaign',
       description: 'Complete multi-channel launch sequence',
-      icon: Rocket,
       color: 'blue',
       steps: 8,
       duration: '4 weeks',
@@ -23,7 +21,6 @@ const WorkflowTemplates: React.FC = () => {
       id: 2,
       name: 'Lead Nurture Sequence',
       description: 'Convert prospects into customers',
-      icon: Users,
       color: 'green',
       steps: 6,
       duration: '2 weeks',
@@ -35,7 +32,6 @@ const WorkflowTemplates: React.FC = () => {
       id: 3,
       name: 'Content Distribution',
       description: 'Maximize content reach across platforms',
-      icon: Share2,
       color: 'purple',
       steps: 5,
       duration: '1 week',
@@ -47,7 +43,6 @@ const WorkflowTemplates: React.FC = () => {
       id: 4,
       name: 'Event Promotion',
       description: 'Drive registrations and attendance',
-      icon: Calendar,
       color: 'orange',
       steps: 7,
       duration: '3 weeks',
@@ -75,19 +70,18 @@ const WorkflowTemplates: React.FC = () => {
       <CardContent>
         <div className="space-y-4">
           {templates.map((template) => {
-            const Icon = template.icon;
             return (
               <div key={template.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-lg ${getColorClasses(template.color)}`}>
-                      <Icon className="h-4 w-4" />
+                      <span className="text-xs font-medium">{template.id}</span>
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
                         <h4 className="font-medium">{template.name}</h4>
                         {template.featured && (
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                          <span className="text-yellow-500 font-bold">*</span>
                         )}
                       </div>
                       <p className="text-sm text-gray-600">{template.description}</p>

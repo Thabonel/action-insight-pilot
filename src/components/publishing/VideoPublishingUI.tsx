@@ -4,7 +4,6 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Loader2, Send, Calendar, Sparkles } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { PlatformSelector } from './PlatformSelector'
@@ -174,7 +173,6 @@ export function VideoPublishingUI({
             onClick={handleGenerateCaption}
             className="text-xs"
           >
-            <Sparkles className="h-3 w-3 mr-1" />
             AI Generate
           </Button>
         </div>
@@ -234,7 +232,6 @@ export function VideoPublishingUI({
             onClick={() => setShowSchedule(!showSchedule)}
             className="text-xs"
           >
-            <Calendar className="h-3 w-3 mr-1" />
             {showSchedule ? 'Publish Now' : 'Schedule'}
           </Button>
         </div>
@@ -276,17 +273,11 @@ export function VideoPublishingUI({
         size="lg"
       >
         {isPublishing ? (
-          <>
-            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            {showSchedule && scheduledDate && scheduledTime ? 'Scheduling...' : 'Publishing...'}
-          </>
+          showSchedule && scheduledDate && scheduledTime ? 'Scheduling...' : 'Publishing...'
         ) : (
-          <>
-            <Send className="h-5 w-5 mr-2" />
-            {showSchedule && scheduledDate && scheduledTime
-              ? `Schedule for ${selectedPlatforms.length} Platform${selectedPlatforms.length > 1 ? 's' : ''}`
-              : `Publish to ${selectedPlatforms.length} Platform${selectedPlatforms.length > 1 ? 's' : ''}`}
-          </>
+          showSchedule && scheduledDate && scheduledTime
+            ? `Schedule for ${selectedPlatforms.length} Platform${selectedPlatforms.length > 1 ? 's' : ''}`
+            : `Publish to ${selectedPlatforms.length} Platform${selectedPlatforms.length > 1 ? 's' : ''}`
         )}
       </Button>
 

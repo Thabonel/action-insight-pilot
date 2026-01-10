@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp } from 'lucide-react';
 import PerformancePredictions from './predictive/PerformancePredictions';
 import RevenueForecastChart from './predictive/RevenueForecastChart';
 import CampaignSuccessPredictions from './predictive/CampaignSuccessPredictions';
@@ -81,7 +80,6 @@ const PredictiveAnalytics: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="h-5 w-5 text-blue-600" />
           <span>Predictive Analytics</span>
         </CardTitle>
       </CardHeader>

@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Upload, Calendar, Target } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface VideoData {
@@ -88,10 +87,7 @@ const VideoUploader: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="h-5 w-5" />
-          Upload Viral Video
-        </CardTitle>
+        <CardTitle>Upload Viral Video</CardTitle>
         <CardDescription>
           Upload and schedule your short-form video with automated comment monitoring
         </CardDescription>
@@ -118,9 +114,8 @@ const VideoUploader: React.FC = () => {
               </div>
             ) : (
               <div>
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Drag & drop your video file here, or click to browse
+                <p className="text-sm text-muted-foreground mb-2">
+                  Drag and drop your video file here, or click to browse
                 </p>
                 <Input
                   id="video-upload"
@@ -202,15 +197,12 @@ const VideoUploader: React.FC = () => {
         {/* Schedule */}
         <div className="space-y-2">
           <Label htmlFor="schedule">Schedule (Optional)</Label>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <Input
-              id="schedule"
-              type="datetime-local"
-              value={videoData.scheduleDate}
-              onChange={(e) => setVideoData(prev => ({ ...prev, scheduleDate: e.target.value }))}
-            />
-          </div>
+          <Input
+            id="schedule"
+            type="datetime-local"
+            value={videoData.scheduleDate}
+            onChange={(e) => setVideoData(prev => ({ ...prev, scheduleDate: e.target.value }))}
+          />
           <p className="text-xs text-muted-foreground">
             Leave empty to post immediately after upload
           </p>
@@ -229,10 +221,7 @@ const VideoUploader: React.FC = () => {
         {videoData.title && videoData.keyword && (
           <Card className="border border-primary">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Target className="h-4 w-4" />
-                Preview Setup
-              </CardTitle>
+              <CardTitle className="text-sm">Preview Setup</CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="space-y-2 text-sm">

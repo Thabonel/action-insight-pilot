@@ -5,13 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Hash,
-  TrendingUp,
-  BarChart3,
-  Loader2,
-  Sparkles
-} from 'lucide-react';
 
 interface HashtagSuggestion {
   id: string;
@@ -133,7 +126,7 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
     return (
       <Card>
         <CardContent className="p-12 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </CardContent>
       </Card>
     );
@@ -146,7 +139,6 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Hash className="h-5 w-5 text-purple-600" />
               Top Performing Hashtags
             </CardTitle>
             <div className="flex gap-2">
@@ -191,7 +183,6 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
         <CardContent>
           {topHashtags.length === 0 ? (
             <div className="text-center p-12 text-gray-500">
-              <Hash className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium">No hashtags yet</p>
               <p className="text-sm mt-1">
                 Start using hashtags in your posts to see performance data
@@ -224,7 +215,6 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
                           </Badge>
                           {hashtag.ai_generated && (
                             <Badge variant="outline" className="text-blue-700 border-blue-300">
-                              <Sparkles className="h-3 w-3 mr-1" />
                               AI
                             </Badge>
                           )}
@@ -233,7 +223,6 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
                           <span>Used {hashtag.usage_count}x</span>
                           {hashtag.avg_engagement_rate !== null && (
                             <span className={getEngagementColor(hashtag.avg_engagement_rate)}>
-                              <TrendingUp className="h-3 w-3 inline mr-1" />
                               {hashtag.avg_engagement_rate.toFixed(2)}% engagement
                             </span>
                           )}
@@ -266,7 +255,6 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
               Performance Timeline
             </CardTitle>
           </CardHeader>
@@ -310,7 +298,6 @@ export const HashtagAnalyticsDashboard: React.FC = () => {
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <Sparkles className="h-5 w-5 text-blue-600 mt-1" />
             <div>
               <h3 className="font-semibold text-blue-900 mb-1">Pro Tips</h3>
               <ul className="text-sm text-blue-800 space-y-1">

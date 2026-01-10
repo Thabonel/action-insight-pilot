@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const CookiePolicy: React.FC = () => {
@@ -17,7 +16,6 @@ const CookiePolicy: React.FC = () => {
               <span className="text-xl font-bold text-black">AI Boost Campaign</span>
             </div>
             <Button variant="ghost" onClick={() => navigate('/')} className="text-black hover:text-blue-600">
-              <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
           </div>

@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
-import { Loader2, Mail } from 'lucide-react';
 
 interface CampaignBrief {
   subject: string;
@@ -87,7 +86,6 @@ const IntelligentCampaignBuilder: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Mail className="h-5 w-5" />
             <span>Intelligent Email Campaign Builder</span>
           </CardTitle>
         </CardHeader>
@@ -152,17 +150,7 @@ const IntelligentCampaignBuilder: React.FC = () => {
           </div>
 
           <Button onClick={generateCampaign} disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Mail className="mr-2 h-4 w-4" />
-                Generate Email Campaign
-              </>
-            )}
+            {loading ? 'Generating...' : 'Generate Email Campaign'}
           </Button>
         </CardContent>
       </Card>

@@ -4,18 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import {
-  Zap,
-  Copy,
-  TrendingUp,
-  Calendar,
-  Share2,
-  RefreshCw,
-  Target,
-  Clock,
-  BarChart3,
-  CheckCircle
-} from 'lucide-react';
 
 interface Workflow {
   id: number;
@@ -23,7 +11,6 @@ interface Workflow {
   description: string;
   confidence: number;
   estimatedTime: string;
-  icon: React.ComponentType<{ className?: string }>;
   action: string;
 }
 
@@ -35,7 +22,6 @@ const ContentWorkflowFeatures: React.FC = () => {
       description: "Generate content based on your best performing piece",
       confidence: 96,
       estimatedTime: "15 mins",
-      icon: Target,
       action: "create_similar"
     },
     {
@@ -44,7 +30,6 @@ const ContentWorkflowFeatures: React.FC = () => {
       description: "Transform successful content into different formats",
       confidence: 89,
       estimatedTime: "10 mins",
-      icon: RefreshCw,
       action: "repurpose"
     },
     {
@@ -53,7 +38,6 @@ const ContentWorkflowFeatures: React.FC = () => {
       description: "Auto-schedule content for your best performing times",
       confidence: 92,
       estimatedTime: "5 mins",
-      icon: Calendar,
       action: "schedule_optimal"
     },
     {
@@ -62,7 +46,6 @@ const ContentWorkflowFeatures: React.FC = () => {
       description: "Create variations for testing different approaches",
       confidence: 85,
       estimatedTime: "20 mins",
-      icon: BarChart3,
       action: "ab_test"
     }
   ]);
@@ -125,24 +108,19 @@ const ContentWorkflowFeatures: React.FC = () => {
       {/* Quick Workflows */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Zap className="h-5 w-5 text-yellow-600" />
-            <span>Smart Content Workflows</span>
-          </CardTitle>
+          <CardTitle>Smart Content Workflows</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {workflows.map((workflow) => {
-              const Icon = workflow.icon;
               return (
-                <Card 
+                <Card
                   key={workflow.id}
                   className="cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => handleWorkflowStart(workflow)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start space-x-3">
-                      <Icon className="h-5 w-5 text-blue-600 mt-1" />
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900 mb-1">
                           {workflow.name}
@@ -155,8 +133,7 @@ const ContentWorkflowFeatures: React.FC = () => {
                             <Badge variant="secondary">
                               {workflow.confidence}% confidence
                             </Badge>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
+                            <span className="text-xs text-gray-500">
                               {workflow.estimatedTime}
                             </span>
                           </div>
@@ -176,10 +153,7 @@ const ContentWorkflowFeatures: React.FC = () => {
         {/* Active Automations */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <RefreshCw className="h-5 w-5 text-green-600" />
-              <span>Active Automations</span>
-            </CardTitle>
+            <CardTitle>Active Automations</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {automations.map((automation, index) => (
@@ -206,16 +180,12 @@ const ContentWorkflowFeatures: React.FC = () => {
         {/* Recent Workflow Actions */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-blue-600" />
-              <span>Recent Actions</span>
-            </CardTitle>
+            <CardTitle>Recent Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {recentActions.map((action, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-4 w-4 text-green-600 mt-1" />
                   <div className="flex-1">
                     <p className="text-sm text-gray-900 mb-1">{action.action}</p>
                     <p className="text-xs text-gray-500 mb-2">{action.time}</p>
@@ -240,19 +210,15 @@ const ContentWorkflowFeatures: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Button variant="outline" className="h-20 flex-col">
-              <Copy className="h-5 w-5 mb-2" />
               <span className="text-xs">Duplicate Best</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col">
-              <Calendar className="h-5 w-5 mb-2" />
               <span className="text-xs">Schedule Batch</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col">
-              <Share2 className="h-5 w-5 mb-2" />
               <span className="text-xs">Cross-Post</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col">
-              <TrendingUp className="h-5 w-5 mb-2" />
               <span className="text-xs">Boost Top</span>
             </Button>
           </div>

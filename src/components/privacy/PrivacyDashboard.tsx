@@ -5,7 +5,6 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useDataPrivacy } from '@/hooks/useDataPrivacy';
-import { Download, Trash2, Shield, Eye, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PrivacyDashboard: React.FC = () => {
@@ -89,8 +88,7 @@ const PrivacyDashboard: React.FC = () => {
       {/* Privacy Overview */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+          <CardTitle>
             Privacy & Data Protection
           </CardTitle>
         </CardHeader>
@@ -142,8 +140,7 @@ const PrivacyDashboard: React.FC = () => {
       {/* Data Rights */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
+          <CardTitle>
             Your Data Rights
           </CardTitle>
         </CardHeader>
@@ -168,7 +165,6 @@ const PrivacyDashboard: React.FC = () => {
               disabled={loading === 'export'}
               variant="outline"
             >
-              <Download className="h-4 w-4 mr-2" />
               {loading === 'export' ? 'Processing...' : 'Export Data'}
             </Button>
           </div>
@@ -181,8 +177,7 @@ const PrivacyDashboard: React.FC = () => {
                 Request permanent deletion of all your personal data
               </p>
               {privacySettings.rightToBeDeletedRequested && (
-                <div className="mt-2 flex items-center gap-2 text-orange-600">
-                  <AlertTriangle className="h-4 w-4" />
+                <div className="mt-2 text-orange-600">
                   <span className="text-sm">Deletion request pending</span>
                 </div>
               )}
@@ -192,7 +187,6 @@ const PrivacyDashboard: React.FC = () => {
               disabled={loading === 'delete' || privacySettings.rightToBeDeletedRequested}
               variant="destructive"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
               {loading === 'delete' ? 'Processing...' : 'Delete Account'}
             </Button>
           </div>

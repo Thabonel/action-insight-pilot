@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Settings, Zap } from 'lucide-react';
 import { behaviorTracker } from '@/lib/behavior-tracker';
 
 interface SocialHeaderProps {
@@ -21,27 +20,24 @@ const SocialHeader: React.FC<SocialHeaderProps> = ({ onCreatePost, onSchedulePos
       </div>
       
       <div className="flex space-x-3">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="sm"
           onClick={() => navigate('/app/connect-platforms')}
         >
-          <Settings className="h-4 w-4 mr-2" />
           Manage Platforms
         </Button>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="sm"
           onClick={onSchedulePosts}
         >
-          <Calendar className="h-4 w-4 mr-2" />
           Schedule Posts
         </Button>
-        <Button 
+        <Button
           size="sm"
           onClick={onCreatePost}
         >
-          <Zap className="h-4 w-4 mr-2" />
           Create Post
         </Button>
       </div>

@@ -2,17 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  BookOpen, 
-  PlayCircle, 
-  Target, 
-  Users, 
-  BarChart3, 
-  Zap,
-  ArrowRight,
-  Clock,
-  CheckCircle
-} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 
@@ -20,7 +9,6 @@ interface WorkflowGuide {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
   duration: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   steps: string[];
@@ -33,7 +21,6 @@ const workflowGuides: WorkflowGuide[] = [
     id: 'campaign-creation',
     title: 'Create Your First Campaign',
     description: 'Learn how to set up effective marketing campaigns from start to finish.',
-    icon: <Target className="h-6 w-6" />,
     duration: '10 min',
     difficulty: 'Beginner',
     steps: [
@@ -49,7 +36,6 @@ const workflowGuides: WorkflowGuide[] = [
     id: 'lead-management',
     title: 'Manage Leads Effectively',
     description: 'Track, score, and nurture leads to maximize conversion opportunities.',
-    icon: <Users className="h-6 w-6" />,
     duration: '8 min',
     difficulty: 'Beginner',
     steps: [
@@ -65,7 +51,6 @@ const workflowGuides: WorkflowGuide[] = [
     id: 'analytics-insights',
     title: 'Understand Your Analytics',
     description: 'Read reports, track KPIs, and make data-driven decisions.',
-    icon: <BarChart3 className="h-6 w-6" />,
     duration: '12 min',
     difficulty: 'Intermediate',
     steps: [
@@ -81,7 +66,6 @@ const workflowGuides: WorkflowGuide[] = [
     id: 'automation-setup',
     title: 'Set Up Automation',
     description: 'Automate repetitive tasks and create smart workflows.',
-    icon: <Zap className="h-6 w-6" />,
     duration: '15 min',
     difficulty: 'Advanced',
     steps: [
@@ -135,7 +119,6 @@ export const GettingStartedGuide: React.FC = () => {
       <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <PlayCircle className="h-6 w-6 text-primary" />
             Quick Start Tour
           </CardTitle>
         </CardHeader>
@@ -144,7 +127,6 @@ export const GettingStartedGuide: React.FC = () => {
             New to marketing platforms? Take our interactive tour to familiarize yourself with the interface and key features.
           </p>
           <Button onClick={() => window.location.reload()}>
-            <PlayCircle className="h-4 w-4 mr-2" />
             Start Interactive Tour
           </Button>
         </CardContent>
@@ -157,11 +139,10 @@ export const GettingStartedGuide: React.FC = () => {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className={`p-2 rounded-lg ${guide.color}`}>
-                  {guide.icon}
+                  <span className="text-sm font-medium">{guide.title.charAt(0)}</span>
                 </div>
                 <div className="flex gap-2">
                   <Badge variant="secondary" className="text-xs">
-                    <Clock className="h-3 w-3 mr-1" />
                     {guide.duration}
                   </Badge>
                   <Badge className={getDifficultyColor(guide.difficulty)}>
@@ -175,25 +156,24 @@ export const GettingStartedGuide: React.FC = () => {
               <p className="text-muted-foreground mb-4">
                 {guide.description}
               </p>
-              
+
               <div className="space-y-2 mb-4">
                 <h4 className="font-medium text-sm">What you'll learn:</h4>
                 <ul className="space-y-1">
                   {guide.steps.map((step, index) => (
                     <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle className="h-3 w-3 text-green-600" />
+                      <span className="h-3 w-3 text-green-600">-</span>
                       {step}
                     </li>
                   ))}
                 </ul>
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={() => handleStartWorkflow(guide)}
                 className="w-full"
               >
                 Start Guide
-                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
@@ -204,14 +184,12 @@ export const GettingStartedGuide: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6" />
             Additional Resources
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 border rounded-lg">
-              <BookOpen className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-medium mb-1">Documentation</h3>
               <p className="text-sm text-muted-foreground mb-3">
                 Comprehensive guides and API references
@@ -220,9 +198,8 @@ export const GettingStartedGuide: React.FC = () => {
                 Read Docs
               </Button>
             </div>
-            
+
             <div className="text-center p-4 border rounded-lg">
-              <PlayCircle className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-medium mb-1">Video Tutorials</h3>
               <p className="text-sm text-muted-foreground mb-3">
                 Step-by-step video walkthroughs
@@ -231,9 +208,8 @@ export const GettingStartedGuide: React.FC = () => {
                 Watch Videos
               </Button>
             </div>
-            
+
             <div className="text-center p-4 border rounded-lg">
-              <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
               <h3 className="font-medium mb-1">Community</h3>
               <p className="text-sm text-muted-foreground mb-3">
                 Connect with other users and experts

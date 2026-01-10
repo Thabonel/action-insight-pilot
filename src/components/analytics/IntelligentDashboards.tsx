@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Activity, Eye, RefreshCw } from 'lucide-react';
 
 const IntelligentDashboards: React.FC = () => {
   const [activeView, setActiveView] = useState<'overview' | 'channels' | 'campaigns'>('overview');
@@ -72,7 +71,6 @@ const IntelligentDashboards: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
-            <Activity className="h-5 w-5 text-blue-600" />
             <span>Intelligent Analytics Dashboard</span>
           </CardTitle>
           <div className="flex space-x-2">
@@ -214,7 +212,6 @@ const IntelligentDashboards: React.FC = () => {
 
         {activeView === 'campaigns' && (
           <div className="text-center py-12">
-            <RefreshCw className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Campaign Analytics</h3>
             <p className="text-gray-600 mb-4">Deep dive into individual campaign performance</p>
             <Button>Analyze Campaigns</Button>
@@ -224,11 +221,10 @@ const IntelligentDashboards: React.FC = () => {
         {/* Contextual Information */}
         <div className="bg-blue-50 rounded-lg p-4">
           <div className="flex items-start space-x-3">
-            <Eye className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
               <h4 className="font-medium text-blue-900 mb-1">Dashboard Intelligence</h4>
               <p className="text-sm text-blue-700">
-                This dashboard adapts to show your most relevant metrics. 
+                This dashboard adapts to show your most relevant metrics.
                 Currently highlighting revenue growth and channel performance based on your recent activity.
               </p>
             </div>

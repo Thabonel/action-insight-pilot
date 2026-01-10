@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, DollarSign, Users, Target, ArrowUp, ArrowDown } from 'lucide-react';
 
 const PerformanceInsights: React.FC = () => {
   const [roiAnalysis] = useState([
@@ -52,17 +51,16 @@ const PerformanceInsights: React.FC = () => {
     }
   };
 
-  const getTrendIcon = (trend: string) => {
-    return trend === 'up' ? 
-      <ArrowUp className="h-4 w-4 text-green-500" /> : 
-      <ArrowDown className="h-4 w-4 text-red-500" />;
+  const getTrendIndicator = (trend: string) => {
+    return trend === 'up' ?
+      <span className="text-green-500 font-medium">+</span> :
+      <span className="text-red-500 font-medium">-</span>;
   };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="h-5 w-5 text-green-600" />
           <span>Performance Insights</span>
         </CardTitle>
       </CardHeader>
@@ -76,7 +74,7 @@ const PerformanceInsights: React.FC = () => {
                 <div className="flex items-center justify-between mb-3">
                   <h5 className="font-medium text-gray-900">{campaign.campaign}</h5>
                   <div className="flex items-center space-x-2">
-                    {getTrendIcon(campaign.trend)}
+                    {getTrendIndicator(campaign.trend)}
                     <Badge variant={campaign.roi > 200 ? 'default' : 'secondary'}>
                       {campaign.roi}% ROI
                     </Badge>
@@ -139,19 +137,16 @@ const PerformanceInsights: React.FC = () => {
           <div className="bg-blue-50 rounded-lg p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <Users className="h-6 w-6 text-blue-600 mx-auto mb-1" />
                 <div className="text-2xl font-bold text-blue-900">{leadQuality.totalLeads}</div>
                 <div className="text-xs text-blue-700">Total Leads</div>
                 <div className="text-xs text-green-600 font-medium">{leadQuality.trends.leadVolume}</div>
               </div>
               <div className="text-center">
-                <Target className="h-6 w-6 text-green-600 mx-auto mb-1" />
                 <div className="text-2xl font-bold text-green-900">{leadQuality.qualifiedLeads}</div>
                 <div className="text-xs text-green-700">Qualified</div>
                 <div className="text-xs text-green-600 font-medium">{leadQuality.trends.quality}</div>
               </div>
               <div className="text-center">
-                <DollarSign className="h-6 w-6 text-purple-600 mx-auto mb-1" />
                 <div className="text-2xl font-bold text-purple-900">{leadQuality.qualificationRate}%</div>
                 <div className="text-xs text-purple-700">Qualification Rate</div>
               </div>

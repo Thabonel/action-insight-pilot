@@ -4,7 +4,6 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRateLimiter } from '@/hooks/useRateLimiter';
-import { Activity, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 
 interface RateLimitStatus {
   blocked: boolean;
@@ -49,7 +48,6 @@ const RateLimitMonitor: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5" />
           Rate Limit Monitor
         </CardTitle>
       </CardHeader>
@@ -66,17 +64,7 @@ const RateLimitMonitor: React.FC = () => {
                     {endpoint.replace('-', ' ')} API
                   </h4>
                   <Badge variant={getStatusColor(status)}>
-                    {status.blocked ? (
-                      <>
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Blocked
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Active
-                      </>
-                    )}
+                    {status.blocked ? 'Blocked' : 'Active'}
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground">
@@ -102,8 +90,7 @@ const RateLimitMonitor: React.FC = () => {
 
               {status.blocked && (
                 <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-800">
-                  <AlertTriangle className="h-4 w-4 inline mr-1" />
-                  This endpoint is currently rate limited. 
+                  This endpoint is currently rate limited.
                   {status.resetTime && (
                     <> Try again after {new Date(status.resetTime).toLocaleTimeString()}.</>
                   )}
@@ -122,7 +109,6 @@ const RateLimitMonitor: React.FC = () => {
             size="sm"
             onClick={() => resetLimits()}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
             Reset All Limits
           </Button>
         </div>

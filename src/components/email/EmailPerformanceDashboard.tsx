@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { TrendingUp, Mail, MousePointer, Target, Clock } from 'lucide-react';
 
 const EmailPerformanceDashboard: React.FC = () => {
   const [metrics] = useState({
@@ -54,7 +53,6 @@ const EmailPerformanceDashboard: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="h-5 w-5 text-green-600" />
           <span>Email Performance Dashboard</span>
         </CardTitle>
       </CardHeader>
@@ -62,7 +60,6 @@ const EmailPerformanceDashboard: React.FC = () => {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <Mail className="h-6 w-6 text-blue-600 mx-auto mb-1" />
             <div className="text-2xl font-bold text-blue-900">{metrics.totalSent.toLocaleString()}</div>
             <div className="text-xs text-blue-700">Emails Sent</div>
           </div>
@@ -74,12 +71,10 @@ const EmailPerformanceDashboard: React.FC = () => {
             </Badge>
           </div>
           <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <MousePointer className="h-6 w-6 text-purple-600 mx-auto mb-1" />
             <div className="text-2xl font-bold text-purple-900">{metrics.avgClickRate}%</div>
             <div className="text-xs text-purple-700">Avg Click Rate</div>
           </div>
           <div className="text-center p-3 bg-orange-50 rounded-lg">
-            <Target className="h-6 w-6 text-orange-600 mx-auto mb-1" />
             <div className="text-2xl font-bold text-orange-900">{metrics.conversionRate}%</div>
             <div className="text-xs text-orange-700">Conversion Rate</div>
           </div>

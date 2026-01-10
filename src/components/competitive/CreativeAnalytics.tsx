@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Palette, Target, Zap, TrendingUp } from 'lucide-react';
 
 interface CreativeElement {
   element: string;
@@ -45,7 +44,6 @@ const CreativeAnalytics: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
-            <Palette className="h-5 w-5 text-orange-600" />
             <span>Creative Analytics</span>
           </CardTitle>
           <div className="flex space-x-2">
@@ -195,7 +193,6 @@ const CreativeAnalytics: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-green-50 rounded-lg p-4">
                 <div className="flex items-center space-x-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
                   <h4 className="font-medium text-green-900">Strengths</h4>
                 </div>
                 <ul className="text-sm text-green-700 space-y-1">
@@ -207,7 +204,6 @@ const CreativeAnalytics: React.FC = () => {
 
               <div className="bg-yellow-50 rounded-lg p-4">
                 <div className="flex items-center space-x-2 mb-2">
-                  <Target className="h-5 w-5 text-yellow-600" />
                   <h4 className="font-medium text-yellow-900">Opportunities</h4>
                 </div>
                 <ul className="text-sm text-yellow-700 space-y-1">
@@ -223,7 +219,6 @@ const CreativeAnalytics: React.FC = () => {
         {/* AI Recommendations */}
         <div className="bg-purple-50 rounded-lg p-4">
           <div className="flex items-center space-x-2 mb-2">
-            <Zap className="h-5 w-5 text-purple-600" />
             <h4 className="font-medium text-purple-900">AI Recommendations</h4>
           </div>
           <ul className="text-sm text-purple-700 space-y-1">

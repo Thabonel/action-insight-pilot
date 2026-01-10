@@ -6,20 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import {
-  Play,
-  Pause,
-  Settings,
-  Search,
-  Mail,
-  Phone,
-  Calendar,
-  RefreshCw,
-  Target,
-  TrendingUp,
-  Users,
-  Zap
-} from 'lucide-react';
 
 interface Workflow {
   id: number;
@@ -36,7 +22,6 @@ interface Workflow {
 interface QuickAction {
   label: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
   confidence: number;
   estimatedResults: number;
   action: string;
@@ -101,7 +86,6 @@ const LeadWorkflowAutomation: React.FC = () => {
     {
       label: 'Find 50 more leads like best converters',
       description: 'Search for leads matching your top 10 converting profiles',
-      icon: Search,
       confidence: 94,
       estimatedResults: 50,
       action: 'find_similar_leads'
@@ -109,7 +93,6 @@ const LeadWorkflowAutomation: React.FC = () => {
     {
       label: 'Score all leads with new pattern data',
       description: 'Apply latest conversion patterns to rescore all leads',
-      icon: Target,
       confidence: 88,
       estimatedResults: 2847,
       action: 'rescore_all_leads'
@@ -117,7 +100,6 @@ const LeadWorkflowAutomation: React.FC = () => {
     {
       label: 'Export hot leads for immediate outreach',
       description: 'Get CSV of all leads with 85+ score for direct contact',
-      icon: Mail,
       confidence: 92,
       estimatedResults: 87,
       action: 'export_hot_leads'
@@ -125,7 +107,6 @@ const LeadWorkflowAutomation: React.FC = () => {
     {
       label: 'Create email sequence for nurture leads',
       description: 'Set up automated email series for medium-score prospects',
-      icon: Calendar,
       confidence: 85,
       estimatedResults: 234,
       action: 'create_nurture_sequence'
@@ -133,7 +114,6 @@ const LeadWorkflowAutomation: React.FC = () => {
     {
       label: 'Track conversion patterns by source',
       description: 'Analyze which lead sources are converting best',
-      icon: TrendingUp,
       confidence: 91,
       estimatedResults: 5,
       action: 'analyze_source_patterns'
@@ -185,7 +165,6 @@ const LeadWorkflowAutomation: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Zap className="h-5 w-5 text-blue-600" />
             <span>Quick Actions</span>
           </CardTitle>
         </CardHeader>
@@ -198,9 +177,6 @@ const LeadWorkflowAutomation: React.FC = () => {
                 className="border rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors"
               >
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <action.icon className="h-5 w-5 text-blue-600" />
-                  </div>
                   <div className="flex-1">
                     <h4 className="font-medium mb-1">{action.label}</h4>
                     <p className="text-sm text-gray-600 mb-2">{action.description}</p>
@@ -227,7 +203,6 @@ const LeadWorkflowAutomation: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Settings className="h-5 w-5 text-purple-600" />
             <span>Custom Lead Automation</span>
           </CardTitle>
         </CardHeader>
@@ -289,11 +264,9 @@ const LeadWorkflowAutomation: React.FC = () => {
             
             <div className="flex space-x-3">
               <Button onClick={handleCustomSearch} className="flex items-center space-x-2">
-                <Search className="h-4 w-4" />
                 <span>Find Matching Leads</span>
               </Button>
               <Button variant="outline" className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4" />
                 <span>Schedule Automation</span>
               </Button>
             </div>
@@ -305,7 +278,6 @@ const LeadWorkflowAutomation: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <RefreshCw className="h-5 w-5 text-green-600" />
             <span>Active Workflows</span>
           </CardTitle>
         </CardHeader>
@@ -331,11 +303,7 @@ const LeadWorkflowAutomation: React.FC = () => {
                       variant="outline"
                       onClick={() => handleWorkflowToggle(workflow.id, workflow.status)}
                     >
-                      {workflow.status === 'active' ? (
-                        <Pause className="h-3 w-3" />
-                      ) : (
-                        <Play className="h-3 w-3" />
-                      )}
+                      {workflow.status === 'active' ? 'Pause' : 'Play'}
                     </Button>
                   </div>
                 </div>

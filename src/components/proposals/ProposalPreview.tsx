@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Send, FileText } from 'lucide-react';
 import { GeneratedProposal } from '@/types/proposals';
 import { generateProposalPDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +37,6 @@ const ProposalPreview: React.FC<ProposalPreviewProps> = ({ proposal, onExport })
     return (
       <Card>
         <CardContent className="text-center py-12">
-          <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
           <p className="text-slate-600">No proposal generated yet. Create a proposal first.</p>
         </CardContent>
       </Card>
@@ -53,24 +51,19 @@ const ProposalPreview: React.FC<ProposalPreviewProps> = ({ proposal, onExport })
           <CardDescription>Review and customize your proposal before sending</CardDescription>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handlePDFDownload}
-            className="flex items-center gap-2"
           >
-            <Download className="h-4 w-4" />
             Export PDF
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => onExport(proposal.id, 'docx')}
-            className="flex items-center gap-2"
           >
-            <Download className="h-4 w-4" />
             Export Word
           </Button>
-          <Button className="flex items-center gap-2">
-            <Send className="h-4 w-4" />
+          <Button>
             Send Proposal
           </Button>
         </div>

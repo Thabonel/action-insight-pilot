@@ -10,26 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  MoreVertical,
-  Edit,
-  Archive,
-  Trash2,
-  Copy,
-  Calendar,
-  Target,
-  DollarSign,
-  TrendingUp,
-  Mail,
-  Share2,
-  FileText,
-  Eye,
-  BarChart3,
-  Rocket,
-  Pause,
-  Play,
-  Loader2
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -107,19 +87,19 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
     }
   };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeLabel = (type: string) => {
     switch (type.toLowerCase()) {
       case 'email':
-        return <Mail className="h-4 w-4" />;
+        return 'Email';
       case 'social':
       case 'social_media':
-        return <Share2 className="h-4 w-4" />;
+        return 'Social';
       case 'content':
-        return <FileText className="h-4 w-4" />;
+        return 'Content';
       case 'paid_ads':
-        return <Target className="h-4 w-4" />;
+        return 'Ads';
       default:
-        return <BarChart3 className="h-4 w-4" />;
+        return 'Campaign';
     }
   };
 
@@ -300,7 +280,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
             {/* Campaign Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-2">
-                {getTypeIcon(campaign.type)}
+                <span className="text-xs font-medium text-gray-500">[{getTypeLabel(campaign.type)}]</span>
                 <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -318,29 +298,24 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
+                ...
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleViewDetails}>
-                <Eye className="h-4 w-4 mr-2" />
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleEdit}>
-                <Edit className="h-4 w-4 mr-2" />
                 Edit Campaign
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDuplicate}>
-                <Copy className="h-4 w-4 mr-2" />
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleArchive}>
-                <Archive className="h-4 w-4 mr-2" />
                 Archive
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-                <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -358,7 +333,6 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="flex items-center space-x-2 mb-1">
-              <DollarSign className="h-3 w-3 text-gray-500" />
               <span className="text-xs font-medium text-gray-700">Budget</span>
             </div>
             <div className="text-sm font-semibold">
@@ -374,7 +348,6 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="flex items-center space-x-2 mb-1">
-              <Target className="h-3 w-3 text-gray-500" />
               <span className="text-xs font-medium text-gray-700">Performance</span>
             </div>
             <div className="text-sm font-semibold">{conversionRate.toFixed(1)}%</div>
@@ -385,11 +358,9 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
         {/* Additional Stats */}
         <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
           <div className="flex items-center space-x-1">
-            <TrendingUp className="h-3 w-3" />
             <span>{reach.toLocaleString()} reach</span>
           </div>
           <div className="flex items-center space-x-1">
-            <Calendar className="h-3 w-3" />
             <span>{new Date(campaign.created_at).toLocaleDateString()}</span>
           </div>
         </div>
@@ -404,12 +375,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
               disabled={actionLoading}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
             >
-              {actionLoading ? (
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              ) : (
-                <Rocket className="h-3 w-3 mr-1" />
-              )}
-              Launch
+              {actionLoading ? '...' : 'Launch'}
             </Button>
           )}
 
@@ -421,12 +387,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
               variant="outline"
               className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
             >
-              {actionLoading ? (
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              ) : (
-                <Pause className="h-3 w-3 mr-1" />
-              )}
-              Pause
+              {actionLoading ? '...' : 'Pause'}
             </Button>
           )}
 
@@ -437,12 +398,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
               disabled={actionLoading}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {actionLoading ? (
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              ) : (
-                <Play className="h-3 w-3 mr-1" />
-              )}
-              Resume
+              {actionLoading ? '...' : 'Resume'}
             </Button>
           )}
 
@@ -455,7 +411,6 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
                        campaign.status.toLowerCase() === 'paused' ? 'flex-1' : 'w-full'}
             onClick={handleViewDetails}
           >
-            <Eye className="h-4 w-4 mr-2" />
             View Details
           </Button>
         </div>

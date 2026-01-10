@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { FileText } from 'lucide-react';
 import { ProposalFormData } from '@/types/proposals';
 import TemplateSelection from './form/TemplateSelection';
 import ClientInformation from './form/ClientInformation';
@@ -96,12 +95,11 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
       </div>
 
       <div className="flex justify-end">
-        <Button 
-          onClick={onSubmit} 
+        <Button
+          onClick={onSubmit}
           disabled={!formData.template_type || !formData.client_info.company_name || loading || !hasTemplates}
           className="flex items-center gap-2"
         >
-          <FileText className="h-4 w-4" />
           {loading ? 'Generating...' : 'Generate Proposal'}
         </Button>
       </div>

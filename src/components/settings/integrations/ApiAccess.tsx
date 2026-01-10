@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Key, ExternalLink } from 'lucide-react';
 
 interface ApiEndpoint {
   method: string;
@@ -26,10 +25,7 @@ const ApiAccess: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Key className="h-5 w-5" />
-          <span>API Access & Documentation</span>
-        </CardTitle>
+        <CardTitle>API Access and Documentation</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -65,7 +61,6 @@ const ApiAccess: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-medium">API Endpoints</h4>
             <Button variant="outline" size="sm">
-              <ExternalLink className="h-3 w-3 mr-2" />
               Full Documentation
             </Button>
           </div>

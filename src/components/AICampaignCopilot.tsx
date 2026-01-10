@@ -11,23 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAIFeedback } from '@/hooks/useAIFeedback';
 import { AIAutocompleteInput } from '@/components/AIAutocompleteInput';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Bot, 
-  Wand2, 
-  Users, 
-  Target, 
-  MessageSquare, 
-  Calendar,
-  BarChart3,
-  RefreshCw,
-  HelpCircle,
-  Edit3,
-  ChevronRight,
-  Sparkles,
-  ThumbsUp,
-  ThumbsDown,
-  Star
-} from 'lucide-react';
 
 interface CampaignBrief {
   businessGoal: string;
@@ -286,14 +269,12 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <Bot className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold">AI Campaign Co-pilot</h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Let's build your campaign together. I'll ask you a few key questions, then create a comprehensive strategy with interactive recommendations you can refine.
           </p>
           <Badge variant="secondary" className="bg-primary/10 text-primary">
-            <Sparkles className="h-3 w-3 mr-1" />
             Phase 1: Interactive Co-pilot
           </Badge>
         </div>
@@ -301,7 +282,6 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
         <Card className="border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
               Campaign Brief
             </CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -382,23 +362,13 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
 
             <div className="pt-4">
               <Progress value={Object.values(brief).filter(v => v.trim()).length * 20} className="mb-4" />
-              <Button 
+              <Button
                 onClick={generateCampaign}
                 disabled={!isComplete || loading}
                 className="w-full"
                 size="lg"
               >
-                {loading ? (
-                  <>
-                    <Bot className="mr-2 h-4 w-4 animate-pulse" />
-                    Creating Your Campaign Strategy...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="mr-2 h-4 w-4" />
-                    Generate Campaign with AI Co-pilot
-                  </>
-                )}
+                {loading ? 'Creating Your Campaign Strategy...' : 'Generate Campaign with AI Co-pilot'}
               </Button>
             </div>
           </CardContent>
@@ -423,7 +393,6 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
         <Card className="group hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
               <CardTitle>Audience Personas</CardTitle>
             </div>
             <Button
@@ -432,7 +401,7 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
               onClick={() => regenerateSection('personas')}
               className="opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -453,14 +422,13 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
                       ))}
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" className="ml-2">
-                    <HelpCircle 
-                      className="h-4 w-4" 
-                      onClick={() => toast({
-                        title: "AI Reasoning",
-                        description: persona.reasoning
-                      })}
-                    />
+                  <Button variant="ghost" size="sm" className="ml-2"
+                    onClick={() => toast({
+                      title: "AI Reasoning",
+                      description: persona.reasoning
+                    })}
+                  >
+                    ?
                   </Button>
                 </div>
               </div>
@@ -472,7 +440,6 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
         <Card className="group hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
               <CardTitle>Channel & Budget Mix</CardTitle>
             </div>
             <Button
@@ -481,7 +448,7 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
               onClick={() => regenerateSection('channel mix')}
               className="opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -494,14 +461,13 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
                   <span className="font-medium">{channel.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{channel.allocation}%</span>
-                    <Button variant="ghost" size="sm">
-                      <HelpCircle 
-                        className="h-4 w-4" 
-                        onClick={() => toast({
-                          title: "Why this channel?",
-                          description: channel.reasoning
-                        })}
-                      />
+                    <Button variant="ghost" size="sm"
+                      onClick={() => toast({
+                        title: "Why this channel?",
+                        description: channel.reasoning
+                      })}
+                    >
+                      ?
                     </Button>
                   </div>
                 </div>
@@ -518,7 +484,6 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
         <Card className="group hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
               <CardTitle>Messaging Pillars</CardTitle>
             </div>
             <Button
@@ -527,7 +492,7 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
               onClick={() => regenerateSection('messaging')}
               className="opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -541,19 +506,18 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="sm" onClick={() => recordApproval(pillar, { type: 'messaging', brief }, sessionId)}>
-                      <ThumbsUp className="h-4 w-4" />
+                      Approve
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => recordRegeneration(pillar, { type: 'messaging', brief }, sessionId)}>
-                      <RefreshCw className="h-4 w-4" />
+                      Regenerate
                     </Button>
-                    <Button variant="ghost" size="sm">
-                      <HelpCircle 
-                        className="h-4 w-4" 
-                        onClick={() => toast({
-                          title: "AI Reasoning",
-                          description: pillar.reasoning
-                        })}
-                      />
+                    <Button variant="ghost" size="sm"
+                      onClick={() => toast({
+                        title: "AI Reasoning",
+                        description: pillar.reasoning
+                      })}
+                    >
+                      ?
                     </Button>
                   </div>
                 </div>
@@ -566,7 +530,6 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
         <Card className="group hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
               <CardTitle>Content Calendar</CardTitle>
             </div>
             <Button
@@ -575,7 +538,7 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
               onClick={() => regenerateSection('content calendar')}
               className="opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -596,16 +559,15 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="sm">
-                      <Edit3 className="h-4 w-4" />
+                      Edit
                     </Button>
-                    <Button variant="ghost" size="sm">
-                      <HelpCircle 
-                        className="h-4 w-4" 
-                        onClick={() => toast({
-                          title: "Why this content?",
-                          description: content.reasoning
-                        })}
-                      />
+                    <Button variant="ghost" size="sm"
+                      onClick={() => toast({
+                        title: "Why this content?",
+                        description: content.reasoning
+                      })}
+                    >
+                      ?
                     </Button>
                   </div>
                 </div>
@@ -617,12 +579,10 @@ const AICampaignCopilot: React.FC<AICampaignCopilotProps> = ({ initialBrief, onS
 
       <div className="flex justify-center gap-4 pt-6">
         <Button variant="outline" onClick={() => setStep('brief')}>
-          <ChevronRight className="h-4 w-4 rotate-180 mr-2" />
           Back to Brief
         </Button>
         <Button onClick={() => onSave?.(aiGeneration)} size="lg">
           Save Campaign Strategy
-          <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
     </div>

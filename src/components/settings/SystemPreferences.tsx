@@ -9,17 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
 import { userPreferencesService } from '@/lib/services/user-preferences-service';
-import { 
-  Settings, 
-  Bell, 
-  Globe, 
-  Palette, 
-  Shield, 
-  Database,
-  Clock,
-  Download,
-  Trash2
-} from 'lucide-react';
 
 interface SystemPreference {
   id: string;
@@ -193,16 +182,6 @@ const SystemPreferences: React.FC = () => {
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Notifications': return Bell;
-      case 'Appearance': return Palette;
-      case 'Localization': return Globe;
-      case 'Security': return Shield;
-      case 'Data': return Database;
-      default: return Settings;
-    }
-  };
 
   const groupedPreferences = preferences.reduce((groups, pref) => {
     if (!groups[pref.category]) {
@@ -229,24 +208,19 @@ const SystemPreferences: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={exportPreferences}>
-            <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
           <Button variant="outline" onClick={resetPreferences}>
-            <Trash2 className="h-4 w-4 mr-2" />
             Reset All
           </Button>
         </div>
       </div>
 
       {Object.entries(groupedPreferences).map(([category, prefs]) => {
-        const IconComponent = getCategoryIcon(category);
-        
         return (
           <Card key={category}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <IconComponent className="h-5 w-5" />
                 <span>{category}</span>
               </CardTitle>
             </CardHeader>
@@ -262,9 +236,6 @@ const SystemPreferences: React.FC = () => {
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      {saving === pref.id && (
-                        <Clock className="h-4 w-4 animate-spin text-gray-400" />
-                      )}
                       
                       {pref.type === 'boolean' && (
                         <Switch

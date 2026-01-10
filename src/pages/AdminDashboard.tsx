@@ -2,7 +2,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useCampaigns } from '@/hooks/useCampaigns';
-import { TrendingUp, Users, Mail, DollarSign, Activity, AlertCircle } from 'lucide-react';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const AdminDashboard: React.FC = () => {
@@ -47,7 +46,6 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
           <p className="text-gray-600">{error}</p>
         </div>
@@ -66,46 +64,34 @@ const AdminDashboard: React.FC = () => {
         {/* Key Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">${businessMetrics.totalRevenue.toLocaleString()}</p>
-                <p className="text-sm text-green-600">+{businessMetrics.revenueGrowth}% from last month</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+              <p className="text-2xl font-bold text-gray-900">${businessMetrics.totalRevenue.toLocaleString()}</p>
+              <p className="text-sm text-green-600">+{businessMetrics.revenueGrowth}% from last month</p>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900">{businessMetrics.totalUsers.toLocaleString()}</p>
-                <p className="text-sm text-green-600">+{businessMetrics.userGrowth}% from last month</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Active Users</p>
+              <p className="text-2xl font-bold text-gray-900">{businessMetrics.totalUsers.toLocaleString()}</p>
+              <p className="text-sm text-green-600">+{businessMetrics.userGrowth}% from last month</p>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Emails Sent</p>
-                <p className="text-2xl font-bold text-gray-900">{businessMetrics.emailsSent.toLocaleString()}</p>
-                <p className="text-sm text-green-600">+{businessMetrics.emailGrowth}% from last month</p>
-              </div>
-              <Mail className="h-8 w-8 text-purple-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Emails Sent</p>
+              <p className="text-2xl font-bold text-gray-900">{businessMetrics.emailsSent.toLocaleString()}</p>
+              <p className="text-sm text-green-600">+{businessMetrics.emailGrowth}% from last month</p>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
-                <p className="text-2xl font-bold text-gray-900">{businessMetrics.activeCampaigns}</p>
-                <p className="text-sm text-gray-500">Across all users</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-orange-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
+              <p className="text-2xl font-bold text-gray-900">{businessMetrics.activeCampaigns}</p>
+              <p className="text-sm text-gray-500">Across all users</p>
             </div>
           </div>
         </div>
@@ -155,26 +141,17 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Recent System Activity</h3>
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Activity className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">New user registration spike</p>
-                <p className="text-xs text-gray-500">15 new users in the last hour</p>
-              </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm font-medium text-gray-900">New user registration spike</p>
+              <p className="text-xs text-gray-500">15 new users in the last hour</p>
             </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <Mail className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">Email campaign completed</p>
-                <p className="text-xs text-gray-500">Summer Sale campaign reached 25K recipients</p>
-              </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm font-medium text-gray-900">Email campaign completed</p>
+              <p className="text-xs text-gray-500">Summer Sale campaign reached 25K recipients</p>
             </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">Revenue milestone reached</p>
-                <p className="text-xs text-gray-500">Monthly revenue exceeded $125K target</p>
-              </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm font-medium text-gray-900">Revenue milestone reached</p>
+              <p className="text-xs text-gray-500">Monthly revenue exceeded $125K target</p>
             </div>
           </div>
         </div>

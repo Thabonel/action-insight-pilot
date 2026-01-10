@@ -4,14 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Eye, 
-  EyeOff, 
-  Save, 
-  Check,
-  AlertCircle,
-  Trash2
-} from 'lucide-react';
 import { ApiKeyConfig } from './ApiKeyConfig';
 import { SecretMetadata } from '@/lib/services/secrets-service';
 
@@ -62,7 +54,7 @@ const ApiKeyRow: React.FC<ApiKeyRowProps> = ({
               <Badge variant="outline" className="text-xs">Required</Badge>
             )}
             {secretExists && (
-              <Check className="h-4 w-4 text-green-600" />
+              <span className="text-green-600 text-sm">Saved</span>
             )}
           </div>
           <p className="text-sm text-gray-600 mt-1">{config.description}</p>
@@ -81,7 +73,6 @@ const ApiKeyRow: React.FC<ApiKeyRowProps> = ({
           />
           {!isValid && inputValue && (
             <div className="flex items-center space-x-1 mt-1 text-red-600 text-xs">
-              <AlertCircle className="h-3 w-3" />
               <span>Invalid format</span>
             </div>
           )}
@@ -93,7 +84,7 @@ const ApiKeyRow: React.FC<ApiKeyRowProps> = ({
           onClick={onToggleVisibility}
           disabled={!inputValue}
         >
-          {isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {isVisible ? 'Hide' : 'Show'}
         </Button>
         
         <Button
@@ -101,11 +92,7 @@ const ApiKeyRow: React.FC<ApiKeyRowProps> = ({
           onClick={onSave}
           disabled={!isValid || !hasChanges || isSaving}
         >
-          {isSaving ? (
-            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
+          {isSaving ? 'Saving...' : 'Save'}
         </Button>
 
         {secretExists && (
@@ -115,7 +102,7 @@ const ApiKeyRow: React.FC<ApiKeyRowProps> = ({
             onClick={onDelete}
             className="text-red-600 hover:text-red-700"
           >
-            <Trash2 className="h-4 w-4" />
+            Delete
           </Button>
         )}
       </div>

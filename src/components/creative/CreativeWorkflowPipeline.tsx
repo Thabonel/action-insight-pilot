@@ -4,16 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
-  Users, 
-  MessageSquare, 
-  Calendar,
-  ArrowRight,
-  MoreHorizontal
-} from 'lucide-react';
 
 interface WorkflowTask {
   id: string;
@@ -118,17 +108,6 @@ const CreativeWorkflowPipeline: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: WorkflowTask['status']) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'in_progress': return <Clock className="h-4 w-4 text-blue-600" />;
-      case 'review': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'approved': return <CheckCircle className="h-4 w-4 text-purple-600" />;
-      case 'pending': return <Clock className="h-4 w-4 text-gray-600" />;
-      default: return <Clock className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
   const currentProject = projects.find(p => p.id === selectedProject);
 
   const getTasksByStatus = (status: WorkflowTask['status']) => {
@@ -154,11 +133,11 @@ const CreativeWorkflowPipeline: React.FC = () => {
               </p>
             </div>
           </div>
-          
+
           {/* Progress Bar */}
           <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${currentProject?.progress}%` }}
             />
           </div>
@@ -170,8 +149,7 @@ const CreativeWorkflowPipeline: React.FC = () => {
         {/* Pending Column */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <Clock className="h-4 w-4 mr-2 text-gray-600" />
+            <CardTitle className="text-sm font-medium">
               Pending ({getTasksByStatus('pending').length})
             </CardTitle>
           </CardHeader>
@@ -180,7 +158,6 @@ const CreativeWorkflowPipeline: React.FC = () => {
               <div key={task.id} className="p-3 bg-gray-50 rounded-lg border">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="text-sm font-medium">{task.title}</h4>
-                  <MoreHorizontal className="h-4 w-4 text-gray-400" />
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
                   <Avatar className="h-6 w-6">
@@ -191,18 +168,10 @@ const CreativeWorkflowPipeline: React.FC = () => {
                   <span className="text-xs text-gray-600">{task.assignee.name}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="flex items-center">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                  <div className="flex items-center space-x-2">
-                    {task.comments > 0 && (
-                      <span className="flex items-center">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        {task.comments}
-                      </span>
-                    )}
-                  </div>
+                  <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                  {task.comments > 0 && (
+                    <span>{task.comments} comments</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -212,8 +181,7 @@ const CreativeWorkflowPipeline: React.FC = () => {
         {/* In Progress Column */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <Clock className="h-4 w-4 mr-2 text-blue-600" />
+            <CardTitle className="text-sm font-medium">
               In Progress ({getTasksByStatus('in_progress').length})
             </CardTitle>
           </CardHeader>
@@ -222,7 +190,6 @@ const CreativeWorkflowPipeline: React.FC = () => {
               <div key={task.id} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="text-sm font-medium">{task.title}</h4>
-                  <MoreHorizontal className="h-4 w-4 text-gray-400" />
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
                   <Avatar className="h-6 w-6">
@@ -233,18 +200,10 @@ const CreativeWorkflowPipeline: React.FC = () => {
                   <span className="text-xs text-gray-600">{task.assignee.name}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="flex items-center">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                  <div className="flex items-center space-x-2">
-                    {task.comments > 0 && (
-                      <span className="flex items-center">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        {task.comments}
-                      </span>
-                    )}
-                  </div>
+                  <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                  {task.comments > 0 && (
+                    <span>{task.comments} comments</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -254,8 +213,7 @@ const CreativeWorkflowPipeline: React.FC = () => {
         {/* Review Column */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <AlertCircle className="h-4 w-4 mr-2 text-yellow-600" />
+            <CardTitle className="text-sm font-medium">
               Review ({getTasksByStatus('review').length})
             </CardTitle>
           </CardHeader>
@@ -264,7 +222,6 @@ const CreativeWorkflowPipeline: React.FC = () => {
               <div key={task.id} className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="text-sm font-medium">{task.title}</h4>
-                  <MoreHorizontal className="h-4 w-4 text-gray-400" />
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
                   <Avatar className="h-6 w-6">
@@ -275,18 +232,10 @@ const CreativeWorkflowPipeline: React.FC = () => {
                   <span className="text-xs text-gray-600">{task.assignee.name}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="flex items-center">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                  <div className="flex items-center space-x-2">
-                    {task.comments > 0 && (
-                      <span className="flex items-center">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        {task.comments}
-                      </span>
-                    )}
-                  </div>
+                  <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                  {task.comments > 0 && (
+                    <span>{task.comments} comments</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -296,8 +245,7 @@ const CreativeWorkflowPipeline: React.FC = () => {
         {/* Approved Column */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2 text-purple-600" />
+            <CardTitle className="text-sm font-medium">
               Approved ({getTasksByStatus('approved').length})
             </CardTitle>
           </CardHeader>
@@ -306,7 +254,6 @@ const CreativeWorkflowPipeline: React.FC = () => {
               <div key={task.id} className="p-3 bg-purple-50 rounded-lg border border-purple-200">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="text-sm font-medium">{task.title}</h4>
-                  <MoreHorizontal className="h-4 w-4 text-gray-400" />
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
                   <Avatar className="h-6 w-6">
@@ -317,18 +264,10 @@ const CreativeWorkflowPipeline: React.FC = () => {
                   <span className="text-xs text-gray-600">{task.assignee.name}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="flex items-center">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                  <div className="flex items-center space-x-2">
-                    {task.comments > 0 && (
-                      <span className="flex items-center">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        {task.comments}
-                      </span>
-                    )}
-                  </div>
+                  <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                  {task.comments > 0 && (
+                    <span>{task.comments} comments</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -338,8 +277,7 @@ const CreativeWorkflowPipeline: React.FC = () => {
         {/* Completed Column */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+            <CardTitle className="text-sm font-medium">
               Completed ({getTasksByStatus('completed').length})
             </CardTitle>
           </CardHeader>
@@ -348,7 +286,6 @@ const CreativeWorkflowPipeline: React.FC = () => {
               <div key={task.id} className="p-3 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="text-sm font-medium">{task.title}</h4>
-                  <MoreHorizontal className="h-4 w-4 text-gray-400" />
                 </div>
                 <div className="flex items-center space-x-2 mb-2">
                   <Avatar className="h-6 w-6">
@@ -359,18 +296,10 @@ const CreativeWorkflowPipeline: React.FC = () => {
                   <span className="text-xs text-gray-600">{task.assignee.name}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="flex items-center">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                  <div className="flex items-center space-x-2">
-                    {task.comments > 0 && (
-                      <span className="flex items-center">
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        {task.comments}
-                      </span>
-                    )}
-                  </div>
+                  <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                  {task.comments > 0 && (
+                    <span>{task.comments} comments</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -384,15 +313,12 @@ const CreativeWorkflowPipeline: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button size="sm">
-                <Users className="h-4 w-4 mr-2" />
                 Assign Task
               </Button>
               <Button size="sm" variant="outline">
-                <Calendar className="h-4 w-4 mr-2" />
                 Schedule Review
               </Button>
               <Button size="sm" variant="outline">
-                <MessageSquare className="h-4 w-4 mr-2" />
                 Add Comment
               </Button>
             </div>

@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Calendar, TrendingUp, Zap } from 'lucide-react';
 
 const TimingIntelligencePanel: React.FC = () => {
   const timingData = {
@@ -34,7 +33,6 @@ const TimingIntelligencePanel: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Clock className="h-5 w-5 text-blue-600" />
           <span>Timing Intelligence</span>
         </CardTitle>
       </CardHeader>
@@ -42,7 +40,6 @@ const TimingIntelligencePanel: React.FC = () => {
         {/* Planning Pattern */}
         <div className="bg-blue-50 rounded-lg p-4">
           <h4 className="font-medium text-blue-900 mb-2 flex items-center space-x-2">
-            <Zap className="h-4 w-4" />
             <span>Your Planning Pattern</span>
           </h4>
           <p className="text-sm text-blue-700">
@@ -54,7 +51,6 @@ const TimingIntelligencePanel: React.FC = () => {
         {/* Weekly Success Pattern */}
         <div>
           <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-            <Calendar className="h-4 w-4" />
             <span>Weekly Success Pattern</span>
           </h4>
           <div className="space-y-2">
@@ -90,7 +86,6 @@ const TimingIntelligencePanel: React.FC = () => {
         {/* Next Recommendation */}
         <div className="bg-green-50 rounded-lg p-4">
           <h4 className="font-medium text-green-900 mb-2 flex items-center space-x-2">
-            <TrendingUp className="h-4 w-4" />
             <span>Next Optimal Launch</span>
           </h4>
           <p className="text-sm text-green-700">

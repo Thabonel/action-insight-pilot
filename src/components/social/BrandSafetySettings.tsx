@@ -14,13 +14,6 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Shield,
-  Plus,
-  Trash2,
-  Loader2,
-  AlertCircle
-} from 'lucide-react';
 
 interface BrandSafetyFilter {
   id: string
@@ -231,7 +224,6 @@ export const BrandSafetySettings: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-red-600" />
           Brand Safety Filters
         </CardTitle>
       </CardHeader>
@@ -239,7 +231,6 @@ export const BrandSafetySettings: React.FC = () => {
         {/* Info Banner */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
               <p className="text-sm text-blue-900 font-medium mb-1">
                 Protect your brand reputation
@@ -255,7 +246,6 @@ export const BrandSafetySettings: React.FC = () => {
         {/* Add Filter Button */}
         <div className="mb-6">
           <Button onClick={() => setShowAddForm(!showAddForm)}>
-            <Plus className="h-4 w-4 mr-2" />
             Add Brand Safety Filter
           </Button>
         </div>
@@ -327,8 +317,6 @@ export const BrandSafetySettings: React.FC = () => {
                   onClick={addFilter}
                   disabled={isLoading || !newFilter.value}
                 >
-                  {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  <Plus className="h-4 w-4 mr-2" />
                   Add Filter
                 </Button>
                 <Button
@@ -348,7 +336,6 @@ export const BrandSafetySettings: React.FC = () => {
         {/* Loading State */}
         {isLoading && filters.length === 0 && (
           <div className="text-center p-6 text-gray-500">
-            <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-gray-300" />
             <p className="text-sm">Loading brand safety filters...</p>
           </div>
         )}
@@ -356,7 +343,6 @@ export const BrandSafetySettings: React.FC = () => {
         {/* Empty State */}
         {!isLoading && filters.length === 0 && (
           <div className="text-center p-6 text-gray-500">
-            <Shield className="h-12 w-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">
               No brand safety filters configured yet. Add filters to protect your brand reputation.
             </p>
@@ -419,7 +405,7 @@ export const BrandSafetySettings: React.FC = () => {
                       onClick={() => deleteFilter(filter.id)}
                       disabled={isLoading}
                     >
-                      <Trash2 className="h-3 w-3 text-red-600" />
+                      Delete
                     </Button>
                   </div>
                 </div>

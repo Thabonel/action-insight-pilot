@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { TrendingUp, Heart, MessageCircle, Share2, Eye, Users } from 'lucide-react';
 
 const SocialPerformanceDashboard: React.FC = () => {
   const [selectedMetric, setSelectedMetric] = useState('engagement');
@@ -77,10 +76,7 @@ const SocialPerformanceDashboard: React.FC = () => {
       {/* Platform Performance Overview */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <BarChart className="h-5 w-5" />
-            <span>Platform Performance</span>
-          </CardTitle>
+          <CardTitle>Platform Performance</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -138,10 +134,7 @@ const SocialPerformanceDashboard: React.FC = () => {
       {/* Top Performing Posts */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5" />
-            <span>Top Performing Posts</span>
-          </CardTitle>
+          <CardTitle>Top Performing Posts</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -162,22 +155,18 @@ const SocialPerformanceDashboard: React.FC = () => {
                 
                 <div className="grid grid-cols-4 gap-4 text-center">
                   <div>
-                    <Heart className="h-4 w-4 mx-auto mb-1 text-red-500" />
                     <p className="text-sm font-medium">{post.likes}</p>
                     <p className="text-xs text-gray-600">Likes</p>
                   </div>
                   <div>
-                    <MessageCircle className="h-4 w-4 mx-auto mb-1 text-blue-500" />
                     <p className="text-sm font-medium">{post.comments}</p>
                     <p className="text-xs text-gray-600">Comments</p>
                   </div>
                   <div>
-                    <Share2 className="h-4 w-4 mx-auto mb-1 text-green-500" />
                     <p className="text-sm font-medium">{post.shares}</p>
                     <p className="text-xs text-gray-600">Shares</p>
                   </div>
                   <div>
-                    <Eye className="h-4 w-4 mx-auto mb-1 text-purple-500" />
                     <p className="text-sm font-medium">{post.views.toLocaleString()}</p>
                     <p className="text-xs text-gray-600">Views</p>
                   </div>

@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Sparkles, Eye, Edit, Check, X, Plus, Trash2, Copy } from 'lucide-react';
 import type { AssessmentTemplate, AssessmentQuestion } from '@/types/assessment';
 
 interface AssessmentGeneratorProps {
@@ -199,7 +198,6 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Sparkles className="h-5 w-5 mr-2 text-blue-600" />
               Generate High-Converting Assessment
             </CardTitle>
             <p className="text-sm text-gray-600 mt-2">
@@ -252,17 +250,7 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
               className="w-full bg-blue-600 hover:bg-blue-700"
               size="lg"
             >
-              {generating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating Assessment...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate Assessment
-                </>
-              )}
+              {generating ? 'Generating Assessment...' : 'Generate Assessment'}
             </Button>
           </CardContent>
         </Card>
@@ -321,24 +309,13 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
                   onClick={() => setEditing(!editing)}
                   variant="outline"
                 >
-                  {editing ? (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Done Editing
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit Questions
-                    </>
-                  )}
+                  {editing ? 'Done Editing' : 'Edit Questions'}
                 </Button>
 
                 <Button
                   onClick={copyAssessmentURL}
                   variant="outline"
                 >
-                  <Copy className="mr-2 h-4 w-4" />
                   Copy URL
                 </Button>
 
@@ -346,7 +323,6 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
                   onClick={() => window.open(`/a/${generated.id}`, '_blank')}
                   variant="outline"
                 >
-                  <Eye className="mr-2 h-4 w-4" />
                   Preview
                 </Button>
               </div>
@@ -360,7 +336,6 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
                 <CardTitle>Questions ({editedQuestions.length})</CardTitle>
                 {editing && (
                   <Button onClick={addQuestion} variant="outline" size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
                     Add Question
                   </Button>
                 )}
@@ -383,7 +358,7 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
                           size="sm"
                           className="text-red-600 hover:text-red-700"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          Delete
                         </Button>
                       )}
                     </div>
@@ -467,17 +442,7 @@ export default function AssessmentGenerator({ campaignId, onAssessmentCreated }:
                   className="bg-green-600 hover:bg-green-700"
                   size="lg"
                 >
-                  {publishing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Publishing...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Publish Assessment
-                    </>
-                  )}
+                  {publishing ? 'Publishing...' : 'Publish Assessment'}
                 </Button>
               </div>
             </CardContent>

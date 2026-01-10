@@ -3,7 +3,6 @@ import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { BookOpen, Target, Upload, Eye } from 'lucide-react'
 import { KnowledgeBucket } from '@/lib/services/knowledge-service'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -25,11 +24,6 @@ export const BucketCard: React.FC<BucketCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            {bucket.bucket_type === 'campaign' ? (
-              <Target className="h-4 w-4 text-primary" />
-            ) : (
-              <BookOpen className="h-4 w-4 text-secondary" />
-            )}
             <Badge variant={bucket.bucket_type === 'campaign' ? 'default' : 'secondary'}>
               {bucket.bucket_type === 'campaign' ? 'Campaign' : 'General'}
             </Badge>
@@ -57,7 +51,6 @@ export const BucketCard: React.FC<BucketCardProps> = ({
             onClick={() => onSelect(bucket.id)}
             className="flex-1"
           >
-            <Eye className="h-3 w-3 mr-1" />
             View
           </Button>
           <Button
@@ -69,7 +62,7 @@ export const BucketCard: React.FC<BucketCardProps> = ({
             }}
             title="Upload to this bucket"
           >
-            <Upload className="h-3 w-3" />
+            Upload
           </Button>
         </div>
       </CardContent>

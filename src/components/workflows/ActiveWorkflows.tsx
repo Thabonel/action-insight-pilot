@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Play, Pause, Settings, MoreHorizontal } from 'lucide-react';
 
 const ActiveWorkflows: React.FC = () => {
   const activeWorkflows = [
@@ -82,18 +81,18 @@ const ActiveWorkflows: React.FC = () => {
                 <div className="flex items-center space-x-1">
                   {workflow.status === 'running' ? (
                     <Button size="sm" variant="outline">
-                      <Pause className="h-3 w-3" />
+                      Pause
                     </Button>
                   ) : (
                     <Button size="sm" variant="outline">
-                      <Play className="h-3 w-3" />
+                      Play
                     </Button>
                   )}
                   <Button size="sm" variant="outline">
-                    <Settings className="h-3 w-3" />
+                    Settings
                   </Button>
                   <Button size="sm" variant="outline">
-                    <MoreHorizontal className="h-3 w-3" />
+                    More
                   </Button>
                 </div>
               </div>

@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Clock, TrendingUp, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
@@ -45,11 +44,11 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
 
   const getPersonalizedMessage = () => {
     if (!insights) return "Let's optimize your marketing strategy today.";
-    
+
     if (insights.recentActivities && insights.recentActivities.length > 0) {
       return `I see you've been working on your campaigns. Let's continue optimizing your strategy.`;
     }
-    
+
     return "Ready to help you build and optimize your marketing campaigns.";
   };
 
@@ -62,13 +61,13 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
           <div className="absolute top-4 right-4">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-white hover:bg-white/20 p-2"
                   disabled={isLoggingOut}
                 >
-                  <LogOut className="h-4 w-4" />
+                  Sign out
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -90,7 +89,6 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
 
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-              <Sparkles className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-xl font-semibold">{getGreeting()}!</h2>
@@ -110,13 +108,13 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
         <div className="absolute top-4 right-4">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-white hover:bg-white/20 p-2"
                 disabled={isLoggingOut}
               >
-                <LogOut className="h-4 w-4" />
+                Sign out
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -138,31 +136,28 @@ const AIGreeting: React.FC<AIGreetingProps> = ({ insights }) => {
 
         <div className="flex items-center space-x-3 mb-4">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-            <Sparkles className="h-5 w-5" />
           </div>
           <div>
             <h2 className="text-xl font-semibold">{getGreeting()}!</h2>
             <p className="text-blue-100">I'm your AI Marketing Assistant</p>
           </div>
         </div>
-        
+
         <p className="text-white/90 mb-4">
           {getPersonalizedMessage()}
         </p>
-        
+
         <div className="flex items-center space-x-4 text-sm">
           <div className="flex items-center space-x-1">
             <div className="w-2 h-2 rounded-full bg-green-400"></div>
             <span className="text-white/80">System healthy</span>
           </div>
-          
+
           <div className="flex items-center space-x-1">
-            <TrendingUp className="h-3 w-3" />
             <span className="text-white/80">{insights.totalActions} total actions</span>
           </div>
-          
+
           <div className="flex items-center space-x-1">
-            <Clock className="h-3 w-3" />
             <span className="text-white/80">Updated now</span>
           </div>
         </div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, TrendingUp, Target, DollarSign, BarChart3, RefreshCw, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { useToast } from '@/hooks/use-toast';
@@ -105,7 +104,6 @@ const CampaignOverview: React.FC = () => {
       <div className="text-center py-12">
         <p className="text-red-600 mb-4">Failed to load campaigns: {error}</p>
         <Button onClick={() => reload()} variant="outline">
-          <RefreshCw className="h-4 w-4 mr-2" />
           Try Again
         </Button>
       </div>
@@ -134,11 +132,9 @@ const CampaignOverview: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={() => reload()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
           <Button onClick={handleNewCampaign}>
-            <Plus className="mr-2 h-4 w-4" />
             New Campaign
           </Button>
         </div>
@@ -165,7 +161,6 @@ const CampaignOverview: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{campaigns?.length || 0}</div>
@@ -176,7 +171,6 @@ const CampaignOverview: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{activeCampaigns.length}</div>
@@ -187,7 +181,6 @@ const CampaignOverview: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Budget</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">${totalBudget.toLocaleString()}</div>
@@ -198,7 +191,6 @@ const CampaignOverview: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{avgConversion.toFixed(2)}%</div>
@@ -209,7 +201,6 @@ const CampaignOverview: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overall ROI</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{avgROI.toFixed(0)}%</div>
@@ -225,7 +216,6 @@ const CampaignOverview: React.FC = () => {
           {selectedCampaignsForComparison.length > 0 && (
             <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center space-x-2">
-                <BarChart3 className="h-4 w-4 text-blue-600" />
                 <span className="text-sm font-medium text-blue-900">
                   {selectedCampaignsForComparison.length} campaign{selectedCampaignsForComparison.length > 1 ? 's' : ''} selected for comparison
                 </span>
@@ -238,7 +228,6 @@ const CampaignOverview: React.FC = () => {
               <div className="flex gap-2 ml-auto">
                 {selectedCampaignsForComparison.length >= 2 && (
                   <Button size="sm" onClick={handleCompare} className="bg-blue-600 hover:bg-blue-700">
-                    <BarChart3 className="h-4 w-4 mr-2" />
                     Compare {selectedCampaignsForComparison.length} Campaigns
                   </Button>
                 )}
@@ -267,13 +256,11 @@ const CampaignOverview: React.FC = () => {
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <BarChart3 className="h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No campaigns found</h3>
                 <p className="text-gray-500 text-center mb-6">
                   Get started by creating your first comprehensive marketing campaign with all the professional features you need.
                 </p>
                 <Button onClick={handleNewCampaign}>
-                  <Plus className="mr-2 h-4 w-4" />
                   Create Your First Campaign
                 </Button>
               </CardContent>

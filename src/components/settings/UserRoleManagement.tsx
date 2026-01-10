@@ -4,17 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  UserPlus, 
-  Shield, 
-  Edit3, 
-  Trash2, 
-  Mail,
-  Search,
-  Crown,
-  Settings
-} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -123,7 +112,6 @@ const UserRoleManagement: React.FC = () => {
           <p className="text-gray-600">Manage team members and their permissions</p>
         </div>
         <Button className="flex items-center space-x-2">
-          <UserPlus className="h-4 w-4" />
           <span>Invite User</span>
         </Button>
       </div>
@@ -133,12 +121,10 @@ const UserRoleManagement: React.FC = () => {
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
               />
             </div>
             <select
@@ -159,7 +145,6 @@ const UserRoleManagement: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Shield className="h-5 w-5" />
             <span>Role Definitions</span>
           </CardTitle>
         </CardHeader>
@@ -170,7 +155,6 @@ const UserRoleManagement: React.FC = () => {
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-medium">{role.name}</h3>
                   <Badge variant="outline" className={`text-${role.color}-600 border-${role.color}-300`}>
-                    {role.id === 'admin' && <Crown className="h-3 w-3 mr-1" />}
                     {role.id}
                   </Badge>
                 </div>
@@ -192,7 +176,6 @@ const UserRoleManagement: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Users className="h-5 w-5" />
             <span>Team Members ({filteredUsers.length})</span>
           </CardTitle>
         </CardHeader>
@@ -237,13 +220,13 @@ const UserRoleManagement: React.FC = () => {
                         <td className="py-3 px-4">
                           <div className="flex space-x-2">
                             <Button variant="outline" size="sm" title="Edit role">
-                              <Edit3 className="h-3 w-3" />
+                              Edit
                             </Button>
                             <Button variant="outline" size="sm" title="Send email">
-                              <Mail className="h-3 w-3" />
+                              Email
                             </Button>
                             <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" title="Remove user">
-                              <Trash2 className="h-3 w-3" />
+                              Remove
                             </Button>
                           </div>
                         </td>
@@ -261,22 +244,18 @@ const UserRoleManagement: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Settings className="h-5 w-5" />
             <span>Bulk Actions</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button variant="outline" className="flex items-center space-x-2">
-              <Mail className="h-4 w-4" />
               <span>Send Bulk Invite</span>
             </Button>
             <Button variant="outline" className="flex items-center space-x-2">
-              <Shield className="h-4 w-4" />
               <span>Update Permissions</span>
             </Button>
             <Button variant="outline" className="flex items-center space-x-2">
-              <Users className="h-4 w-4" />
               <span>Export User List</span>
             </Button>
           </div>

@@ -4,7 +4,6 @@
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, XCircle, AlertTriangle, ExternalLink, RefreshCw } from 'lucide-react'
 import { PlatformResult } from './VideoPublishingUI'
 
 interface PublishingStatusProps {
@@ -34,11 +33,11 @@ export function PublishingStatus({ results, onRetry }: PublishingStatusProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'published':
-        return <Check className="h-5 w-5 text-green-600" />
+        return <span className="text-green-600 font-bold">✓</span>
       case 'failed':
-        return <XCircle className="h-5 w-5 text-red-600" />
+        return <span className="text-red-600 font-bold">✕</span>
       case 'skipped':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />
+        return <span className="text-yellow-600 font-bold">!</span>
       default:
         return null
     }
@@ -149,7 +148,6 @@ export function PublishingStatus({ results, onRetry }: PublishingStatusProps) {
                     className="h-auto p-0 mt-2 text-xs"
                     onClick={() => window.open(result.platform_url, '_blank')}
                   >
-                    <ExternalLink className="h-3 w-3 mr-1" />
                     View on {platformNames[result.platform]}
                   </Button>
                 )}
@@ -163,7 +161,6 @@ export function PublishingStatus({ results, onRetry }: PublishingStatusProps) {
                   onClick={() => onRetry(result.platform)}
                   className="flex-shrink-0"
                 >
-                  <RefreshCw className="h-3 w-3 mr-1" />
                   Retry
                 </Button>
               )}

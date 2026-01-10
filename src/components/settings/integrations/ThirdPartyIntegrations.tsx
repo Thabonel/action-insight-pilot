@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { ExternalLink, Zap, RefreshCw, Settings, Loader2 } from 'lucide-react';
 import { useIntegrations } from '@/hooks/useIntegrations';
 import { useToast } from '@/hooks/use-toast';
 
@@ -156,10 +155,7 @@ const ThirdPartyIntegrations: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Zap className="h-5 w-5" />
-          <span>Third-Party Integrations</span>
-        </CardTitle>
+        <CardTitle>Third-Party Integrations</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -184,7 +180,7 @@ const ThirdPartyIntegrations: React.FC = () => {
                   </div>
                   <Button variant="outline" size="sm" asChild>
                     <a href={service.docsUrl} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-3 w-3" />
+                      Docs
                     </a>
                   </Button>
                 </div>
@@ -223,44 +219,31 @@ const ThirdPartyIntegrations: React.FC = () => {
                             }))}
                           />
                         </div>
-                        <Button 
+                        <Button
                           onClick={() => handleConnect(service)}
                           disabled={connecting.has(service.id) || !apiKeys[service.id]}
                           className="w-full"
                         >
-                          {connecting.has(service.id) ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Connecting...
-                            </>
-                          ) : (
-                            'Connect'
-                          )}
+                          {connecting.has(service.id) ? 'Connecting...' : 'Connect'}
                         </Button>
                       </div>
                     </DialogContent>
                   </Dialog>
                 ) : (
                   <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleSync(service.id)}
                       disabled={syncing.has(service.id)}
                     >
-                      {syncing.has(service.id) ? (
-                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                      ) : (
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                      )}
-                      Sync
+                      {syncing.has(service.id) ? 'Syncing...' : 'Sync'}
                     </Button>
                     <Button variant="outline" size="sm">
-                      <Settings className="h-3 w-3 mr-1" />
                       Settings
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDisconnect(service.id)}
                     >

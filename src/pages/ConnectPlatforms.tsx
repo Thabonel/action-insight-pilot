@@ -4,18 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Settings, 
-  CheckCircle, 
-  Clock, 
-  AlertCircle,
-  ExternalLink,
-  Zap,
-  Users,
-  BarChart3,
-  Calendar,
-  RefreshCw
-} from 'lucide-react';
 import { SocialPlatform, PlatformConnection, PlatformConfig } from '@/types/socialConnectors';
 import { useToast } from '@/hooks/use-toast';
 import PlatformSelector from '@/components/socialConnectors/PlatformSelector';
@@ -161,11 +149,9 @@ const ConnectPlatforms: React.FC = () => {
         
         <div className="flex space-x-3">
           <Button variant="outline" onClick={loadConnections}>
-            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
           <Button onClick={() => setActiveTab('select')}>
-            <Zap className="h-4 w-4 mr-2" />
             Add Platform
           </Button>
         </div>
@@ -175,50 +161,38 @@ const ConnectPlatforms: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Connected Platforms</p>
-                <p className="text-2xl font-bold">{connections.filter(c => c.isConnected).length}</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Connected Platforms</p>
+              <p className="text-2xl font-bold">{connections.filter(c => c.isConnected).length}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">Social Profiles</p>
-                <p className="text-2xl font-bold">
-                  {connections.reduce((total, conn) => total + conn.profiles.length, 0)}
-                </p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Social Profiles</p>
+              <p className="text-2xl font-bold">
+                {connections.reduce((total, conn) => total + conn.profiles.length, 0)}
+              </p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-gray-600">Posts This Month</p>
-                <p className="text-2xl font-bold">248</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Posts This Month</p>
+              <p className="text-2xl font-bold">248</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5 text-orange-600" />
-              <div>
-                <p className="text-sm text-gray-600">Avg Engagement</p>
-                <p className="text-2xl font-bold">6.8%</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Avg Engagement</p>
+              <p className="text-2xl font-bold">6.8%</p>
             </div>
           </CardContent>
         </Card>

@@ -9,20 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Play, 
-  Pause, 
-  Plus, 
-  Settings, 
-  Trash2, 
-  ArrowRight,
-  Mail,
-  MessageSquare,
-  Clock,
-  Filter,
-  Zap,
-  Save
-} from 'lucide-react';
 import { Workflow, WorkflowStep } from '@/lib/api-client-interface';
 
 interface VisualWorkflowBuilderProps {
@@ -49,17 +35,12 @@ const VisualWorkflowBuilder: React.FC<VisualWorkflowBuilderProps> = ({
   const { toast } = useToast();
 
   const stepTypes = [
-    { value: 'email', label: 'Send Email', icon: Mail, color: 'bg-blue-500' },
-    { value: 'sms', label: 'Send SMS', icon: MessageSquare, color: 'bg-green-500' },
-    { value: 'wait', label: 'Wait/Delay', icon: Clock, color: 'bg-yellow-500' },
-    { value: 'condition', label: 'Condition', icon: Filter, color: 'bg-purple-500' },
-    { value: 'webhook', label: 'Webhook', icon: Zap, color: 'bg-red-500' }
+    { value: 'email', label: 'Send Email', color: 'bg-blue-500' },
+    { value: 'sms', label: 'Send SMS', color: 'bg-green-500' },
+    { value: 'wait', label: 'Wait/Delay', color: 'bg-yellow-500' },
+    { value: 'condition', label: 'Condition', color: 'bg-purple-500' },
+    { value: 'webhook', label: 'Webhook', color: 'bg-red-500' }
   ];
-
-  const getStepIcon = (type: string) => {
-    const stepType = stepTypes.find(st => st.value === type);
-    return stepType?.icon || Settings;
-  };
 
   const getStepColor = (type: string) => {
     const stepType = stepTypes.find(st => st.value === type);
@@ -208,12 +189,10 @@ const VisualWorkflowBuilder: React.FC<VisualWorkflowBuilderProps> = ({
                 {editingWorkflow.status}
               </Badge>
               <Button onClick={handleSave}>
-                <Save className="h-4 w-4 mr-2" />
                 Save
               </Button>
               {workflow?.id && editingWorkflow.status === 'active' && (
                 <Button onClick={handleExecute}>
-                  <Play className="h-4 w-4 mr-2" />
                   Execute
                 </Button>
               )}
@@ -228,7 +207,6 @@ const VisualWorkflowBuilder: React.FC<VisualWorkflowBuilderProps> = ({
           <div className="flex items-center justify-between">
             <CardTitle>Workflow Steps</CardTitle>
             <Button onClick={addStep}>
-              <Plus className="h-4 w-4 mr-2" />
               Add Step
             </Button>
           </div>
@@ -238,20 +216,17 @@ const VisualWorkflowBuilder: React.FC<VisualWorkflowBuilderProps> = ({
             <div className="text-center py-8">
               <div className="text-gray-400 mb-2">No steps added yet</div>
               <Button variant="outline" onClick={addStep}>
-                <Plus className="h-4 w-4 mr-2" />
                 Add First Step
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
               {editingWorkflow.steps?.map((step, index) => {
-                const StepIcon = getStepIcon(step.type);
-                
                 return (
                   <div key={step.id} className="relative">
                     <div className="flex items-center space-x-4 p-4 border rounded-lg hover:border-blue-500 transition-colors">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${getStepColor(step.type)}`}>
-                        <StepIcon className="h-5 w-5" />
+                        <span className="text-xs font-medium">{index + 1}</span>
                       </div>
                       
                       <div className="flex-1">
@@ -277,7 +252,7 @@ const VisualWorkflowBuilder: React.FC<VisualWorkflowBuilderProps> = ({
                           onClick={() => moveStep(step.id, 'up')}
                           disabled={index === 0}
                         >
-                          ↑
+                          Up
                         </Button>
                         <Button
                           variant="ghost"
@@ -285,28 +260,28 @@ const VisualWorkflowBuilder: React.FC<VisualWorkflowBuilderProps> = ({
                           onClick={() => moveStep(step.id, 'down')}
                           disabled={index === (editingWorkflow.steps?.length || 1) - 1}
                         >
-                          ↓
+                          Down
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => editStep(step)}
                         >
-                          <Settings className="h-4 w-4" />
+                          Edit
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => deleteStep(step.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          Delete
                         </Button>
                       </div>
                     </div>
                     
                     {index < (editingWorkflow.steps?.length || 1) - 1 && (
                       <div className="flex justify-center py-2">
-                        <ArrowRight className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-400">---</span>
                       </div>
                     )}
                   </div>

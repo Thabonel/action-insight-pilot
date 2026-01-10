@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useContentIdeas } from '@/contexts/ContentIdeasContext';
-import { Lightbulb, Plus, Trash2, TrendingUp, Video } from 'lucide-react';
 
 interface ContentIdea {
   id: string;
@@ -99,7 +98,6 @@ const ContentIdeasManager: React.FC<ContentIdeasManagerProps> = ({ onVideoGenera
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Lightbulb className="h-5 w-5 text-yellow-600" />
             <span>Content Ideas ({contentIdeas.length})</span>
           </div>
           <div className="flex space-x-2">
@@ -109,13 +107,11 @@ const ContentIdeasManager: React.FC<ContentIdeasManagerProps> = ({ onVideoGenera
               onClick={handleGenerateVideo}
               disabled={contentIdeas.length === 0}
             >
-              <Video className="h-4 w-4 mr-2" />
               Generate Video
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
                   Add Idea
                 </Button>
               </DialogTrigger>
@@ -174,7 +170,6 @@ const ContentIdeasManager: React.FC<ContentIdeasManagerProps> = ({ onVideoGenera
       <CardContent>
         {contentIdeas.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <Lightbulb className="h-12 w-12 mx-auto mb-4 opacity-20" />
             <p>No content ideas yet</p>
             <p className="text-sm">Add your first idea to get started</p>
           </div>
@@ -186,7 +181,6 @@ const ContentIdeasManager: React.FC<ContentIdeasManagerProps> = ({ onVideoGenera
                   <h4 className="text-sm font-medium">{idea.title}</h4>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary" className="text-xs flex items-center">
-                      <TrendingUp className="h-3 w-3 mr-1" />
                       {idea.trending}%
                     </Badge>
                     <Button
@@ -195,7 +189,7 @@ const ContentIdeasManager: React.FC<ContentIdeasManagerProps> = ({ onVideoGenera
                       onClick={() => handleDeleteIdea(idea.id)}
                       className="h-6 w-6 p-0 text-red-600 hover:text-red-800"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      Delete
                     </Button>
                   </div>
                 </div>

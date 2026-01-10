@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Search, TrendingUp, AlertCircle, Plus } from 'lucide-react';
 
 interface CompetitorAd {
   id: string;
@@ -52,21 +51,18 @@ const CompetitorTracker: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Eye className="h-5 w-5 text-purple-600" />
-          <span>Competitor Intelligence</span>
+        <CardTitle>
+          Competitor Intelligence
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+          <div className="flex-1">
             <Input
               placeholder="Search competitors or ad content..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
             />
           </div>
           <div className="flex gap-2">
@@ -106,14 +102,8 @@ const CompetitorTracker: React.FC = () => {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <div className="flex items-center space-x-1">
-                    <TrendingUp className="h-4 w-4" />
-                    <span>{ad.performance.estimatedReach.toLocaleString()} reach</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <AlertCircle className="h-4 w-4" />
-                    <span>{ad.performance.engagement} engagements</span>
-                  </div>
+                  <span>{ad.performance.estimatedReach.toLocaleString()} reach</span>
+                  <span>{ad.performance.engagement} engagements</span>
                   <span>Running {ad.performance.runDuration}</span>
                 </div>
                 <Button size="sm" variant="outline">
@@ -127,7 +117,6 @@ const CompetitorTracker: React.FC = () => {
         {/* Add Competitor Button */}
         <div className="text-center pt-4 border-t">
           <Button variant="outline" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
             Track New Competitor
           </Button>
         </div>

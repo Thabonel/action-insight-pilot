@@ -4,17 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Building2,
-  Target,
-  Zap,
-  Upload,
-  CheckCircle,
-  Lightbulb
-} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -152,7 +141,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <Building2 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Tell us about your business</h2>
               <p className="text-gray-600">This helps us customize the AI behavior for your specific needs</p>
             </div>
@@ -210,7 +198,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <Target className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">What are your marketing goals?</h2>
               <p className="text-gray-600">Select all that apply to help us prioritize AI suggestions</p>
             </div>
@@ -232,7 +219,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm">{goal}</span>
-                    {formData.goals.includes(goal) && <CheckCircle className="h-4 w-4 text-blue-600" />}
+                    {formData.goals.includes(goal) && <span className="text-blue-600 font-bold">Selected</span>}
                   </div>
                 </div>
               ))}
@@ -244,7 +231,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <Zap className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Current marketing tools</h2>
               <p className="text-gray-600">We'll help you integrate with existing tools</p>
             </div>
@@ -266,7 +252,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
                 >
                   <span className="text-sm">{tool}</span>
                   {formData.currentTools.includes(tool) && (
-                    <CheckCircle className="h-4 w-4 text-blue-600 mx-auto mt-1" />
+                    <span className="text-blue-600 text-xs block mt-1">Selected</span>
                   )}
                 </div>
               ))}
@@ -278,7 +264,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <Lightbulb className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Content preferences</h2>
               <p className="text-gray-600">Help us understand what content you need most</p>
             </div>
@@ -300,7 +285,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
                 >
                   <span className="text-sm">{type}</span>
                   {formData.contentTypes.includes(type) && (
-                    <CheckCircle className="h-4 w-4 text-blue-600 mx-auto mt-1" />
+                    <span className="text-blue-600 text-xs block mt-1">Selected</span>
                   )}
                 </div>
               ))}
@@ -337,21 +322,18 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <Upload className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Import existing data</h2>
               <p className="text-gray-600">Optional: Upload data from your current tools to get started faster</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                 <h4 className="font-medium mb-2">Customer Data</h4>
                 <p className="text-sm text-gray-600 mb-3">CSV file with contacts and leads</p>
                 <Button variant="outline" size="sm">Upload CSV</Button>
               </div>
 
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                 <h4 className="font-medium mb-2">Campaign Data</h4>
                 <p className="text-sm text-gray-600 mb-3">Past campaign performance data</p>
                 <Button variant="outline" size="sm">Upload Data</Button>
@@ -383,7 +365,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
               <p className="text-gray-600 mt-1">Let's customize your experience</p>
             </div>
             <Button variant="outline" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
+              Close
             </Button>
           </div>
           
@@ -407,18 +389,16 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onClose }) => {
         </CardContent>
 
         <div className="flex justify-between p-6 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 1}
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
             Previous
           </Button>
-          
+
           <Button onClick={handleNext} disabled={isSaving}>
             {currentStep === totalSteps ? (isSaving ? 'Saving...' : 'Complete Setup') : 'Next'}
-            {currentStep < totalSteps && <ChevronRight className="h-4 w-4 ml-2" />}
           </Button>
         </div>
       </Card>

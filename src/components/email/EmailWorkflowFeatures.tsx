@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Workflow, Zap, Target, Clock, TrendingUp, Users, Mail } from 'lucide-react';
 
 const EmailWorkflowFeatures: React.FC = () => {
   const [workflows] = useState([
@@ -15,8 +14,7 @@ const EmailWorkflowFeatures: React.FC = () => {
       trigger: 'Lead score > 80',
       emails: 3,
       performance: 'Very High',
-      conversionRate: 18.4,
-      icon: Target
+      conversionRate: 18.4
     },
     {
       id: 2,
@@ -25,8 +23,7 @@ const EmailWorkflowFeatures: React.FC = () => {
       trigger: 'AI timing analysis',
       emails: 'All',
       performance: 'High',
-      conversionRate: 34.2,
-      icon: Clock
+      conversionRate: 34.2
     },
     {
       id: 3,
@@ -35,8 +32,7 @@ const EmailWorkflowFeatures: React.FC = () => {
       trigger: 'New campaign',
       emails: 'Varies',
       performance: 'High',
-      conversionRate: 28.7,
-      icon: TrendingUp
+      conversionRate: 28.7
     },
     {
       id: 4,
@@ -45,8 +41,7 @@ const EmailWorkflowFeatures: React.FC = () => {
       trigger: 'Engagement patterns',
       emails: '5-7',
       performance: 'Medium',
-      conversionRate: 12.1,
-      icon: Users
+      conversionRate: 12.1
     }
   ]);
 
@@ -55,35 +50,30 @@ const EmailWorkflowFeatures: React.FC = () => {
       action: 'Create sequence for hot leads',
       description: 'Build automated follow-up for high-scoring leads',
       estimatedImpact: '+25% conversion',
-      icon: Target,
       color: 'bg-red-50 text-red-600'
     },
     {
       action: 'Optimize all send times with AI',
       description: 'Apply machine learning to all campaign timing',
       estimatedImpact: '+15% open rate',
-      icon: Clock,
       color: 'bg-blue-50 text-blue-600'
     },
     {
       action: 'Generate variations for testing',
       description: 'Create A/B test versions of top campaigns',
       estimatedImpact: '+20% performance',
-      icon: TrendingUp,
       color: 'bg-green-50 text-green-600'
     },
     {
       action: 'Create nurture sequence from template',
       description: 'Use proven templates for lead nurturing',
       estimatedImpact: '+30% engagement',
-      icon: Users,
       color: 'bg-purple-50 text-purple-600'
     },
     {
       action: 'Track email ROI by campaign',
       description: 'Set up revenue attribution tracking',
       estimatedImpact: 'Clear ROI data',
-      icon: Mail,
       color: 'bg-yellow-50 text-yellow-600'
     }
   ]);
@@ -116,7 +106,6 @@ const EmailWorkflowFeatures: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Workflow className="h-5 w-5 text-indigo-600" />
           <span>Email Workflow Features</span>
         </CardTitle>
       </CardHeader>
@@ -155,12 +144,11 @@ const EmailWorkflowFeatures: React.FC = () => {
           <h4 className="font-medium text-gray-900 mb-3">Smart Workflows</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {workflows.map((workflow) => {
-              const Icon = workflow.icon;
               return (
                 <div key={workflow.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start space-x-3">
                     <div className="bg-indigo-50 p-2 rounded-lg">
-                      <Icon className="h-5 w-5 text-indigo-600" />
+                      <span className="text-indigo-600 font-medium">{workflow.name.charAt(0)}</span>
                     </div>
                     <div className="flex-1">
                       <h5 className="font-medium text-gray-900">{workflow.name}</h5>
@@ -175,10 +163,10 @@ const EmailWorkflowFeatures: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between mt-3">
                         <span className="text-sm text-gray-600">
-                          {workflow.emails} emails • {workflow.conversionRate}% conversion
+                          {workflow.emails} emails - {workflow.conversionRate}% conversion
                         </span>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           onClick={() => handleWorkflowActivate(workflow.id)}
                         >
                           Activate
@@ -197,7 +185,6 @@ const EmailWorkflowFeatures: React.FC = () => {
           <h4 className="font-medium text-gray-900 mb-3">Quick Workflow Actions</h4>
           <div className="space-y-3">
             {quickActions.map((action, index) => {
-              const Icon = action.icon;
               return (
                 <div
                   key={index}
@@ -206,7 +193,7 @@ const EmailWorkflowFeatures: React.FC = () => {
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-lg ${action.color}`}>
-                      <Icon className="h-5 w-5" />
+                      <span className="font-medium">{action.action.charAt(0)}</span>
                     </div>
                     <div>
                       <h5 className="font-medium text-gray-900">{action.action}</h5>
@@ -227,11 +214,9 @@ const EmailWorkflowFeatures: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex space-x-3">
           <Button className="flex-1">
-            <Workflow className="h-4 w-4 mr-2" />
             Create Custom Workflow
           </Button>
           <Button variant="outline">
-            <Zap className="h-4 w-4 mr-2" />
             AI Optimization
           </Button>
         </div>

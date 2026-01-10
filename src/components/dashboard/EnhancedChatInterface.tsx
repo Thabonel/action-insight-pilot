@@ -8,19 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import {
-  Send,
-  Mic,
-  Paperclip,
-  MoreVertical,
-  MessageSquare,
-  Bot,
-  User as UserIcon,
-  Clock,
-  Trash2,
-  Edit3,
-  BookmarkPlus
-} from 'lucide-react';
 import { ChatSession, ChatMessage } from '@/lib/api-client-interface';
 
 interface EnhancedChatInterfaceProps {
@@ -100,14 +87,11 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
     <Card className="h-[600px] flex flex-col">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
-            <MessageSquare className="h-5 w-5" />
-            <span>AI Assistant</span>
-          </CardTitle>
+          <CardTitle>AI Assistant</CardTitle>
           <div className="flex items-center space-x-2">
             {chatSessions.length > 0 && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => setShowSessions(!showSessions)}
               >
@@ -120,7 +104,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
               </Button>
             )}
             <Button variant="ghost" size="sm">
-              <MoreVertical className="h-4 w-4" />
+              ...
             </Button>
           </div>
         </div>
@@ -151,7 +135,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                     }}
                     className="h-6 w-6 p-0"
                   >
-                    <Trash2 className="h-3 w-3" />
+                    x
                   </Button>
                 )}
               </div>
@@ -165,7 +149,6 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
           <div className="space-y-4">
             {chatHistory.length === 0 && (
               <div className="text-center py-8">
-                <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Ready to help!
                 </h3>
@@ -199,14 +182,10 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                   {message.role === 'user' ? (
                     <>
                       <AvatarImage src={user?.user_metadata?.avatar_url} />
-                      <AvatarFallback>
-                        <UserIcon className="h-4 w-4" />
-                      </AvatarFallback>
+                      <AvatarFallback>U</AvatarFallback>
                     </>
                   ) : (
-                    <AvatarFallback className="bg-blue-100">
-                      <Bot className="h-4 w-4 text-blue-600" />
-                    </AvatarFallback>
+                    <AvatarFallback className="bg-blue-100">AI</AvatarFallback>
                   )}
                 </Avatar>
                 <div className={`flex-1 ${message.role === 'user' ? 'text-right' : ''}`}>
@@ -220,13 +199,12 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                     <p className="text-sm">{message.content}</p>
                   </div>
                   <div className="flex items-center space-x-2 mt-1">
-                    <Clock className="h-3 w-3 text-gray-400" />
                     <span className="text-xs text-gray-500">
                       {formatTimestamp(message.timestamp)}
                     </span>
                     {message.role === 'assistant' && onSaveNote && (
                       <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => onSaveNote(message)}>
-                        <BookmarkPlus className="h-3 w-3" />
+                        +
                       </Button>
                     )}
                   </div>
@@ -237,9 +215,7 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
             {isProcessing && (
               <div className="flex items-start space-x-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-blue-100">
-                    <Bot className="h-4 w-4 text-blue-600" />
-                  </AvatarFallback>
+                  <AvatarFallback className="bg-blue-100">AI</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="inline-block p-3 rounded-lg bg-gray-100">
@@ -269,32 +245,13 @@ const EnhancedChatInterface: React.FC<EnhancedChatInterfaceProps> = ({
                 disabled={isProcessing}
                 className="pr-20"
               />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                >
-                  <Paperclip className="h-3 w-3" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={`h-6 w-6 p-0 ${isRecording ? 'text-red-500' : ''}`}
-                  onClick={() => setIsRecording(!isRecording)}
-                >
-                  <Mic className="h-3 w-3" />
-                </Button>
-              </div>
             </div>
             <Button
               type="submit"
               disabled={isProcessing || !query.trim()}
               size="sm"
             >
-              <Send className="h-4 w-4" />
+              Send
             </Button>
           </form>
 

@@ -4,16 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import {
-  FileText,
-  Star,
-  TrendingUp,
-  Target,
-  Zap,
-  Copy,
-  Eye,
-  Clock
-} from 'lucide-react';
 
 interface Template {
   id: number;
@@ -107,10 +97,7 @@ const ContentTemplates: React.FC = () => {
       {/* Personalized Templates */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Star className="h-5 w-5 text-yellow-600" />
-            <span>Your High-Performing Templates</span>
-          </CardTitle>
+          <CardTitle>Your High-Performing Templates</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -127,7 +114,6 @@ const ContentTemplates: React.FC = () => {
                       </Badge>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm font-medium text-green-600">
                         {template.successRate}%
                       </span>
@@ -173,14 +159,12 @@ const ContentTemplates: React.FC = () => {
                         size="sm"
                         onClick={() => handleTemplatePreview(template)}
                       >
-                        <Eye className="h-4 w-4 mr-1" />
                         Preview
                       </Button>
                       <Button
                         size="sm"
                         onClick={() => handleTemplateUse(template)}
                       >
-                        <Copy className="h-4 w-4 mr-1" />
                         Use Template
                       </Button>
                     </div>
@@ -196,10 +180,7 @@ const ContentTemplates: React.FC = () => {
         {/* Industry Templates */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Target className="h-5 w-5 text-blue-600" />
-              <span>Industry-Specific Templates</span>
-            </CardTitle>
+            <CardTitle>Industry-Specific Templates</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {industryTemplates.map((template, index) => (
@@ -220,37 +201,31 @@ const ContentTemplates: React.FC = () => {
         {/* Quick Templates */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Zap className="h-5 w-5 text-purple-600" />
-              <span>Quick Creation Templates</span>
-            </CardTitle>
+            <CardTitle>Quick Creation Templates</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 gap-3">
               <Button variant="outline" className="justify-start h-auto py-3">
                 <div className="text-left">
                   <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
                     <span className="font-medium">5-Minute Social Post</span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">Quick engagement content</p>
                 </div>
               </Button>
-              
+
               <Button variant="outline" className="justify-start h-auto py-3">
                 <div className="text-left">
                   <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-gray-500" />
                     <span className="font-medium">Email Newsletter Template</span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">Weekly update format</p>
                 </div>
               </Button>
-              
+
               <Button variant="outline" className="justify-start h-auto py-3">
                 <div className="text-left">
                   <div className="flex items-center space-x-2">
-                    <TrendingUp className="h-4 w-4 text-gray-500" />
                     <span className="font-medium">Quick Tip Format</span>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">Bite-sized value content</p>

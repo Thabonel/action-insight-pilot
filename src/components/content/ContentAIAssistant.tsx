@@ -4,14 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Bot, TrendingUp, Target, Lightbulb, FileText, Zap } from 'lucide-react';
 
 interface AISuggestion {
   id: number;
   type: string;
   message: string;
   confidence: number;
-  icon: React.ComponentType<{ className?: string }>;
   action: string;
 }
 
@@ -30,7 +28,6 @@ const ContentAIAssistant: React.FC = () => {
       type: 'topic',
       message: "Your 'Marketing Automation' content gets 45% higher engagement",
       confidence: 94,
-      icon: Target,
       action: "Create similar content"
     },
     {
@@ -38,7 +35,6 @@ const ContentAIAssistant: React.FC = () => {
       type: 'format',
       message: "List-based content performs 32% better for your audience",
       confidence: 87,
-      icon: TrendingUp,
       action: "Use list format"
     },
     {
@@ -46,7 +42,6 @@ const ContentAIAssistant: React.FC = () => {
       type: 'timing',
       message: "Publishing at 10:30 AM increases views by 23%",
       confidence: 91,
-      icon: Lightbulb,
       action: "Schedule for optimal time"
     }
   ]);
@@ -77,7 +72,6 @@ const ContentAIAssistant: React.FC = () => {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Bot className="h-5 w-5 text-purple-600" />
           <span>Content Intelligence AI</span>
         </CardTitle>
       </CardHeader>
@@ -100,31 +94,27 @@ const ContentAIAssistant: React.FC = () => {
         <div>
           <h4 className="font-medium text-gray-900 mb-3">Smart Recommendations</h4>
           <div className="space-y-3">
-            {suggestions.map((suggestion) => {
-              const Icon = suggestion.icon;
-              return (
-                <div
-                  key={suggestion.id}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-start space-x-3">
-                    <Icon className="h-4 w-4 text-gray-600 mt-1" />
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-800">{suggestion.message}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="text-xs text-gray-500">
-                          {suggestion.confidence}% confidence
-                        </div>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          {suggestion.action}
-                        </Button>
+            {suggestions.map((suggestion) => (
+              <div
+                key={suggestion.id}
+                onClick={() => handleSuggestionClick(suggestion)}
+                className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-800">{suggestion.message}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="text-xs text-gray-500">
+                        {suggestion.confidence}% confidence
                       </div>
+                      <Button size="sm" variant="outline" className="text-xs">
+                        {suggestion.action}
+                      </Button>
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
 

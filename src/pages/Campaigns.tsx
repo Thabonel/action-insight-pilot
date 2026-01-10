@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusIcon, SearchIcon, FilterIcon, Zap, Settings, BarChart3 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { Campaign } from '@/lib/api-client-interface';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
@@ -86,7 +85,6 @@ const Campaigns: React.FC = () => {
         <div className="mb-6 flex gap-3">
           <Button asChild className="flex-1">
             <Link to="/app/campaign-management">
-              <Zap className="h-4 w-4 mr-2" />
               Campaign Management
             </Link>
           </Button>
@@ -98,19 +96,16 @@ const Campaigns: React.FC = () => {
             <div className="flex gap-3 justify-end">
               <Button variant="outline" asChild>
                 <Link to="/app/campaigns/ai-generator">
-                  <PlusIcon className="h-4 w-4 mr-2" />
                   Quick Generator
                 </Link>
               </Button>
               <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600">
                 <Link to="/app/campaigns/copilot">
-                  <PlusIcon className="h-4 w-4 mr-2" />
                   AI Co-pilot
                 </Link>
               </Button>
               <Button variant="secondary" asChild>
                 <Link to="/app/campaigns/new">
-                  <PlusIcon className="h-4 w-4 mr-2" />
                   Manual
                 </Link>
               </Button>
@@ -119,18 +114,15 @@ const Campaigns: React.FC = () => {
             {/* Filters */}
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <SearchIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <div className="flex-1">
                   <Input
                     placeholder="Search campaigns..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full sm:w-48">
-                    <FilterIcon className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -171,7 +163,6 @@ const Campaigns: React.FC = () => {
                     {campaigns.length === 0 && (
                       <Button asChild>
                         <Link to="/app/campaigns/new">
-                          <PlusIcon className="h-4 w-4 mr-2" />
                           Create Campaign
                         </Link>
                       </Button>

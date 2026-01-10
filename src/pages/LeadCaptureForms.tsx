@@ -22,16 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Plus,
-  Copy,
-  Code,
-  Eye,
-  Trash2,
-  Users,
-  FormInput,
-  ExternalLink
-} from 'lucide-react';
 
 const LeadCaptureForms: React.FC = () => {
   const navigate = useNavigate();
@@ -224,7 +214,6 @@ const LeadCaptureForms: React.FC = () => {
           <Dialog open={showNewFormDialog} onOpenChange={setShowNewFormDialog}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="mr-2 h-4 w-4" />
                 Create Form
               </Button>
             </DialogTrigger>
@@ -312,11 +301,9 @@ const LeadCaptureForms: React.FC = () => {
         ) : forms.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <FormInput className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <h3 className="text-lg font-semibold mb-2">No forms yet</h3>
               <p className="text-gray-600 mb-4">Create your first lead capture form to start collecting leads</p>
               <Button onClick={() => setShowNewFormDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" />
                 Create Your First Form
               </Button>
             </CardContent>
@@ -356,7 +343,6 @@ const LeadCaptureForms: React.FC = () => {
                         className="flex-1"
                         onClick={() => getEmbedCode(form.id)}
                       >
-                        <Code className="mr-2 h-4 w-4" />
                         Get Code
                       </Button>
 
@@ -365,7 +351,7 @@ const LeadCaptureForms: React.FC = () => {
                         size="sm"
                         onClick={() => window.open(`${import.meta.env.VITE_BACKEND_URL}/form/${form.id}`, '_blank')}
                       >
-                        <Eye className="h-4 w-4" />
+                        View
                       </Button>
 
                       <Button
@@ -373,7 +359,7 @@ const LeadCaptureForms: React.FC = () => {
                         size="sm"
                         onClick={() => deleteForm(form.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Delete
                       </Button>
                     </div>
 
@@ -382,7 +368,6 @@ const LeadCaptureForms: React.FC = () => {
                       className="w-full"
                       onClick={() => navigate(`/app/leads?form_id=${form.id}`)}
                     >
-                      <Users className="mr-2 h-4 w-4" />
                       View Leads
                     </Button>
                   </div>
@@ -412,7 +397,6 @@ const LeadCaptureForms: React.FC = () => {
                     variant="outline"
                     onClick={() => copyToClipboard(embedCode.embed_code, 'Embed code')}
                   >
-                    <Copy className="mr-2 h-4 w-4" />
                     Copy
                   </Button>
                 </div>
@@ -430,7 +414,6 @@ const LeadCaptureForms: React.FC = () => {
                     variant="outline"
                     onClick={() => copyToClipboard(embedCode.iframe_code, 'iframe code')}
                   >
-                    <Copy className="mr-2 h-4 w-4" />
                     Copy
                   </Button>
                 </div>
@@ -449,7 +432,6 @@ const LeadCaptureForms: React.FC = () => {
                       variant="outline"
                       onClick={() => copyToClipboard(embedCode.direct_url, 'URL')}
                     >
-                      <Copy className="mr-2 h-4 w-4" />
                       Copy
                     </Button>
                     <Button
@@ -457,7 +439,6 @@ const LeadCaptureForms: React.FC = () => {
                       variant="outline"
                       onClick={() => window.open(embedCode.direct_url, '_blank')}
                     >
-                      <ExternalLink className="mr-2 h-4 w-4" />
                       Open
                     </Button>
                   </div>

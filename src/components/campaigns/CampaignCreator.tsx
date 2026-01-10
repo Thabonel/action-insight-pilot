@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
 
 const CampaignCreator: React.FC = () => {
   const [campaignName, setCampaignName] = useState('');
@@ -22,7 +21,6 @@ const CampaignCreator: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Plus className="h-5 w-5" />
             <span>Create New Campaign</span>
           </CardTitle>
         </CardHeader>

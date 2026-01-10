@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Sparkles, Target, DollarSign, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -154,7 +153,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-6 w-6 text-blue-600" />
           What do you sell or offer?
         </CardTitle>
         <CardDescription>
@@ -183,7 +181,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
           className="w-full"
         >
           Next: Define Your Audience
-          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardContent>
     </Card>
@@ -193,7 +190,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Target className="h-6 w-6 text-green-600" />
           Who are your ideal customers?
         </CardTitle>
         <CardDescription>
@@ -248,7 +244,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
 
         <div className="flex gap-2">
           <Button onClick={() => setStep(1)} variant="outline" className="flex-1">
-            <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
           <Button
@@ -261,7 +256,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
             className="flex-1"
           >
             Next: Set Budget
-            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </CardContent>
@@ -272,7 +266,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-6 w-6 text-purple-600" />
           What's your monthly marketing budget?
         </CardTitle>
         <CardDescription>
@@ -331,7 +324,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
                   }
                 }}
               >
-                {config.goals.includes(goal) && <CheckCircle2 className="mr-2 h-4 w-4" />}
                 {goal}
               </Button>
             ))}
@@ -340,7 +332,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
 
         <div className="flex gap-2">
           <Button onClick={() => setStep(2)} variant="outline" className="flex-1">
-            <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
           <Button
@@ -349,15 +340,9 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
             className="flex-1"
           >
             {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating Strategy...
-              </>
+              'Generating Strategy...'
             ) : (
-              <>
-                Generate AI Strategy
-                <Sparkles className="ml-2 h-4 w-4" />
-              </>
+              'Generate AI Strategy'
             )}
           </Button>
         </div>
@@ -372,7 +357,6 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-blue-600" />
             Your AI-Generated Marketing Strategy
           </CardTitle>
           <CardDescription>
@@ -445,11 +429,10 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
 
           <div className="flex gap-2">
             <Button onClick={() => setStep(3)} variant="outline" className="flex-1">
-              <ArrowLeft className="mr-2 h-4 w-4" />
               Modify Settings
             </Button>
             <Button onClick={handleActivateAutopilot} className="flex-1">
-              Activate Autopilot 🚀
+              Activate Autopilot
             </Button>
           </div>
         </CardContent>
@@ -472,7 +455,7 @@ Format as JSON with: channels (array of {name, budgetPercentage, rationale}), me
                   : 'bg-gray-200 text-gray-500'
               }`}
             >
-              {s < step ? <CheckCircle2 className="h-5 w-5" /> : s}
+              {s < step ? '✓' : s}
             </div>
             {s < 4 && (
               <div

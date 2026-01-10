@@ -5,17 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  ExternalLink, 
-  Settings, 
-  CheckCircle, 
-  XCircle, 
-  Clock,
-  Globe,
-  Mail,
-  Share2,
-  BarChart3
-} from 'lucide-react';
 import { useIntegrations } from '@/hooks/useIntegrations';
 import { useToast } from '@/hooks/use-toast';
 
@@ -43,7 +32,6 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
     {
       id: 'wordpress',
       name: 'WordPress',
-      icon: Globe,
       type: 'blog',
       description: 'Publish as blog post',
       customization: ['Custom excerpt', 'Featured image', 'Categories']
@@ -51,7 +39,6 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
     {
       id: 'mailchimp',
       name: 'Mailchimp',
-      icon: Mail,
       type: 'email',
       description: 'Send to email subscribers',
       customization: ['Email subject', 'Preview text', 'Template']
@@ -59,7 +46,6 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
     {
       id: 'buffer',
       name: 'Buffer',
-      icon: Share2,
       type: 'social',
       description: 'Schedule social posts',
       customization: ['Custom caption', 'Hashtags', 'Timing']
@@ -67,7 +53,6 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
     {
       id: 'hootsuite',
       name: 'Hootsuite',
-      icon: Share2,
       type: 'social',
       description: 'Multi-platform social posting',
       customization: ['Platform-specific content', 'Scheduling', 'Audience targeting']
@@ -94,18 +79,18 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
     return connection?.connection_status || 'disconnected';
   };
 
-  const getStatusIcon = (platformId: string) => {
+  const getStatusText = (platformId: string) => {
     const status = getConnectionStatus(platformId);
     const publishState = publishStatus[platformId];
-    
-    if (publishState === 'success') return <CheckCircle className="h-4 w-4 text-green-600" />;
-    if (publishState === 'error') return <XCircle className="h-4 w-4 text-red-600" />;
-    if (publishState === 'pending') return <Clock className="h-4 w-4 text-yellow-600 animate-spin" />;
-    
+
+    if (publishState === 'success') return <span className="text-green-600">[OK]</span>;
+    if (publishState === 'error') return <span className="text-red-600">[X]</span>;
+    if (publishState === 'pending') return <span className="text-yellow-600">[...]</span>;
+
     switch (status) {
-      case 'connected': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'error': return <XCircle className="h-4 w-4 text-red-600" />;
-      default: return <XCircle className="h-4 w-4 text-gray-400" />;
+      case 'connected': return <span className="text-green-600">[OK]</span>;
+      case 'error': return <span className="text-red-600">[X]</span>;
+      default: return <span className="text-gray-400">[X]</span>;
     }
   };
 
@@ -234,11 +219,9 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Share2 className="h-5 w-5" />
             Publish & Distribute
           </CardTitle>
           <Button variant="outline" size="sm" onClick={openIntegrationSettings}>
-            <Settings className="h-4 w-4 mr-2" />
             Manage Integrations
           </Button>
         </div>
@@ -262,22 +245,20 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Available Platforms</h4>
           {platformConfigs.map((platform) => {
-            const Icon = platform.icon;
             const isConnected = getConnectionStatus(platform.id) === 'connected';
             const isSelected = selectedPlatforms[platform.id] || false;
-            
+
             return (
               <div key={platform.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <Icon className="h-5 w-5 text-gray-600" />
                     <div>
                       <h5 className="font-medium">{platform.name}</h5>
                       <p className="text-sm text-gray-600">{platform.description}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    {getStatusIcon(platform.id)}
+                    {getStatusText(platform.id)}
                     {getStatusBadge(platform.id)}
                   </div>
                 </div>
@@ -302,9 +283,7 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
                 {publishStatus[platform.id] === 'success' && (
                   <div className="mt-3 pt-3 border-t">
                     <Button variant="ghost" size="sm" className="text-blue-600">
-                      <BarChart3 className="h-4 w-4 mr-2" />
                       View Analytics
-                      <ExternalLink className="h-3 w-3 ml-1" />
                     </Button>
                   </div>
                 )}
@@ -327,7 +306,7 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
           </div>
 
           <div className="flex space-x-3">
-            <Button 
+            <Button
               onClick={handlePublish}
               disabled={Object.values(selectedPlatforms).filter(Boolean).length === 0}
               className="flex-1"
@@ -335,7 +314,6 @@ const IntegrationHub: React.FC<IntegrationHubProps> = ({
               Publish Now
             </Button>
             <Button variant="outline">
-              <Clock className="h-4 w-4 mr-2" />
               Schedule
             </Button>
           </div>

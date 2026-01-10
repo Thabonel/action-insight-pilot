@@ -4,22 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  FileText, 
-  Target, 
-  Calendar,
-  Edit,
-  Copy,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  Lightbulb,
-  BarChart3,
-  Clock,
-  Zap
-} from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
 interface BlogStats {
@@ -269,17 +253,11 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
                 <p className="text-sm font-medium text-gray-600">Blogs This Month</p>
                 <p className="text-2xl font-bold">{stats.blogsThisMonth}</p>
                 <div className="flex items-center mt-1">
-                  {monthComparison.isPositive ? (
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                  )}
                   <span className={`text-sm ${monthComparison.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                    {monthComparison.change.toFixed(1)}% vs last month
+                    {monthComparison.isPositive ? '+' : '-'}{monthComparison.change.toFixed(1)}% vs last month
                   </span>
                 </div>
               </div>
-              <FileText className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -292,7 +270,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
                 <p className="text-2xl font-bold">{stats.averageSeoScore}%</p>
                 <Badge className="mt-1 bg-green-100 text-green-800">Excellent</Badge>
               </div>
-              <Target className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -324,7 +301,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
                   <Progress value={(stats.weeklyProgress / stats.weeklyGoal) * 100} className="h-2" />
                 </div>
               </div>
-              <Calendar className="h-8 w-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
@@ -334,7 +310,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
             Quick Actions
           </CardTitle>
         </CardHeader>
@@ -343,7 +318,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
             {/* Continue Drafts */}
             <div className="space-y-3">
               <h4 className="font-medium flex items-center gap-2">
-                <Edit className="h-4 w-4" />
                 Continue Drafts
               </h4>
               {quickActions.drafts.map((draft) => (
@@ -366,7 +340,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
             {/* Best Performers */}
             <div className="space-y-3">
               <h4 className="font-medium flex items-center gap-2">
-                <Copy className="h-4 w-4" />
                 Duplicate Best Performers
               </h4>
               {quickActions.bestPerformers.map((post) => (
@@ -387,7 +360,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t">
             <div className="space-y-3">
               <h4 className="font-medium flex items-center gap-2">
-                <RefreshCw className="h-4 w-4" />
                 Update Suggestions
               </h4>
               {quickActions.updateSuggestions.map((suggestion) => (
@@ -406,7 +378,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
 
             <div className="space-y-3">
               <h4 className="font-medium flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
                 Series Opportunities
               </h4>
               {quickActions.seriesOpportunities.map((opportunity) => (
@@ -429,7 +400,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
               Content Maintenance
             </CardTitle>
           </CardHeader>
@@ -463,7 +433,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="h-3 w-3 text-gray-400" />
                       <span className="text-xs text-gray-600">{suggestion.timing}</span>
                     </div>
                   </div>
@@ -477,7 +446,6 @@ export const BlogPerformanceDashboard: React.FC<BlogPerformanceDashboardProps> =
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-blue-500" />
               Content Opportunities
             </CardTitle>
           </CardHeader>

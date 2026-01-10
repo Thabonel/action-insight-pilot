@@ -3,7 +3,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Command, CommandList, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
 import { useAIAutocomplete } from '@/hooks/useAIAutocomplete';
-import { Hash, AtSign } from 'lucide-react';
 
 interface MentionInputProps {
   value: string;
@@ -158,9 +157,9 @@ export const MentionInput: React.FC<MentionInputProps> = ({
                     className="cursor-pointer"
                   >
                     {suggestionType === 'mention' ? (
-                      <AtSign className="h-3 w-3 mr-2 text-blue-600" />
+                      <span className="mr-2 text-blue-600">@</span>
                     ) : (
-                      <Hash className="h-3 w-3 mr-2 text-purple-600" />
+                      <span className="mr-2 text-purple-600">#</span>
                     )}
                     {suggestion}
                   </CommandItem>
@@ -180,7 +179,6 @@ export const MentionInput: React.FC<MentionInputProps> = ({
               variant="secondary"
               className="bg-blue-100 text-blue-700 hover:bg-blue-200"
             >
-              <AtSign className="h-3 w-3 mr-1" />
               {mention}
             </Badge>
           ))}
@@ -190,7 +188,6 @@ export const MentionInput: React.FC<MentionInputProps> = ({
               variant="outline"
               className="border-purple-300 text-purple-700"
             >
-              <Hash className="h-3 w-3 mr-1" />
               {tag}
             </Badge>
           ))}

@@ -8,22 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Video,
-  Sparkles,
-  Image as ImageIcon,
-  Play,
-  Download,
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-  Settings2,
-  Palette,
-  Upload,
-  GripVertical,
-  Trash2,
-  RefreshCw
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
@@ -341,7 +325,6 @@ const AIVideoStudio: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <Video className="h-8 w-8 text-blue-600" />
             AI Video Studio
           </h1>
           <p className="text-gray-600 mt-1">Create professional marketing videos with AI</p>
@@ -362,9 +345,8 @@ const AIVideoStudio: React.FC = () => {
       {/* Check for Gemini API Key */}
       {status === 'idle' && (
         <Alert>
-          <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Make sure you've added your <strong>Gemini API Key</strong> in Settings → Integrations to use AI video generation.
+            Make sure you've added your <strong>Gemini API Key</strong> in Settings - Integrations to use AI video generation.
           </AlertDescription>
         </Alert>
       )}
@@ -373,15 +355,12 @@ const AIVideoStudio: React.FC = () => {
       <Tabs value={activePanel} onValueChange={(value) => setActivePanel(value as typeof activePanel)}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="prompt" className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
             Prompt & Brand
           </TabsTrigger>
           <TabsTrigger value="scenes" disabled={scenes.length === 0} className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4" />
             Scene Board ({scenes.length})
           </TabsTrigger>
           <TabsTrigger value="preview" disabled={!videoUrl} className="flex items-center gap-2">
-            <Play className="h-4 w-4" />
             Preview & Export
           </TabsTrigger>
         </TabsList>
@@ -441,7 +420,6 @@ const AIVideoStudio: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
                 Brand Kit
               </CardTitle>
             </CardHeader>
@@ -502,17 +480,7 @@ const AIVideoStudio: React.FC = () => {
             className="w-full"
             size="lg"
           >
-            {generatingPlan ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generating Plan...
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-5 w-5" />
-                Generate Video Plan
-              </>
-            )}
+            {generatingPlan ? 'Generating Plan...' : 'Generate Video Plan'}
           </Button>
         </TabsContent>
 
@@ -525,17 +493,7 @@ const AIVideoStudio: React.FC = () => {
               disabled={generatingImages}
               variant="outline"
             >
-              {generatingImages ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <ImageIcon className="mr-2 h-4 w-4" />
-                  Generate Images
-                </>
-              )}
+              {generatingImages ? 'Generating...' : 'Generate Images'}
             </Button>
           </div>
 
@@ -544,7 +502,6 @@ const AIVideoStudio: React.FC = () => {
               <Card key={index}>
                 <CardContent className="pt-6 space-y-3">
                   <div className="flex items-start gap-3">
-                    <GripVertical className="h-5 w-5 text-gray-400 mt-2" />
                     <div className="flex-1 space-y-3">
                       <div className="flex justify-between items-start">
                         <Label className="text-sm font-semibold">Scene {index + 1}</Label>
@@ -555,7 +512,7 @@ const AIVideoStudio: React.FC = () => {
                             size="sm"
                             onClick={() => deleteScene(index)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            Delete
                           </Button>
                         </div>
                       </div>
@@ -575,7 +532,6 @@ const AIVideoStudio: React.FC = () => {
 
                       {generatedImages[index] && (
                         <div className="flex items-center gap-2 text-sm text-green-600">
-                          <CheckCircle className="h-4 w-4" />
                           Image generated
                         </div>
                       )}
@@ -605,7 +561,6 @@ const AIVideoStudio: React.FC = () => {
             <CardContent className="space-y-4">
               {!videoUrl && (
                 <div className="text-center py-8">
-                  <Video className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-600 mb-4">Ready to generate your video?</p>
 
                   <Button
@@ -613,17 +568,9 @@ const AIVideoStudio: React.FC = () => {
                     disabled={generatingVideo || status === 'generating_video'}
                     size="lg"
                   >
-                    {generatingVideo || status === 'generating_video' ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Generating Video... (2-6 min)
-                      </>
-                    ) : (
-                      <>
-                        <Play className="mr-2 h-5 w-5" />
-                        Generate Video with Veo 3
-                      </>
-                    )}
+                    {generatingVideo || status === 'generating_video'
+                      ? 'Generating Video... (2-6 min)'
+                      : 'Generate Video with Veo 3'}
                   </Button>
                 </div>
               )}
@@ -641,12 +588,10 @@ const AIVideoStudio: React.FC = () => {
                   <div className="flex gap-2">
                     <Button className="flex-1" asChild>
                       <a href={videoUrl} download>
-                        <Download className="mr-2 h-4 w-4" />
                         Download Video
                       </a>
                     </Button>
                     <Button variant="outline" onClick={handleGenerateVideo}>
-                      <RefreshCw className="mr-2 h-4 w-4" />
                       Regenerate
                     </Button>
                   </div>

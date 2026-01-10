@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Wand2, Sparkles, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -72,14 +71,12 @@ const CampaignBriefGenerator: React.FC = () => {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2 text-2xl font-bold">
-          <Wand2 className="h-6 w-6 text-purple-600" />
           AI Campaign Generator
         </div>
         <p className="text-gray-600">
           Answer 5 simple questions and let our AI create a complete marketing campaign for you
         </p>
         <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-          <Sparkles className="h-3 w-3 mr-1" />
           Launches AI Co-pilot Experience
         </Badge>
       </div>
@@ -156,28 +153,17 @@ const CampaignBriefGenerator: React.FC = () => {
       </Card>
 
       <div className="space-y-4">
-        <Button 
+        <Button
           onClick={handleGenerateFullCampaign}
           disabled={!isComplete || loading}
           className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-3"
           size="lg"
         >
-          {loading ? (
-            <>
-              <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-              Generating Your Campaign...
-            </>
-          ) : (
-            <>
-              <Wand2 className="mr-2 h-4 w-4" />
-              Generate Complete Campaign with AI
-            </>
-          )}
+          {loading ? 'Generating Your Campaign...' : 'Generate Complete Campaign with AI'}
         </Button>
 
         {!isComplete && (
           <div className="flex items-center gap-2 text-amber-600 text-sm">
-            <AlertCircle className="h-4 w-4" />
             Complete all fields to generate your AI campaign
           </div>
         )}

@@ -2,22 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BookOpen, 
-  LayoutDashboard, 
-  Zap, 
-  Users, 
-  FileText, 
-  Share2, 
-  Mail, 
-  BarChart3, 
-  Workflow,
-  Settings,
-  Target,
-  TrendingUp,
-  MessageSquare,
-  PlusCircle
-} from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const UserManual: React.FC = () => {
@@ -26,7 +10,6 @@ const UserManual: React.FC = () => {
       {/* Header */}
       <div className="text-center space-y-4 mb-8">
         <div className="flex items-center justify-center space-x-3">
-          <BookOpen className="h-8 w-8 text-blue-600" />
           <h1 className="text-4xl font-bold text-gray-900">AI Boost Campaign</h1>
         </div>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -56,7 +39,6 @@ const UserManual: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <LayoutDashboard className="h-6 w-6" />
                 <span>Platform Overview</span>
               </CardTitle>
             </CardHeader>
@@ -77,17 +59,14 @@ const UserManual: React.FC = () => {
                     <p className="text-sm">Conversational interface for natural language queries and insights</p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <Zap className="h-6 w-6 text-green-600 mb-2" />
                     <h5 className="font-semibold">Campaign Management</h5>
                     <p className="text-sm">Advanced tools for creating and managing marketing campaigns</p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg">
-                    <Users className="h-6 w-6 text-purple-600 mb-2" />
                     <h5 className="font-semibold">Lead Management</h5>
                     <p className="text-sm">Comprehensive lead tracking, scoring, and conversion tools</p>
                   </div>
                   <div className="bg-orange-50 p-4 rounded-lg">
-                    <FileText className="h-6 w-6 text-orange-600 mb-2" />
                     <h5 className="font-semibold">Content Creation</h5>
                     <p className="text-sm">AI-assisted content generation and management</p>
                   </div>
@@ -147,7 +126,6 @@ const UserManual: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <LayoutDashboard className="h-6 w-6" />
                   <span>Traditional Dashboard</span>
                 </CardTitle>
               </CardHeader>
@@ -173,7 +151,6 @@ const UserManual: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Zap className="h-6 w-6" />
                 <span>Campaign Management</span>
               </CardTitle>
             </CardHeader>
@@ -224,7 +201,6 @@ const UserManual: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Users className="h-6 w-6" />
                 <span>Lead Management</span>
               </CardTitle>
             </CardHeader>
@@ -234,19 +210,16 @@ const UserManual: React.FC = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <Target className="h-6 w-6 text-green-600 mb-2" />
                     <h5 className="font-semibold">Lead Capture</h5>
                     <p className="text-sm">Automated lead capture from multiple sources including forms, social media, and campaigns.</p>
                   </div>
 
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <TrendingUp className="h-6 w-6 text-blue-600 mb-2" />
                     <h5 className="font-semibold">Lead Scoring</h5>
                     <p className="text-sm">AI-powered lead scoring based on engagement, demographics, and behavior patterns.</p>
                   </div>
 
                   <div className="bg-purple-50 p-4 rounded-lg">
-                    <MessageSquare className="h-6 w-6 text-purple-600 mb-2" />
                     <h5 className="font-semibold">Lead Nurturing</h5>
                     <p className="text-sm">Automated nurturing sequences and personalized communication workflows.</p>
                   </div>
@@ -287,7 +260,6 @@ const UserManual: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <FileText className="h-6 w-6" />
                 <span>Content Creation & Management</span>
               </CardTitle>
             </CardHeader>
@@ -348,7 +320,6 @@ const UserManual: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Share2 className="h-6 w-6" />
                 <span>Social Media Management</span>
               </CardTitle>
             </CardHeader>
@@ -412,7 +383,6 @@ const UserManual: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Mail className="h-6 w-6" />
                 <span>Email Marketing</span>
               </CardTitle>
             </CardHeader>
@@ -422,17 +392,14 @@ const UserManual: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-blue-50 p-4 rounded-lg text-center">
-                    <Mail className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                     <h5 className="font-semibold">Campaign Creation</h5>
                     <p className="text-sm">Drag-and-drop email builder with templates</p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg text-center">
-                    <Users className="h-8 w-8 text-green-600 mx-auto mb-2" />
                     <h5 className="font-semibold">List Management</h5>
                     <p className="text-sm">Advanced segmentation and list management</p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg text-center">
-                    <BarChart3 className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                     <h5 className="font-semibold">Analytics</h5>
                     <p className="text-sm">Real-time metrics and performance tracking</p>
                   </div>
@@ -473,7 +440,6 @@ const UserManual: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-6 w-6" />
                 <span>Analytics & Reporting</span>
               </CardTitle>
             </CardHeader>
@@ -483,22 +449,18 @@ const UserManual: React.FC = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                   <div className="bg-blue-50 p-4 rounded-lg text-center">
-                    <TrendingUp className="h-6 w-6 text-blue-600 mx-auto mb-2" />
                     <h5 className="font-semibold text-sm">Performance Metrics</h5>
                     <p className="text-xs">Campaign ROI, conversion rates, engagement</p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg text-center">
-                    <Users className="h-6 w-6 text-green-600 mx-auto mb-2" />
                     <h5 className="font-semibold text-sm">Audience Insights</h5>
                     <p className="text-xs">Demographics, behavior, preferences</p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg text-center">
-                    <BarChart3 className="h-6 w-6 text-purple-600 mx-auto mb-2" />
                     <h5 className="font-semibold text-sm">Channel Performance</h5>
                     <p className="text-xs">Email, social, content effectiveness</p>
                   </div>
                   <div className="bg-orange-50 p-4 rounded-lg text-center">
-                    <Target className="h-6 w-6 text-orange-600 mx-auto mb-2" />
                     <h5 className="font-semibold text-sm">Goal Tracking</h5>
                     <p className="text-xs">Conversion goals, revenue tracking</p>
                   </div>
@@ -549,7 +511,6 @@ const UserManual: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Workflow className="h-5 w-5" />
               <span>Workflow Automation</span>
             </CardTitle>
           </CardHeader>
@@ -567,7 +528,6 @@ const UserManual: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Settings className="h-5 w-5" />
               <span>Settings & Configuration</span>
             </CardTitle>
           </CardHeader>

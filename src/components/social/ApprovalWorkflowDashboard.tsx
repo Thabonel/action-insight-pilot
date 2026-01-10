@@ -6,14 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  Loader2,
-  FileText,
-  AlertCircle
-} from 'lucide-react';
 
 interface Approval {
   id: string
@@ -154,21 +146,18 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
       case 'pending':
         return (
           <Badge variant="outline" className="bg-yellow-100 text-yellow-700">
-            <Clock className="h-3 w-3 mr-1" />
             Pending
           </Badge>
         );
       case 'approved':
         return (
           <Badge className="bg-green-100 text-green-700">
-            <CheckCircle className="h-3 w-3 mr-1" />
             Approved
           </Badge>
         );
       case 'rejected':
         return (
           <Badge className="bg-red-100 text-red-700">
-            <XCircle className="h-3 w-3 mr-1" />
             Rejected
           </Badge>
         );
@@ -185,7 +174,6 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-purple-600" />
           Approval Workflow
         </CardTitle>
       </CardHeader>
@@ -207,7 +195,6 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
         {/* Loading State */}
         {isLoading && approvals.length === 0 && (
           <div className="text-center p-6 text-gray-500">
-            <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-gray-300" />
             <p className="text-sm">Loading approval requests...</p>
           </div>
         )}
@@ -215,7 +202,6 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
         {/* Empty State */}
         {!isLoading && approvals.length === 0 && (
           <div className="text-center p-6 text-gray-500">
-            <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">
               No {filter !== 'all' ? filter : ''} approval requests found.
             </p>
@@ -244,7 +230,6 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
 
                   {isExpired(approval.expires_at) && approval.approval_status === 'pending' && (
                     <Badge variant="outline" className="bg-red-100 text-red-700">
-                      <AlertCircle className="h-3 w-3 mr-1" />
                       Expired
                     </Badge>
                   )}
@@ -322,7 +307,6 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
                         onClick={() => approveRequest(approval.id)}
                         disabled={isLoading}
                       >
-                        <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
                         Approve
                       </Button>
                       <Button
@@ -330,7 +314,6 @@ export const ApprovalWorkflowDashboard: React.FC = () => {
                         onClick={() => rejectRequest(approval.id)}
                         disabled={isLoading}
                       >
-                        <XCircle className="h-4 w-4 mr-2 text-red-600" />
                         Reject
                       </Button>
                     </div>

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRealTimeMetrics } from '@/hooks/useRealTimeMetrics';
-import { TrendingUp, TrendingDown, Mail, MousePointer, Eye, AlertTriangle, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface RealTimeMetricsDashboardProps {
@@ -34,14 +33,12 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <AlertTriangle className="h-5 w-5 text-red-500" />
             <span>Metrics Error</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-600 mb-4">{error}</p>
           <Button onClick={refetch} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
             Retry
           </Button>
         </CardContent>
@@ -79,7 +76,7 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
             <Badge variant="outline">Campaign: {campaignId}</Badge>
           )}
           <Button onClick={refetch} variant="ghost" size="sm">
-            <RefreshCw className="h-4 w-4" />
+            Refresh
           </Button>
         </CardTitle>
       </CardHeader>
@@ -88,7 +85,7 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
           {/* Email Sent */}
           <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <Mail className="h-6 w-6 text-blue-600" />
+              <span className="text-blue-600 font-bold">S</span>
             </div>
             <div>
               <p className="text-sm text-gray-600">Emails Sent</p>
@@ -101,7 +98,7 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
           {/* Email Opens */}
           <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg">
             <div className="p-2 bg-green-100 rounded-lg">
-              <Eye className="h-6 w-6 text-green-600" />
+              <span className="text-green-600 font-bold">O</span>
             </div>
             <div>
               <p className="text-sm text-gray-600">Opens</p>
@@ -120,7 +117,7 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
           {/* Email Clicks */}
           <div className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg">
             <div className="p-2 bg-purple-100 rounded-lg">
-              <MousePointer className="h-6 w-6 text-purple-600" />
+              <span className="text-purple-600 font-bold">C</span>
             </div>
             <div>
               <p className="text-sm text-gray-600">Clicks</p>
@@ -144,16 +141,16 @@ const RealTimeMetricsDashboard: React.FC<RealTimeMetricsDashboardProps> = ({ cam
             {metrics.insights.map((insight, index) => (
               <div key={index} className="flex items-start space-x-2 p-3 bg-gray-50 rounded-lg">
                 {insight.impact === 'positive' ? (
-                  <TrendingUp className="h-5 w-5 text-green-500 mt-0.5" />
+                  <span className="text-green-500 font-bold mt-0.5">+</span>
                 ) : insight.impact === 'negative' ? (
-                  <TrendingDown className="h-5 w-5 text-red-500 mt-0.5" />
+                  <span className="text-red-500 font-bold mt-0.5">-</span>
                 ) : (
                   <div className="h-5 w-5 bg-gray-400 rounded-full mt-0.5" />
                 )}
                 <div>
-                  <Badge 
+                  <Badge
                     variant={
-                      insight.impact === 'positive' ? 'default' : 
+                      insight.impact === 'positive' ? 'default' :
                       insight.impact === 'negative' ? 'destructive' : 'secondary'
                     }
                     className="mb-1"

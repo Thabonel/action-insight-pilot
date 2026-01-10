@@ -2,16 +2,12 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Database } from 'lucide-react';
 
 const DataSyncSettings: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Database className="h-5 w-5" />
-          <span>Data Synchronization</span>
-        </CardTitle>
+        <CardTitle>Data Synchronization</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

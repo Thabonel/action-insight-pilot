@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { Send, Sparkles, Loader2, AlertTriangle, RotateCcw, Save, CheckCircle, Edit, X, ExternalLink } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { parseCampaignFromConversation } from '@/lib/campaign-parser';
@@ -391,7 +390,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
         {/* Header */}
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-blue-100 rounded-lg">
-            <Sparkles className="h-5 w-5 text-blue-600" />
+            <span className="text-blue-600 font-bold">AI</span>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Campaign Creation Assistant</h3>
@@ -407,7 +406,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
           {chatHistory.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-blue-600" />
+                <span className="text-2xl font-bold text-blue-600">AI</span>
               </div>
               <h4 className="text-lg font-medium text-gray-900 mb-2">Ready to create your marketing campaign?</h4>
               <p className="text-gray-600 mb-6">I'll guide you through building a comprehensive campaign step-by-step</p>
@@ -483,7 +482,6 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             <div className="flex justify-start">
               <div className="bg-blue-50 border border-blue-200 text-blue-900 p-4 rounded-lg max-w-[90%]">
                 <div className="flex items-center space-x-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-blue-600" />
                   <span className="text-lg font-semibold">Campaign Preview</span>
                 </div>
                 
@@ -539,30 +537,27 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 <div className="border-t border-blue-200 pt-3">
                   <p className="text-blue-800 font-medium mb-3">Shall I create this campaign for you?</p>
                   <div className="flex space-x-2">
-                    <Button 
+                    <Button
                       onClick={() => handleCampaignApproval('yes')}
                       size="sm"
                       className="bg-green-600 hover:bg-green-700 text-white"
                     >
-                      <CheckCircle className="w-3 h-3 mr-1" />
                       Yes, Create It
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => handleCampaignApproval('edit')}
                       size="sm"
                       variant="outline"
                       className="text-blue-700 border-blue-300 hover:bg-blue-50"
                     >
-                      <Edit className="w-3 h-3 mr-1" />
                       Edit Details
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => handleCampaignApproval('cancel')}
                       size="sm"
                       variant="outline"
                       className="text-red-700 border-red-300 hover:bg-red-50"
                     >
-                      <X className="w-3 h-3 mr-1" />
                       Cancel
                     </Button>
                   </div>
@@ -575,7 +570,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             <div className="flex justify-start">
               <div className="bg-green-100 text-green-900 p-3 rounded-lg max-w-[80%]">
                 <div className="flex items-center space-x-2">
-                  <Loader2 className="animate-spin w-4 h-4 text-green-600" />
+                  <div className="animate-spin w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full"></div>
                   <span className="text-sm">Creating your campaign...</span>
                 </div>
               </div>
@@ -586,28 +581,25 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             <div className="flex justify-start">
               <div className="bg-red-100 text-red-900 p-3 rounded-lg max-w-[80%]">
                 <div className="flex items-center space-x-2 mb-2">
-                  <AlertTriangle className="w-4 h-4 text-red-600" />
                   <span className="text-sm font-medium">Campaign Creation Failed</span>
                 </div>
                 <p className="text-sm mb-3">{campaignError}</p>
                 <div className="flex space-x-2">
-                  <Button 
+                  <Button
                     onClick={retryCampaignCreation}
                     disabled={isCreatingCampaign}
                     size="sm"
                     variant="outline"
                     className="text-red-700 border-red-300 hover:bg-red-50"
                   >
-                    <RotateCcw className="w-3 h-3 mr-1" />
                     Retry
                   </Button>
-                  <Button 
+                  <Button
                     onClick={saveAnswersForLater}
                     size="sm"
                     variant="outline"
                     className="text-red-700 border-red-300 hover:bg-red-50"
                   >
-                    <Save className="w-3 h-3 mr-1" />
                     Save for Later
                   </Button>
                 </div>
@@ -619,8 +611,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             <div className="flex justify-start">
               <div className="bg-green-100 text-green-900 p-4 rounded-lg max-w-[80%]">
                 <div className="flex items-center space-x-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-green-600" />
-                  <span className="text-lg font-semibold">Campaign Created Successfully! 🎉</span>
+                  <span className="text-lg font-semibold">Campaign Created Successfully!</span>
                 </div>
                 <p className="text-sm text-green-800 mb-3">
                   Your campaign has been created and is ready to launch. You can now view and manage it from your campaigns dashboard.
@@ -628,17 +619,16 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
                 <div className="flex space-x-2">
                   {createdCampaignId && (
                     <Link to={`/app/campaigns/${createdCampaignId}`}>
-                      <Button 
+                      <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white"
                       >
-                        <ExternalLink className="w-3 h-3 mr-1" />
                         View Campaign
                       </Button>
                     </Link>
                   )}
                   <Link to="/app/campaign-management">
-                    <Button 
+                    <Button
                       size="sm"
                       variant="outline"
                       className="text-green-700 border-green-300 hover:bg-green-50"
@@ -656,7 +646,6 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             <div className="flex justify-start">
               <div className="bg-purple-50 border border-purple-200 text-purple-900 p-4 rounded-lg max-w-[90%]">
                 <div className="flex items-center space-x-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
                   <span className="text-lg font-semibold">Suggested Campaign Templates</span>
                 </div>
                 <p className="text-sm text-purple-800 mb-4">
@@ -716,7 +705,7 @@ const ConversationalChatInterface: React.FC<ConversationalChatInterfaceProps> = 
             disabled={!query.trim() || isProcessing || !user}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
-            <Send className="h-4 w-4" />
+            Send
           </Button>
         </form>
 

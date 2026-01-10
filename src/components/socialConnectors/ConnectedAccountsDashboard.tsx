@@ -2,17 +2,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Settings, 
-  BarChart3, 
-  Calendar,
-  RefreshCw,
-  Unlink,
-  CheckCircle,
-  AlertTriangle,
-  Users,
-  TrendingUp
-} from 'lucide-react';
 import { PlatformConnection, SocialPlatform } from '@/types/socialConnectors';
 
 interface ConnectedAccountsDashboardProps {
@@ -92,36 +81,27 @@ const ConnectedAccountsDashboard: React.FC<ConnectedAccountsDashboardProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Connected Platforms</p>
-                <p className="text-2xl font-bold">{connectedPlatforms.length}</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Connected Platforms</p>
+              <p className="text-2xl font-bold">{connectedPlatforms.length}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">Social Profiles</p>
-                <p className="text-2xl font-bold">{totalProfiles}</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Social Profiles</p>
+              <p className="text-2xl font-bold">{totalProfiles}</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-gray-600">AI Posts This Week</p>
-                <p className="text-2xl font-bold">24</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">AI Posts This Week</p>
+              <p className="text-2xl font-bold">24</p>
             </div>
           </CardContent>
         </Card>
@@ -131,8 +111,7 @@ const ConnectedAccountsDashboard: React.FC<ConnectedAccountsDashboardProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {connections.map((connection) => {
           const health = getConnectionHealth(connection);
-          const HealthIcon = health.status === 'healthy' ? CheckCircle : AlertTriangle;
-          
+
           return (
             <Card key={connection.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
@@ -142,9 +121,8 @@ const ConnectedAccountsDashboard: React.FC<ConnectedAccountsDashboardProps> = ({
                     <div>
                       <CardTitle className="text-lg">{getPlatformName(connection.platform)}</CardTitle>
                       <div className="flex items-center space-x-2">
-                        <HealthIcon className={`h-4 w-4 text-${health.color}-600`} />
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`text-${health.color}-600 border-${health.color}-300`}
                         >
                           {health.text}
@@ -157,7 +135,7 @@ const ConnectedAccountsDashboard: React.FC<ConnectedAccountsDashboardProps> = ({
                     size="sm"
                     onClick={() => setSelectedConnection(connection)}
                   >
-                    <Settings className="h-4 w-4" />
+                    Settings
                   </Button>
                 </div>
               </CardHeader>
@@ -200,19 +178,17 @@ const ConnectedAccountsDashboard: React.FC<ConnectedAccountsDashboardProps> = ({
                 {/* Actions */}
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" className="flex-1">
-                    <BarChart3 className="h-3 w-3 mr-2" />
                     Analytics
                   </Button>
                   <Button variant="outline" size="sm" className="flex-1">
-                    <Calendar className="h-3 w-3 mr-2" />
                     Schedule Post
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => onDisconnect(connection.platform)}
                   >
-                    <Unlink className="h-3 w-3" />
+                    Disconnect
                   </Button>
                 </div>
               </CardContent>
@@ -229,15 +205,12 @@ const ConnectedAccountsDashboard: React.FC<ConnectedAccountsDashboardProps> = ({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button variant="outline" className="h-20 flex-col">
-              <Calendar className="h-6 w-6 mb-2" />
               <span>Schedule AI Post</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col">
-              <BarChart3 className="h-6 w-6 mb-2" />
               <span>View Analytics</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col" onClick={onRefresh}>
-              <RefreshCw className="h-6 w-6 mb-2" />
               <span>Sync All Platforms</span>
             </Button>
           </div>

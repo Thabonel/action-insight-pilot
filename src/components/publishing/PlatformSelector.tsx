@@ -5,7 +5,6 @@
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Check } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { Platform } from './VideoPublishingUI'
@@ -151,8 +150,8 @@ export function PlatformSelector({
           >
             {/* Selected Check Mark */}
             {isSelected && (
-              <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                <Check className="h-4 w-4" />
+              <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                ✓
               </div>
             )}
 

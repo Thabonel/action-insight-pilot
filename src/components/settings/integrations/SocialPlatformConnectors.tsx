@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { SocialPlatformConnection, ApiResponse } from '@/lib/api-client-interface';
-import { Loader2, CheckCircle, XCircle, RefreshCw, TestTube } from 'lucide-react';
 
 const SocialPlatformConnectors: React.FC = () => {
   const [connections, setConnections] = useState<SocialPlatformConnection[]>([]);
@@ -135,7 +134,7 @@ const SocialPlatformConnectors: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <span>Loading...</span>
           </div>
         </CardContent>
       </Card>
@@ -156,11 +155,6 @@ const SocialPlatformConnectors: React.FC = () => {
                 <p className="text-sm text-gray-500">{connection.account_name}</p>
               </div>
               <Badge variant={connection.status === 'connected' ? 'default' : 'destructive'}>
-                {connection.status === 'connected' ? (
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                ) : (
-                  <XCircle className="h-3 w-3 mr-1" />
-                )}
                 {connection.status}
               </Badge>
             </div>
@@ -174,11 +168,7 @@ const SocialPlatformConnectors: React.FC = () => {
                     onClick={() => handleTest(connection.platform)}
                     disabled={actionLoading === `test-${connection.platform}`}
                   >
-                    {actionLoading === `test-${connection.platform}` ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <TestTube className="h-4 w-4" />
-                    )}
+                    {actionLoading === `test-${connection.platform}` ? 'Testing...' : 'Test'}
                   </Button>
                   <Button
                     variant="outline"
@@ -186,11 +176,7 @@ const SocialPlatformConnectors: React.FC = () => {
                     onClick={() => handleSync(connection.platform)}
                     disabled={actionLoading === `sync-${connection.platform}`}
                   >
-                    {actionLoading === `sync-${connection.platform}` ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4" />
-                    )}
+                    {actionLoading === `sync-${connection.platform}` ? 'Syncing...' : 'Sync'}
                   </Button>
                   <Button
                     variant="destructive"
@@ -198,11 +184,7 @@ const SocialPlatformConnectors: React.FC = () => {
                     onClick={() => handleDisconnect(connection.platform)}
                     disabled={actionLoading === connection.platform}
                   >
-                    {actionLoading === connection.platform ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Disconnect'
-                    )}
+                    {actionLoading === connection.platform ? 'Disconnecting...' : 'Disconnect'}
                   </Button>
                 </>
               ) : (
@@ -211,11 +193,7 @@ const SocialPlatformConnectors: React.FC = () => {
                   disabled={actionLoading === connection.platform}
                   size="sm"
                 >
-                  {actionLoading === connection.platform ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Connect'
-                  )}
+                  {actionLoading === connection.platform ? 'Connecting...' : 'Connect'}
                 </Button>
               )}
             </div>

@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { IntegrationConnection, ApiResponse } from '@/lib/api-client-interface';
-import { Loader2, CheckCircle, XCircle, Plus, Trash2 } from 'lucide-react';
 
 const MCPConnectors: React.FC = () => {
   const [connections, setConnections] = useState<IntegrationConnection[]>([]);
@@ -94,7 +93,7 @@ const MCPConnectors: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="text-muted-foreground">Loading...</span>
           </div>
         </CardContent>
       </Card>
@@ -111,12 +110,7 @@ const MCPConnectors: React.FC = () => {
             disabled={actionLoading === 'create'}
             size="sm"
           >
-            {actionLoading === 'create' ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-            Create Connection
+            {actionLoading === 'create' ? 'Creating...' : 'Create Connection'}
           </Button>
         </CardTitle>
       </CardHeader>
@@ -129,11 +123,6 @@ const MCPConnectors: React.FC = () => {
                 <p className="text-sm text-gray-500">{connection.type}</p>
               </div>
               <Badge variant={connection.status === 'connected' ? 'default' : 'destructive'}>
-                {connection.status === 'connected' ? (
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                ) : (
-                  <XCircle className="h-3 w-3 mr-1" />
-                )}
                 {connection.status}
               </Badge>
             </div>
@@ -144,11 +133,7 @@ const MCPConnectors: React.FC = () => {
               onClick={() => handleDeleteConnection(connection.id)}
               disabled={actionLoading === connection.id}
             >
-              {actionLoading === connection.id ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
+              {actionLoading === connection.id ? 'Deleting...' : 'Delete'}
             </Button>
           </div>
         ))}

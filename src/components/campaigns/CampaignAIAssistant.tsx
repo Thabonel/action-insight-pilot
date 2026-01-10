@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Bot, Clock, TrendingUp, Target } from 'lucide-react';
 
 const CampaignAIAssistant: React.FC = () => {
   const [insights, setInsights] = useState({
@@ -18,22 +17,19 @@ const CampaignAIAssistant: React.FC = () => {
       id: 1,
       type: 'timing',
       message: "Based on your pattern, campaigns launched Tuesday mornings perform 34% better",
-      confidence: 92,
-      icon: Clock
+      confidence: 92
     },
     {
       id: 2,
       type: 'performance',
       message: "Your email campaigns consistently outperform social by 28%",
-      confidence: 89,
-      icon: TrendingUp
+      confidence: 89
     },
     {
       id: 3,
       type: 'optimization',
       message: "Consider increasing budget on high-performing content campaigns",
-      confidence: 76,
-      icon: Target
+      confidence: 76
     }
   ]);
 
@@ -53,7 +49,6 @@ const CampaignAIAssistant: React.FC = () => {
     type: string;
     message: string;
     confidence: number;
-    icon: React.ComponentType<{ className?: string }>;
   }
 
   const handleSuggestionClick = (suggestion: Suggestion) => {
@@ -67,7 +62,6 @@ const CampaignAIAssistant: React.FC = () => {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Bot className="h-5 w-5 text-blue-600" />
           <span>AI Campaign Assistant</span>
         </CardTitle>
       </CardHeader>
@@ -87,7 +81,6 @@ const CampaignAIAssistant: React.FC = () => {
           <h4 className="font-medium text-gray-900 mb-3">Smart Suggestions</h4>
           <div className="space-y-3">
             {suggestions.map((suggestion) => {
-              const Icon = suggestion.icon;
               return (
                 <div
                   key={suggestion.id}
@@ -95,7 +88,6 @@ const CampaignAIAssistant: React.FC = () => {
                   className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-start space-x-3">
-                    <Icon className="h-4 w-4 text-gray-600 mt-1" />
                     <div className="flex-1">
                       <p className="text-sm text-gray-800">{suggestion.message}</p>
                       <div className="mt-1 text-xs text-gray-500">

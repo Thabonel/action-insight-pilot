@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { MessageSquare } from 'lucide-react';
 import { useChatLogic } from '@/hooks/useChatLogic';
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';

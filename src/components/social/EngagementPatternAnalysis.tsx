@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Clock, TrendingUp, Hash, Users, Target, Calendar } from 'lucide-react';
 
 const EngagementPatternAnalysis: React.FC = () => {
   const [selectedAnalysis, setSelectedAnalysis] = useState('timing');
@@ -65,10 +64,7 @@ const EngagementPatternAnalysis: React.FC = () => {
           {/* Optimal Posting Times */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5" />
-                <span>Optimal Posting Times</span>
-              </CardTitle>
+              <CardTitle>Optimal Posting Times</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -179,10 +175,7 @@ const EngagementPatternAnalysis: React.FC = () => {
           {/* Hashtag Performance */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Hash className="h-5 w-5" />
-                <span>Hashtag Performance Analysis</span>
-              </CardTitle>
+              <CardTitle>Hashtag Performance Analysis</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -220,10 +213,7 @@ const EngagementPatternAnalysis: React.FC = () => {
           {/* Audience Insights */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>Audience Behavior Insights</span>
-              </CardTitle>
+              <CardTitle>Audience Behavior Insights</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -243,10 +233,7 @@ const EngagementPatternAnalysis: React.FC = () => {
           {/* Viral Content Patterns */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5" />
-                <span>Viral Content Patterns</span>
-              </CardTitle>
+              <CardTitle>Viral Content Patterns</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">

@@ -7,14 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Users,
-  Send,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Share2
-} from 'lucide-react';
 
 interface MentionData {
   handle: string
@@ -208,7 +200,6 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-blue-600" />
           Team Collaboration
         </CardTitle>
       </CardHeader>
@@ -223,7 +214,6 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
                 size="sm"
                 onClick={() => setShowShareForm(!showShareForm)}
               >
-                <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
             </div>
@@ -259,8 +249,6 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
                     onClick={shareRecommendation}
                     disabled={isLoading || !shareEmail}
                   >
-                    {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    <Send className="h-4 w-4 mr-2" />
                     Send to Team
                   </Button>
                   <Button
@@ -281,14 +269,12 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
 
           {isLoading && shares.length === 0 && (
             <div className="text-center p-6 text-gray-500">
-              <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-gray-300" />
               <p className="text-sm">Loading shared recommendations...</p>
             </div>
           )}
 
           {!isLoading && shares.length === 0 && (
             <div className="text-center p-6 text-gray-500">
-              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p className="text-sm">
                 No shared recommendations yet. Team members can share their best mentions and hashtags with you.
               </p>
@@ -331,7 +317,6 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
                           onClick={() => respondToShare(share.id, true)}
                           disabled={isLoading}
                         >
-                          <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
                           Accept
                         </Button>
                         <Button
@@ -340,7 +325,6 @@ export const TeamCollaborationPanel: React.FC<TeamCollaborationPanelProps> = ({
                           onClick={() => respondToShare(share.id, false)}
                           disabled={isLoading}
                         >
-                          <XCircle className="h-3 w-3 mr-1 text-red-600" />
                           Decline
                         </Button>
                       </div>
