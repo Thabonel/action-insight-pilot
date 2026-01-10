@@ -9,10 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, Eye, ToggleLeft } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { useUserMode } from '@/hooks/useUserMode';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import NeuralFlowIcon from '@/components/ui/NeuralFlowIcon';
 
 const ModeSwitcher: React.FC = () => {
   const { mode, setMode } = useUserMode();
@@ -43,12 +44,12 @@ const ModeSwitcher: React.FC = () => {
         <Button variant="outline" size="sm" className="gap-2">
           {mode === 'simple' ? (
             <>
-              <ToggleLeft className="h-4 w-4" />
+              <NeuralFlowIcon name="mode-switch" size={16} />
               Simple Mode
             </>
           ) : (
             <>
-              <Settings className="h-4 w-4" />
+              <NeuralFlowIcon name="settings" size={16} />
               Advanced Mode
             </>
           )}
@@ -65,7 +66,7 @@ const ModeSwitcher: React.FC = () => {
         >
           <div className="flex items-center justify-between w-full mb-1">
             <div className="flex items-center gap-2">
-              <ToggleLeft className="h-4 w-4 text-blue-600" />
+              <NeuralFlowIcon name="mode-switch" size={16} />
               <span className="font-medium">Simple Mode</span>
             </div>
             {mode === 'simple' && <Badge className="bg-blue-600">Active</Badge>}
@@ -82,7 +83,7 @@ const ModeSwitcher: React.FC = () => {
         >
           <div className="flex items-center justify-between w-full mb-1">
             <div className="flex items-center gap-2">
-              <Settings className="h-4 w-4 text-purple-600" />
+              <NeuralFlowIcon name="settings" size={16} />
               <span className="font-medium">Advanced Mode</span>
             </div>
             {mode === 'advanced' && <Badge className="bg-purple-600">Active</Badge>}
