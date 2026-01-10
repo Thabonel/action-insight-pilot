@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from 'next-themes';
 import { userPreferencesService } from '@/lib/services/user-preferences-service';
 import { 
   Settings, 
@@ -35,6 +36,7 @@ const SystemPreferences: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const { toast } = useToast();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     loadPreferences();
@@ -85,6 +87,10 @@ const SystemPreferences: React.FC = () => {
           }
         ];
         setPreferences(systemPrefs);
+
+        // Apply saved theme on load
+        const savedTheme = result.data.theme ?? 'light';
+        setTheme(savedTheme === 'auto' ? 'system' : savedTheme);
       }
     } catch (error) {
       console.error('Error loading preferences:', error);
@@ -107,13 +113,18 @@ const SystemPreferences: React.FC = () => {
       );
       setPreferences(updatedPrefs);
 
+      // Apply theme change immediately
+      if (id === 'theme' && typeof value === 'string') {
+        setTheme(value === 'auto' ? 'system' : value);
+      }
+
       const prefData: Record<string, string | number | boolean> = {};
       updatedPrefs.forEach(pref => {
         prefData[pref.id] = pref.value;
       });
 
       await userPreferencesService.updateGeneralPreferences(prefData);
-      
+
       toast({
         title: "Preferences Updated",
         description: "Your system preferences have been saved",
