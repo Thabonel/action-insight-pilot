@@ -36,6 +36,21 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
     await reload()
   }
 
+  const downloadDoc = (doc: KnowledgeDocument, edited = false) => {
+    const nameBase = (doc.file_name || doc.title || 'document').replace(/[^a-z0-9-_ ]/gi, '').trim() || 'document'
+    const ext = doc.file_type?.includes('json') ? 'json' : 'txt'
+    const content = edited ? editContent : doc.content
+    const blob = new Blob([content], { type: ext === 'json' ? 'application/json' : 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${nameBase}.${ext}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   const visible = documents.filter(d =>
     d.title.toLowerCase().includes(filter.toLowerCase()) ||
     d.content.toLowerCase().includes(filter.toLowerCase())
@@ -68,6 +83,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => setEditing(doc)}>View</Button>
+                    <Button size="sm" variant="outline" onClick={() => downloadDoc(doc)}>Download</Button>
                     <Button size="sm" variant="outline" onClick={() => reprocessDocument(doc.id)}>Reprocess</Button>
                     <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => onDelete(doc)}>Delete</Button>
                   </div>
@@ -89,6 +105,7 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
             />
             <div className="mt-3 flex gap-2">
               <Button onClick={onSave}>Save</Button>
+              <Button variant="outline" onClick={() => downloadDoc(editing!, true)}>Download</Button>
               <Button variant="outline" onClick={() => setEditing(null)}>Close</Button>
             </div>
           </div>
