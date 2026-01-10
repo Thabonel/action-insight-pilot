@@ -131,7 +131,7 @@ const SimpleDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-screen">
+      <div className="p-6 flex items-center justify-center min-h-screen bg-gray-50 dark:bg-[#0B0D10]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -158,7 +158,7 @@ const SimpleDashboard: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -209,7 +209,7 @@ const SimpleDashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Leads */}
-            <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
               <div className="flex items-center justify-between mb-2">
                 <Badge className="bg-blue-100 text-blue-700">New</Badge>
               </div>
@@ -220,7 +220,7 @@ const SimpleDashboard: React.FC = () => {
             </div>
 
             {/* Spend */}
-            <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="outline">
                   {autopilotConfig.monthly_budget
@@ -235,7 +235,7 @@ const SimpleDashboard: React.FC = () => {
             </div>
 
             {/* ROI */}
-            <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
               <div className="flex items-center justify-between mb-2">
                 <Badge className="bg-green-100 text-green-700">Strong</Badge>
               </div>
@@ -276,7 +276,7 @@ const SimpleDashboard: React.FC = () => {
               {campaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-[#1C2430] transition-colors border-gray-200 dark:border-[#273140]"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">

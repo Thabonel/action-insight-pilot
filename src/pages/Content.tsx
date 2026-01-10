@@ -52,12 +52,12 @@ const Content: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Content Creation Intelligence</h1>
-          <p className="text-gray-600 mt-2">AI-powered content optimization and performance learning</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Content Creation Intelligence</h1>
+          <p className="text-gray-600 dark:text-[#94A3B8] mt-2">AI-powered content optimization and performance learning</p>
         </div>
         
         <div className="flex space-x-3">

@@ -17,12 +17,22 @@
 /* 2026 Mood Mode - Charcoal/Slate Theme */
 
 /* Base backgrounds - Override ALL white/light backgrounds */
+html.dark,
+html.dark body,
 .dark,
 .dark body {
   background-color: #0B0D10 !important;
   color: #E9EEF5 !important;
 }
 
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark [class*="bg-white"],
+html.dark main,
+html.dark .min-h-screen,
 .dark .bg-white,
 .dark .bg-gray-50,
 .dark .bg-gray-100,
@@ -35,6 +45,12 @@
 }
 
 /* Card/Surface backgrounds */
+html.dark .bg-card,
+html.dark [class*="bg-card"],
+html.dark .bg-gray-100,
+html.dark .rounded-lg.border,
+html.dark .shadow-sm,
+html.dark .shadow,
 .dark .bg-card,
 .dark [class*="bg-card"],
 .dark .bg-gray-100,
@@ -45,6 +61,20 @@
 }
 
 /* ===== TEXT COLORS - White text on dark backgrounds ===== */
+html.dark .text-black,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark .font-bold,
+html.dark .font-semibold,
+html.dark .font-medium,
 .dark .text-black,
 .dark .text-gray-900,
 .dark .text-gray-800,
@@ -62,6 +92,12 @@
   color: #E9EEF5 !important;
 }
 
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark p,
+html.dark span:not(.text-white):not([class*="text-blue"]),
 .dark .text-gray-700,
 .dark .text-gray-600,
 .dark .text-slate-700,
@@ -71,6 +107,11 @@
   color: #94A3B8 !important;
 }
 
+html.dark .text-gray-500,
+html.dark .text-gray-400,
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-muted-foreground,
 .dark .text-gray-500,
 .dark .text-gray-400,
 .dark .text-slate-500,
@@ -80,11 +121,20 @@
 }
 
 /* Ensure white text stays white */
+html.dark .text-white,
 .dark .text-white {
   color: white !important;
 }
 
 /* ===== BORDERS - Bento Grid style ===== */
+html.dark .border,
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark .border-gray-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark [class*="border-gray"],
+html.dark [class*="border-slate"],
 .dark .border,
 .dark .border-gray-200,
 .dark .border-gray-300,
@@ -97,6 +147,9 @@
 }
 
 /* ===== BLUE ACCENT - Luminous glow effect ===== */
+html.dark .text-blue-600,
+html.dark .text-blue-500,
+html.dark .text-blue-700,
 .dark .text-blue-600,
 .dark .text-blue-500,
 .dark .text-blue-700 {
@@ -104,6 +157,9 @@
   filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.3));
 }
 
+html.dark .bg-blue-600,
+html.dark .bg-blue-500,
+html.dark .bg-blue-700,
 .dark .bg-blue-600,
 .dark .bg-blue-500,
 .dark .bg-blue-700 {
@@ -111,12 +167,18 @@
   box-shadow: 0 0 16px rgba(59, 130, 246, 0.25);
 }
 
+html.dark .bg-blue-50,
+html.dark .bg-blue-100,
 .dark .bg-blue-50,
 .dark .bg-blue-100 {
   background-color: rgba(59, 130, 246, 0.15) !important;
 }
 
 /* ===== HOVER STATES ===== */
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-100:hover,
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover,
 .dark .hover\:bg-gray-50:hover,
 .dark .hover\:bg-gray-100:hover,
 .dark .hover\:bg-slate-50:hover,
@@ -124,6 +186,8 @@
   background-color: #1C2430 !important;
 }
 
+html.dark .hover\:shadow-md:hover,
+html.dark .hover\:shadow-lg:hover,
 .dark .hover\:shadow-md:hover,
 .dark .hover\:shadow-lg:hover {
   box-shadow: none !important;
@@ -131,6 +195,16 @@
 }
 
 /* ===== INPUT FIELDS ===== */
+html.dark input,
+html.dark textarea,
+html.dark select,
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark input[type="tel"],
+html.dark input[type="url"],
+html.dark input[type="search"],
 .dark input,
 .dark textarea,
 .dark select,
@@ -146,12 +220,17 @@
   border: 1px solid #273140 !important;
 }
 
+html.dark input::placeholder,
+html.dark textarea::placeholder,
 .dark input::placeholder,
 .dark textarea::placeholder {
   color: #64748B !important;
   opacity: 1 !important;
 }
 
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus,
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
@@ -160,6 +239,7 @@
   outline: none !important;
 }
 
+html.dark select option,
 .dark select option {
   background-color: #151A21 !important;
   color: #E9EEF5 !important;
@@ -167,16 +247,22 @@
 
 /* ===== SHADCN UI COMPONENTS ===== */
 /* Tabs */
+html.dark [role="tablist"],
+html.dark .TabsList,
 .dark [role="tablist"],
 .dark .TabsList {
   background-color: #151A21 !important;
 }
 
+html.dark [role="tab"],
+html.dark .TabsTrigger,
 .dark [role="tab"],
 .dark .TabsTrigger {
   color: #94A3B8 !important;
 }
 
+html.dark [role="tab"][data-state="active"],
+html.dark .TabsTrigger[data-state="active"],
 .dark [role="tab"][data-state="active"],
 .dark .TabsTrigger[data-state="active"] {
   background-color: #273140 !important;
@@ -184,6 +270,8 @@
 }
 
 /* Badges */
+html.dark .Badge,
+html.dark [class*="badge"],
 .dark .Badge,
 .dark [class*="badge"] {
   background-color: #273140 !important;
@@ -192,10 +280,20 @@
 }
 
 /* Buttons - ghost and outline variants */
+html.dark .btn-ghost,
+html.dark button[class*="ghost"],
+html.dark [class*="variant-ghost"],
 .dark .btn-ghost,
 .dark button[class*="ghost"],
 .dark [class*="variant-ghost"] {
   color: #94A3B8 !important;
+}
+
+/* Fallback: force any remaining light surfaces to dark in html.dark */
+html.dark [class*="bg-white"],
+html.dark [class*="bg-gray-50"],
+html.dark [class*="bg-gray-100"] {
+  background-color: #0B0D10 !important;
 }
 
 .dark .btn-ghost:hover,

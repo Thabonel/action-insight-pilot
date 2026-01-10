@@ -36,7 +36,7 @@ const AdminDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0B0D10]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -44,62 +44,62 @@ const AdminDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0B0D10]">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
-          <p className="text-gray-600">{error}</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-[#E9EEF5] mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600 dark:text-[#94A3B8]">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B0D10] p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Business metrics and system overview</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Admin Dashboard</h1>
+          <p className="text-gray-600 dark:text-[#94A3B8] mt-2">Business metrics and system overview</p>
         </div>
 
         {/* Key Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-[#151A21] rounded-lg shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140] p-6">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">${businessMetrics.totalRevenue.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-[#94A3B8]">Total Revenue</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-[#E9EEF5]">${businessMetrics.totalRevenue.toLocaleString()}</p>
               <p className="text-sm text-green-600">+{businessMetrics.revenueGrowth}% from last month</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-[#151A21] rounded-lg shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140] p-6">
             <div>
-              <p className="text-sm font-medium text-gray-600">Active Users</p>
-              <p className="text-2xl font-bold text-gray-900">{businessMetrics.totalUsers.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-[#94A3B8]">Active Users</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-[#E9EEF5]">{businessMetrics.totalUsers.toLocaleString()}</p>
               <p className="text-sm text-green-600">+{businessMetrics.userGrowth}% from last month</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-[#151A21] rounded-lg shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140] p-6">
             <div>
-              <p className="text-sm font-medium text-gray-600">Emails Sent</p>
-              <p className="text-2xl font-bold text-gray-900">{businessMetrics.emailsSent.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-[#94A3B8]">Emails Sent</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-[#E9EEF5]">{businessMetrics.emailsSent.toLocaleString()}</p>
               <p className="text-sm text-green-600">+{businessMetrics.emailGrowth}% from last month</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-[#151A21] rounded-lg shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140] p-6">
             <div>
-              <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
-              <p className="text-2xl font-bold text-gray-900">{businessMetrics.activeCampaigns}</p>
-              <p className="text-sm text-gray-500">Across all users</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-[#94A3B8]">Active Campaigns</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-[#E9EEF5]">{businessMetrics.activeCampaigns}</p>
+              <p className="text-sm text-gray-500 dark:text-[#64748B]">Across all users</p>
             </div>
           </div>
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Revenue & User Growth</h3>
+          <div className="bg-white dark:bg-[#151A21] rounded-lg shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140] p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-[#E9EEF5] mb-4">Revenue & User Growth</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -113,23 +113,23 @@ const AdminDashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">System Health</h3>
+          <div className="bg-white dark:bg-[#151A21] rounded-lg shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140] p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-[#E9EEF5] mb-4">System Health</h3>
             <div className="space-y-4">
               {systemHealth.map((metric, index) => (
                 <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">{metric.name}</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-[#94A3B8]">{metric.name}</span>
                   <div className="flex items-center space-x-2">
-                    <div className="w-32 bg-gray-200 rounded-full h-2">
-                      <div 
+                    <div className="w-32 bg-gray-200 dark:bg-[#273140] rounded-full h-2">
+                      <div
                         className={`h-2 rounded-full ${
-                          metric.status === 'excellent' ? 'bg-green-600' : 
+                          metric.status === 'excellent' ? 'bg-green-600' :
                           metric.status === 'good' ? 'bg-blue-600' : 'bg-yellow-600'
                         }`}
                         style={{ width: `${metric.value}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{metric.value}%</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-[#E9EEF5]">{metric.value}%</span>
                   </div>
                 </div>
               ))}
@@ -138,20 +138,20 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent System Activity</h3>
+        <div className="bg-white dark:bg-[#151A21] rounded-lg shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140] p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-[#E9EEF5] mb-4">Recent System Activity</h3>
           <div className="space-y-3">
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-900">New user registration spike</p>
-              <p className="text-xs text-gray-500">15 new users in the last hour</p>
+            <div className="p-3 bg-gray-50 dark:bg-[#1C2430] rounded-lg">
+              <p className="text-sm font-medium text-gray-900 dark:text-[#E9EEF5]">New user registration spike</p>
+              <p className="text-xs text-gray-500 dark:text-[#64748B]">15 new users in the last hour</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-900">Email campaign completed</p>
-              <p className="text-xs text-gray-500">Summer Sale campaign reached 25K recipients</p>
+            <div className="p-3 bg-gray-50 dark:bg-[#1C2430] rounded-lg">
+              <p className="text-sm font-medium text-gray-900 dark:text-[#E9EEF5]">Email campaign completed</p>
+              <p className="text-xs text-gray-500 dark:text-[#64748B]">Summer Sale campaign reached 25K recipients</p>
             </div>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-900">Revenue milestone reached</p>
-              <p className="text-xs text-gray-500">Monthly revenue exceeded $125K target</p>
+            <div className="p-3 bg-gray-50 dark:bg-[#1C2430] rounded-lg">
+              <p className="text-sm font-medium text-gray-900 dark:text-[#E9EEF5]">Revenue milestone reached</p>
+              <p className="text-xs text-gray-500 dark:text-[#64748B]">Monthly revenue exceeded $125K target</p>
             </div>
           </div>
         </div>

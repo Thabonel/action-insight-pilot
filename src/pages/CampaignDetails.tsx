@@ -742,7 +742,7 @@ const CampaignDetails: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0B0D10]">
         <div className="flex items-center gap-2">
           <span>Loading campaign details...</span>
         </div>
@@ -765,7 +765,7 @@ const CampaignDetails: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B0D10] p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

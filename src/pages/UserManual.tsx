@@ -6,13 +6,13 @@ import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const UserManual: React.FC = () => {
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 max-w-6xl mx-auto space-y-6 min-h-screen bg-white dark:bg-[#0B0D10]">
       {/* Header */}
       <div className="text-center space-y-4 mb-8">
         <div className="flex items-center justify-center space-x-3">
-          <h1 className="text-4xl font-bold text-gray-900">AI Boost Campaign</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-[#E9EEF5]">AI Boost Campaign</h1>
         </div>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-600 dark:text-[#94A3B8] max-w-3xl mx-auto">
           Complete User Manual - Your comprehensive guide to mastering the AI-powered marketing automation platform
         </p>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">

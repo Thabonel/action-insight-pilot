@@ -202,13 +202,13 @@ const LeadCaptureForms: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B0D10] p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Lead Capture Forms</h1>
-            <p className="text-gray-600">Create embeddable forms to capture leads from your landing pages</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-[#E9EEF5]">Lead Capture Forms</h1>
+            <p className="text-gray-600 dark:text-[#94A3B8]">Create embeddable forms to capture leads from your landing pages</p>
           </div>
 
           <Dialog open={showNewFormDialog} onOpenChange={setShowNewFormDialog}>
@@ -302,7 +302,7 @@ const LeadCaptureForms: React.FC = () => {
           <Card>
             <CardContent className="py-12 text-center">
               <h3 className="text-lg font-semibold mb-2">No forms yet</h3>
-              <p className="text-gray-600 mb-4">Create your first lead capture form to start collecting leads</p>
+              <p className="text-gray-600 dark:text-[#94A3B8] mb-4">Create your first lead capture form to start collecting leads</p>
               <Button onClick={() => setShowNewFormDialog(true)}>
                 Create Your First Form
               </Button>
@@ -332,7 +332,7 @@ const LeadCaptureForms: React.FC = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Submissions:</span>
+                      <span className="text-gray-600 dark:text-[#94A3B8]">Submissions:</span>
                       <span className="font-semibold">{form.submissions_count || 0}</span>
                     </div>
 
@@ -400,7 +400,7 @@ const LeadCaptureForms: React.FC = () => {
                     Copy
                   </Button>
                 </div>
-                <pre className="bg-gray-100 p-4 rounded-lg text-xs overflow-x-auto">
+                <pre className="bg-gray-100 dark:bg-[#1C2430] dark:text-[#E9EEF5] p-4 rounded-lg text-xs overflow-x-auto">
                   {embedCode.embed_code}
                 </pre>
               </div>
@@ -417,7 +417,7 @@ const LeadCaptureForms: React.FC = () => {
                     Copy
                   </Button>
                 </div>
-                <pre className="bg-gray-100 p-4 rounded-lg text-xs overflow-x-auto">
+                <pre className="bg-gray-100 dark:bg-[#1C2430] dark:text-[#E9EEF5] p-4 rounded-lg text-xs overflow-x-auto">
                   {embedCode.iframe_code}
                 </pre>
               </div>
@@ -443,7 +443,7 @@ const LeadCaptureForms: React.FC = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gray-100 p-4 rounded-lg text-sm">
+                <div className="bg-gray-100 dark:bg-[#1C2430] dark:text-[#E9EEF5] p-4 rounded-lg text-sm">
                   {embedCode.direct_url}
                 </div>
               </div>

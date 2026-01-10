@@ -25,7 +25,7 @@ const SystemPreferences: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const { toast } = useToast();
-  const { setTheme } = useTheme();
+  const { theme: currentTheme, setTheme } = useTheme();
 
   useEffect(() => {
     loadPreferences();
@@ -35,7 +35,10 @@ const SystemPreferences: React.FC = () => {
     try {
       setLoading(true);
       const result = await userPreferencesService.getGeneralPreferences();
-      
+
+      // Use current theme from next-themes as the default (preserves user's current selection)
+      const activeTheme = currentTheme === 'system' ? 'auto' : (currentTheme ?? 'dark');
+
       if (result.success && result.data) {
         // Transform the preferences data into our SystemPreference format
         const systemPrefs: SystemPreference[] = [
@@ -53,7 +56,8 @@ const SystemPreferences: React.FC = () => {
             name: 'Theme',
             description: 'Choose your preferred color theme',
             type: 'select',
-            value: result.data.theme ?? 'light',
+            // Use saved theme if exists, otherwise use current active theme (don't default to light)
+            value: result.data.theme ?? activeTheme,
             options: ['light', 'dark', 'auto']
           },
           {
@@ -77,9 +81,10 @@ const SystemPreferences: React.FC = () => {
         ];
         setPreferences(systemPrefs);
 
-        // Apply saved theme on load
-        const savedTheme = result.data.theme ?? 'light';
-        setTheme(savedTheme === 'auto' ? 'system' : savedTheme);
+        // Only apply theme if explicitly saved in database (don't override current theme with default)
+        if (result.data.theme) {
+          setTheme(result.data.theme === 'auto' ? 'system' : result.data.theme);
+        }
       }
     } catch (error) {
       console.error('Error loading preferences:', error);
@@ -248,7 +253,7 @@ const SystemPreferences: React.FC = () => {
                       
                       {pref.type === 'select' && (
                         <Select
-                          value={pref.value}
+                          value={String(pref.value)}
                           onValueChange={(value) => updatePreference(pref.id, value)}
                           disabled={saving === pref.id}
                         >

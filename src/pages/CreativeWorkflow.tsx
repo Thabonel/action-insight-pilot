@@ -9,11 +9,11 @@ const CreativeWorkflow: React.FC = () => {
   const [activeTab, setActiveTab] = useState('briefs');
 
   return (
-    <div className="space-y-8 p-6 bg-white min-h-screen">
+    <div className="space-y-8 p-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-black">Creative Workflow</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-black dark:text-[#E9EEF5]">Creative Workflow</h1>
+        <p className="text-gray-600 dark:text-[#94A3B8] mt-2">
           Build comprehensive creative briefs, manage approval workflows, and track project progress.
         </p>
       </div>
@@ -42,8 +42,8 @@ const CreativeWorkflow: React.FC = () => {
 
         <TabsContent value="analytics" className="mt-6">
           <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Performance Analytics</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-[#E9EEF5] mb-2">Performance Analytics</h3>
+            <p className="text-gray-600 dark:text-[#94A3B8]">
               Creative performance analytics will be available in the next phase.
             </p>
           </div>

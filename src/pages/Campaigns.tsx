@@ -71,13 +71,13 @@ const Campaigns: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B0D10] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Campaigns & Automation</h1>
-            <p className="text-gray-600 mt-1">Manage campaigns and marketing automation</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Campaigns & Automation</h1>
+            <p className="text-gray-600 dark:text-[#94A3B8] mt-1">Manage campaigns and marketing automation</p>
           </div>
         </div>
 
@@ -112,7 +112,7 @@ const Campaigns: React.FC = () => {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white dark:bg-[#151A21] rounded-lg shadow dark:shadow-none dark:border dark:border-[#273140] p-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <Input
@@ -151,10 +151,10 @@ const Campaigns: React.FC = () => {
               <Card>
                 <CardContent className="pt-6 text-center">
                   <div className="py-12">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-[#E9EEF5] mb-2">
                       {campaigns.length === 0 ? 'No campaigns yet' : 'No campaigns match your search'}
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-600 dark:text-[#94A3B8] mb-4">
                       {campaigns.length === 0 
                         ? 'Get started by creating your first campaign'
                         : 'Try adjusting your search or filter criteria'
@@ -184,17 +184,17 @@ const Campaigns: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <p className="text-gray-600 text-sm line-clamp-2">
+                        <p className="text-gray-600 dark:text-[#94A3B8] text-sm line-clamp-2">
                           {campaign.description || 'No description provided'}
                         </p>
-                        
+
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Type</span>
-                          <span className="font-medium">{campaign.type}</span>
+                          <span className="text-gray-500 dark:text-[#64748B]">Type</span>
+                          <span className="font-medium dark:text-[#E9EEF5]">{campaign.type}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500">Created</span>
+                          <span className="text-gray-500 dark:text-[#64748B]">Created</span>
                           <span className="font-medium">
                             {new Date(campaign.created_at).toLocaleDateString()}
                           </span>

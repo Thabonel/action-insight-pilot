@@ -47,7 +47,7 @@ const Social: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       <SocialHeader 
         onCreatePost={handleCreatePost}
         onSchedulePosts={handleSchedulePosts}

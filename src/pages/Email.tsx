@@ -12,10 +12,10 @@ const Email: React.FC = () => {
   const activeCampaignId = "campaign_123";
 
   return (
-    <div className="p-6 space-y-6 bg-white min-h-screen">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-black">Email Automation</h1>
-        <p className="text-gray-600 mt-2">AI-powered email campaigns with real-time analytics and behavioral triggers</p>
+        <h1 className="text-3xl font-bold text-black dark:text-[#E9EEF5]">Email Automation</h1>
+        <p className="text-gray-600 dark:text-[#94A3B8] mt-2">AI-powered email campaigns with real-time analytics and behavioral triggers</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

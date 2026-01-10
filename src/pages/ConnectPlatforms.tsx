@@ -137,12 +137,12 @@ const ConnectPlatforms: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Connect Your Social Media Tools</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Connect Your Social Media Tools</h1>
+          <p className="text-gray-600 dark:text-[#94A3B8] mt-2">
             Integrate with your existing social media management platforms to enhance your workflow
           </p>
         </div>
@@ -162,7 +162,7 @@ const ConnectPlatforms: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Connected Platforms</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Connected Platforms</p>
               <p className="text-2xl font-bold">{connections.filter(c => c.isConnected).length}</p>
             </div>
           </CardContent>
@@ -171,7 +171,7 @@ const ConnectPlatforms: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Social Profiles</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Social Profiles</p>
               <p className="text-2xl font-bold">
                 {connections.reduce((total, conn) => total + conn.profiles.length, 0)}
               </p>
@@ -182,7 +182,7 @@ const ConnectPlatforms: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Posts This Month</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Posts This Month</p>
               <p className="text-2xl font-bold">248</p>
             </div>
           </CardContent>
@@ -191,7 +191,7 @@ const ConnectPlatforms: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Avg Engagement</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Avg Engagement</p>
               <p className="text-2xl font-bold">6.8%</p>
             </div>
           </CardContent>
