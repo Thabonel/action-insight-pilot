@@ -38,7 +38,7 @@ const Layout: React.FC = () => {
   type NavItem = {
     name: string;
     href: string;
-    iconName: NeuralFlowIconName;
+    iconName?: NeuralFlowIconName;
     description: string;
   };
 
@@ -117,7 +117,6 @@ const Layout: React.FC = () => {
     {
       name: 'Viral Video Marketing',
       href: '/app/viral-video-marketing',
-      iconName: 'content',
       description: 'Video content automation'
     },
     {
@@ -129,7 +128,6 @@ const Layout: React.FC = () => {
     {
       name: 'Knowledge',
       href: '/app/knowledge',
-      iconName: 'dashboard',
       description: 'AI knowledge base'
     },
     {
@@ -185,9 +183,11 @@ const Layout: React.FC = () => {
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <div className="mr-3 flex-shrink-0">
-                    <NeuralFlowIcon name={item.iconName} size={24} />
-                  </div>
+                  {item.iconName && (
+                    <div className="mr-3 flex-shrink-0">
+                      <NeuralFlowIcon name={item.iconName} size={24} />
+                    </div>
+                  )}
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="truncate">{item.name}</span>
