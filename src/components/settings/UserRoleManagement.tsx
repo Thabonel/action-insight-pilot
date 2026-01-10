@@ -39,7 +39,8 @@ const UserRoleManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      // Attempt embedded relation first (works when FK is present)
+      const embedded = await supabase
         .from('user_roles')
         .select(`
           id,
@@ -53,16 +54,60 @@ const UserRoleManagement: React.FC = () => {
           )
         `);
 
-      if (error) {
-        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
-          console.log('User roles table not yet configured - this is an enterprise feature');
+      if (!embedded.error) {
+        setUsers(embedded.data || []);
+        return;
+      }
+
+      // If embedding fails (400 / no FK), fall back to two-step fetch
+      if (
+        embedded.error?.code === 'PGRST116' ||
+        embedded.error?.message?.includes('does not exist') ||
+        embedded.error?.message?.toLowerCase().includes('relationship') ||
+        embedded.error?.message?.toLowerCase().includes('foreign key') ||
+        embedded.error?.details ||
+        embedded.status === 400
+      ) {
+        const { data: rolesOnly, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('id,user_id,role,company_id');
+
+        if (rolesError) throw rolesError;
+
+        const userIds = (rolesOnly || []).map(r => r.user_id);
+        if (userIds.length === 0) {
           setUsers([]);
           return;
         }
-        throw error;
+
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id,first_name,last_name,avatar_url')
+          .in('id', userIds);
+
+        if (profilesError) {
+          // Still show roles without profile names rather than failing hard
+          setUsers((rolesOnly || []).map(r => ({ ...r })) as UserRole[]);
+          return;
+        }
+
+        const profileMap = new Map<string, { first_name: string; last_name: string; avatar_url: string | null }>();
+        (profiles || []).forEach(p => profileMap.set(p.id as string, {
+          first_name: (p as any).first_name,
+          last_name: (p as any).last_name,
+          avatar_url: (p as any).avatar_url ?? null
+        }));
+
+        const merged: UserRole[] = (rolesOnly || []).map(r => ({
+          ...r,
+          profiles: profileMap.get(r.user_id)
+        }));
+        setUsers(merged);
+        return;
       }
 
-      setUsers(data || []);
+      // Any other error: bubble up
+      throw embedded.error;
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
