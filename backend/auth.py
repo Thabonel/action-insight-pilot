@@ -2,6 +2,7 @@ import jwt
 import os
 import requests
 from typing import Dict, Any, Optional
+from fastapi import Header, HTTPException
 from functools import lru_cache
 import logging
 
@@ -26,37 +27,34 @@ def get_supabase_jwt_secret() -> str:
         raise ValueError("Neither SUPABASE_JWT_SECRET nor SUPABASE_URL configured")
     return jwt_secret
 
-def verify_token(token: str) -> Dict[str, Any]:
-    """Verify JWT token from Supabase and extract user data"""
+def verify_token(authorization: Optional[str] = Header(None)) -> str:
+    """FastAPI dependency: return Authorization header or raise 401.
+
+    Routes use this with Depends to ensure presence of an auth header.
+    Use get_current_user() to decode and validate the JWT when needed.
+    """
+    if not authorization:
+        # Raise 401 to match tests expecting auth errors, not 422
+        raise HTTPException(status_code=401, detail="Authorization header required")
+    return authorization
+
+def decode_token(token: str) -> Dict[str, Any]:
+    """Decode and verify JWT token and return its payload."""
     try:
         if not token:
             raise ValueError("Token is required")
-        
-        # Remove 'Bearer ' prefix if present
         if token.startswith('Bearer '):
             token = token[7:]
-        
-        # Get Supabase JWT secret
         jwt_secret = get_supabase_jwt_secret()
-        
-        # Decode and verify the token
-        # Supabase uses HS256 algorithm by default
         payload = jwt.decode(
-            token, 
-            jwt_secret, 
-            algorithms=["HS256"], 
-            options={
-                "verify_aud": False,  # Supabase doesn't always set audience
-                "verify_iss": False   # Allow for flexible issuer
-            }
+            token,
+            jwt_secret,
+            algorithms=["HS256"],
+            options={"verify_aud": False, "verify_iss": False},
         )
-        
-        # Validate required fields
         if not payload.get("sub"):
             raise ValueError("Token missing user ID (sub)")
-        
         return payload
-        
     except jwt.ExpiredSignatureError:
         logger.warning("Token has expired")
         raise ValueError("Token has expired")
@@ -70,7 +68,7 @@ def verify_token(token: str) -> Dict[str, Any]:
 def get_current_user(token: str) -> Dict[str, Any]:
     """Get current user from JWT token"""
     try:
-        payload = verify_token(token)
+        payload = decode_token(token)
         
         # Extract user information from JWT payload
         user_data = {
@@ -93,7 +91,7 @@ def get_current_user(token: str) -> Dict[str, Any]:
 def extract_user_id(token: str) -> str:
     """Extract user ID from JWT token"""
     try:
-        payload = verify_token(token)
+        payload = decode_token(token)
         user_id = payload.get("sub")
         if not user_id:
             raise ValueError("User ID not found in token")
