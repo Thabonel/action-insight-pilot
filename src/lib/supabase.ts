@@ -1,9 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = "https://kciuuxoqxfsogjuqflou.supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjaXV1eG9xeGZzb2dqdXFmbG91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg0Mzg4MDMsImV4cCI6MjA2NDAxNDgwM30.xLArvJytF37HKDMnr8O1euf_t_M_iRFy55_D9CI1DC0";
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the single supabase client from integrations to avoid multiple GoTrue instances
+export { supabase } from '@/integrations/supabase/client';
 
 export type AuthUser = {
   id: string;
