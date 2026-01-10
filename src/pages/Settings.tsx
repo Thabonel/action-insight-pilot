@@ -1,19 +1,8 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import {
-  Building2,
-  Users,
-  Settings as SettingsIcon,
-  Download,
-  Zap,
-  Shield,
-  Crown,
-  BookOpen,
-  UserCircle
-} from 'lucide-react';
 import WorkspaceSettings from '@/components/settings/WorkspaceSettings';
 import UserRoleManagement from '@/components/settings/UserRoleManagement';
 import AIBehaviorSettings from '@/components/settings/AIBehaviorSettings';
@@ -35,49 +24,42 @@ const Settings: React.FC = () => {
     {
       id: 'workspace',
       name: 'Workspace',
-      icon: Building2,
       description: 'Company settings and configuration',
       enterprise: false
     },
     {
       id: 'account',
       name: 'Account & Privacy',
-      icon: UserCircle,
       description: 'Account settings and data management',
       enterprise: false
     },
     {
       id: 'users',
       name: 'Users & Roles',
-      icon: Users,
       description: 'Manage team members and permissions',
       enterprise: true
     },
     {
       id: 'ai-behavior',
       name: 'AI Behavior',
-      icon: SettingsIcon,
       description: 'Customize AI responses and workflows',
       enterprise: false
     },
     {
       id: 'integrations',
       name: 'Integrations',
-      icon: Zap,
       description: 'Connect external services and APIs',
       enterprise: false
     },
     {
       id: 'export',
       name: 'Export & Backup',
-      icon: Download,
       description: 'Data portability and backup options',
       enterprise: true
     },
     {
       id: 'admin',
       name: 'Admin Dashboard',
-      icon: Shield,
       description: 'System administration and monitoring',
       enterprise: true,
       adminOnly: true
@@ -111,7 +93,6 @@ const Settings: React.FC = () => {
             onClick={() => setShowOnboarding(true)}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <BookOpen className="h-4 w-4 mr-2" />
             Setup Guide
           </button>
         </div>
@@ -119,57 +100,43 @@ const Settings: React.FC = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-7 lg:w-fit bg-gray-100">
-          {availableSections.map((section) => {
-            const Icon = section.icon;
-            return (
-              <TabsTrigger 
-                key={section.id} 
-                value={section.id}
-                className="flex items-center space-x-2 text-black data-[state=active]:bg-white data-[state=active]:text-black"
-              >
-                <Icon className="h-4 w-4" />
-                <span className="hidden lg:inline">{section.name}</span>
-                {section.enterprise && (
-                  <Crown className="h-3 w-3 text-yellow-500" />
-                )}
-              </TabsTrigger>
-            );
-          })}
+          {availableSections.map((section) => (
+            <TabsTrigger
+              key={section.id}
+              value={section.id}
+              className="flex items-center space-x-2 text-black data-[state=active]:bg-white data-[state=active]:text-black"
+            >
+              <span>{section.name}</span>
+              {section.enterprise && (
+                <Badge variant="outline" className="text-xs ml-1">Pro</Badge>
+              )}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         {/* Settings Sections Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {availableSections.map((section) => {
-            const Icon = section.icon;
-            return (
-              <Card 
-                key={section.id}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md bg-white border-gray-200 ${
-                  activeTab === section.id ? 'ring-2 ring-blue-500' : ''
-                }`}
-                onClick={() => setActiveTab(section.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Icon className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-medium text-black">{section.name}</h3>
-                        {section.enterprise && (
-                          <Badge variant="secondary" className="text-xs">
-                            Enterprise
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{section.description}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {availableSections.map((section) => (
+            <Card
+              key={section.id}
+              className={`cursor-pointer transition-all duration-200 hover:shadow-md bg-white border-gray-200 ${
+                activeTab === section.id ? 'ring-2 ring-blue-500' : ''
+              }`}
+              onClick={() => setActiveTab(section.id)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <h3 className="font-medium text-black">{section.name}</h3>
+                  {section.enterprise && (
+                    <Badge variant="secondary" className="text-xs">
+                      Enterprise
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600 mt-1">{section.description}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Settings Content */}
