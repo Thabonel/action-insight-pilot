@@ -1,6 +1,6 @@
 
 /* Color and Background Overrides */
-/* Updated for 2026 Mood Mode - supports both light and dark themes */
+/* 2026 Mood Mode - Comprehensive Dark Theme Support */
 
 /* ===== LIGHT MODE OVERRIDES ===== */
 /* Override dark backgrounds in LIGHT mode only */
@@ -13,110 +13,134 @@
   color: white !important;
 }
 
-/* Ensure colored backgrounds use blue in light mode */
-:root:not(.dark) .bg-blue-600,
-:root:not(.dark) .bg-purple-600,
-:root:not(.dark) .bg-green-600,
-:root:not(.dark) .bg-indigo-600 {
-  background-color: #2563eb !important;
-  color: white !important;
-}
-
-/* ===== DARK MODE STYLES ===== */
+/* ===== DARK MODE - COMPREHENSIVE OVERRIDES ===== */
 /* 2026 Mood Mode - Charcoal/Slate Theme */
 
-/* Base dark mode backgrounds */
-.dark {
-  background-color: #0B0D10;
+/* Base backgrounds - Override ALL white/light backgrounds */
+.dark,
+.dark body {
+  background-color: #0B0D10 !important;
+  color: #E9EEF5 !important;
 }
 
 .dark .bg-white,
 .dark .bg-gray-50,
-.dark .bg-gray-100 {
-  background-color: #151A21 !important;
-  color: #E9EEF5 !important;
+.dark .bg-gray-100,
+.dark .bg-slate-50,
+.dark .bg-slate-100,
+.dark [class*="bg-white"],
+.dark main,
+.dark .min-h-screen {
+  background-color: #0B0D10 !important;
 }
 
-/* Dark mode card surfaces */
+/* Card/Surface backgrounds */
 .dark .bg-card,
-.dark [class*="bg-card"] {
+.dark [class*="bg-card"],
+.dark .bg-gray-100,
+.dark .rounded-lg.border,
+.dark .shadow-sm,
+.dark .shadow {
   background-color: #151A21 !important;
 }
 
-/* Dark mode text colors */
+/* ===== TEXT COLORS - White text on dark backgrounds ===== */
 .dark .text-black,
 .dark .text-gray-900,
-.dark .text-gray-800 {
+.dark .text-gray-800,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark .font-bold,
+.dark .font-semibold,
+.dark .font-medium {
   color: #E9EEF5 !important;
 }
 
 .dark .text-gray-700,
-.dark .text-gray-600 {
+.dark .text-gray-600,
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark p,
+.dark span:not(.text-white):not([class*="text-blue"]) {
   color: #94A3B8 !important;
 }
 
 .dark .text-gray-500,
-.dark .text-gray-400 {
+.dark .text-gray-400,
+.dark .text-slate-500,
+.dark .text-slate-400,
+.dark .text-muted-foreground {
   color: #64748B !important;
 }
 
-/* Dark mode borders - Bento Grid style */
+/* Ensure white text stays white */
+.dark .text-white {
+  color: white !important;
+}
+
+/* ===== BORDERS - Bento Grid style ===== */
+.dark .border,
 .dark .border-gray-200,
 .dark .border-gray-300,
-.dark .border-gray-100 {
+.dark .border-gray-100,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark [class*="border-gray"],
+.dark [class*="border-slate"] {
   border-color: #273140 !important;
 }
 
-/* Blue icon luminous glow effect in dark mode */
+/* ===== BLUE ACCENT - Luminous glow effect ===== */
 .dark .text-blue-600,
-.dark .text-blue-500 {
+.dark .text-blue-500,
+.dark .text-blue-700 {
   color: #60A5FA !important;
-  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.4));
+  filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.3));
 }
 
 .dark .bg-blue-600,
-.dark .bg-blue-500 {
+.dark .bg-blue-500,
+.dark .bg-blue-700 {
   background-color: #3B82F6 !important;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.25);
 }
 
-/* Dark mode hover states */
+.dark .bg-blue-50,
+.dark .bg-blue-100 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* ===== HOVER STATES ===== */
 .dark .hover\:bg-gray-50:hover,
-.dark .hover\:bg-gray-100:hover {
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover {
   background-color: #1C2430 !important;
 }
 
-.dark .hover\:bg-blue-700:hover {
-  background-color: #2563EB !important;
-  box-shadow: 0 0 24px rgba(59, 130, 246, 0.4);
+.dark .hover\:shadow-md:hover,
+.dark .hover\:shadow-lg:hover {
+  box-shadow: none !important;
+  border-color: #334155 !important;
 }
 
 /* ===== INPUT FIELDS ===== */
-/* Light mode inputs */
-:root:not(.dark) input[type="text"],
-:root:not(.dark) input[type="email"],
-:root:not(.dark) input[type="password"],
-:root:not(.dark) input[type="number"],
-:root:not(.dark) input[type="tel"],
-:root:not(.dark) input[type="url"],
-:root:not(.dark) input[type="search"],
-:root:not(.dark) textarea,
-:root:not(.dark) select {
-  background-color: white !important;
-  color: black !important;
-  border: 1px solid #d1d5db !important;
-}
-
-/* Dark mode inputs */
+.dark input,
+.dark textarea,
+.dark select,
 .dark input[type="text"],
 .dark input[type="email"],
 .dark input[type="password"],
 .dark input[type="number"],
 .dark input[type="tel"],
 .dark input[type="url"],
-.dark input[type="search"],
-.dark textarea,
-.dark select {
+.dark input[type="search"] {
   background-color: #151A21 !important;
   color: #E9EEF5 !important;
   border: 1px solid #273140 !important;
@@ -133,57 +157,140 @@
 .dark select:focus {
   border-color: #3B82F6 !important;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  outline: none !important;
 }
 
-/* Dark mode select options */
 .dark select option {
   background-color: #151A21 !important;
   color: #E9EEF5 !important;
 }
 
-/* ===== SIDEBAR DARK MODE ===== */
+/* ===== SHADCN UI COMPONENTS ===== */
+/* Tabs */
+.dark [role="tablist"],
+.dark .TabsList {
+  background-color: #151A21 !important;
+}
+
+.dark [role="tab"],
+.dark .TabsTrigger {
+  color: #94A3B8 !important;
+}
+
+.dark [role="tab"][data-state="active"],
+.dark .TabsTrigger[data-state="active"] {
+  background-color: #273140 !important;
+  color: #E9EEF5 !important;
+}
+
+/* Badges */
+.dark .Badge,
+.dark [class*="badge"] {
+  background-color: #273140 !important;
+  color: #94A3B8 !important;
+  border-color: #273140 !important;
+}
+
+/* Buttons - ghost and outline variants */
+.dark .btn-ghost,
+.dark button[class*="ghost"],
+.dark [class*="variant-ghost"] {
+  color: #94A3B8 !important;
+}
+
+.dark .btn-ghost:hover,
+.dark button[class*="ghost"]:hover {
+  background-color: #1C2430 !important;
+  color: #E9EEF5 !important;
+}
+
+/* Dialogs and Popovers */
+.dark [role="dialog"],
+.dark [class*="dialog"],
+.dark [class*="popover"],
+.dark [class*="dropdown"] {
+  background-color: #151A21 !important;
+  border-color: #273140 !important;
+}
+
+/* ===== SIDEBAR ===== */
 .dark aside,
-.dark [class*="sidebar"] {
+.dark [class*="sidebar"],
+.dark nav {
   background-color: #0B0D10 !important;
   border-color: #273140 !important;
 }
 
-.dark aside .text-gray-900,
-.dark aside .text-gray-800 {
-  color: #E9EEF5 !important;
-}
-
-.dark aside .text-gray-600,
-.dark aside .text-gray-500 {
-  color: #94A3B8 !important;
-}
-
-/* Active nav item in dark mode */
-.dark .bg-blue-50 {
-  background-color: rgba(59, 130, 246, 0.15) !important;
-}
-
-.dark .text-blue-700 {
-  color: #60A5FA !important;
-}
-
-.dark .border-blue-600 {
-  border-color: #3B82F6 !important;
-}
-
-/* ===== BENTO GRID CARD STYLES ===== */
-/* Apply 1px borders instead of shadows for Bento Grid aesthetic */
+/* ===== CARDS - Bento Grid Style ===== */
 .dark .shadow-sm,
 .dark .shadow,
 .dark .shadow-md,
-.dark .shadow-lg {
+.dark .shadow-lg,
+.dark .shadow-xl {
   box-shadow: none !important;
   border: 1px solid #273140 !important;
 }
 
-/* Card hover effect in dark mode */
-.dark .hover\:shadow-md:hover,
-.dark .hover\:shadow-lg:hover {
-  box-shadow: none !important;
+/* Card hover */
+.dark .Card:hover,
+.dark [class*="card"]:hover {
   border-color: #334155 !important;
+}
+
+/* ===== ALERTS AND NOTIFICATIONS ===== */
+.dark [role="alert"],
+.dark .Alert {
+  background-color: #151A21 !important;
+  border-color: #273140 !important;
+  color: #E9EEF5 !important;
+}
+
+/* ===== TABLES ===== */
+.dark table,
+.dark th,
+.dark td {
+  border-color: #273140 !important;
+}
+
+.dark th {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
+}
+
+.dark tr:hover {
+  background-color: #1C2430 !important;
+}
+
+/* ===== SCROLLBARS ===== */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0B0D10;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #273140;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* ===== LIGHT MODE INPUT OVERRIDES ===== */
+:root:not(.dark) input[type="text"],
+:root:not(.dark) input[type="email"],
+:root:not(.dark) input[type="password"],
+:root:not(.dark) input[type="number"],
+:root:not(.dark) input[type="tel"],
+:root:not(.dark) input[type="url"],
+:root:not(.dark) input[type="search"],
+:root:not(.dark) textarea,
+:root:not(.dark) select {
+  background-color: white !important;
+  color: black !important;
+  border: 1px solid #d1d5db !important;
 }
