@@ -179,9 +179,9 @@ const Layout: React.FC = () => {
           ) : (
             <div className="min-w-0 w-full">
               {/* Title row: logo + name on the same baseline */}
-              <div className="flex items-baseline gap-2">
-                <LogoMarkIcon className="h-[1.35em] w-[1.35em] align-baseline relative top-[2px]" />
-                <h2 className="text-xl font-bold leading-tight text-gray-900 dark:text-[#E9EEF5] whitespace-normal">
+              <div className="flex items-baseline gap-1">
+                <LogoMarkIcon className="h-[1.35em] w-[1.35em] align-baseline relative top-[2px] -mr-0.5" />
+                <h2 className="text-xl font-bold leading-tight tracking-tight -ml-[2px] text-gray-900 dark:text-[#E9EEF5] whitespace-normal">
                   I Boost Campaign
                 </h2>
               </div>
