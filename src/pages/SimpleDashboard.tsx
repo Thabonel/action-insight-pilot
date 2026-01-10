@@ -162,8 +162,8 @@ const SimpleDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Marketing Autopilot</h1>
-          <p className="text-gray-600 mt-1">Your AI is running your marketing 24/7</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Marketing Autopilot</h1>
+          <p className="text-gray-600 dark:text-[#94A3B8] mt-1">Your AI is running your marketing 24/7</p>
         </div>
         <div className="flex gap-3">
           <Link to="/app/settings">
@@ -183,12 +183,12 @@ const SimpleDashboard: React.FC = () => {
 
       {/* Status Banner */}
       {!autopilotConfig.is_active && (
-        <Card className="bg-yellow-50 border-yellow-200">
+        <Card className="bg-yellow-50 dark:bg-[#1C2430] border-yellow-200 dark:border-[#273140]">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div>
-                <p className="font-medium text-yellow-900">Autopilot is paused</p>
-                <p className="text-sm text-yellow-700">
+                <p className="font-medium text-yellow-900 dark:text-[#E9EEF5]">Autopilot is paused</p>
+                <p className="text-sm text-yellow-700 dark:text-[#94A3B8]">
                   Your campaigns are not running. Click "Resume Autopilot" to continue.
                 </p>
               </div>
@@ -198,10 +198,10 @@ const SimpleDashboard: React.FC = () => {
       )}
 
       {/* This Week Stats */}
-      <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+      <Card className="bg-white dark:bg-[#151A21] border border-gray-200 dark:border-[#273140]">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">This Week</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-[#E9EEF5]">This Week</h2>
             <Badge variant="secondary">
               {new Date(stats.week_start).toLocaleDateString()} - Today
             </Badge>
@@ -247,8 +247,8 @@ const SimpleDashboard: React.FC = () => {
           </div>
 
           {stats.this_week_leads === 0 && autopilotConfig.is_active && (
-            <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-              <p className="text-sm text-blue-900">
+            <div className="mt-4 p-3 bg-blue-100 dark:bg-[rgba(59,130,246,0.15)] rounded-lg">
+              <p className="text-sm text-blue-900 dark:text-[#E9EEF5]">
                 Your AI is setting up campaigns and optimizing targeting. Leads should start coming in within 24-48 hours.
               </p>
             </div>
@@ -308,24 +308,24 @@ const SimpleDashboard: React.FC = () => {
 
       {/* No Campaigns Message */}
       {campaigns.length === 0 && autopilotConfig?.is_active && (
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-blue-50 dark:bg-[#1C2430] border-blue-200 dark:border-[#273140]">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div>
-                <h3 className="font-semibold text-blue-900 mb-1">Setting Up Your Campaigns</h3>
-                <p className="text-sm text-blue-800 mb-3">
+                <h3 className="font-semibold text-blue-900 dark:text-[#E9EEF5] mb-1">Setting Up Your Campaigns</h3>
+                <p className="text-sm text-blue-800 dark:text-[#94A3B8] mb-3">
                   The autopilot runs daily at 2 AM UTC. If you just activated it, your first campaigns will be created during the next scheduled run.
                 </p>
-                <p className="text-sm text-blue-800">
+                <p className="text-sm text-blue-800 dark:text-[#94A3B8]">
                   <strong>What happens next:</strong>
                 </p>
-                <ul className="text-sm text-blue-800 mt-2 space-y-1 list-disc list-inside">
+                <ul className="text-sm text-blue-800 dark:text-[#94A3B8] mt-2 space-y-1 list-disc list-inside">
                   <li>AI analyzes your business description</li>
                   <li>Creates campaigns for optimal channels (LinkedIn, Facebook, etc.)</li>
                   <li>Generates 15-question assessments for lead capture</li>
                   <li>Sets up targeting and budget allocation</li>
                 </ul>
-                <p className="text-xs text-blue-700 mt-3">
+                <p className="text-xs text-blue-700 dark:text-[#94A3B8] mt-3">
                   Watch the Activity Feed on the right for real-time updates.
                 </p>
               </div>
@@ -348,12 +348,12 @@ const SimpleDashboard: React.FC = () => {
       </div>
 
       {/* Advanced Mode CTA */}
-      <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+      <Card className="bg-white dark:bg-[#151A21] border border-gray-200 dark:border-[#273140]">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-lg mb-1">Want to see what's happening under the hood?</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="font-semibold text-lg mb-1 dark:text-[#E9EEF5]">Want to see what's happening under the hood?</h3>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">
                 Switch to Advanced Mode to access detailed analytics, campaign controls, and more
               </p>
             </div>
