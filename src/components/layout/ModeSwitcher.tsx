@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sparkles, Settings, Eye, Zap } from 'lucide-react';
+import { Settings, Eye, ToggleLeft } from 'lucide-react';
 import { useUserMode } from '@/hooks/useUserMode';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -43,7 +43,7 @@ const ModeSwitcher: React.FC = () => {
         <Button variant="outline" size="sm" className="gap-2">
           {mode === 'simple' ? (
             <>
-              <Sparkles className="h-4 w-4" />
+              <ToggleLeft className="h-4 w-4" />
               Simple Mode
             </>
           ) : (
@@ -65,7 +65,7 @@ const ModeSwitcher: React.FC = () => {
         >
           <div className="flex items-center justify-between w-full mb-1">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-blue-600" />
+              <ToggleLeft className="h-4 w-4 text-blue-600" />
               <span className="font-medium">Simple Mode</span>
             </div>
             {mode === 'simple' && <Badge className="bg-blue-600">Active</Badge>}
