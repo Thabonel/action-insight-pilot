@@ -187,7 +187,7 @@ const Layout: React.FC = () => {
                 </h2>
               </div>
               <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1 max-w-[18ch]">
-                {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
+                Smart Campaigns
               </p>
             </div>
           )}
