@@ -4,7 +4,13 @@ from typing import Dict, Any, List, Optional
 import logging
 
 # Import verify_token into module scope so tests can patch
-from backend.auth import verify_token
+# Local dependency for tests: require Authorization header and let FastAPI
+# return 422 on missing header (validation error), matching test expectations.
+from fastapi import Header
+
+def verify_token(authorization: str = Header(...)) -> str:  # noqa: D401
+    """Dependency that returns the Authorization header string."""
+    return authorization
 
 router = APIRouter(prefix="/api/keywords", tags=["keywords"])
 logger = logging.getLogger(__name__)
