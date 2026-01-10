@@ -11,9 +11,7 @@ import { PageHelpModal } from '@/components/common/PageHelpModal';
 const CampaignManagement: React.FC = () => {
   const [activeView, setActiveView] = useState<'overview' | 'create' | 'templates' | 'brand-ambassador' | 'blog-creator'>('overview');
 
-  const handleTemplateSelect = (templateId: string) => {
-    console.log('Template selected:', templateId);
-    // Switch to create tab when a template is selected
+  const handleTemplateSelect = (_templateId: string) => {
     setActiveView('create');
   };
 

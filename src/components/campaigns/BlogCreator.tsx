@@ -44,10 +44,8 @@ const BlogCreator: React.FC = () => {
   };
 
   const handlePublish = async (platforms: string[]) => {
-    console.log('Publishing to platforms:', platforms);
-    // Simulate publishing logic
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     setBlogPost(prev => ({ ...prev, status: 'published' }));
     toast({
       title: "Publishing initiated",
@@ -63,9 +61,8 @@ const BlogCreator: React.FC = () => {
     });
   };
 
-  const handlePostSelect = (postId: string) => {
-    console.log('Selected post:', postId);
-    // Load selected post data
+  const handlePostSelect = (_postId: string) => {
+    // Post selection handled by dashboard
   };
 
   // Dashboard action handlers
@@ -81,40 +78,32 @@ const BlogCreator: React.FC = () => {
     });
   };
 
-  const handleContinueDraft = (draftId: string) => {
-    console.log('Continuing draft:', draftId);
+  const handleContinueDraft = (_draftId: string) => {
     setActiveTab('editor');
-    // Load draft data
     toast({
       title: "Draft loaded",
       description: "Continue working on your draft."
     });
   };
 
-  const handleDuplicatePost = (postId: string) => {
-    console.log('Duplicating post:', postId);
+  const handleDuplicatePost = (_postId: string) => {
     setActiveTab('editor');
-    // Load post structure
     toast({
       title: "Post duplicated",
       description: "Created a new post based on your best performer."
     });
   };
 
-  const handleUpdatePost = (postId: string) => {
-    console.log('Updating post:', postId);
+  const handleUpdatePost = (_postId: string) => {
     setActiveTab('editor');
-    // Load post for editing
     toast({
       title: "Post loaded for update",
       description: "Make your improvements and republish."
     });
   };
 
-  const handleCreateSeries = (postId: string) => {
-    console.log('Creating series from post:', postId);
+  const handleCreateSeries = (_postId: string) => {
     setActiveTab('editor');
-    // Initialize series creation
     toast({
       title: "Series creation started",
       description: "Building content series from successful post."

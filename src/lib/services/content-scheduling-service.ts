@@ -20,7 +20,6 @@ export class ContentSchedulingService {
     scheduledFor: Date;
   }): Promise<ApiResponse<ScheduledContent>> {
     try {
-      console.log('Scheduling content:', contentData);
       
       const scheduledContent: ScheduledContent = {
         id: Date.now().toString(),
@@ -47,9 +46,7 @@ export class ContentSchedulingService {
 
   async getScheduledContent(): Promise<ApiResponse<ScheduledContent[]>> {
     try {
-      console.log('Fetching scheduled content');
-      
-      // Mock data - in a real app this would fetch from API
+      // Returns sample data - backend integration pending
       const mockContent: ScheduledContent[] = [
         {
           id: '1',
@@ -77,9 +74,6 @@ export class ContentSchedulingService {
 
   async updateScheduledContent(id: string, updates: Partial<ScheduledContent>): Promise<ApiResponse<ScheduledContent>> {
     try {
-      console.log('Updating scheduled content:', id, updates);
-      
-      // Mock update - in a real app this would update via API
       const updatedContent: ScheduledContent = {
         id,
         title: updates.title || 'Updated Title',
@@ -103,9 +97,8 @@ export class ContentSchedulingService {
     }
   }
 
-  async deleteScheduledContent(id: string): Promise<ApiResponse<void>> {
+  async deleteScheduledContent(_id: string): Promise<ApiResponse<void>> {
     try {
-      console.log('Deleting scheduled content:', id);
       return { success: true };
     } catch (error) {
       console.error('Error deleting scheduled content:', error);

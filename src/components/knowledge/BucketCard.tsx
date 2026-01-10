@@ -65,8 +65,9 @@ export const BucketCard: React.FC<BucketCardProps> = ({
             variant="outline"
             onClick={(e) => {
               e.stopPropagation()
-              // TODO: Implement upload to specific bucket
+              onSelect(bucket.id)
             }}
+            title="Upload to this bucket"
           >
             <Upload className="h-3 w-3" />
           </Button>

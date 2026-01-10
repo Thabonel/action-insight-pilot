@@ -50,8 +50,6 @@ const IntelligentCampaignCreator: React.FC = () => {
 
     setLoading(true);
     try {
-      console.log('Creating campaign with form data:', formData);
-      
       // Calculate timeline dates
       const startDate = new Date();
       const endDate = new Date();
@@ -129,12 +127,8 @@ const IntelligentCampaignCreator: React.FC = () => {
         metrics: {}
       };
       
-      console.log('Sending to API:', campaignData);
-
       const result = await apiClient.createCampaign(campaignData) as ApiResponse<Record<string, unknown>>;
 
-      console.log('API Response:', result);
-      
       if (result.success && result.data) {
         toast({
           title: "Success!",
