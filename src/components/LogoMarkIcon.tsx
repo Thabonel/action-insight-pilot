@@ -10,7 +10,7 @@ type Props = {
 const LogoMarkIcon: React.FC<Props> = ({ className, size = 20, title = 'AI Boost Campaign' }) => {
   return (
     <img
-      src="/brand/mark.png?v=2"
+      src="/brand/mark.png?v=5"
       alt={title}
       width={size}
       height={size}
