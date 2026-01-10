@@ -9,7 +9,14 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      // Bento Grid style: 1px borders, no heavy shadows
+      "rounded-lg border bg-card text-card-foreground",
+      // Light mode: subtle shadow
+      "shadow-sm",
+      // Dark mode: 1px border, no shadow (Bento Grid aesthetic)
+      "dark:shadow-none dark:border-[#273140] dark:bg-[#151A21]",
+      // Hover effect
+      "transition-colors dark:hover:border-[#334155]",
       className
     )}
     {...props}

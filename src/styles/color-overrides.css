@@ -1,200 +1,189 @@
 
 /* Color and Background Overrides */
+/* Updated for 2026 Mood Mode - supports both light and dark themes */
 
-/* Override any dark backgrounds globally to use blue */
-.bg-black,
-.bg-gray-900,
-.bg-gray-800,
-.bg-slate-900,
-.bg-slate-800 {
+/* ===== LIGHT MODE OVERRIDES ===== */
+/* Override dark backgrounds in LIGHT mode only */
+:root:not(.dark) .bg-black,
+:root:not(.dark) .bg-gray-900,
+:root:not(.dark) .bg-gray-800,
+:root:not(.dark) .bg-slate-900,
+:root:not(.dark) .bg-slate-800 {
   background-color: #2563eb !important;
   color: white !important;
 }
 
-/* Ensure all colored backgrounds use blue and have white text */
-.bg-blue-600,
-.bg-blue-500,
-.bg-purple-600,
-.bg-purple-500,
-.bg-green-600,
-.bg-green-500,
-.bg-red-600,
-.bg-red-500,
-.bg-yellow-600,
-.bg-yellow-500,
-.bg-orange-600,
-.bg-orange-500,
-.bg-indigo-600,
-.bg-indigo-500,
-.bg-pink-600,
-.bg-pink-500,
-.bg-gray-600,
-.bg-gray-500,
-.bg-teal-600,
-.bg-teal-500,
-.bg-cyan-600,
-.bg-cyan-500,
-.bg-emerald-600,
-.bg-emerald-500,
-.bg-lime-600,
-.bg-lime-500,
-.bg-amber-600,
-.bg-amber-500,
-.bg-rose-600,
-.bg-rose-500,
-.bg-violet-600,
-.bg-violet-500,
-.bg-fuchsia-600,
-.bg-fuchsia-500,
-.bg-sky-600,
-.bg-sky-500,
-.bg-slate-600,
-.bg-slate-500,
-.bg-stone-600,
-.bg-stone-500,
-.bg-neutral-600,
-.bg-neutral-500,
-.bg-zinc-600,
-.bg-zinc-500 {
+/* Ensure colored backgrounds use blue in light mode */
+:root:not(.dark) .bg-blue-600,
+:root:not(.dark) .bg-purple-600,
+:root:not(.dark) .bg-green-600,
+:root:not(.dark) .bg-indigo-600 {
   background-color: #2563eb !important;
   color: white !important;
 }
 
-/* Ensure gradient backgrounds use blue and have white text */
-.bg-gradient-to-r {
-  background-color: #2563eb !important;
-  color: white !important;
+/* ===== DARK MODE STYLES ===== */
+/* 2026 Mood Mode - Charcoal/Slate Theme */
+
+/* Base dark mode backgrounds */
+.dark {
+  background-color: #0B0D10;
 }
 
-/* Override text-white on light backgrounds only when needed */
-.bg-white .text-white,
-.bg-gray-50 .text-white,
-.bg-gray-100 .text-white {
-  @apply text-black !important;
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
 }
 
-/* Ensure hover states also use blue */
-.hover\:bg-gray-700:hover,
-.hover\:bg-gray-800:hover,
-.hover\:bg-gray-900:hover,
-.hover\:bg-black:hover {
-  background-color: #1d4ed8 !important;
+/* Dark mode card surfaces */
+.dark .bg-card,
+.dark [class*="bg-card"] {
+  background-color: #151A21 !important;
 }
 
-/* Ensure all hover state backgrounds use blue */
-.hover\:bg-purple-600:hover,
-.hover\:bg-green-600:hover,
-.hover\:bg-red-600:hover,
-.hover\:bg-yellow-600:hover,
-.hover\:bg-orange-600:hover,
-.hover\:bg-indigo-600:hover,
-.hover\:bg-pink-600:hover,
-.hover\:bg-gray-600:hover,
-.hover\:bg-teal-600:hover,
-.hover\:bg-cyan-600:hover,
-.hover\:bg-emerald-600:hover,
-.hover\:bg-lime-600:hover,
-.hover\:bg-amber-600:hover,
-.hover\:bg-rose-600:hover,
-.hover\:bg-violet-600:hover,
-.hover\:bg-fuchsia-600:hover,
-.hover\:bg-sky-600:hover,
-.hover\:bg-slate-600:hover,
-.hover\:bg-stone-600:hover,
-.hover\:bg-neutral-600:hover,
-.hover\:bg-zinc-600:hover {
-  background-color: #1d4ed8 !important;
-  color: white !important;
+/* Dark mode text colors */
+.dark .text-black,
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: #E9EEF5 !important;
 }
 
-/* Input Field Specific Overrides */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="tel"],
-input[type="url"],
-input[type="search"],
-textarea,
-select {
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: #94A3B8 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400 {
+  color: #64748B !important;
+}
+
+/* Dark mode borders - Bento Grid style */
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-gray-100 {
+  border-color: #273140 !important;
+}
+
+/* Blue icon luminous glow effect in dark mode */
+.dark .text-blue-600,
+.dark .text-blue-500 {
+  color: #60A5FA !important;
+  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.4));
+}
+
+.dark .bg-blue-600,
+.dark .bg-blue-500 {
+  background-color: #3B82F6 !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Dark mode hover states */
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover {
+  background-color: #1C2430 !important;
+}
+
+.dark .hover\:bg-blue-700:hover {
+  background-color: #2563EB !important;
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.4);
+}
+
+/* ===== INPUT FIELDS ===== */
+/* Light mode inputs */
+:root:not(.dark) input[type="text"],
+:root:not(.dark) input[type="email"],
+:root:not(.dark) input[type="password"],
+:root:not(.dark) input[type="number"],
+:root:not(.dark) input[type="tel"],
+:root:not(.dark) input[type="url"],
+:root:not(.dark) input[type="search"],
+:root:not(.dark) textarea,
+:root:not(.dark) select {
   background-color: white !important;
   color: black !important;
   border: 1px solid #d1d5db !important;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="number"]:focus,
-input[type="tel"]:focus,
-input[type="url"]:focus,
-input[type="search"]:focus,
-textarea:focus,
-select:focus {
-  background-color: white !important;
-  color: black !important;
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+/* Dark mode inputs */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="tel"],
+.dark input[type="url"],
+.dark input[type="search"],
+.dark textarea,
+.dark select {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
+  border: 1px solid #273140 !important;
 }
 
-input[type="text"]::placeholder,
-input[type="email"]::placeholder,
-input[type="password"]::placeholder,
-input[type="number"]::placeholder,
-input[type="tel"]::placeholder,
-input[type="url"]::placeholder,
-input[type="search"]::placeholder,
-textarea::placeholder {
-  color: #6b7280 !important;
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748B !important;
   opacity: 1 !important;
 }
 
-/* Ensure Shadcn UI input components use white backgrounds */
-.bg-background {
-  background-color: white !important;
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
 
-.text-foreground {
-  color: black !important;
+/* Dark mode select options */
+.dark select option {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
 }
 
-/* Override any CSS variables that might cause dark inputs */
-[data-theme="dark"] input,
-[data-theme="dark"] textarea,
-[data-theme="dark"] select,
-.dark input,
-.dark textarea,
-.dark select {
-  background-color: white !important;
-  color: black !important;
-  border-color: #d1d5db !important;
+/* ===== SIDEBAR DARK MODE ===== */
+.dark aside,
+.dark [class*="sidebar"] {
+  background-color: #0B0D10 !important;
+  border-color: #273140 !important;
 }
 
-/* Form field container overrides */
-.form-field input,
-.form-field textarea,
-.form-field select,
-.form-control input,
-.form-control textarea,
-.form-control select {
-  background-color: white !important;
-  color: black !important;
-  border: 1px solid #d1d5db !important;
+.dark aside .text-gray-900,
+.dark aside .text-gray-800 {
+  color: #E9EEF5 !important;
 }
 
-/* Select dropdown specific fixes */
-select option {
-  background-color: white !important;
-  color: black !important;
+.dark aside .text-gray-600,
+.dark aside .text-gray-500 {
+  color: #94A3B8 !important;
 }
 
-/* Disable system dark mode for inputs */
-@media (prefers-color-scheme: dark) {
-  input,
-  textarea,
-  select {
-    background-color: white !important;
-    color: black !important;
-    border-color: #d1d5db !important;
-  }
+/* Active nav item in dark mode */
+.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .text-blue-700 {
+  color: #60A5FA !important;
+}
+
+.dark .border-blue-600 {
+  border-color: #3B82F6 !important;
+}
+
+/* ===== BENTO GRID CARD STYLES ===== */
+/* Apply 1px borders instead of shadows for Bento Grid aesthetic */
+.dark .shadow-sm,
+.dark .shadow,
+.dark .shadow-md,
+.dark .shadow-lg {
+  box-shadow: none !important;
+  border: 1px solid #273140 !important;
+}
+
+/* Card hover effect in dark mode */
+.dark .hover\:shadow-md:hover,
+.dark .hover\:shadow-lg:hover {
+  box-shadow: none !important;
+  border-color: #334155 !important;
 }
