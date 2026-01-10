@@ -5,16 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock, 
-  Target, 
-  Eye,
-  FileText,
-  Shield,
-  Zap
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export interface PublishingWorkflowProps {
@@ -50,14 +40,14 @@ export const PublishingWorkflow: React.FC<PublishingWorkflowProps> = ({
   const { toast } = useToast();
 
   const checklistItems = [
-    { key: 'content_quality', label: 'Content Quality Check', icon: FileText },
-    { key: 'seo_optimization', label: 'SEO Optimization', icon: Target },
-    { key: 'accessibility_compliance', label: 'Accessibility Compliance', icon: Eye },
-    { key: 'legal_compliance', label: 'Legal Compliance', icon: Shield },
-    { key: 'featured_image', label: 'Featured Image Added', icon: Eye },
-    { key: 'internal_links', label: 'Internal Links Added', icon: Target },
-    { key: 'call_to_action', label: 'Call-to-Action Included', icon: Zap },
-    { key: 'social_promotion', label: 'Social Promotion Ready', icon: Target }
+    { key: 'content_quality', label: 'Content Quality Check' },
+    { key: 'seo_optimization', label: 'SEO Optimization' },
+    { key: 'accessibility_compliance', label: 'Accessibility Compliance' },
+    { key: 'legal_compliance', label: 'Legal Compliance' },
+    { key: 'featured_image', label: 'Featured Image Added' },
+    { key: 'internal_links', label: 'Internal Links Added' },
+    { key: 'call_to_action', label: 'Call-to-Action Included' },
+    { key: 'social_promotion', label: 'Social Promotion Ready' }
   ];
 
   const handleChecklistChange = (key: string, checked: boolean) => {
@@ -72,7 +62,6 @@ export const PublishingWorkflow: React.FC<PublishingWorkflowProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
             Content Quality Assessment
           </CardTitle>
         </CardHeader>
@@ -125,23 +114,20 @@ export const PublishingWorkflow: React.FC<PublishingWorkflowProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5" />
             Pre-Publication Checklist
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">
             {checklistItems.map((item) => {
-              const Icon = item.icon;
               return (
                 <div key={item.key} className="flex items-center space-x-3">
                   <Checkbox
                     checked={checklist[item.key as keyof typeof checklist]}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       handleChecklistChange(item.key, checked as boolean)
                     }
                   />
-                  <Icon className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">{item.label}</span>
                 </div>
               );

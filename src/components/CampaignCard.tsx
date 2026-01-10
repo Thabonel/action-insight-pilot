@@ -3,7 +3,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Target, DollarSign } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -62,27 +61,24 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
       
       <CardContent className="space-y-3">
         <div className="flex items-center text-sm text-slate-600">
-          <Target className="h-4 w-4 mr-2" />
           <span className="capitalize">{campaign.type || 'General'}</span>
         </div>
-        
+
         {campaign.description && (
           <p className="text-sm text-slate-600 line-clamp-2">
             {campaign.description}
           </p>
         )}
-        
+
         <div className="flex justify-between items-center text-sm">
           {campaign.budget_allocated && (
             <div className="flex items-center text-slate-600">
-              <DollarSign className="h-4 w-4 mr-1" />
               <span>${campaign.budget_allocated.toLocaleString()}</span>
             </div>
           )}
-          
+
           {campaign.start_date && (
             <div className="flex items-center text-slate-600">
-              <Calendar className="h-4 w-4 mr-1" />
               <span>{new Date(campaign.start_date).toLocaleDateString()}</span>
             </div>
           )}

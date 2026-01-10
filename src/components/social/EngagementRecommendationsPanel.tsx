@@ -5,16 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Sparkles,
-  TrendingUp,
-  Users,
-  Clock,
-  Target,
-  Loader2,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react';
 
 interface Recommendation {
   type: 'mention' | 'hashtag' | 'timing' | 'content' | 'engagement'
@@ -227,11 +217,11 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <AlertCircle className="h-4 w-4 text-red-600" />;
+        return <span className="text-red-600 font-bold">!</span>;
       case 'medium':
-        return <TrendingUp className="h-4 w-4 text-yellow-600" />;
+        return <span className="text-yellow-600 font-bold">~</span>;
       default:
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <span className="text-green-600 font-bold">+</span>;
     }
   };
 
@@ -249,17 +239,17 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'mention':
-        return <Users className="h-4 w-4" />;
+        return <span className="text-blue-600">@</span>;
       case 'hashtag':
-        return <Target className="h-4 w-4" />;
+        return <span className="text-purple-600">#</span>;
       case 'timing':
-        return <Clock className="h-4 w-4" />;
+        return <span className="text-orange-600">T</span>;
       case 'content':
-        return <Sparkles className="h-4 w-4" />;
+        return <span className="text-blue-600">C</span>;
       case 'engagement':
-        return <TrendingUp className="h-4 w-4" />;
+        return <span className="text-green-600">E</span>;
       default:
-        return <Sparkles className="h-4 w-4" />;
+        return <span className="text-blue-600">*</span>;
     }
   };
 
@@ -271,15 +261,13 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-600" />
           AI Recommendations
-          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+          {isLoading && <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span>}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {recommendations.length === 0 && !isLoading && (
           <div className="text-center p-6 text-gray-500">
-            <Sparkles className="h-12 w-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">
               Type more content to get AI-powered engagement recommendations
             </p>
@@ -326,7 +314,6 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
 
                     <div className="flex items-center justify-between">
                       <Badge variant="secondary" className="text-xs">
-                        <TrendingUp className="h-3 w-3 mr-1" />
                         {rec.impact}
                       </Badge>
 
@@ -336,14 +323,12 @@ export const EngagementRecommendationsPanel: React.FC<EngagementRecommendationsP
                           size="sm"
                           onClick={() => markAsApplied(index)}
                         >
-                          <CheckCircle className="h-3 w-3 mr-1" />
                           Mark Applied
                         </Button>
                       )}
 
                       {appliedRecommendations.has(index.toString()) && (
                         <span className="text-sm text-green-600 flex items-center gap-1">
-                          <CheckCircle className="h-4 w-4" />
                           Applied
                         </span>
                       )}

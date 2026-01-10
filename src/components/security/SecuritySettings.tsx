@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Shield, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useSecurityContext } from '@/contexts/SecurityContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,16 +51,12 @@ const SecuritySettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-2">
-        <Shield className="h-6 w-6 text-primary" />
         <h2 className="text-2xl font-bold">Security Settings</h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <span>Authentication Security</span>
-          </CardTitle>
+          <CardTitle>Authentication Security</CardTitle>
           <CardDescription>
             Manage your session and authentication security preferences
           </CardDescription>
@@ -102,21 +97,17 @@ const SecuritySettings: React.FC = () => {
           <div className="space-y-3">
             <Label>Session Management</Label>
             <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleRefreshTokens}
-                className="flex items-center space-x-2"
               >
-                <CheckCircle2 className="h-4 w-4" />
-                <span>Refresh Tokens</span>
+                Refresh Tokens
               </Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={handleRevokeAllSessions}
-                className="flex items-center space-x-2"
               >
-                <AlertTriangle className="h-4 w-4" />
-                <span>Revoke All Sessions</span>
+                Revoke All Sessions
               </Button>
             </div>
           </div>
@@ -125,32 +116,17 @@ const SecuritySettings: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            <span>Security Recommendations</span>
-          </CardTitle>
+          <CardTitle>Security Recommendations</CardTitle>
           <CardDescription>
             Best practices to keep your account secure
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-3 text-sm">
-            <li className="flex items-start space-x-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-              <span>Two-factor authentication is enabled (via Supabase Auth)</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-              <span>API keys are encrypted and stored securely</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-              <span>All database access is protected with Row Level Security</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-              <span>Regular security updates are applied automatically</span>
-            </li>
+          <ul className="space-y-3 text-sm list-disc list-inside">
+            <li>Two-factor authentication is enabled (via Supabase Auth)</li>
+            <li>API keys are encrypted and stored securely</li>
+            <li>All database access is protected with Row Level Security</li>
+            <li>Regular security updates are applied automatically</li>
           </ul>
         </CardContent>
       </Card>

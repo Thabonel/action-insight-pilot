@@ -5,25 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Linkedin, 
-  Twitter, 
-  Facebook, 
-  Instagram, 
-  Target, 
-  Clock, 
-  Hash,
-  Users,
-  TrendingUp,
-  MessageCircle 
-} from 'lucide-react';
 
 const PlatformOptimization: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] = useState('linkedin');
 
   const platformData = {
     linkedin: {
-      icon: Linkedin,
       color: 'blue',
       engagement: 12.3,
       followers: 15200,
@@ -49,7 +36,6 @@ const PlatformOptimization: React.FC = () => {
       ]
     },
     twitter: {
-      icon: Twitter,
       color: 'sky',
       engagement: 8.7,
       followers: 8900,
@@ -75,7 +61,6 @@ const PlatformOptimization: React.FC = () => {
       ]
     },
     facebook: {
-      icon: Facebook,
       color: 'indigo',
       engagement: 6.2,
       followers: 12400,
@@ -101,7 +86,6 @@ const PlatformOptimization: React.FC = () => {
       ]
     },
     instagram: {
-      icon: Instagram,
       color: 'pink',
       engagement: 9.1,
       followers: 22100,
@@ -143,7 +127,6 @@ const PlatformOptimization: React.FC = () => {
   };
 
   const currentPlatform = platformData[selectedPlatform as keyof typeof platformData];
-  const Icon = currentPlatform.icon;
 
   return (
     <div className="space-y-6">
@@ -155,21 +138,17 @@ const PlatformOptimization: React.FC = () => {
         <CardContent>
           <Tabs value={selectedPlatform} onValueChange={setSelectedPlatform}>
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="linkedin" className="flex items-center space-x-2">
-                <Linkedin className="h-4 w-4" />
-                <span>LinkedIn</span>
+              <TabsTrigger value="linkedin">
+                LinkedIn
               </TabsTrigger>
-              <TabsTrigger value="twitter" className="flex items-center space-x-2">
-                <Twitter className="h-4 w-4" />
-                <span>Twitter</span>
+              <TabsTrigger value="twitter">
+                Twitter
               </TabsTrigger>
-              <TabsTrigger value="facebook" className="flex items-center space-x-2">
-                <Facebook className="h-4 w-4" />
-                <span>Facebook</span>
+              <TabsTrigger value="facebook">
+                Facebook
               </TabsTrigger>
-              <TabsTrigger value="instagram" className="flex items-center space-x-2">
-                <Instagram className="h-4 w-4" />
-                <span>Instagram</span>
+              <TabsTrigger value="instagram">
+                Instagram
               </TabsTrigger>
             </TabsList>
 
@@ -178,7 +157,6 @@ const PlatformOptimization: React.FC = () => {
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4 mb-6">
-                    <Icon className={`h-8 w-8 text-${currentPlatform.color}-600`} />
                     <div>
                       <h2 className="text-2xl font-bold capitalize">{selectedPlatform}</h2>
                       <p className="text-gray-600">Optimization recommendations</p>
@@ -187,22 +165,18 @@ const PlatformOptimization: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <TrendingUp className={`h-6 w-6 mx-auto mb-2 text-${currentPlatform.color}-600`} />
                       <p className="text-2xl font-bold">{currentPlatform.engagement}%</p>
                       <p className="text-sm text-gray-600">Engagement Rate</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Users className={`h-6 w-6 mx-auto mb-2 text-${currentPlatform.color}-600`} />
                       <p className="text-2xl font-bold">{currentPlatform.followers.toLocaleString()}</p>
                       <p className="text-sm text-gray-600">Followers</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Clock className={`h-6 w-6 mx-auto mb-2 text-${currentPlatform.color}-600`} />
                       <p className="text-2xl font-bold">{currentPlatform.bestTime}</p>
                       <p className="text-sm text-gray-600">Best Time</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Target className={`h-6 w-6 mx-auto mb-2 text-${currentPlatform.color}-600`} />
                       <p className="text-2xl font-bold">{currentPlatform.bestDay}</p>
                       <p className="text-sm text-gray-600">Best Day</p>
                     </div>
@@ -247,8 +221,7 @@ const PlatformOptimization: React.FC = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {currentPlatform.insights.map((insight, index) => (
-                      <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
-                        <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div key={index} className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-sm text-blue-900">{insight}</p>
                       </div>
                     ))}
@@ -265,7 +238,6 @@ const PlatformOptimization: React.FC = () => {
                   <div className="space-y-4">
                     {currentPlatform.recommendations.map((recommendation, index) => (
                       <div key={index} className="flex items-start space-x-3 p-4 border rounded-lg">
-                        <Target className="h-5 w-5 text-green-600 mt-0.5" />
                         <div className="flex-1">
                           <p className="text-sm text-gray-800">{recommendation}</p>
                         </div>

@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Sparkles, TrendingUp, Zap, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { viralPromptsLibrary, getPromptsByCategory, getPromptsByPlatform } from '@/lib/viral-prompts-library';
 
@@ -88,7 +87,6 @@ What's your experience with ${topic}? Drop it below! 👇`;
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
             Go Viral GPT Generator
           </CardTitle>
           <CardDescription>
@@ -143,23 +141,13 @@ What's your experience with ${topic}? Drop it below! 👇`;
             </Select>
           </div>
 
-          <Button 
-            onClick={handleGenerate} 
+          <Button
+            onClick={handleGenerate}
             disabled={isGenerating || !topic}
             className="w-full"
             size="lg"
           >
-            {isGenerating ? (
-              <>
-                <RotateCcw className="mr-2 h-4 w-4 animate-spin" />
-                Generating Viral Content...
-              </>
-            ) : (
-              <>
-                <Zap className="mr-2 h-4 w-4" />
-                Generate Viral Content
-              </>
-            )}
+            {isGenerating ? 'Generating Viral Content...' : 'Generate Viral Content'}
           </Button>
         </CardContent>
       </Card>
@@ -175,7 +163,6 @@ What's your experience with ${topic}? Drop it below! 👇`;
                   <CardTitle>Generated Viral Content</CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant={viralScore >= 80 ? 'default' : viralScore >= 60 ? 'secondary' : 'outline'}>
-                      <TrendingUp className="mr-1 h-3 w-3" />
                       Viral Score: {viralScore}%
                     </Badge>
                     <Button
@@ -183,7 +170,7 @@ What's your experience with ${topic}? Drop it below! 👇`;
                       size="sm"
                       onClick={() => handleCopy(generatedContent)}
                     >
-                      <Copy className="h-4 w-4" />
+                      Copy
                     </Button>
                   </div>
                 </div>

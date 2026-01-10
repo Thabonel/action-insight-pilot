@@ -15,26 +15,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { Campaign, ApiResponse } from '@/lib/api-client-interface';
-import {
-  TrendingUp,
-  TrendingDown,
-  Users,
-  Target,
-  DollarSign,
-  BarChart3,
-  Mail,
-  MousePointer,
-  Eye,
-  Clock,
-  Calendar,
-  RefreshCw,
-  Download,
-  Share2,
-  AlertTriangle,
-  CheckCircle,
-  Activity,
-  Zap
-} from 'lucide-react';
 
 interface AnalyticsData {
   impressions: number;
@@ -232,17 +212,16 @@ const CampaignDashboard: React.FC = () => {
     }
   };
 
-  const getTrendIcon = (value: number, target: number) => {
-    if (value > target) return <TrendingUp className="h-4 w-4 text-green-500" />;
-    if (value < target * 0.8) return <TrendingDown className="h-4 w-4 text-red-500" />;
-    return <Activity className="h-4 w-4 text-yellow-500" />;
+  const getTrendIndicator = (value: number, target: number) => {
+    if (value > target) return '+';
+    if (value < target * 0.8) return '-';
+    return '~';
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex items-center gap-2">
-          <BarChart3 className="h-8 w-8 animate-pulse" />
           <span>Loading campaign dashboard...</span>
         </div>
       </div>
@@ -253,7 +232,6 @@ const CampaignDashboard: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Campaign Not Found</h3>
           <p className="text-gray-500">Unable to load dashboard for this campaign.</p>
         </div>
@@ -279,11 +257,9 @@ const CampaignDashboard: React.FC = () => {
             <p className="text-gray-600">{campaign.description}</p>
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
               <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
                 <span>Started {campaign.startDate ? new Date(campaign.startDate).toLocaleDateString() : 'N/A'}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
                 <span>Last updated {new Date(campaign.updated_at).toLocaleDateString()}</span>
               </div>
             </div>
@@ -302,12 +278,10 @@ const CampaignDashboard: React.FC = () => {
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={exportData}>
-              <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
             <Button variant="outline" onClick={handleRefresh} disabled={refreshing}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
+              {refreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
           </div>
         </div>
@@ -316,81 +290,60 @@ const CampaignDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Impressions</p>
-                  <p className="text-2xl font-bold">{analytics.impressions.toLocaleString()}</p>
-                  <p className="text-xs text-green-600 flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3" />
-                    +12.5% vs last period
-                  </p>
-                </div>
-                <Eye className="h-8 w-8 text-blue-500" />
+              <div>
+                <p className="text-sm text-gray-600">Impressions</p>
+                <p className="text-2xl font-bold">{analytics.impressions.toLocaleString()}</p>
+                <p className="text-xs text-green-600">+12.5% vs last period</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Clicks</p>
-                  <p className="text-2xl font-bold">{analytics.clicks.toLocaleString()}</p>
-                  <p className="text-xs text-gray-600">CTR: {analytics.ctr}%</p>
-                </div>
-                <MousePointer className="h-8 w-8 text-green-500" />
+              <div>
+                <p className="text-sm text-gray-600">Clicks</p>
+                <p className="text-2xl font-bold">{analytics.clicks.toLocaleString()}</p>
+                <p className="text-xs text-gray-600">CTR: {analytics.ctr}%</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Conversions</p>
-                  <p className="text-2xl font-bold">{analytics.conversions.toLocaleString()}</p>
-                  <p className="text-xs text-gray-600">Rate: {analytics.conversionRate}%</p>
-                </div>
-                <Target className="h-8 w-8 text-purple-500" />
+              <div>
+                <p className="text-sm text-gray-600">Conversions</p>
+                <p className="text-2xl font-bold">{analytics.conversions.toLocaleString()}</p>
+                <p className="text-xs text-gray-600">Rate: {analytics.conversionRate}%</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Revenue</p>
-                  <p className="text-2xl font-bold">${analytics.revenue.toLocaleString()}</p>
-                  <p className="text-xs text-green-600">ROAS: {analytics.roas}x</p>
-                </div>
-                <DollarSign className="h-8 w-8 text-green-500" />
+              <div>
+                <p className="text-sm text-gray-600">Revenue</p>
+                <p className="text-2xl font-bold">${analytics.revenue.toLocaleString()}</p>
+                <p className="text-xs text-green-600">ROAS: {analytics.roas}x</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Cost</p>
-                  <p className="text-2xl font-bold">${analytics.cost.toLocaleString()}</p>
-                  <p className="text-xs text-gray-600">CPC: ${analytics.cpc}</p>
-                </div>
-                <BarChart3 className="h-8 w-8 text-orange-500" />
+              <div>
+                <p className="text-sm text-gray-600">Cost</p>
+                <p className="text-2xl font-bold">${analytics.cost.toLocaleString()}</p>
+                <p className="text-xs text-gray-600">CPC: ${analytics.cpc}</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">ROI</p>
-                  <p className="text-2xl font-bold">{analytics.roi}%</p>
-                  <p className="text-xs text-gray-600">CPA: ${analytics.cpa}</p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-blue-500" />
+              <div>
+                <p className="text-sm text-gray-600">ROI</p>
+                <p className="text-2xl font-bold">{analytics.roi}%</p>
+                <p className="text-xs text-gray-600">CPA: ${analytics.cpa}</p>
               </div>
             </CardContent>
           </Card>
@@ -418,7 +371,6 @@ const CampaignDashboard: React.FC = () => {
                   <div className="space-y-4">
                     <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
                       <div className="text-center">
-                        <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500">Interactive chart showing daily performance trends</p>
                         <p className="text-sm text-gray-400 mt-1">
                           Last 30 days: Impressions, Clicks, Conversions
@@ -511,16 +463,16 @@ const CampaignDashboard: React.FC = () => {
                 <div className="space-y-4">
                   {analytics.recentActivities.map((activity, index) => (
                     <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className={`p-1 rounded-full ${
+                      <div className={`p-2 rounded-full ${
                         activity.impact === 'positive' ? 'bg-green-100' :
                         activity.impact === 'negative' ? 'bg-red-100' : 'bg-blue-100'
                       }`}>
-                        {activity.impact === 'positive' ? 
-                          <CheckCircle className="h-4 w-4 text-green-600" /> :
-                          activity.impact === 'negative' ?
-                          <AlertTriangle className="h-4 w-4 text-red-600" /> :
-                          <Activity className="h-4 w-4 text-blue-600" />
-                        }
+                        <span className={`text-xs font-bold ${
+                          activity.impact === 'positive' ? 'text-green-600' :
+                          activity.impact === 'negative' ? 'text-red-600' : 'text-blue-600'
+                        }`}>
+                          {activity.impact === 'positive' ? '+' : activity.impact === 'negative' ? '!' : 'i'}
+                        </span>
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium">{activity.message}</p>
@@ -691,7 +643,6 @@ const CampaignDashboard: React.FC = () => {
                     <h4 className="font-medium mb-3">Daily Spend Trend</h4>
                     <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center">
                       <div className="text-center">
-                        <BarChart3 className="h-8 w-8 text-gray-400 mx-auto mb-1" />
                         <p className="text-sm text-gray-500">Daily spend visualization</p>
                       </div>
                     </div>
@@ -708,7 +659,6 @@ const CampaignDashboard: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
                     AI Recommendations
                   </CardTitle>
                 </CardHeader>
@@ -747,7 +697,6 @@ const CampaignDashboard: React.FC = () => {
                 <CardContent className="space-y-4">
                   <div className="p-3 bg-green-50 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
                       <h4 className="font-medium text-green-800">Strong Performance</h4>
                     </div>
                     <p className="text-sm text-green-700">
@@ -757,7 +706,6 @@ const CampaignDashboard: React.FC = () => {
 
                   <div className="p-3 bg-yellow-50 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
                       <h4 className="font-medium text-yellow-800">Optimization Opportunity</h4>
                     </div>
                     <p className="text-sm text-yellow-700">
@@ -767,7 +715,6 @@ const CampaignDashboard: React.FC = () => {
 
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <Activity className="h-4 w-4 text-blue-600" />
                       <h4 className="font-medium text-blue-800">Audience Insight</h4>
                     </div>
                     <p className="text-sm text-blue-700">
@@ -777,7 +724,6 @@ const CampaignDashboard: React.FC = () => {
 
                   <div className="p-3 bg-purple-50 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-4 w-4 text-purple-600" />
                       <h4 className="font-medium text-purple-800">ROI Achievement</h4>
                     </div>
                     <p className="text-sm text-purple-700">

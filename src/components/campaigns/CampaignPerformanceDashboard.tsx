@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Target, Calendar, DollarSign } from 'lucide-react';
 
 interface CampaignMetrics {
   conversion_rate?: number;
@@ -203,7 +202,6 @@ const CampaignPerformanceDashboard: React.FC<CampaignPerformanceDashboardProps> 
           ) : (
             <div className="flex items-center justify-center h-64 text-gray-500">
               <div className="text-center">
-                <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No campaigns to compare</p>
               </div>
             </div>
@@ -238,7 +236,6 @@ const CampaignPerformanceDashboard: React.FC<CampaignPerformanceDashboardProps> 
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No performance data available</p>
             </div>
           )}
@@ -284,7 +281,6 @@ const CampaignPerformanceDashboard: React.FC<CampaignPerformanceDashboardProps> 
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No budget data available</p>
             </div>
           )}

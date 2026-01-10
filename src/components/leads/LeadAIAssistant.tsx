@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
-import { Loader2, Bot, Users } from 'lucide-react';
 
 interface LeadInsight {
   id: string;
@@ -107,7 +106,6 @@ const LeadAIAssistant: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Bot className="h-5 w-5" />
             <span>Lead AI Assistant</span>
           </CardTitle>
         </CardHeader>
@@ -124,31 +122,11 @@ const LeadAIAssistant: React.FC = () => {
 
           <div className="flex space-x-2">
             <Button onClick={analyzeLeads} disabled={loading} className="flex-1">
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Bot className="mr-2 h-4 w-4" />
-                  Get AI Insights
-                </>
-              )}
+              {loading ? 'Analyzing...' : 'Get AI Insights'}
             </Button>
 
             <Button onClick={scoreLeads} disabled={loading} variant="outline">
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Scoring...
-                </>
-              ) : (
-                <>
-                  <Users className="mr-2 h-4 w-4" />
-                  Score All Leads
-                </>
-              )}
+              {loading ? 'Scoring...' : 'Score All Leads'}
             </Button>
           </div>
         </CardContent>

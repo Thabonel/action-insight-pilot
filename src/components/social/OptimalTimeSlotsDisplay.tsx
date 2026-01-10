@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock } from 'lucide-react';
 
 interface TimeSlot {
   time: string;
@@ -29,10 +28,7 @@ const OptimalTimeSlotsDisplay: React.FC<OptimalTimeSlotsDisplayProps> = ({ timeS
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Clock className="h-5 w-5" />
-          <span>Optimal Posting Times Today</span>
-        </CardTitle>
+        <CardTitle>Optimal Posting Times Today</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

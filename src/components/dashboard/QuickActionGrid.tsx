@@ -2,16 +2,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  MessageSquare, 
-  BarChart3, 
-  Users, 
-  Zap,
-  PlusCircle,
-  Settings,
-  TrendingUp,
-  Target
-} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RealInsights } from '@/types/insights';
 
@@ -25,7 +15,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
   const getPersonalizedActions = () => {
     const baseActions = [
       {
-        icon: MessageSquare,
+        label: 'AI',
         title: 'Ask AI Assistant',
         description: 'Get instant help with marketing',
         action: () => {
@@ -38,7 +28,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         priority: 1
       },
       {
-        icon: PlusCircle,
+        label: '+',
         title: 'Create Campaign',
         description: 'Start new marketing campaign',
         action: () => navigate('/app/campaign-management'),
@@ -46,7 +36,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         priority: 2
       },
       {
-        icon: Users,
+        label: 'L',
         title: 'View Leads',
         description: 'Manage lead pipeline',
         action: () => navigate('/app/leads'),
@@ -54,7 +44,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         priority: 3
       },
       {
-        icon: BarChart3,
+        label: 'A',
         title: 'Analytics',
         description: 'View performance metrics',
         action: () => navigate('/app/analytics'),
@@ -64,11 +54,11 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
     ];
 
     // Add contextual actions based on insights
-    const contextualActions = [];
+    const contextualActions: typeof baseActions = [];
 
     if (insights?.recentActivities && insights.recentActivities.length > 0) {
       contextualActions.push({
-        icon: TrendingUp,
+        label: 'C',
         title: 'Continue Work',
         description: 'Resume recent activities',
         action: () => navigate('/app/campaign-management'),
@@ -99,7 +89,7 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
               className={`h-40 p-4 ${action.color} hover:text-white text-white border-0 flex flex-col items-center justify-center text-center space-y-2 overflow-hidden`}
               onClick={action.action}
             >
-              <action.icon className="h-6 w-6 flex-shrink-0" />
+              <span className="h-6 w-6 flex-shrink-0 font-bold text-lg">{action.label}</span>
               <div className="flex flex-col items-center space-y-1 w-full">
                 <div className="text-sm font-medium leading-tight text-center whitespace-normal break-words hyphens-auto w-full px-1">
                   {action.title}
@@ -115,7 +105,6 @@ const QuickActionGrid: React.FC<QuickActionGridProps> = ({ insights }) => {
         {!insights && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center space-x-2 text-blue-700">
-              <Zap className="h-4 w-4 flex-shrink-0" />
               <span className="text-sm">Actions will personalize as you use the platform</span>
             </div>
           </div>

@@ -1,13 +1,12 @@
 
 import React from 'react';
-import { MessageSquare } from 'lucide-react';
 
 const AuthenticationPrompt: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh]">
       <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-8 border border-amber-200 max-w-md mx-auto text-center shadow-sm">
         <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-md">
-          <MessageSquare className="h-8 w-8 text-white" />
+          <span className="text-2xl text-white font-bold">?</span>
         </div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h3>
         <p className="text-gray-600 mb-6">

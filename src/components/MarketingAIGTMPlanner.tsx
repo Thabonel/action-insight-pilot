@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, X, Target, TrendingUp, Users, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -182,11 +181,9 @@ export const MarketingAIGTMPlanner = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Target className="h-4 w-4" />
             <span>AI-Powered Strategy</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <TrendingUp className="h-4 w-4" />
             <span>Real-time Research</span>
           </div>
         </div>
@@ -220,7 +217,6 @@ export const MarketingAIGTMPlanner = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
                 Product Information
               </CardTitle>
               <CardDescription>
@@ -284,7 +280,6 @@ export const MarketingAIGTMPlanner = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
                 Market & Launch Details
               </CardTitle>
               <CardDescription>
@@ -327,7 +322,7 @@ export const MarketingAIGTMPlanner = () => {
                     </SelectContent>
                   </Select>
                   <Button type="button" onClick={addMarket} size="icon" variant="outline">
-                    <Plus className="h-4 w-4" />
+                    +
                   </Button>
                 </div>
                 
@@ -335,10 +330,12 @@ export const MarketingAIGTMPlanner = () => {
                   {inputs.primaryMarkets.map(market => (
                     <Badge key={market} variant="secondary" className="gap-2">
                       {market}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
+                      <span
+                        className="ml-1 cursor-pointer"
                         onClick={() => removeMarket(market)}
-                      />
+                      >
+                        x
+                      </span>
                     </Badge>
                   ))}
                 </div>
@@ -351,30 +348,19 @@ export const MarketingAIGTMPlanner = () => {
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
                 <div className="flex items-center justify-center gap-2 text-lg font-semibold">
-                  <TrendingUp className="h-5 w-5" />
                   Ready to Generate Your GTM Strategy?
                 </div>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
                   Our AI will conduct comprehensive market research, analyze competitors, 
                   and create a detailed go-to-market strategy tailored to your product.
                 </p>
-                <Button 
-                  onClick={generateStrategy} 
+                <Button
+                  onClick={generateStrategy}
                   disabled={isGenerating}
                   size="lg"
                   className="gap-2"
                 >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Generating Strategy...
-                    </>
-                  ) : (
-                    <>
-                      <Target className="h-4 w-4" />
-                      Generate GTM Strategy
-                    </>
-                  )}
+                  {isGenerating ? 'Generating Strategy...' : 'Generate GTM Strategy'}
                 </Button>
               </div>
             </CardContent>
@@ -389,7 +375,6 @@ export const MarketingAIGTMPlanner = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
                   GTM Strategy: {strategy.product_name}
                 </CardTitle>
                 <CardDescription>
@@ -397,7 +382,6 @@ export const MarketingAIGTMPlanner = () => {
                 </CardDescription>
               </div>
               <Button onClick={downloadStrategy} variant="outline" className="gap-2">
-                <DollarSign className="h-4 w-4" />
                 Download Strategy
               </Button>
             </div>

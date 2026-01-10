@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageSquare, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -95,16 +94,14 @@ const SupportTicketDialog: React.FC<SupportTicketDialogProps> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button variant={variant} className="gap-2">
-            <MessageSquare className="h-4 w-4" />
+          <Button variant={variant}>
             {triggerText}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-blue-600" />
+          <DialogTitle>
             Report an Issue
           </DialogTitle>
         </DialogHeader>
@@ -161,17 +158,7 @@ const SupportTicketDialog: React.FC<SupportTicketDialogProps> = ({
               disabled={isSubmitting}
               className="flex-1"
             >
-              {isSubmitting ? (
-                <>
-                  <Send className="h-4 w-4 mr-2 animate-pulse" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Submit Ticket
-                </>
-              )}
+              {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
             </Button>
             <Button
               type="button"

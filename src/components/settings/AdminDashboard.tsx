@@ -4,20 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Shield,
-  Users,
-  Activity,
-  DollarSign,
-  AlertTriangle,
-  Server,
-  Database,
-  Zap,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
 import SupportTickets from './SupportTickets';
 import { AIModelManager } from '@/components/admin/AIModelManager';
 
@@ -30,10 +16,10 @@ const AdminDashboard: React.FC = () => {
   });
 
   const systemMetrics = [
-    { label: 'Total Users', value: '2,847', change: '+12%', icon: Users, color: 'blue' },
-    { label: 'Active Workspaces', value: '423', change: '+8%', icon: Shield, color: 'green' },
-    { label: 'Monthly Revenue', value: '$84,230', change: '+15%', icon: DollarSign, color: 'purple' },
-    { label: 'API Requests', value: '1.2M', change: '+22%', icon: Activity, color: 'orange' }
+    { label: 'Total Users', value: '2,847', change: '+12%', color: 'blue' },
+    { label: 'Active Workspaces', value: '423', change: '+8%', color: 'green' },
+    { label: 'Monthly Revenue', value: '$84,230', change: '+15%', color: 'purple' },
+    { label: 'API Requests', value: '1.2M', change: '+22%', color: 'orange' }
   ];
 
   const recentUsers = [
@@ -56,12 +42,12 @@ const AdminDashboard: React.FC = () => {
     { feature: 'API Calls', usage: 78, limit: 100 }
   ];
 
-  const getStatusIcon = (status: string) => {
+  const getStatusText = (status: string) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'degraded': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      case 'down': return <XCircle className="h-4 w-4 text-red-600" />;
-      default: return <Clock className="h-4 w-4 text-gray-600" />;
+      case 'healthy': return 'Healthy';
+      case 'degraded': return 'Degraded';
+      case 'down': return 'Down';
+      default: return 'Unknown';
     }
   };
 
@@ -79,7 +65,6 @@ const AdminDashboard: React.FC = () => {
       {/* System Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {systemMetrics.map(metric => {
-          const Icon = metric.icon;
           return (
             <Card key={metric.label}>
               <CardContent className="p-4">
@@ -88,9 +73,6 @@ const AdminDashboard: React.FC = () => {
                     <p className="text-sm text-gray-600">{metric.label}</p>
                     <p className="text-2xl font-bold">{metric.value}</p>
                     <p className="text-sm text-green-600">{metric.change}</p>
-                  </div>
-                  <div className={`p-3 bg-${metric.color}-100 rounded-lg`}>
-                    <Icon className={`h-6 w-6 text-${metric.color}-600`} />
                   </div>
                 </div>
               </CardContent>
@@ -113,7 +95,6 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Server className="h-5 w-5" />
                 <span>System Status</span>
               </CardTitle>
             </CardHeader>
@@ -122,14 +103,9 @@ const AdminDashboard: React.FC = () => {
                 {Object.entries(systemStatus).map(([service, status]) => (
                   <div key={service} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
-                      {service === 'api' && <Activity className="h-5 w-5" />}
-                      {service === 'database' && <Database className="h-5 w-5" />}
-                      {service === 'ai' && <Zap className="h-5 w-5" />}
-                      {service === 'integrations' && <Shield className="h-5 w-5" />}
                       <span className="font-medium capitalize">{service}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      {getStatusIcon(status)}
                       <Badge variant="outline" className={`text-${getStatusColor(status)}-600 border-${getStatusColor(status)}-300`}>
                         {status}
                       </Badge>
@@ -144,7 +120,6 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5" />
                 <span>Resource Usage</span>
               </CardTitle>
             </CardHeader>
@@ -176,7 +151,6 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5" />
                 <span>System Alerts</span>
               </CardTitle>
             </CardHeader>
@@ -203,7 +177,6 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
                 <span>Recent Workspaces</span>
               </CardTitle>
             </CardHeader>
@@ -254,7 +227,6 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <DollarSign className="h-5 w-5" />
                 <span>Revenue Overview</span>
               </CardTitle>
             </CardHeader>

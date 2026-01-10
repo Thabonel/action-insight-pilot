@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, Clock, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
@@ -81,10 +80,7 @@ const ContentSchedulingDialog: React.FC<ContentSchedulingDialogProps> = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5 text-blue-600" />
-            <span>Schedule Content</span>
-          </DialogTitle>
+          <DialogTitle>Schedule Content</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
@@ -129,17 +125,7 @@ const ContentSchedulingDialog: React.FC<ContentSchedulingDialogProps> = ({
               disabled={isScheduling}
               className="flex-1"
             >
-              {isScheduling ? (
-                <>
-                  <Clock className="h-4 w-4 mr-2 animate-spin" />
-                  Scheduling...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Schedule Content
-                </>
-              )}
+              {isScheduling ? 'Scheduling...' : 'Schedule Content'}
             </Button>
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel

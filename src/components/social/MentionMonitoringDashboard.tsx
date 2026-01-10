@@ -6,17 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Bell,
-  ExternalLink,
-  Check,
-  MessageCircle,
-  ThumbsUp,
-  ThumbsDown,
-  Meh,
-  Loader2,
-  RefreshCw
-} from 'lucide-react';
 
 interface MentionMonitoring {
   id: string;
@@ -158,11 +147,11 @@ export const MentionMonitoringDashboard: React.FC = () => {
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
       case 'positive':
-        return <ThumbsUp className="h-4 w-4 text-green-600" />;
+        return <span className="text-green-600">+</span>;
       case 'negative':
-        return <ThumbsDown className="h-4 w-4 text-red-600" />;
+        return <span className="text-red-600">-</span>;
       default:
-        return <Meh className="h-4 w-4 text-gray-600" />;
+        return <span className="text-gray-600">~</span>;
     }
   };
 
@@ -194,7 +183,7 @@ export const MentionMonitoringDashboard: React.FC = () => {
     return (
       <Card>
         <CardContent className="p-12 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </CardContent>
       </Card>
     );
@@ -205,7 +194,6 @@ export const MentionMonitoringDashboard: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-blue-600" />
             Brand Mentions
             {unreadCount > 0 && (
               <Badge className="bg-red-100 text-red-700">
@@ -219,7 +207,6 @@ export const MentionMonitoringDashboard: React.FC = () => {
             onClick={fetchMentions}
             disabled={isLoading}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
         </div>
@@ -269,7 +256,6 @@ export const MentionMonitoringDashboard: React.FC = () => {
           <TabsContent value={filter} className="space-y-3">
             {mentions.length === 0 ? (
               <div className="text-center p-12 text-gray-500">
-                <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p className="text-lg font-medium">No mentions found</p>
                 <p className="text-sm mt-1">
                   {filter === 'unread'
@@ -321,12 +307,10 @@ export const MentionMonitoringDashboard: React.FC = () => {
                       {/* Engagement Stats */}
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
-                          <ThumbsUp className="h-3 w-3" />
-                          {mention.engagement_stats?.likes || 0}
+                          {mention.engagement_stats?.likes || 0} likes
                         </span>
                         <span className="flex items-center gap-1">
-                          <MessageCircle className="h-3 w-3" />
-                          {mention.engagement_stats?.comments || 0}
+                          {mention.engagement_stats?.comments || 0} comments
                         </span>
                         <span className="text-xs text-gray-500">
                           {new Date(mention.discovered_at).toLocaleDateString()}
@@ -341,7 +325,6 @@ export const MentionMonitoringDashboard: React.FC = () => {
                         size="sm"
                         onClick={() => window.open(mention.post_url, '_blank')}
                       >
-                        <ExternalLink className="h-4 w-4 mr-1" />
                         View
                       </Button>
                       {!mention.is_read && (
@@ -350,7 +333,6 @@ export const MentionMonitoringDashboard: React.FC = () => {
                           size="sm"
                           onClick={() => markAsRead(mention.id)}
                         >
-                          <Check className="h-4 w-4 mr-1" />
                           Mark Read
                         </Button>
                       )}
@@ -360,7 +342,6 @@ export const MentionMonitoringDashboard: React.FC = () => {
                           size="sm"
                           onClick={() => markAsResponded(mention.id)}
                         >
-                          <MessageCircle className="h-4 w-4 mr-1" />
                           Responded
                         </Button>
                       )}

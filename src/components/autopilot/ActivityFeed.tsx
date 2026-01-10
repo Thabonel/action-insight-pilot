@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  Zap,
-  TrendingUp,
-  FileText,
-  Target,
-  DollarSign,
-  Users,
-  Mail,
-  Share2,
-  Clock,
-  Video
-} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -87,25 +75,25 @@ const ActivityFeed: React.FC = () => {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'campaign_created':
-        return <Zap className="h-4 w-4 text-blue-600" />;
+        return <span className="text-blue-600">C</span>;
       case 'budget_adjusted':
-        return <DollarSign className="h-4 w-4 text-green-600" />;
+        return <span className="text-green-600">$</span>;
       case 'ad_copy_generated':
-        return <FileText className="h-4 w-4 text-purple-600" />;
+        return <span className="text-purple-600">A</span>;
       case 'targeting_optimized':
-        return <Target className="h-4 w-4 text-orange-600" />;
+        return <span className="text-orange-600">T</span>;
       case 'performance_improved':
-        return <TrendingUp className="h-4 w-4 text-green-600" />;
+        return <span className="text-green-600">P</span>;
       case 'lead_captured':
-        return <Users className="h-4 w-4 text-indigo-600" />;
+        return <span className="text-indigo-600">L</span>;
       case 'email_sent':
-        return <Mail className="h-4 w-4 text-blue-600" />;
+        return <span className="text-blue-600">E</span>;
       case 'social_post_created':
-        return <Share2 className="h-4 w-4 text-pink-600" />;
+        return <span className="text-pink-600">S</span>;
       case 'video_generation':
-        return <Video className="h-4 w-4 text-purple-600" />;
+        return <span className="text-purple-600">V</span>;
       default:
-        return <Clock className="h-4 w-4 text-gray-600" />;
+        return <span className="text-gray-600">-</span>;
     }
   };
 
@@ -160,14 +148,12 @@ const ActivityFeed: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-blue-600" />
           Autopilot Activity
         </CardTitle>
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            <Clock className="h-12 w-12 mx-auto mb-3 text-gray-300" />
             <p className="font-medium">No activity yet</p>
             <p className="text-sm">Your AI autopilot will start working soon</p>
           </div>

@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Minus, Zap } from 'lucide-react';
 
 const WorkflowPerformance: React.FC = () => {
   const performanceMetrics = [
@@ -57,11 +56,11 @@ const WorkflowPerformance: React.FC = () => {
     }
   ];
 
-  const getTrendIcon = (trend: string) => {
+  const getTrendIndicator = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'down': return <TrendingDown className="h-4 w-4 text-red-600" />;
-      default: return <Minus className="h-4 w-4 text-gray-600" />;
+      case 'up': return <span className="text-green-600 font-bold">+</span>;
+      case 'down': return <span className="text-red-600 font-bold">-</span>;
+      default: return <span className="text-gray-600">=</span>;
     }
   };
 
@@ -85,10 +84,7 @@ const WorkflowPerformance: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Zap className="h-5 w-5 text-orange-600" />
-          <span>Performance Analytics</span>
-        </CardTitle>
+        <CardTitle>Performance Analytics</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Performance Metrics */}
@@ -100,7 +96,7 @@ const WorkflowPerformance: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-sm">{metric.metric}</span>
-                    {getTrendIcon(metric.trend)}
+                    {getTrendIndicator(metric.trend)}
                   </div>
                   <p className="text-xs text-gray-600 mt-1">{metric.description}</p>
                 </div>

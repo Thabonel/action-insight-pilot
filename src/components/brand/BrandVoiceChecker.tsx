@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, Lightbulb, Target } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export interface BrandVoiceCheckerProps {
@@ -40,7 +39,6 @@ export const BrandVoiceChecker: React.FC<BrandVoiceCheckerProps> = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Target className="h-5 w-5" />
           Brand Voice Checker
         </CardTitle>
       </CardHeader>
@@ -75,7 +73,6 @@ export const BrandVoiceChecker: React.FC<BrandVoiceCheckerProps> = ({
           <h4 className="font-medium text-sm">Improvement Suggestions</h4>
           {analysis.suggestions.map((suggestion, index) => (
             <div key={index} className="flex items-start space-x-2 p-2 bg-gray-50 rounded">
-              <Lightbulb className="h-4 w-4 text-yellow-500 mt-0.5" />
               <span className="text-sm">{suggestion}</span>
             </div>
           ))}

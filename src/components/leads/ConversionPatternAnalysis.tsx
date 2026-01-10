@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, MapPin, Building, Clock, Users } from 'lucide-react';
 
 const ConversionPatternAnalysis: React.FC = () => {
   const sourcePerformance = [
@@ -51,7 +50,6 @@ const ConversionPatternAnalysis: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5 text-green-600" />
             <span>Lead Source Performance</span>
           </CardTitle>
         </CardHeader>
@@ -91,7 +89,6 @@ const ConversionPatternAnalysis: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Building className="h-5 w-5 text-blue-600" />
               <span>Industry Distribution</span>
             </CardTitle>
           </CardHeader>
@@ -143,7 +140,6 @@ const ConversionPatternAnalysis: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-purple-600" />
               <span>Company Size Impact</span>
             </CardTitle>
           </CardHeader>
@@ -170,7 +166,6 @@ const ConversionPatternAnalysis: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-orange-600" />
               <span>Optimal Contact Timing</span>
             </CardTitle>
           </CardHeader>
@@ -200,7 +195,6 @@ const ConversionPatternAnalysis: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <MapPin className="h-5 w-5 text-red-600" />
               <span>Geographic Performance</span>
             </CardTitle>
           </CardHeader>

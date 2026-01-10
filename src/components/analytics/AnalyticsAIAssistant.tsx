@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { BarChart, TrendingUp, Target, AlertTriangle, Lightbulb } from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 
 const AnalyticsAIAssistant: React.FC = () => {
@@ -48,8 +47,7 @@ const AnalyticsAIAssistant: React.FC = () => {
       title: "Reallocate Budget to High-ROI Channels",
       description: "Move 25% budget from social to email marketing",
       impact: "+$4,200 projected revenue",
-      effort: "Low",
-      icon: Target
+      effort: "Low"
     },
     {
       id: 2,
@@ -57,8 +55,7 @@ const AnalyticsAIAssistant: React.FC = () => {
       title: "Campaign Fatigue Detection",
       description: "Email open rates declining 2% weekly",
       impact: "Potential 15% revenue loss",
-      effort: "Medium",
-      icon: AlertTriangle
+      effort: "Medium"
     },
     {
       id: 3,
@@ -66,8 +63,7 @@ const AnalyticsAIAssistant: React.FC = () => {
       title: "Content Gap Opportunity",
       description: "High search volume for 'AI automation guides'",
       impact: "+300 potential leads",
-      effort: "High",
-      icon: Lightbulb
+      effort: "High"
     }
   ]);
 
@@ -79,7 +75,7 @@ const AnalyticsAIAssistant: React.FC = () => {
     });
   };
 
-  const handleRecommendationClick = (rec: { id: number; type: string; title: string; description: string; impact: string; effort: string; icon: React.ComponentType<{ className?: string }> }) => {
+  const handleRecommendationClick = (rec: { id: number; type: string; title: string; description: string; impact: string; effort: string }) => {
     behaviorTracker.trackAction('feature_use', 'analytics_recommendation', {
       recommendationType: rec.type,
       recommendationId: rec.id,
@@ -143,7 +139,6 @@ const AnalyticsAIAssistant: React.FC = () => {
           <h4 className="font-medium text-gray-900 mb-3">AI Recommendations</h4>
           <div className="space-y-3">
             {recommendations.map((rec) => {
-              const Icon = rec.icon;
               const getTypeColor = (type: string) => {
                 switch (type) {
                   case 'optimization': return 'text-green-600 bg-green-50';
@@ -161,7 +156,7 @@ const AnalyticsAIAssistant: React.FC = () => {
                 >
                   <div className="flex items-start space-x-3">
                     <div className={`p-2 rounded-lg ${getTypeColor(rec.type)}`}>
-                      <Icon className="h-4 w-4" />
+                      <span className="text-xs font-medium uppercase">{rec.type.charAt(0)}</span>
                     </div>
                     <div className="flex-1">
                       <h5 className="font-medium text-gray-900 text-sm mb-1">{rec.title}</h5>

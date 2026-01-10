@@ -2,7 +2,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -42,13 +41,11 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
           <div className="max-w-md w-full">
             <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="mb-4">
                 Something went wrong. Please try refreshing the page or contact support if the problem persists.
               </AlertDescription>
               <div className="flex space-x-2">
                 <Button onClick={this.handleRetry} size="sm" variant="outline">
-                  <RefreshCw className="h-4 w-4 mr-2" />
                   Try Again
                 </Button>
                 <Button 

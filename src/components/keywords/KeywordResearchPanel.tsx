@@ -11,7 +11,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Progress } from '@/components/ui/progress';
 import { useKeywordResearch } from '@/hooks/useKeywordResearch';
 import { KeywordMetrics } from '@/lib/api/keyword-research-service';
-import { Search, TrendingUp, Users, Globe, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const KeywordResearchPanel: React.FC = () => {
@@ -104,7 +103,6 @@ export const KeywordResearchPanel: React.FC = () => {
       <Card className="mt-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
             {title} ({keywords.length} keywords)
           </CardTitle>
         </CardHeader>
@@ -177,15 +175,12 @@ export const KeywordResearchPanel: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="research" className="flex items-center gap-2">
-            <Search className="h-4 w-4" />
             Keyword Research
           </TabsTrigger>
           <TabsTrigger value="competitor" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
             Competitor Analysis
           </TabsTrigger>
           <TabsTrigger value="trending" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
             Trending Keywords
           </TabsTrigger>
         </TabsList>
@@ -214,7 +209,7 @@ export const KeywordResearchPanel: React.FC = () => {
                           size="icon"
                           onClick={() => removeKeywordField(index)}
                         >
-                          <X className="h-4 w-4" />
+                          x
                         </Button>
                       )}
                     </div>
@@ -226,8 +221,7 @@ export const KeywordResearchPanel: React.FC = () => {
                     onClick={addKeywordField}
                     className="mt-2"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Keyword
+                    + Add Keyword
                   </Button>
                 </div>
               </div>

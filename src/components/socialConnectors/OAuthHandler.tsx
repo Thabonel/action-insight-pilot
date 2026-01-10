@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, ExternalLink, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { SocialPlatform, PlatformConnection, PlatformConfig, OAuthState } from '@/types/socialConnectors';
 
 interface OAuthHandlerProps {
@@ -176,20 +175,17 @@ const OAuthHandler: React.FC<OAuthHandlerProps> = ({
             </div>
 
             <Alert>
-              <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                We only request the minimum permissions needed to enhance your social media workflow. 
+                We only request the minimum permissions needed to enhance your social media workflow.
                 You can revoke access at any time.
               </AlertDescription>
             </Alert>
 
             <div className="flex space-x-3">
               <Button onClick={startOAuthFlow} className="flex-1" disabled={!authUrl}>
-                <ExternalLink className="h-4 w-4 mr-2" />
                 Connect to {platformConfig.name}
               </Button>
               <Button variant="outline" onClick={() => window.history.back()}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             </div>
@@ -199,7 +195,7 @@ const OAuthHandler: React.FC<OAuthHandlerProps> = ({
       case 'authorizing':
         return (
           <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
+            <div className="h-12 w-12 mx-auto text-blue-600 animate-pulse">Loading...</div>
             <h2 className="text-xl font-semibold">Redirecting to {platformConfig.name}...</h2>
             <p className="text-gray-600">Please complete the authorization process in the new window.</p>
           </div>
@@ -208,7 +204,7 @@ const OAuthHandler: React.FC<OAuthHandlerProps> = ({
       case 'processing':
         return (
           <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
+            <div className="h-12 w-12 mx-auto text-blue-600 animate-pulse">Loading...</div>
             <h2 className="text-xl font-semibold">Processing Authorization...</h2>
             <p className="text-gray-600">We're setting up your connection. This may take a moment.</p>
           </div>
@@ -217,7 +213,6 @@ const OAuthHandler: React.FC<OAuthHandlerProps> = ({
       case 'complete':
         return (
           <div className="text-center space-y-4">
-            <CheckCircle className="h-12 w-12 mx-auto text-green-600" />
             <h2 className="text-xl font-semibold text-green-800">Successfully Connected!</h2>
             <p className="text-gray-600">Your {platformConfig.name} account is now connected and ready to use.</p>
           </div>
@@ -233,7 +228,7 @@ const OAuthHandler: React.FC<OAuthHandlerProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <span>OAuth Authorization</span>
-          {isConnecting && <Loader2 className="h-5 w-5 animate-spin" />}
+          {isConnecting && <span className="text-sm text-gray-500 animate-pulse">Connecting...</span>}
         </CardTitle>
       </CardHeader>
       <CardContent>

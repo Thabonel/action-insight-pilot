@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Eye, Download, Search, Filter } from 'lucide-react';
 import { Proposal } from '@/types/proposals';
 
 interface ProposalsListProps {
@@ -27,17 +26,14 @@ const ProposalsList: React.FC<ProposalsListProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+        <div className="flex-1 max-w-sm">
           <Input
             placeholder="Search proposals..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
           />
         </div>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Filter className="h-4 w-4" />
+        <Button variant="outline">
           Filter
         </Button>
       </div>
@@ -63,17 +59,14 @@ const ProposalsList: React.FC<ProposalsListProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
+                  <Button variant="outline" size="sm">
                     View
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => onExport(proposal.id, 'pdf')}
-                    className="flex items-center gap-2"
                   >
-                    <Download className="h-4 w-4" />
                     Export
                   </Button>
                 </div>

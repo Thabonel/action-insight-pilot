@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Search, Sparkles, Target, TrendingUp, Filter } from 'lucide-react';
 
 interface SearchCriteria {
   industry: string;
@@ -113,7 +112,6 @@ const AdaptiveLeadSearch: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5 text-purple-600" />
             <span>AI-Suggested Search Criteria</span>
           </CardTitle>
         </CardHeader>
@@ -129,7 +127,6 @@ const AdaptiveLeadSearch: React.FC = () => {
                   <Badge variant="secondary" className="text-xs">
                     {suggestion.conversionRate} conversion
                   </Badge>
-                  <Target className="h-4 w-4 text-purple-600" />
                 </div>
                 <p className="text-sm font-medium mb-2">{suggestion.criteria}</p>
                 <p className="text-xs text-gray-600">{suggestion.reasoning}</p>
@@ -143,7 +140,6 @@ const AdaptiveLeadSearch: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Search className="h-5 w-5 text-blue-600" />
             <span>Advanced Lead Search</span>
           </CardTitle>
         </CardHeader>
@@ -187,11 +183,9 @@ const AdaptiveLeadSearch: React.FC = () => {
 
           <div className="flex space-x-3">
             <Button onClick={handleSearch} className="flex items-center space-x-2">
-              <Search className="h-4 w-4" />
               <span>Search Leads</span>
             </Button>
             <Button variant="outline" className="flex items-center space-x-2">
-              <Sparkles className="h-4 w-4" />
               <span>Use AI Suggestions</span>
             </Button>
           </div>

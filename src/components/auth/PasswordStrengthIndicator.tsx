@@ -1,7 +1,6 @@
 import React from 'react';
 import { validatePasswordStrength } from '@/lib/validation/input-sanitizer';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, XCircle } from 'lucide-react';
 
 interface PasswordStrengthIndicatorProps {
   password: string;
@@ -63,13 +62,8 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
 
               return (
                 <div key={requirement} className="flex items-center gap-2 text-sm">
-                  {hasRequirement ? (
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-muted-foreground" />
-                  )}
                   <span className={hasRequirement ? 'text-emerald-600' : 'text-muted-foreground'}>
-                    {requirement}
+                    {hasRequirement ? '[OK]' : '[  ]'} {requirement}
                   </span>
                 </div>
               );

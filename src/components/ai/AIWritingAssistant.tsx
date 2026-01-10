@@ -6,18 +6,6 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  X, 
-  Lightbulb, 
-  TrendingUp, 
-  Link, 
-  RefreshCw,
-  Expand,
-  MessageSquare,
-  BarChart3,
-  Eye,
-  Edit3
-} from 'lucide-react';
 
 interface AIWritingAssistantProps {
   content: string;
@@ -85,7 +73,7 @@ const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
       <div className="flex items-center justify-between p-4 border-b">
         <h3 className="font-semibold text-lg">Writing Assistant</h3>
         <Button variant="ghost" size="sm" onClick={onToggle}>
-          <X className="h-4 w-4" />
+          Close
         </Button>
       </div>
 
@@ -95,7 +83,6 @@ const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center">
-                <BarChart3 className="h-4 w-4 mr-2" />
                 Readability Score
               </CardTitle>
             </CardHeader>
@@ -120,7 +107,6 @@ const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center">
-                <Eye className="h-4 w-4 mr-2" />
                 Content Structure
               </CardTitle>
             </CardHeader>
@@ -143,7 +129,6 @@ const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center">
-                <Lightbulb className="h-4 w-4 mr-2" />
                 Suggestions
               </CardTitle>
             </CardHeader>
@@ -167,37 +152,33 @@ const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center">
-                <Edit3 className="h-4 w-4 mr-2" />
                 Enhance Content
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full justify-start text-xs"
                   onClick={() => handleExpandSection('current')}
                 >
-                  <Expand className="h-3 w-3 mr-2" />
                   Expand This Section
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full justify-start text-xs"
                   onClick={() => handleRephrase('professional')}
                 >
-                  <MessageSquare className="h-3 w-3 mr-2" />
                   Rephrase (Professional)
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full justify-start text-xs"
                   onClick={() => handleRephrase('friendly')}
                 >
-                  <MessageSquare className="h-3 w-3 mr-2" />
                   Rephrase (Friendly)
                 </Button>
               </div>
@@ -208,34 +189,30 @@ const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center">
-                <TrendingUp className="h-4 w-4 mr-2" />
                 Research
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full justify-start text-xs"
                 >
-                  <RefreshCw className="h-3 w-3 mr-2" />
                   Research Similar Articles
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full justify-start text-xs"
                 >
-                  <TrendingUp className="h-3 w-3 mr-2" />
                   Find Trending Topics
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full justify-start text-xs"
                 >
-                  <Link className="h-3 w-3 mr-2" />
                   Suggest Links
                 </Button>
               </div>

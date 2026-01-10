@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -109,7 +108,6 @@ const CampaignForm: React.FC<CampaignFormProps> = ({
               disabled={loading || !newCampaign.name.trim()}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {loading ? 'Creating Campaign...' : 'Create Campaign'}
             </Button>
             <Button

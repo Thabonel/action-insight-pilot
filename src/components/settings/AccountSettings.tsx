@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Trash2, Download, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -109,9 +108,8 @@ const AccountSettings: React.FC = () => {
     <div className="space-y-6">
       <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-black flex items-center space-x-2">
-            <Shield className="h-5 w-5" />
-            <span>Account Information</span>
+          <CardTitle className="text-black">
+            Account Information
           </CardTitle>
           <CardDescription>
             Your account details and privacy settings
@@ -131,9 +129,8 @@ const AccountSettings: React.FC = () => {
 
       <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-black flex items-center space-x-2">
-            <Download className="h-5 w-5" />
-            <span>Data Export</span>
+          <CardTitle className="text-black">
+            Data Export
           </CardTitle>
           <CardDescription>
             Download all your data in JSON format (GDPR compliance)
@@ -146,7 +143,6 @@ const AccountSettings: React.FC = () => {
             variant="outline"
             className="w-full sm:w-auto"
           >
-            <Download className="h-4 w-4 mr-2" />
             {isExporting ? 'Exporting...' : 'Export My Data'}
           </Button>
         </CardContent>
@@ -154,9 +150,8 @@ const AccountSettings: React.FC = () => {
 
       <Card className="bg-red-50 border-red-200">
         <CardHeader>
-          <CardTitle className="text-red-900 flex items-center space-x-2">
-            <AlertTriangle className="h-5 w-5" />
-            <span>Danger Zone</span>
+          <CardTitle className="text-red-900">
+            Danger Zone
           </CardTitle>
           <CardDescription className="text-red-700">
             Irreversible actions that will permanently delete your account
@@ -176,7 +171,6 @@ const AccountSettings: React.FC = () => {
                   className="w-full sm:w-auto"
                   disabled={isDeleting}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
                   {isDeleting ? 'Deleting...' : 'Delete Account'}
                 </Button>
               </AlertDialogTrigger>

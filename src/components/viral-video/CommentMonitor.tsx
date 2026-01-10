@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Mail, Clock, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Comment {
@@ -72,20 +71,20 @@ const CommentMonitor: React.FC = () => {
     toast.success('Email collected and added to segment');
   };
 
-  const getStatusIcon = (status: Comment['status']) => {
+  const getStatusIndicator = (status: Comment['status']) => {
     switch (status) {
       case 'detected':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
+        return <span className="text-yellow-500 font-bold">*</span>;
       case 'responded':
-        return <MessageCircle className="h-4 w-4 text-blue-500" />;
+        return <span className="text-blue-500 font-bold">R</span>;
       case 'email_requested':
-        return <Mail className="h-4 w-4 text-orange-500" />;
+        return <span className="text-orange-500 font-bold">E</span>;
       case 'email_collected':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <span className="text-green-500 font-bold">+</span>;
       case 'failed':
-        return <Clock className="h-4 w-4 text-red-500" />;
+        return <span className="text-red-500 font-bold">!</span>;
       default:
-        return <Clock className="h-4 w-4" />;
+        return <span>-</span>;
     }
   };
 
@@ -125,10 +124,7 @@ const CommentMonitor: React.FC = () => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              Live Comment Monitor
-            </CardTitle>
+            <CardTitle>Live Comment Monitor</CardTitle>
             <CardDescription>
               Real-time keyword detection and automated responses
             </CardDescription>
@@ -176,7 +172,7 @@ const CommentMonitor: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-1 mb-1">
-                      {getStatusIcon(comment.status)}
+                      {getStatusIndicator(comment.status)}
                       <Badge variant={getStatusColor(comment.status)} className="text-xs">
                         {comment.status.replace('_', ' ')}
                       </Badge>

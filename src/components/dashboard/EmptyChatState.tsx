@@ -1,12 +1,11 @@
 
 import React from 'react';
-import { MessageSquare } from 'lucide-react';
 
 const EmptyChatState: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-full p-6 mb-6">
-        <MessageSquare className="h-12 w-12 text-blue-600" />
+      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-full p-6 mb-6 w-24 h-24 flex items-center justify-center">
+        <span className="text-3xl text-blue-600 font-bold">AI</span>
       </div>
       <h3 className="text-xl font-semibold text-gray-900 mb-3">
         Start a conversation with your AI assistant

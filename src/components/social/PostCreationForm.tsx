@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Send, Zap, Calendar, Loader2 } from 'lucide-react';
 import { MentionInput } from './MentionInput';
 
 interface Platform {
@@ -52,7 +51,6 @@ const PostCreationForm: React.FC<PostCreationFormProps> = ({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Send className="h-5 w-5" />
           <span>Create Intelligent Post</span>
         </CardTitle>
       </CardHeader>
@@ -91,39 +89,19 @@ const PostCreationForm: React.FC<PostCreationFormProps> = ({
         </div>
 
         <div className="flex space-x-3">
-          <Button 
+          <Button
             className="flex-1"
             onClick={onPostNow}
             disabled={isPosting || isScheduling}
           >
-            {isPosting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Posting...
-              </>
-            ) : (
-              <>
-                <Zap className="h-4 w-4 mr-2" />
-                Post Now (Optimal Time)
-              </>
-            )}
+            {isPosting ? 'Posting...' : 'Post Now (Optimal Time)'}
           </Button>
-          <Button 
+          <Button
             variant="outline"
             onClick={onScheduleForLater}
             disabled={isPosting || isScheduling}
           >
-            {isScheduling ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Scheduling...
-              </>
-            ) : (
-              <>
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule for Later
-              </>
-            )}
+            {isScheduling ? 'Scheduling...' : 'Schedule for Later'}
           </Button>
         </div>
       </CardContent>

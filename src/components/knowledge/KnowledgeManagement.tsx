@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react'
-import { Plus, Upload, Search, BookOpen, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -42,15 +41,12 @@ const KnowledgeManagement: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setShowSearch(true)} variant="outline">
-            <Search className="h-4 w-4 mr-2" />
             Search Knowledge
           </Button>
           <Button onClick={() => setShowUploadDialog(true)} variant="outline">
-            <Upload className="h-4 w-4 mr-2" />
             Upload Document
           </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
             New Bucket
           </Button>
         </div>
@@ -60,7 +56,6 @@ const KnowledgeManagement: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Buckets</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{buckets.length}</div>
@@ -69,7 +64,6 @@ const KnowledgeManagement: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Campaign Buckets</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{campaignBuckets.length}</div>
@@ -78,7 +72,6 @@ const KnowledgeManagement: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">General Buckets</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{generalBuckets.length}</div>
@@ -87,7 +80,6 @@ const KnowledgeManagement: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
-            <Upload className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -114,13 +106,11 @@ const KnowledgeManagement: React.FC = () => {
             <CardContent>
               {campaignBuckets.length === 0 ? (
                 <div className="text-center py-8">
-                  <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">No campaign buckets yet</h3>
                   <p className="text-muted-foreground mb-4">
                     Create campaign-specific knowledge buckets to help AI agents understand your campaigns better
                   </p>
                   <Button onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
                     Create Campaign Bucket
                   </Button>
                 </div>
@@ -151,13 +141,11 @@ const KnowledgeManagement: React.FC = () => {
             <CardContent>
               {generalBuckets.length === 0 ? (
                 <div className="text-center py-8">
-                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">No general buckets yet</h3>
                   <p className="text-muted-foreground mb-4">
                     Create general knowledge buckets for marketing industry insights and best practices
                   </p>
                   <Button onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
                     Create General Bucket
                   </Button>
                 </div>

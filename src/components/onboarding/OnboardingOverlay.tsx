@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useOnboarding } from '../../contexts/OnboardingContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, ArrowLeft, ArrowRight, HelpCircle } from 'lucide-react';
 
 export const OnboardingOverlay: React.FC = () => {
   const { isActive, currentStep, steps, nextStep, prevStep, skipOnboarding, completeOnboarding } = useOnboarding();
@@ -112,17 +111,16 @@ export const OnboardingOverlay: React.FC = () => {
       >
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <HelpCircle className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">
               {currentStepData.title}
             </CardTitle>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={skipOnboarding}
               className="h-6 w-6 p-0"
             >
-              <X className="h-4 w-4" />
+              X
             </Button>
           </div>
           <div className="text-sm text-muted-foreground">
@@ -141,9 +139,7 @@ export const OnboardingOverlay: React.FC = () => {
               size="sm"
               onClick={prevStep}
               disabled={isFirstStep}
-              className="flex items-center gap-1"
             >
-              <ArrowLeft className="h-3 w-3" />
               Previous
             </Button>
             
@@ -161,10 +157,8 @@ export const OnboardingOverlay: React.FC = () => {
             <Button
               size="sm"
               onClick={isLastStep ? completeOnboarding : nextStep}
-              className="flex items-center gap-1"
             >
               {isLastStep ? 'Finish' : 'Next'}
-              {!isLastStep && <ArrowRight className="h-3 w-3" />}
             </Button>
           </div>
           

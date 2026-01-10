@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Search, BookOpen, Target } from 'lucide-react'
 import { useKnowledgeSearch } from '@/hooks/useKnowledge'
 import { KnowledgeBucket } from '@/lib/services/knowledge-service'
 
@@ -112,7 +111,6 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
           </div>
 
           <Button type="submit" disabled={isSearching || !query.trim()} className="w-full">
-            <Search className="h-4 w-4 mr-2" />
             {isSearching ? 'Searching...' : 'Search'}
           </Button>
         </form>
@@ -125,12 +123,7 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
                 <Card key={`${result.chunk_id}-${index}`} className="text-sm">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        {result.bucket_name === 'campaign' ? (
-                          <Target className="h-4 w-4" />
-                        ) : (
-                          <BookOpen className="h-4 w-4" />
-                        )}
+                      <CardTitle className="text-base">
                         {result.document_title}
                       </CardTitle>
                       <Badge variant="outline">
@@ -154,7 +147,6 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
 
         {searchResults.length === 0 && query && !isSearching && (
           <div className="text-center py-8">
-            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No results found</h3>
             <p className="text-muted-foreground">
               Try adjusting your search query or check different bucket types

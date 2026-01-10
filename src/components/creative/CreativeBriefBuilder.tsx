@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { PlusCircle, Target, Users, MessageSquare, Calendar, Zap } from 'lucide-react';
 
 interface ModuleContent {
   primary?: string;
@@ -75,15 +74,6 @@ const CreativeBriefBuilder: React.FC = () => {
 
   const [selectedModule, setSelectedModule] = useState<string>('obj_1');
 
-  const moduleIcons = {
-    objective: Target,
-    audience: Users,
-    messaging: MessageSquare,
-    creative: PlusCircle,
-    timeline: Calendar,
-    kpis: Zap
-  };
-
   const updateModuleContent = (moduleId: string, field: string, value: string | string[]) => {
     setBrief(prev => ({
       ...prev,
@@ -137,27 +127,22 @@ const CreativeBriefBuilder: React.FC = () => {
       <div className="lg:col-span-1">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Target className="h-5 w-5 text-blue-600" />
-              <span>Brief Modules</span>
-            </CardTitle>
+            <CardTitle>Brief Modules</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {brief.modules.map(module => {
-              const Icon = moduleIcons[module.type];
               return (
                 <div
                   key={module.id}
                   onClick={() => setSelectedModule(module.id)}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedModule === module.id 
-                      ? 'border-blue-500 bg-blue-50' 
+                    selectedModule === module.id
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Icon className="h-4 w-4" />
                       <span className="text-sm font-medium">{module.title}</span>
                     </div>
                     {module.isComplete && (
@@ -169,9 +154,8 @@ const CreativeBriefBuilder: React.FC = () => {
                 </div>
               );
             })}
-            
+
             <Button variant="outline" className="w-full" onClick={() => addModule('creative')}>
-              <PlusCircle className="h-4 w-4 mr-2" />
               Add Module
             </Button>
           </CardContent>
@@ -284,7 +268,6 @@ const CreativeBriefBuilder: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">Creative Direction</h4>
                   <Button onClick={generateAIScript} className="bg-purple-600 hover:bg-purple-700">
-                    <Zap className="h-4 w-4 mr-2" />
                     Generate AI Script
                   </Button>
                 </div>

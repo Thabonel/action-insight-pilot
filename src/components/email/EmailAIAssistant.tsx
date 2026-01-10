@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Bot, Clock, Target, TrendingUp, Mail, Zap, LucideIcon } from 'lucide-react';
 
 interface EmailInsights {
   optimalSendTime: string;
@@ -20,7 +19,6 @@ interface EmailSuggestion {
   type: 'timing' | 'subject' | 'content';
   message: string;
   confidence: number;
-  icon: LucideIcon;
   action: string;
 }
 
@@ -45,7 +43,6 @@ const EmailAIAssistant: React.FC = () => {
       type: 'timing',
       message: "Your audience opens emails 45% more at 10:30 AM on Tuesdays",
       confidence: 94,
-      icon: Clock,
       action: "Optimize send times"
     },
     {
@@ -53,7 +50,6 @@ const EmailAIAssistant: React.FC = () => {
       type: 'subject',
       message: "Subject lines with numbers get 28% higher open rates",
       confidence: 87,
-      icon: Target,
       action: "Generate subjects"
     },
     {
@@ -61,7 +57,6 @@ const EmailAIAssistant: React.FC = () => {
       type: 'content',
       message: "Educational content drives 3x more conversions",
       confidence: 92,
-      icon: TrendingUp,
       action: "Create educational email"
     }
   ]);
@@ -91,10 +86,7 @@ const EmailAIAssistant: React.FC = () => {
   return (
     <Card className="h-fit">
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Bot className="h-5 w-5 text-blue-600" />
-          <span>Email AI Assistant</span>
-        </CardTitle>
+        <CardTitle>Email AI Assistant</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Performance Insights */}
@@ -121,7 +113,6 @@ const EmailAIAssistant: React.FC = () => {
           <h4 className="font-medium text-gray-900 mb-3">Smart Recommendations</h4>
           <div className="space-y-3">
             {suggestions.map((suggestion) => {
-              const Icon = suggestion.icon;
               return (
                 <div
                   key={suggestion.id}
@@ -129,7 +120,6 @@ const EmailAIAssistant: React.FC = () => {
                   className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-start space-x-3">
-                    <Icon className="h-4 w-4 text-gray-600 mt-1" />
                     <div className="flex-1">
                       <p className="text-sm text-gray-800">{suggestion.message}</p>
                       <div className="flex items-center justify-between mt-2">

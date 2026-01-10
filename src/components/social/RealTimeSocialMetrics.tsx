@@ -4,16 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useSocialRealTimeMetrics } from '@/hooks/useSocialRealTimeMetrics';
-import { 
-  Heart, 
-  MessageCircle, 
-  Share, 
-  Eye, 
-  TrendingUp, 
-  Wifi, 
-  WifiOff,
-  RefreshCw
-} from 'lucide-react';
 
 interface RealTimeSocialMetricsProps {
   postIds: string[];
@@ -58,7 +48,6 @@ const RealTimeSocialMetrics: React.FC<RealTimeSocialMetricsProps> = ({
       <Card className="border-red-200 bg-red-50">
         <CardContent className="p-6">
           <div className="flex items-center space-x-2 text-red-700">
-            <WifiOff className="h-5 w-5" />
             <span>Real-time metrics unavailable: {error}</span>
           </div>
         </CardContent>
@@ -72,25 +61,18 @@ const RealTimeSocialMetrics: React.FC<RealTimeSocialMetricsProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {isConnected ? (
-            <>
-              <Wifi className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-green-600">Live Metrics Connected</span>
-            </>
+            <span className="text-sm text-green-600">Live Metrics Connected</span>
           ) : (
-            <>
-              <WifiOff className="h-4 w-4 text-gray-400" />
-              <span className="text-sm text-gray-400">Connecting...</span>
-            </>
+            <span className="text-sm text-gray-400">Connecting...</span>
           )}
         </div>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={refreshMetrics}
           disabled={!isConnected}
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
       </div>
@@ -99,53 +81,45 @@ const RealTimeSocialMetrics: React.FC<RealTimeSocialMetricsProps> = ({
       {showAggregated && getAllMetrics().length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
-              <span>Total Performance</span>
-            </CardTitle>
+            <CardTitle>Total Performance</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-1 text-pink-600 mb-1">
-                  <Heart className="h-4 w-4" />
                   <span className="text-sm font-medium">Likes</span>
                 </div>
                 <p className="text-2xl font-bold">{formatNumber(aggregatedMetrics.likes)}</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-1 text-blue-600 mb-1">
-                  <MessageCircle className="h-4 w-4" />
                   <span className="text-sm font-medium">Comments</span>
                 </div>
                 <p className="text-2xl font-bold">{formatNumber(aggregatedMetrics.comments)}</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-1 text-green-600 mb-1">
-                  <Share className="h-4 w-4" />
                   <span className="text-sm font-medium">Shares</span>
                 </div>
                 <p className="text-2xl font-bold">{formatNumber(aggregatedMetrics.shares)}</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-1 text-purple-600 mb-1">
-                  <Eye className="h-4 w-4" />
                   <span className="text-sm font-medium">Views</span>
                 </div>
                 <p className="text-2xl font-bold">{formatNumber(aggregatedMetrics.views)}</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-1 text-orange-600 mb-1">
-                  <TrendingUp className="h-4 w-4" />
                   <span className="text-sm font-medium">Reach</span>
                 </div>
                 <p className="text-2xl font-bold">{formatNumber(aggregatedMetrics.reach)}</p>
               </div>
-              
+
               <div className="text-center">
                 <div className="flex items-center justify-center space-x-1 mb-1">
                   <span className="text-sm font-medium">Engagement</span>
@@ -191,22 +165,22 @@ const RealTimeSocialMetrics: React.FC<RealTimeSocialMetricsProps> = ({
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center space-x-2">
-                    <Heart className="h-4 w-4 text-pink-600" />
+                    <span className="text-sm text-pink-600">Likes:</span>
                     <span className="text-sm">{formatNumber(metrics.likes)}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
-                    <MessageCircle className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-600">Comments:</span>
                     <span className="text-sm">{formatNumber(metrics.comments)}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
-                    <Share className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-600">Shares:</span>
                     <span className="text-sm">{formatNumber(metrics.shares)}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
-                    <Eye className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm text-purple-600">Views:</span>
                     <span className="text-sm">{formatNumber(metrics.views)}</span>
                   </div>
                 </div>
@@ -238,7 +212,6 @@ const RealTimeSocialMetrics: React.FC<RealTimeSocialMetricsProps> = ({
       {postIds.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="p-8 text-center">
-            <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-600 mb-2">No Posts to Monitor</h3>
             <p className="text-gray-500">
               Create some social media posts to see real-time metrics here.

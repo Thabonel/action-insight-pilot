@@ -2,12 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Key, 
-  Video,
-  Share2,
-  Globe
-} from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 import SecurityBanner from './api-keys/SecurityBanner';
 import SectionBanner from './api-keys/SectionBanner';
@@ -33,7 +27,6 @@ const UserApiKeysSettings: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Key className="h-5 w-5" />
             <span>User API Keys</span>
           </CardTitle>
         </CardHeader>
@@ -52,7 +45,6 @@ const UserApiKeysSettings: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Key className="h-5 w-5" />
           <span>User API Keys</span>
         </CardTitle>
         <p className="text-sm text-gray-600">
@@ -69,15 +61,13 @@ const UserApiKeysSettings: React.FC = () => {
               <span>AI Services</span>
             </TabsTrigger>
             <TabsTrigger value="social-platforms" className="flex items-center space-x-2">
-              <Share2 className="h-4 w-4" />
               <span>Social Platforms</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="ai-services" className="space-y-4">
             <SectionBanner
-              icon={Video}
-              title="🧠 AI & Video Creation Tools"
+              title="AI & Video Creation Tools"
               description="These API keys enable AI-powered content generation and video creation features. OpenAI key is required for full functionality, Claude can be used as an alternative for analytics."
               bgColor="bg-blue-50"
               borderColor="border-blue-200"
@@ -99,8 +89,7 @@ const UserApiKeysSettings: React.FC = () => {
 
           <TabsContent value="social-platforms" className="space-y-4">
             <SectionBanner
-              icon={Globe}
-              title="📱 Social Media Platform Access"
+              title="Social Media Platform Access"
               description="Connect your social media accounts to enable direct posting and content management. These tokens allow the platform to post on your behalf."
               bgColor="bg-purple-50"
               borderColor="border-purple-200"

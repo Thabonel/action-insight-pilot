@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Calendar, MessageSquare, Settings as SettingsIcon, TrendingUp } from 'lucide-react';
 
 export interface Insight {
   title: string;
@@ -14,13 +13,11 @@ interface InsightsCardsProps {
 const InsightsCards: React.FC<InsightsCardsProps> = ({ insights }) => {
   // Ensure insights is always an array
   const safeInsights = Array.isArray(insights) ? insights : [];
-  
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {safeInsights.map((insight, index) => {
-        const icons = [Calendar, MessageSquare, SettingsIcon, TrendingUp];
         const colors = ['text-blue-600', 'text-green-500', 'text-purple-600', 'text-orange-500'];
-        const Icon = icons[index % icons.length];
         const colorClass = colors[index % colors.length];
 
         return (
@@ -28,7 +25,7 @@ const InsightsCards: React.FC<InsightsCardsProps> = ({ insights }) => {
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <Icon className={`h-6 w-6 ${colorClass}`} />
+                  <span className={`h-6 w-6 ${colorClass} font-bold`}>{insight.title.charAt(0)}</span>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>

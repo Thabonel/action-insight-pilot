@@ -1,12 +1,9 @@
 
-import { LucideIcon } from 'lucide-react';
-
 export interface SystemMetric {
   title: string;
   value: string;
   change: string;
   trend: 'loading' | 'up' | 'down';
-  icon: LucideIcon;
   color: string;
   performance: number;
 }

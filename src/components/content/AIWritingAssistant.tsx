@@ -3,15 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Lightbulb, 
-  Edit, 
-  Sparkles, 
-  RefreshCw,
-  CheckCircle,
-  AlertCircle,
-  TrendingUp
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface WritingSuggestion {
@@ -142,15 +133,9 @@ export const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
               AI Writing Assistant
             </CardTitle>
             <Button onClick={analyzeSuggestions} disabled={isAnalyzing}>
-              {isAnalyzing ? (
-                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Lightbulb className="h-4 w-4 mr-2" />
-              )}
               {isAnalyzing ? 'Analyzing...' : 'Analyze Content'}
             </Button>
           </div>
@@ -158,7 +143,6 @@ export const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
         <CardContent>
           {suggestions.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>Click "Analyze Content" to get AI-powered writing suggestions</p>
             </div>
           ) : (
@@ -167,9 +151,6 @@ export const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
                 <div key={index} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      {suggestion.type === 'improvement' && <Edit className="h-4 w-4 text-blue-500" />}
-                      {suggestion.type === 'seo' && <TrendingUp className="h-4 w-4 text-green-500" />}
-                      {suggestion.type === 'readability' && <AlertCircle className="h-4 w-4 text-orange-500" />}
                       <h4 className="font-medium">{suggestion.title}</h4>
                     </div>
                     <Badge variant="outline">{suggestion.confidence}% confident</Badge>
@@ -178,7 +159,6 @@ export const AIWritingAssistant: React.FC<AIWritingAssistantProps> = ({
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">Location: {suggestion.location}</span>
                     <Button size="sm" onClick={() => applySuggestion(suggestion)}>
-                      <CheckCircle className="h-4 w-4 mr-1" />
                       Apply
                     </Button>
                   </div>

@@ -10,26 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Clock, 
-  Calendar, 
-  Share2, 
-  Mail, 
-  Target, 
-  TrendingUp, 
-  BookOpen, 
-  Mic, 
-  Save,
-  Zap,
-  Globe,
-  BarChart3,
-  Users,
-  Link2,
-  Lightbulb,
-  Edit3,
-  CheckCircle,
-  Settings
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const BlogWorkflowAutomation: React.FC = () => {
@@ -101,7 +81,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-blue-600" />
               <span>Smart Publishing</span>
             </CardTitle>
           </CardHeader>
@@ -117,12 +96,11 @@ const BlogWorkflowAutomation: React.FC = () => {
               />
             </div>
             
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleOptimalTimeAnalysis}
             >
-              <BarChart3 className="h-4 w-4 mr-2" />
               Analyze Optimal Times
             </Button>
             
@@ -141,7 +119,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <BookOpen className="h-5 w-5 text-green-600" />
               <span>Content Series</span>
             </CardTitle>
           </CardHeader>
@@ -159,11 +136,10 @@ const BlogWorkflowAutomation: React.FC = () => {
               </SelectContent>
             </Select>
             
-            <Button 
+            <Button
               className="w-full"
               onClick={handleCreateContentSeries}
             >
-              <Target className="h-4 w-4 mr-2" />
               Create Series Plan
             </Button>
           </CardContent>
@@ -173,7 +149,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Share2 className="h-5 w-5 text-purple-600" />
               <span>Social Media</span>
             </CardTitle>
           </CardHeader>
@@ -189,12 +164,11 @@ const BlogWorkflowAutomation: React.FC = () => {
               />
             </div>
             
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleSocialGeneration}
             >
-              <Zap className="h-4 w-4 mr-2" />
               Generate Social Variants
             </Button>
             
@@ -211,7 +185,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Mail className="h-5 w-5 text-orange-600" />
               <span>Email Newsletter</span>
             </CardTitle>
           </CardHeader>
@@ -239,7 +212,6 @@ const BlogWorkflowAutomation: React.FC = () => {
             </Select>
             
             <Button variant="outline" className="w-full">
-              <Edit3 className="h-4 w-4 mr-2" />
               Preview Email
             </Button>
           </CardContent>
@@ -254,7 +226,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Target className="h-5 w-5 text-red-600" />
               <span>Writing Goals</span>
             </CardTitle>
           </CardHeader>
@@ -281,7 +252,6 @@ const BlogWorkflowAutomation: React.FC = () => {
             </div>
             
             <Button variant="outline" size="sm" className="w-full">
-              <Settings className="h-4 w-4 mr-2" />
               Adjust Goals
             </Button>
           </CardContent>
@@ -291,7 +261,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Lightbulb className="h-5 w-5 text-yellow-600" />
               <span>Content Ideas</span>
             </CardTitle>
           </CardHeader>
@@ -309,7 +278,6 @@ const BlogWorkflowAutomation: React.FC = () => {
             ))}
             
             <Button variant="outline" size="sm" className="w-full">
-              <TrendingUp className="h-4 w-4 mr-2" />
               Refresh Ideas
             </Button>
           </CardContent>
@@ -319,7 +287,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Save className="h-5 w-5 text-indigo-600" />
               <span>Quick Notes</span>
             </CardTitle>
           </CardHeader>
@@ -329,7 +296,6 @@ const BlogWorkflowAutomation: React.FC = () => {
               className="min-h-[100px]"
             />
             <Button size="sm" className="w-full">
-              <Save className="h-4 w-4 mr-2" />
               Save Note
             </Button>
           </CardContent>
@@ -339,7 +305,6 @@ const BlogWorkflowAutomation: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Mic className="h-5 w-5 text-pink-600" />
               <span>Voice Notes</span>
             </CardTitle>
           </CardHeader>
@@ -352,7 +317,6 @@ const BlogWorkflowAutomation: React.FC = () => {
             ))}
             
             <Button variant="outline" size="sm" className="w-full">
-              <Mic className="h-4 w-4 mr-2" />
               Start Recording
             </Button>
           </CardContent>
@@ -365,7 +329,6 @@ const BlogWorkflowAutomation: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Globe className="h-5 w-5 text-cyan-600" />
             <span>Cross-Platform Publishing</span>
           </CardTitle>
         </CardHeader>
@@ -397,17 +360,15 @@ const BlogWorkflowAutomation: React.FC = () => {
                       />
                     </div>
                     <Button variant="outline" size="sm" className="w-full">
-                      <Link2 className="h-4 w-4 mr-2" />
                       Configure
                     </Button>
                   </div>
                 ) : (
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="w-full"
                     onClick={() => handleConnectPlatform(platform.name)}
                   >
-                    <Link2 className="h-4 w-4 mr-2" />
                     Connect
                   </Button>
                 )}
@@ -417,7 +378,6 @@ const BlogWorkflowAutomation: React.FC = () => {
           
           <div className="mt-6">
             <Button className="w-full" size="lg">
-              <CheckCircle className="h-5 w-5 mr-2" />
               Publish to All Connected Platforms
             </Button>
           </div>

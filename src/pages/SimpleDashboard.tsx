@@ -2,17 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  TrendingUp,
-  Users,
-  DollarSign,
-  Pause,
-  Play,
-  Settings as SettingsIcon,
-  Download,
-  Sparkles,
-  Target
-} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -153,14 +142,12 @@ const SimpleDashboard: React.FC = () => {
       <div className="p-6">
         <Card className="max-w-2xl mx-auto">
           <CardContent className="p-12 text-center">
-            <Sparkles className="h-16 w-16 mx-auto mb-4 text-blue-600" />
             <h2 className="text-2xl font-bold mb-2">Welcome to Marketing Autopilot</h2>
             <p className="text-gray-600 mb-6">
               Let AI handle your marketing automatically while you focus on your business
             </p>
             <Link to="/app/autopilot/setup">
               <Button size="lg">
-                <Sparkles className="mr-2 h-5 w-5" />
                 Get Started
               </Button>
             </Link>
@@ -181,7 +168,6 @@ const SimpleDashboard: React.FC = () => {
         <div className="flex gap-3">
           <Link to="/app/settings">
             <Button variant="outline" size="sm">
-              <SettingsIcon className="h-4 w-4 mr-2" />
               Settings
             </Button>
           </Link>
@@ -190,17 +176,7 @@ const SimpleDashboard: React.FC = () => {
             size="sm"
             onClick={toggleAutopilot}
           >
-            {autopilotConfig.is_active ? (
-              <>
-                <Pause className="h-4 w-4 mr-2" />
-                Pause Autopilot
-              </>
-            ) : (
-              <>
-                <Play className="h-4 w-4 mr-2" />
-                Resume Autopilot
-              </>
-            )}
+            {autopilotConfig.is_active ? 'Pause Autopilot' : 'Resume Autopilot'}
           </Button>
         </div>
       </div>
@@ -210,7 +186,6 @@ const SimpleDashboard: React.FC = () => {
         <Card className="bg-yellow-50 border-yellow-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Pause className="h-5 w-5 text-yellow-600" />
               <div>
                 <p className="font-medium text-yellow-900">Autopilot is paused</p>
                 <p className="text-sm text-yellow-700">
@@ -236,7 +211,6 @@ const SimpleDashboard: React.FC = () => {
             {/* Leads */}
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <Users className="h-5 w-5 text-blue-600" />
                 <Badge className="bg-blue-100 text-blue-700">New</Badge>
               </div>
               <p className="text-3xl font-bold text-gray-900">
@@ -248,7 +222,6 @@ const SimpleDashboard: React.FC = () => {
             {/* Spend */}
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <DollarSign className="h-5 w-5 text-purple-600" />
                 <Badge variant="outline">
                   {autopilotConfig.monthly_budget
                     ? `$${autopilotConfig.monthly_budget.toLocaleString()} budget`
@@ -264,7 +237,6 @@ const SimpleDashboard: React.FC = () => {
             {/* ROI */}
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
                 <Badge className="bg-green-100 text-green-700">Strong</Badge>
               </div>
               <p className="text-3xl font-bold text-gray-900">
@@ -277,7 +249,6 @@ const SimpleDashboard: React.FC = () => {
           {stats.this_week_leads === 0 && autopilotConfig.is_active && (
             <div className="mt-4 p-3 bg-blue-100 rounded-lg">
               <p className="text-sm text-blue-900">
-                <Sparkles className="inline h-4 w-4 mr-1" />
                 Your AI is setting up campaigns and optimizing targeting. Leads should start coming in within 24-48 hours.
               </p>
             </div>
@@ -291,7 +262,6 @@ const SimpleDashboard: React.FC = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-blue-600" />
                 Active Campaigns ({campaigns.length})
               </CardTitle>
               <Link to="/app/campaigns">
@@ -341,7 +311,6 @@ const SimpleDashboard: React.FC = () => {
         <Card className="bg-blue-50 border-blue-200">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <Sparkles className="h-6 w-6 text-blue-600 mt-1" />
               <div>
                 <h3 className="font-semibold text-blue-900 mb-1">Setting Up Your Campaigns</h3>
                 <p className="text-sm text-blue-800 mb-3">

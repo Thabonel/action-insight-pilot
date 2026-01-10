@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Video } from 'lucide-react';
 
 interface ContentIdea {
   id: string;
@@ -64,10 +63,7 @@ const AiVideoCreatorCard: React.FC<AiVideoCreatorCardProps> = ({ contentIdeas = 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Video className="h-5 w-5" />
-          AI Video Creator
-        </CardTitle>
+        <CardTitle>AI Video Creator</CardTitle>
         <CardDescription>
           Generate a fully-edited faceless POV video from today's content ideas
         </CardDescription>

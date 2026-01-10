@@ -1,6 +1,4 @@
 
-import { LucideIcon } from 'lucide-react';
-
 export interface ApiKeyConfig {
   id: string;
   name: string;

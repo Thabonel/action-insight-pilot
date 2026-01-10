@@ -3,17 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Eye, 
-  Heart, 
-  Share, 
-  MessageCircle,
-  Star,
-  Clock,
-  Target
-} from 'lucide-react';
 
 const ContentPerformanceDashboard: React.FC = () => {
   const [contentLibrary] = useState([
@@ -80,49 +69,36 @@ const ContentPerformanceDashboard: React.FC = () => {
     }
   };
 
-  const getTrendIcon = (trend: string) => {
-    return trend === 'up' ? TrendingUp : TrendingDown;
-  };
-
   return (
     <div className="space-y-6">
       {/* Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Top Performer</p>
-                <p className="text-lg font-semibold">Case Study: 300% ROI</p>
-                <p className="text-sm text-green-600">96% AI score</p>
-              </div>
-              <Star className="h-8 w-8 text-yellow-500" />
+            <div>
+              <p className="text-sm text-gray-600">Top Performer</p>
+              <p className="text-lg font-semibold">Case Study: 300% ROI</p>
+              <p className="text-sm text-green-600">96% AI score</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Best Format</p>
-                <p className="text-lg font-semibold">How-to Guides</p>
-                <p className="text-sm text-blue-600">87% avg score</p>
-              </div>
-              <Target className="h-8 w-8 text-blue-500" />
+            <div>
+              <p className="text-sm text-gray-600">Best Format</p>
+              <p className="text-lg font-semibold">How-to Guides</p>
+              <p className="text-sm text-blue-600">87% avg score</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Optimal Time</p>
-                <p className="text-lg font-semibold">10:30 AM</p>
-                <p className="text-sm text-purple-600">+23% engagement</p>
-              </div>
-              <Clock className="h-8 w-8 text-purple-500" />
+            <div>
+              <p className="text-sm text-gray-600">Optimal Time</p>
+              <p className="text-lg font-semibold">10:30 AM</p>
+              <p className="text-sm text-purple-600">+23% engagement</p>
             </div>
           </CardContent>
         </Card>
@@ -136,7 +112,6 @@ const ContentPerformanceDashboard: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             {contentLibrary.map((content) => {
-              const TrendIcon = getTrendIcon(content.trend);
               return (
                 <div
                   key={content.id}
@@ -153,35 +128,29 @@ const ContentPerformanceDashboard: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge 
+                      <Badge
                         className={getPerformanceColor(content.performance)}
                         variant="secondary"
                       >
                         {content.score}% score
                       </Badge>
-                      <TrendIcon 
-                        className={`h-4 w-4 ${
-                          content.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                        }`} 
-                      />
+                      <span className={content.trend === 'up' ? 'text-green-600' : 'text-red-600'}>
+                        {content.trend === 'up' ? 'Trending up' : 'Trending down'}
+                      </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-4 gap-4 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <Eye className="h-4 w-4 text-gray-500" />
+                    <div>
                       <span>{content.views.toLocaleString()} views</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Heart className="h-4 w-4 text-red-500" />
+                    <div>
                       <span>{content.engagement}% engagement</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Share className="h-4 w-4 text-blue-500" />
+                    <div>
                       <span>{content.shares} shares</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <MessageCircle className="h-4 w-4 text-green-500" />
+                    <div>
                       <span>{content.comments} comments</span>
                     </div>
                   </div>

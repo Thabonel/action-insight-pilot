@@ -5,14 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { 
+import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
-import { 
-  TrendingUp, TrendingDown, Eye, Heart, Share2, DollarSign,
-  Users, Clock, Target, RefreshCw, ArrowUpRight, ArrowDownRight
-} from 'lucide-react';
 
 interface BlogAnalyticsDashboardProps {
   selectedBlogId?: string;
@@ -75,11 +71,11 @@ const BlogAnalyticsDashboard: React.FC<BlogAnalyticsDashboardProps> = ({ selecte
     { keyword: 'content marketing', impressions: 11800, clicks: 756, position: 3.9, ctr: 6.4 }
   ]);
 
-  const getTrendIcon = (trend: string) => {
+  const getTrendText = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'down': return <TrendingDown className="h-4 w-4 text-red-600" />;
-      default: return <div className="h-4 w-4" />;
+      case 'up': return <span className="text-green-600">[+]</span>;
+      case 'down': return <span className="text-red-600">[-]</span>;
+      default: return <span className="text-gray-600">[=]</span>;
     }
   };
 
@@ -102,11 +98,9 @@ const BlogAnalyticsDashboard: React.FC<BlogAnalyticsDashboardProps> = ({ selecte
                 <p className="text-sm text-muted-foreground">Total Views</p>
                 <p className="text-2xl font-bold">24.7K</p>
                 <p className="text-xs text-green-600 flex items-center">
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
                   +12% this month
                 </p>
               </div>
-              <Eye className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -119,7 +113,6 @@ const BlogAnalyticsDashboard: React.FC<BlogAnalyticsDashboardProps> = ({ selecte
                 <p className="text-2xl font-bold">7.8%</p>
                 <p className="text-xs text-green-600">Above average</p>
               </div>
-              <Heart className="h-8 w-8 text-red-600" />
             </div>
           </CardContent>
         </Card>
@@ -131,11 +124,9 @@ const BlogAnalyticsDashboard: React.FC<BlogAnalyticsDashboardProps> = ({ selecte
                 <p className="text-sm text-muted-foreground">Conversions</p>
                 <p className="text-2xl font-bold">127</p>
                 <p className="text-xs text-green-600 flex items-center">
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
                   +8% this month
                 </p>
               </div>
-              <Target className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -148,7 +139,6 @@ const BlogAnalyticsDashboard: React.FC<BlogAnalyticsDashboardProps> = ({ selecte
                 <p className="text-2xl font-bold">284%</p>
                 <p className="text-xs text-green-600">Strong performance</p>
               </div>
-              <DollarSign className="h-8 w-8 text-yellow-600" />
             </div>
           </CardContent>
         </Card>
@@ -232,7 +222,7 @@ const BlogAnalyticsDashboard: React.FC<BlogAnalyticsDashboardProps> = ({ selecte
                         <Badge variant={post.roi > 250 ? 'default' : 'secondary'}>
                           {post.roi}% ROI
                         </Badge>
-                        {getTrendIcon(post.trending)}
+                        {getTrendText(post.trending)}
                       </div>
                     </div>
                   ))}
@@ -327,7 +317,6 @@ const BlogAnalyticsDashboard: React.FC<BlogAnalyticsDashboardProps> = ({ selecte
                     3 posts from 2023 need content refresh for better SEO performance
                   </p>
                   <Button size="sm" variant="outline">
-                    <RefreshCw className="h-4 w-4 mr-2" />
                     Review Posts
                   </Button>
                 </div>

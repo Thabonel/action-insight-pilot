@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2, RefreshCw, CheckCircle, XCircle, Clock, DollarSign } from 'lucide-react';
 import type {
   AIModelConfig,
   AIModelUpdateLog,
@@ -130,17 +129,7 @@ export const AIModelManager: React.FC = () => {
           </p>
         </div>
         <Button onClick={triggerDiscovery} disabled={discovering}>
-          {discovering ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Discovering...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Discover Models
-            </>
-          )}
+          {discovering ? 'Discovering...' : 'Discover Models'}
         </Button>
       </div>
 
@@ -168,7 +157,7 @@ export const AIModelManager: React.FC = () => {
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <span className="text-muted-foreground">Loading...</span>
             </div>
           ) : filteredModels.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -200,8 +189,7 @@ export const AIModelManager: React.FC = () => {
                       <h4 className="font-semibold text-lg">{model.model_name}</h4>
                     </div>
                     <div className="text-right text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                      <div>
                         {new Date(model.discovered_at).toLocaleDateString()}
                       </div>
                     </div>
@@ -220,9 +208,8 @@ export const AIModelManager: React.FC = () => {
                       <span className="text-muted-foreground">Pricing:</span>
                       <div className="font-medium">
                         {model.pricing?.input_per_mtok ? (
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="h-3 w-3" />
-                            {model.pricing.input_per_mtok.toFixed(2)}/M
+                          <span>
+                            ${model.pricing.input_per_mtok.toFixed(2)}/M
                           </span>
                         ) : (
                           'N/A'
@@ -251,17 +238,11 @@ export const AIModelManager: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Status:</span>
-                      <div className="flex items-center gap-1 mt-1">
+                      <div className="mt-1">
                         {model.last_validated_at ? (
-                          <>
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span className="text-xs">Validated</span>
-                          </>
+                          <span className="text-xs text-green-600">Validated</span>
                         ) : (
-                          <>
-                            <XCircle className="h-4 w-4 text-yellow-500" />
-                            <span className="text-xs">Not validated</span>
-                          </>
+                          <span className="text-xs text-yellow-600">Not validated</span>
                         )}
                       </div>
                     </div>
@@ -294,13 +275,12 @@ export const AIModelManager: React.FC = () => {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      {log.status === 'success' ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : log.status === 'partial' ? (
-                        <Clock className="h-5 w-5 text-yellow-500" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      )}
+                      <span className={`text-sm font-medium ${
+                        log.status === 'success' ? 'text-green-600' :
+                        log.status === 'partial' ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        [{log.status.toUpperCase()}]
+                      </span>
                       <span className="font-medium">
                         {new Date(log.run_date).toLocaleString()}
                       </span>

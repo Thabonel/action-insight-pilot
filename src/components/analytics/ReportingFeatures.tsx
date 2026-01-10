@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Download, Share, Calendar, TrendingUp, Target } from 'lucide-react';
 
 const ReportingFeatures: React.FC = () => {
   const [availableReports] = useState([
@@ -14,8 +13,7 @@ const ReportingFeatures: React.FC = () => {
       type: 'executive',
       frequency: 'Weekly',
       lastGenerated: '2 days ago',
-      insights: ['Revenue up 23%', 'Email ROI improved', 'Social engagement declining'],
-      icon: TrendingUp
+      insights: ['Revenue up 23%', 'Email ROI improved', 'Social engagement declining']
     },
     {
       id: 2,
@@ -24,8 +22,7 @@ const ReportingFeatures: React.FC = () => {
       type: 'channel',
       frequency: 'Monthly',
       lastGenerated: '5 days ago',
-      insights: ['Email top performer', 'Social needs optimization', 'Content shows growth'],
-      icon: Target
+      insights: ['Email top performer', 'Social needs optimization', 'Content shows growth']
     },
     {
       id: 3,
@@ -34,8 +31,7 @@ const ReportingFeatures: React.FC = () => {
       type: 'roi',
       frequency: 'Bi-weekly',
       lastGenerated: '1 week ago',
-      insights: ['Product demos highest ROI', 'Educational content growing', 'Promotional declining'],
-      icon: FileText
+      insights: ['Product demos highest ROI', 'Educational content growing', 'Promotional declining']
     },
     {
       id: 4,
@@ -44,8 +40,7 @@ const ReportingFeatures: React.FC = () => {
       type: 'funnel',
       frequency: 'Monthly',
       lastGenerated: '3 days ago',
-      insights: ['Landing page conversion up', 'Email-to-demo path optimized', 'Social funnel needs work'],
-      icon: TrendingUp
+      insights: ['Landing page conversion up', 'Email-to-demo path optimized', 'Social funnel needs work']
     }
   ]);
 
@@ -93,7 +88,6 @@ const ReportingFeatures: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <FileText className="h-5 w-5 text-blue-600" />
           <span>Intelligent Reporting</span>
         </CardTitle>
       </CardHeader>
@@ -103,15 +97,13 @@ const ReportingFeatures: React.FC = () => {
           <h4 className="font-medium text-gray-900 mb-3">AI-Generated Reports</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {safeAvailableReports.map((report) => {
-              const Icon = report.icon;
               const safeInsights = Array.isArray(report.insights) ? report.insights : [];
-              
+
               return (
                 <div key={report.id} className="border rounded-lg p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-lg ${getTypeColor(report.type)}`}>
-                        <Icon className="h-4 w-4" />
                       </div>
                       <div>
                         <h5 className="font-medium text-gray-900">{report.title}</h5>
@@ -139,24 +131,23 @@ const ReportingFeatures: React.FC = () => {
                   </div>
 
                   <div className="flex space-x-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => handleGenerateReport(report.id)}
                       className="flex-1"
                     >
-                      <Download className="h-4 w-4 mr-1" />
                       Generate
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => handleScheduleReport(report.id)}
                     >
-                      <Calendar className="h-4 w-4" />
+                      Schedule
                     </Button>
                     <Button size="sm" variant="outline">
-                      <Share className="h-4 w-4" />
+                      Share
                     </Button>
                   </div>
                 </div>
@@ -200,7 +191,6 @@ const ReportingFeatures: React.FC = () => {
           
           <div className="mt-4 text-center">
             <Button variant="outline">
-              <Calendar className="h-4 w-4 mr-2" />
               Schedule New Report
             </Button>
           </div>
@@ -225,19 +215,15 @@ const ReportingFeatures: React.FC = () => {
           <h4 className="font-medium text-gray-900 mb-3">Export & Sharing</h4>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline">
-              <Download className="h-4 w-4 mr-1" />
               PDF Report
             </Button>
             <Button size="sm" variant="outline">
-              <Download className="h-4 w-4 mr-1" />
               Excel Data
             </Button>
             <Button size="sm" variant="outline">
-              <Share className="h-4 w-4 mr-1" />
               Share Dashboard
             </Button>
             <Button size="sm" variant="outline">
-              <Calendar className="h-4 w-4 mr-1" />
               Schedule Email
             </Button>
           </div>

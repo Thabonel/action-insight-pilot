@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, ArrowRight, ArrowLeft, Mail, User, Phone } from 'lucide-react';
 import type { AssessmentTemplate, AssessmentResponse } from '@/types/assessment';
 
 /**
@@ -218,15 +217,12 @@ export default function PublicAssessmentPage() {
                   {assessment.questions && (
                     <>
                       <div className="flex items-start">
-                        <CheckCircle className="h-6 w-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
                         <p className="text-gray-700">Your current score and where you stand</p>
                       </div>
                       <div className="flex items-start">
-                        <CheckCircle className="h-6 w-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
                         <p className="text-gray-700">3 key insights personalized to your situation</p>
                       </div>
                       <div className="flex items-start">
-                        <CheckCircle className="h-6 w-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
                         <p className="text-gray-700">Specific next steps to improve your results</p>
                       </div>
                     </>
@@ -260,7 +256,6 @@ export default function PublicAssessmentPage() {
                   className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-6 text-lg rounded-full shadow-lg transform transition hover:scale-105"
                 >
                   Start Assessment
-                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <p className="mt-4 text-sm text-gray-500">
                   Takes 3-5 minutes • Get instant results
@@ -338,7 +333,6 @@ export default function PublicAssessmentPage() {
                   variant="outline"
                   disabled={currentQuestionIndex === 0}
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
                   Previous
                 </Button>
 
@@ -348,7 +342,6 @@ export default function PublicAssessmentPage() {
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   {currentQuestionIndex === assessment.questions.length - 1 ? 'See Results' : 'Next'}
-                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -360,7 +353,6 @@ export default function PublicAssessmentPage() {
           <Card className="shadow-xl">
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <Mail className="h-8 w-8 text-blue-600" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Get Your Results</h2>
               <p className="text-gray-600 mt-2">
@@ -374,13 +366,12 @@ export default function PublicAssessmentPage() {
                   Email Address *
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="pl-10 text-lg p-6"
+                    className="text-lg p-6"
                     required
                   />
                 </div>
@@ -391,13 +382,12 @@ export default function PublicAssessmentPage() {
                   Name (optional)
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your name"
-                    className="pl-10 text-lg p-6"
+                    className="text-lg p-6"
                   />
                 </div>
               </div>
@@ -407,13 +397,12 @@ export default function PublicAssessmentPage() {
                   Phone (optional)
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+1 (555) 123-4567"
-                    className="pl-10 text-lg p-6"
+                    className="text-lg p-6"
                   />
                 </div>
               </div>
@@ -430,7 +419,6 @@ export default function PublicAssessmentPage() {
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg rounded-lg"
               >
                 {submitting ? 'Submitting...' : 'Get My Results'}
-                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
               <p className="text-xs text-gray-500 text-center">
@@ -490,13 +478,11 @@ export default function PublicAssessmentPage() {
                   className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg rounded-full shadow-lg transform transition hover:scale-105"
                 >
                   {result.result.cta.text}
-                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>
 
               {/* Email confirmation */}
               <div className="text-center text-sm text-gray-600">
-                <Mail className="h-5 w-5 inline mr-2" />
                 We've sent your detailed results to <span className="font-medium">{email}</span>
               </div>
             </CardContent>

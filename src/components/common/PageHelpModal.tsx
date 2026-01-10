@@ -1,4 +1,3 @@
-import { HelpCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -33,7 +32,7 @@ export function PageHelpModal({ helpKey, className = '' }: PageHelpModalProps) {
                 className={`fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all bg-primary text-primary-foreground hover:bg-primary/90 ${className}`}
                 title="Help - Learn how to use this page"
               >
-                <HelpCircle className="h-6 w-6" />
+                <span className="text-lg font-bold">?</span>
                 <span className="sr-only">Help - Learn how to use this page</span>
               </Button>
             </DialogTrigger>

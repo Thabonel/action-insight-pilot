@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ExternalLink, Key, Shield } from 'lucide-react';
 
 interface PlatformCredential {
   platform: string;
@@ -72,14 +71,10 @@ const PlatformCredentialsSetup: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Key className="h-5 w-5" />
-          <span>Platform API Credentials Setup</span>
-        </CardTitle>
+        <CardTitle>Platform API Credentials Setup</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <Alert>
-          <Shield className="h-4 w-4" />
           <AlertDescription>
             To enable OAuth integrations with social media platforms, you need to configure API credentials 
             for each platform in your Supabase project settings. These credentials are stored securely 
@@ -91,13 +86,12 @@ const PlatformCredentialsSetup: React.FC = () => {
           <div key={platform.name} className="border rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg">{platform.platform}</h3>
-              <a 
+              <a
                 href={platform.docsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                className="text-blue-600 hover:text-blue-800 text-sm"
               >
-                <ExternalLink className="h-4 w-4 mr-1" />
                 API Docs
               </a>
             </div>

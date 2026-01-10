@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, RefreshCw, Copy, Check } from 'lucide-react';
 import { useContentGeneration } from '@/hooks/useContentGeneration';
 import { useToast } from '@/hooks/use-toast';
 
@@ -84,7 +83,6 @@ const LiveContentSuggestions: React.FC<LiveContentSuggestionsProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
             AI Content Suggestions
           </CardTitle>
           <CardDescription>Generating personalized content...</CardDescription>
@@ -105,7 +103,6 @@ const LiveContentSuggestions: React.FC<LiveContentSuggestionsProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5" />
             AI Content Suggestions
           </CardTitle>
           <CardDescription>
@@ -122,7 +119,6 @@ const LiveContentSuggestions: React.FC<LiveContentSuggestionsProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-yellow-500" />
               AI Content Suggestions
             </CardTitle>
             <CardDescription>
@@ -135,7 +131,7 @@ const LiveContentSuggestions: React.FC<LiveContentSuggestionsProps> = ({
             onClick={handleRefresh}
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? 'Loading...' : 'Refresh'}
           </Button>
         </div>
       </CardHeader>
@@ -206,11 +202,6 @@ const LiveContentSuggestions: React.FC<LiveContentSuggestionsProps> = ({
             onClick={handleCopyContent}
             className="flex-1"
           >
-            {copied ? (
-              <Check className="h-4 w-4 mr-2" />
-            ) : (
-              <Copy className="h-4 w-4 mr-2" />
-            )}
             {copied ? 'Copied!' : 'Copy Content'}
           </Button>
           {onSuggestionSelect && (

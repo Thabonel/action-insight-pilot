@@ -6,18 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import {
-  Users,
-  Search,
-  TrendingUp,
-  Target,
-  MessageSquare,
-  Download,
-  RefreshCw,
-  Star,
-  Clock,
-  ArrowUp
-} from 'lucide-react';
 import LeadAIAssistant from '@/components/leads/LeadAIAssistant';
 import AdaptiveLeadSearch from '@/components/leads/AdaptiveLeadSearch';
 import LeadScoringDashboard from '@/components/leads/LeadScoringDashboard';
@@ -146,7 +134,6 @@ const Leads: React.FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" disabled={isExporting}>
-                <Download className="h-4 w-4 mr-2" />
                 {isExporting ? 'Exporting...' : 'Export Leads'}
               </Button>
             </DropdownMenuTrigger>
@@ -159,9 +146,8 @@ const Leads: React.FC = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
+
           <Button variant="outline" size="sm" onClick={handleSyncSources} disabled={isSyncing}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
             {isSyncing ? 'Syncing...' : 'Sync Sources'}
           </Button>
         </div>
@@ -171,58 +157,46 @@ const Leads: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-gray-600">Total Leads</p>
-                <p className="text-2xl font-bold">{stats.totalLeads.toLocaleString()}</p>
-                {stats.totalLeads === 0 && (
-                  <p className="text-xs text-gray-400">No leads yet</p>
-                )}
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Total Leads</p>
+              <p className="text-2xl font-bold">{stats.totalLeads.toLocaleString()}</p>
+              {stats.totalLeads === 0 && (
+                <p className="text-xs text-gray-400">No leads yet</p>
+              )}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Star className="h-5 w-5 text-yellow-600" />
-              <div>
-                <p className="text-sm text-gray-600">Hot Leads</p>
-                <p className="text-2xl font-bold">{stats.hotLeads.toLocaleString()}</p>
-                <p className="text-xs text-blue-600">85%+ score</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Hot Leads</p>
+              <p className="text-2xl font-bold">{stats.hotLeads.toLocaleString()}</p>
+              <p className="text-xs text-blue-600">85%+ score</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Target className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-gray-600">Conversion Rate</p>
-                <p className="text-2xl font-bold">{stats.conversionRate}%</p>
-                {stats.totalLeads > 0 && (
-                  <p className="text-xs text-green-600">
-                    {stats.conversionRate > 20 ? 'Above average' : 'Building momentum'}
-                  </p>
-                )}
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Conversion Rate</p>
+              <p className="text-2xl font-bold">{stats.conversionRate}%</p>
+              {stats.totalLeads > 0 && (
+                <p className="text-xs text-green-600">
+                  {stats.conversionRate > 20 ? 'Above average' : 'Building momentum'}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-gray-600">Avg. Time to Convert</p>
-                <p className="text-2xl font-bold">{stats.avgTimeToConvert}d</p>
-                <p className="text-xs text-purple-600">Improving</p>
-              </div>
+            <div>
+              <p className="text-sm text-gray-600">Avg. Time to Convert</p>
+              <p className="text-2xl font-bold">{stats.avgTimeToConvert}d</p>
+              <p className="text-xs text-purple-600">Improving</p>
             </div>
           </CardContent>
         </Card>

@@ -3,15 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import {
-  TrendingUp,
-  Users,
-  Mail,
-  CheckCircle,
-  Download,
-  ArrowUp,
-  ArrowDown
-} from 'lucide-react';
 import type { AssessmentAnalytics as AnalyticsData } from '@/types/assessment';
 
 interface AssessmentAnalyticsProps {
@@ -162,7 +153,6 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
             90 Days
           </Button>
           <Button onClick={exportData} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
         </div>
@@ -177,7 +167,6 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
                 <p className="text-sm text-gray-600">Total Views</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{summary.total_views}</p>
               </div>
-              <Users className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -189,7 +178,6 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
                 <p className="text-sm text-gray-600">Completions</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{summary.total_completions}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -201,7 +189,6 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
                 <p className="text-sm text-gray-600">Emails Captured</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{summary.total_emails_captured}</p>
               </div>
-              <Mail className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -214,7 +201,6 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
                 <p className="text-3xl font-bold text-gray-900 mt-1">{summary.overall_conversion_rate.toFixed(1)}%</p>
                 {summary.overall_conversion_rate >= 20 && (
                   <p className="text-xs text-green-600 mt-1 flex items-center">
-                    <ArrowUp className="h-3 w-3 mr-1" />
                     Industry Target
                   </p>
                 )}
@@ -224,7 +210,6 @@ export default function AssessmentAnalytics({ assessmentId, assessmentName }: As
                   </p>
                 )}
               </div>
-              <TrendingUp className="h-8 w-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>

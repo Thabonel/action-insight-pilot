@@ -4,18 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  TrendingUp, 
-  Target, 
-  Lightbulb, 
-  BarChart3,
-  Clock,
-  Eye,
-  Share2,
-  Mail,
-  CheckCircle,
-  AlertTriangle
-} from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,7 +14,6 @@ interface Suggestion {
   description: string;
   impact: string;
   oneClick: boolean;
-  icon: React.ComponentType<{ className?: string }>;
 }
 
 export interface AIOptimizationCoachProps {
@@ -61,8 +48,7 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       title: 'Add more concrete examples',
       description: 'Include 2-3 specific case studies to improve engagement',
       impact: 'High',
-      oneClick: true,
-      icon: Lightbulb
+      oneClick: true
     },
     {
       id: 2,
@@ -70,8 +56,7 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       title: 'Optimize title length',
       description: 'Current title is 65 characters. Ideal range is 50-60.',
       impact: 'Medium',
-      oneClick: true,
-      icon: Target
+      oneClick: true
     },
     {
       id: 3,
@@ -79,8 +64,7 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       title: 'Add compelling subheadings',
       description: 'Break content into scannable sections with H2/H3 tags',
       impact: 'High',
-      oneClick: false,
-      icon: Eye
+      oneClick: false
     },
     {
       id: 4,
@@ -88,8 +72,7 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       title: 'Include relevant statistics',
       description: 'Add industry data to support your main points',
       impact: 'Medium',
-      oneClick: false,
-      icon: BarChart3
+      oneClick: false
     }
   ]);
 
@@ -212,32 +195,27 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-600" />
             Performance Predictions
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <Target className="h-6 w-6 text-blue-600 mx-auto mb-2" />
               <div className="text-sm text-gray-600">Search Ranking</div>
               <div className="font-semibold text-blue-700">{predictions.searchRanking}</div>
             </div>
 
             <div className="text-center p-3 bg-green-50 rounded-lg">
-              <Share2 className="h-6 w-6 text-green-600 mx-auto mb-2" />
               <div className="text-sm text-gray-600">Social Shares</div>
               <div className="font-semibold text-green-700">{predictions.socialShares}</div>
             </div>
 
             <div className="text-center p-3 bg-purple-50 rounded-lg">
-              <Mail className="h-6 w-6 text-purple-600 mx-auto mb-2" />
               <div className="text-sm text-gray-600">Email Open Rate</div>
               <div className="font-semibold text-purple-700">{predictions.emailOpenRate}%</div>
             </div>
 
             <div className="text-center p-3 bg-orange-50 rounded-lg">
-              <BarChart3 className="h-6 w-6 text-orange-600 mx-auto mb-2" />
               <div className="text-sm text-gray-600">Conversion</div>
               <div className="font-semibold text-orange-700">{predictions.conversionPotential}</div>
             </div>
@@ -249,41 +227,33 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-yellow-600" />
             Improvement Suggestions
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {suggestions.map((suggestion) => {
-            const Icon = suggestion.icon;
             return (
               <div key={suggestion.id} className="border rounded-lg p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-gray-600" />
                     <span className="font-medium text-sm">{suggestion.title}</span>
                   </div>
                   <Badge className={getImpactColor(suggestion.impact)}>
                     {suggestion.impact}
                   </Badge>
                 </div>
-                
+
                 <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
-                
+
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    {suggestion.oneClick ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                    )}
                     <span className="text-xs text-gray-500">
                       {suggestion.oneClick ? 'One-click fix' : 'Manual implementation'}
                     </span>
                   </div>
-                  
-                  <Button 
-                    size="sm" 
+
+                  <Button
+                    size="sm"
                     variant={suggestion.oneClick ? 'default' : 'outline'}
                     onClick={() => applySuggestion(suggestion)}
                   >
@@ -300,7 +270,6 @@ export const AIOptimizationCoach: React.FC<AIOptimizationCoachProps> = ({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-600" />
             Competitor Analysis
           </CardTitle>
         </CardHeader>

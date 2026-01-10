@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MessageSquare, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SupportTicket {
@@ -166,7 +165,6 @@ const SupportTickets: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <MessageSquare className="h-5 w-5" />
             <span>Support Tickets</span>
           </CardTitle>
         </CardHeader>
@@ -198,7 +196,6 @@ const SupportTickets: React.FC = () => {
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
                         <span>{ticket.name} ({ticket.email})</span>
                         <span className="flex items-center">
-                          <Clock className="h-3 w-3 mr-1" />
                           {new Date(ticket.created_at).toLocaleDateString()}
                         </span>
                       </div>

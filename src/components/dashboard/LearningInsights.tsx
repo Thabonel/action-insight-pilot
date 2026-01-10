@@ -3,14 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  TrendingUp, 
-  Clock, 
-  Activity,
-  AlertCircle,
-  CheckCircle,
-  ArrowRight
-} from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { RealInsights } from '@/types/insights';
 
@@ -74,12 +66,12 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
     return generatedInsights.slice(0, 3); // Limit to 3 insights
   };
 
-  const getInsightIcon = (type: string) => {
+  const getInsightLabel = (type: string) => {
     switch (type) {
-      case 'positive': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'warning': return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      case 'info': return <LogoMarkIcon className="h-4 w-4" />;
-      default: return <Activity className="h-4 w-4 text-gray-600" />;
+      case 'positive': return 'Positive';
+      case 'warning': return 'Warning';
+      case 'info': return 'Info';
+      default: return 'Note';
     }
   };
 
@@ -128,13 +120,12 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
       <CardContent>
         <div className="space-y-4">
           {displayInsights.map((insight, index) => (
-            <div 
+            <div
               key={index}
               className={`p-3 rounded-lg border-l-4 ${getInsightColor(insight.type)}`}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  {getInsightIcon(insight.type)}
                   <h4 className="font-medium text-sm">{insight.title}</h4>
                 </div>
                 {insight.priority === 'medium' && (
@@ -144,7 +135,6 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
               <p className="text-xs text-gray-600 mb-3">{insight.description}</p>
               <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
                 {insight.action}
-                <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
           ))}
@@ -152,11 +142,9 @@ const LearningInsights: React.FC<LearningInsightsProps> = ({ insights }) => {
           <div className="pt-2 border-t">
             <div className="flex items-center justify-between text-xs text-gray-500">
               <div className="flex items-center space-x-1">
-                <Clock className="h-3 w-3" />
                 <span>Updated {new Date().toLocaleTimeString()}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <TrendingUp className="h-3 w-3" />
                 <span>Learning from your usage</span>
               </div>
             </div>

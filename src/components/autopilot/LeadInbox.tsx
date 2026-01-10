@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mail, Phone, Building2, Star, Search, Download, Filter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -184,11 +183,9 @@ const LeadInbox: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-blue-600" />
             Lead Inbox ({filteredLeads.length})
           </CardTitle>
           <Button onClick={exportLeads} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
         </div>
@@ -196,17 +193,14 @@ const LeadInbox: React.FC = () => {
         {/* Filters */}
         <div className="flex gap-3 mt-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search by name, company, or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
-              <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
@@ -223,7 +217,6 @@ const LeadInbox: React.FC = () => {
       <CardContent>
         {filteredLeads.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            <Mail className="h-12 w-12 mx-auto mb-3 text-gray-300" />
             <p className="font-medium">No leads yet</p>
             <p className="text-sm">Your AI autopilot is working on generating leads for you</p>
           </div>
@@ -240,14 +233,12 @@ const LeadInbox: React.FC = () => {
                       <h4 className="font-semibold">{lead.full_name || 'Unknown'}</h4>
                       {lead.score && (
                         <span className={`text-xs font-medium px-2 py-1 rounded ${getScoreColor(lead.score)}`}>
-                          <Star className="h-3 w-3 inline mr-1" />
                           {lead.score}
                         </span>
                       )}
                     </div>
                     {lead.company_name && (
                       <p className="text-sm text-gray-600 flex items-center gap-1">
-                        <Building2 className="h-3 w-3" />
                         {lead.company_name}
                       </p>
                     )}
@@ -260,7 +251,6 @@ const LeadInbox: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                   {lead.email && (
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Mail className="h-4 w-4" />
                       <a href={`mailto:${lead.email}`} className="hover:text-blue-600">
                         {lead.email}
                       </a>
@@ -268,7 +258,6 @@ const LeadInbox: React.FC = () => {
                   )}
                   {lead.phone && (
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Phone className="h-4 w-4" />
                       <a href={`tel:${lead.phone}`} className="hover:text-blue-600">
                         {lead.phone}
                       </a>

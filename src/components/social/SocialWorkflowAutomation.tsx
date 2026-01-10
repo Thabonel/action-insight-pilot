@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Zap, Play, Pause, Settings, Share2, Calendar, Target, TrendingUp } from 'lucide-react';
 
 const SocialWorkflowAutomation: React.FC = () => {
   const [workflows, setWorkflows] = useState([
@@ -41,28 +40,24 @@ const SocialWorkflowAutomation: React.FC = () => {
     {
       title: 'Post to All Platforms',
       description: 'AI-optimized posting with platform variations',
-      icon: Share2,
       color: 'blue',
       confidence: 96
     },
     {
       title: 'Schedule Optimal Week',
       description: 'Fill next week with AI-suggested content',
-      icon: Calendar,
       color: 'green',
       confidence: 91
     },
     {
       title: 'Repurpose Top Performer',
       description: 'Create variations of your best content',
-      icon: TrendingUp,
       color: 'purple',
       confidence: 88
     },
     {
       title: 'Boost Underperforming',
       description: 'Optimize and repost low-engagement content',
-      icon: Target,
       color: 'orange',
       confidence: 82
     }
@@ -111,15 +106,11 @@ const SocialWorkflowAutomation: React.FC = () => {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Zap className="h-5 w-5" />
-            <span>Quick Automation Actions</span>
-          </CardTitle>
+          <CardTitle>Quick Automation Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {quickActions.map((action, index) => {
-              const Icon = action.icon;
               return (
                 <Button
                   key={index}
@@ -127,7 +118,6 @@ const SocialWorkflowAutomation: React.FC = () => {
                   className="h-24 flex-col justify-center p-4"
                 >
                   <div className="flex items-center space-x-3 mb-2">
-                    <Icon className={`h-5 w-5 text-${action.color}-600`} />
                     <span className="font-medium">{action.title}</span>
                     <Badge variant="secondary">{action.confidence}%</Badge>
                   </div>
@@ -162,7 +152,7 @@ const SocialWorkflowAutomation: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline">{workflow.success}% success</Badge>
                     <Button size="sm" variant="ghost">
-                      <Settings className="h-4 w-4" />
+                      Settings
                     </Button>
                   </div>
                 </div>
@@ -190,11 +180,9 @@ const SocialWorkflowAutomation: React.FC = () => {
 
                 <div className="flex space-x-2 mt-4">
                   <Button size="sm" variant="outline">
-                    <Play className="h-4 w-4 mr-2" />
                     Run Now
                   </Button>
                   <Button size="sm" variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
                     Configure
                   </Button>
                 </div>

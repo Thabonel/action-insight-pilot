@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import { Zap, Clock, Target, Users, TrendingUp, Mail } from 'lucide-react';
 
 const BehavioralAutomation: React.FC = () => {
   const [automations, setAutomations] = useState([
@@ -123,10 +122,7 @@ const BehavioralAutomation: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Zap className="h-5 w-5 text-yellow-600" />
-          <span>Behavioral Automation</span>
-        </CardTitle>
+        <CardTitle>Behavioral Automation</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Active Automations */}
@@ -219,11 +215,9 @@ const BehavioralAutomation: React.FC = () => {
         {/* Quick Actions */}
         <div className="flex space-x-3">
           <Button className="flex-1">
-            <Target className="h-4 w-4 mr-2" />
             Create Automation
           </Button>
           <Button variant="outline">
-            <Clock className="h-4 w-4 mr-2" />
             Optimize Timing
           </Button>
         </div>

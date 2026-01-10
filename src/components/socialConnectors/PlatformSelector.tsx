@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, ExternalLink, Settings } from 'lucide-react';
 import { SocialPlatform, PlatformConnection, PlatformConfig } from '@/types/socialConnectors';
 
 interface PlatformSelectorProps {
@@ -33,10 +32,6 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
     return connection.isConnected ? 'Connected' : 'Pending';
   };
 
-  const getStatusIcon = (connection?: PlatformConnection) => {
-    if (!connection) return null;
-    return connection.isConnected ? CheckCircle : Clock;
-  };
 
   return (
     <div className="space-y-6">
@@ -50,8 +45,7 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {platforms.map((platform) => {
           const connection = getConnectionStatus(platform.id);
-          const StatusIcon = getStatusIcon(connection);
-          
+
           return (
             <Card key={platform.id} className="relative hover:shadow-lg transition-shadow">
               <CardHeader>
@@ -64,9 +58,8 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {StatusIcon && <StatusIcon className={`h-5 w-5 text-${getStatusColor(connection)}-600`} />}
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={`text-${getStatusColor(connection)}-600 border-${getStatusColor(connection)}-300`}
                     >
                       {getStatusText(connection)}
@@ -115,11 +108,10 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
                     </div>
                     <div className="flex space-x-2">
                       <Button variant="outline" size="sm">
-                        <Settings className="h-3 w-3 mr-2" />
                         Manage
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => onDisconnect(platform.id)}
                       >
@@ -129,14 +121,13 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Button 
-                      className="w-full" 
+                    <Button
+                      className="w-full"
                       onClick={() => onPlatformSelect(platform.id)}
                     >
                       Connect {platform.name}
                     </Button>
                     <Button variant="outline" size="sm" className="w-full">
-                      <ExternalLink className="h-3 w-3 mr-2" />
                       Learn More
                     </Button>
                   </div>

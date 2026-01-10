@@ -3,7 +3,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Loader2, Lightbulb } from 'lucide-react';
 import { useAIAutocomplete, AutocompleteContext } from '@/hooks/useAIAutocomplete';
 import { cn } from '@/lib/utils';
 
@@ -121,14 +120,14 @@ export const AIAutocompleteInput: React.FC<AIAutocompleteInputProps> = ({
         />
         
         {isLoading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">
+            ...
           </div>
         )}
-        
+
         {!isLoading && suggestions.length > 0 && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <Lightbulb className="h-4 w-4 text-primary" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-primary text-xs">
+            AI
           </div>
         )}
       </div>
@@ -150,7 +149,6 @@ export const AIAutocompleteInput: React.FC<AIAutocompleteInputProps> = ({
               onClick={() => handleSuggestionClick(suggestion)}
             >
               <div className="flex items-start gap-2">
-                <Lightbulb className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                 <span className="text-sm leading-relaxed break-words">
                   {suggestion}
                 </span>

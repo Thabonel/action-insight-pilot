@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
-import { Loader2, Sparkles, Target } from 'lucide-react';
 
 // Valid campaign types that match database enum exactly
 type ValidCampaignType = 'email' | 'social' | 'content' | 'paid_ads' | 'partnership';
@@ -170,7 +169,6 @@ const IntelligentCampaignCreator: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5" />
             <span>Campaign Creator</span>
           </CardTitle>
         </CardHeader>
@@ -258,17 +256,7 @@ const IntelligentCampaignCreator: React.FC = () => {
           </div>
 
           <Button onClick={createCampaign} disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Campaign...
-              </>
-            ) : (
-              <>
-                <Target className="mr-2 h-4 w-4" />
-                Create Campaign
-              </>
-            )}
+            {loading ? 'Creating Campaign...' : 'Create Campaign'}
           </Button>
         </CardContent>
       </Card>

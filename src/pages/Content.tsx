@@ -5,10 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { behaviorTracker } from '@/lib/behavior-tracker';
-import {
-  Calendar,
-  Zap
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ContentAIAssistant from '@/components/content/ContentAIAssistant';
 import IntelligentContentGenerator from '@/components/content/IntelligentContentGenerator';
@@ -67,12 +63,10 @@ const Content: React.FC = () => {
         <div className="flex space-x-3">
           <ContentSchedulingDialog>
             <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
               Schedule Content
             </Button>
           </ContentSchedulingDialog>
           <Button size="sm" onClick={handleCreateContent}>
-            <Zap className="h-4 w-4 mr-2" />
             Create Content
           </Button>
         </div>

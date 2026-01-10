@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
-import { Loader2, Calendar, Clock } from 'lucide-react';
 
 interface PostData {
   content: string;
@@ -88,7 +87,6 @@ const IntelligentPostScheduler: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Calendar className="h-5 w-5" />
             <span>Intelligent Post Scheduler</span>
           </CardTitle>
         </CardHeader>
@@ -146,17 +144,7 @@ const IntelligentPostScheduler: React.FC = () => {
           </div>
 
           <Button onClick={schedulePost} disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Scheduling...
-              </>
-            ) : (
-              <>
-                <Clock className="mr-2 h-4 w-4" />
-                Schedule Post
-              </>
-            )}
+            {loading ? 'Scheduling...' : 'Schedule Post'}
           </Button>
         </CardContent>
       </Card>

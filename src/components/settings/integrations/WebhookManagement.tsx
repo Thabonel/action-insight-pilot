@@ -1,10 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Plus, Settings, Trash2, TestTube, Loader2 } from 'lucide-react';
 import { useIntegrations } from '@/hooks/useIntegrations';
 import type { Webhook } from '@/lib/api-client-interface';
 
@@ -77,14 +76,11 @@ const WebhookManagement: React.FC = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Globe className="h-5 w-5" />
-            <span>Webhook Management</span>
-          </CardTitle>
+          <CardTitle>Webhook Management</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Loading...</span>
           </div>
         </CardContent>
       </Card>
@@ -94,10 +90,7 @@ const WebhookManagement: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Globe className="h-5 w-5" />
-          <span>Webhook Management</span>
-        </CardTitle>
+        <CardTitle>Webhook Management</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -113,16 +106,11 @@ const WebhookManagement: React.FC = () => {
               onChange={(e) => setNewWebhookUrl(e.target.value)}
               className="flex-1"
             />
-            <Button 
+            <Button
               onClick={handleCreateWebhook}
               disabled={!newWebhookUrl || !newWebhookName || isCreating}
             >
-              {isCreating ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Plus className="h-4 w-4 mr-2" />
-              )}
-              Add
+              {isCreating ? 'Adding...' : 'Add'}
             </Button>
           </div>
         </div>
@@ -139,27 +127,23 @@ const WebhookManagement: React.FC = () => {
                   >
                     {webhook.active ? 'Active' : 'Inactive'}
                   </Badge>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleTestWebhook(webhook.id)}
                     disabled={testingWebhooks.has(webhook.id)}
                   >
-                    {testingWebhooks.has(webhook.id) ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <TestTube className="h-3 w-3" />
-                    )}
+                    {testingWebhooks.has(webhook.id) ? 'Testing...' : 'Test'}
                   </Button>
                   <Button variant="outline" size="sm">
-                    <Settings className="h-3 w-3" />
+                    Settings
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleDeleteWebhook(webhook.id)}
                   >
-                    <Trash2 className="h-3 w-3" />
+                    Delete
                   </Button>
                 </div>
               </div>

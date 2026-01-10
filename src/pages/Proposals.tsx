@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus } from 'lucide-react';
 import { ProposalFormData } from '@/types/proposals';
 import { useProposals } from '@/hooks/useProposals';
 import ProposalForm from '@/components/proposals/ProposalForm';
@@ -109,7 +108,6 @@ const Proposals: React.FC = () => {
           <p className="text-slate-600 mt-2">Create professional proposals with AI assistance</p>
         </div>
         <Button onClick={() => setActiveTab('create')} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
           New Proposal
         </Button>
       </div>

@@ -2,7 +2,6 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GettingStartedGuide } from '../components/help/GettingStartedGuide';
 import { HelpDocumentation } from '../components/help/HelpDocumentation';
-import { HelpCircle, BookOpen, PlayCircle } from 'lucide-react';
 
 const HelpPage: React.FC = () => {
   return (
@@ -11,7 +10,6 @@ const HelpPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <HelpCircle className="h-8 w-8 text-primary" />
             <h1 className="text-4xl font-bold text-foreground">Help Center</h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -22,18 +20,16 @@ const HelpPage: React.FC = () => {
         {/* Main Content Tabs */}
         <Tabs defaultValue="getting-started" className="w-full">
           <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
-            <TabsTrigger 
-              value="getting-started" 
+            <TabsTrigger
+              value="getting-started"
               className="flex items-center gap-2"
             >
-              <PlayCircle className="h-4 w-4" />
               Getting Started
             </TabsTrigger>
-            <TabsTrigger 
-              value="documentation" 
+            <TabsTrigger
+              value="documentation"
               className="flex items-center gap-2"
             >
-              <BookOpen className="h-4 w-4" />
               Documentation
             </TabsTrigger>
           </TabsList>
