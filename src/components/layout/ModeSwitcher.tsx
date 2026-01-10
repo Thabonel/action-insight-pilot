@@ -44,12 +44,12 @@ const ModeSwitcher: React.FC = () => {
         <Button variant="outline" size="sm" className="gap-2">
           {mode === 'simple' ? (
             <>
-              <NeuralFlowIcon name="mode-switch" size={16} />
+              <NeuralFlowIcon name="mode-switch" size={20} />
               Simple Mode
             </>
           ) : (
             <>
-              <NeuralFlowIcon name="settings" size={16} />
+              <NeuralFlowIcon name="settings" size={20} />
               Advanced Mode
             </>
           )}
@@ -66,7 +66,7 @@ const ModeSwitcher: React.FC = () => {
         >
           <div className="flex items-center justify-between w-full mb-1">
             <div className="flex items-center gap-2">
-              <NeuralFlowIcon name="mode-switch" size={16} />
+              <NeuralFlowIcon name="mode-switch" size={20} />
               <span className="font-medium">Simple Mode</span>
             </div>
             {mode === 'simple' && <Badge className="bg-blue-600">Active</Badge>}
@@ -83,7 +83,7 @@ const ModeSwitcher: React.FC = () => {
         >
           <div className="flex items-center justify-between w-full mb-1">
             <div className="flex items-center gap-2">
-              <NeuralFlowIcon name="settings" size={16} />
+              <NeuralFlowIcon name="settings" size={20} />
               <span className="font-medium">Advanced Mode</span>
             </div>
             {mode === 'advanced' && <Badge className="bg-purple-600">Active</Badge>}
