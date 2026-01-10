@@ -62,6 +62,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// 2026 Mood Mode - Charcoal/Slate Dark Theme
+				'brand-dark': {
+					base: '#0B0D10',        // True Charcoal - main background
+					surface: '#151A21',     // Deep Slate - cards/surfaces
+					elevated: '#1C2430',    // Elevated surfaces
+					border: '#273140',      // Subtle borders
+					'border-hover': '#334155',
+					text: {
+						primary: '#E9EEF5',   // Primary text
+						secondary: '#94A3B8', // Secondary text
+						muted: '#64748B',     // Muted text
+					},
+					accent: {
+						blue: '#3B82F6',      // Primary blue
+						'blue-glow': '#60A5FA', // Luminous blue for icons
+						'blue-subtle': 'rgba(59, 130, 246, 0.15)', // Subtle blue bg
+					}
 				}
 			},
 			borderRadius: {
