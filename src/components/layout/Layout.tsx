@@ -1,27 +1,10 @@
 
 import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  Zap,
-  Users,
-  FileText,
-  Share2,
-  Mail,
-  BarChart3,
-  Workflow,
-  FileCheck,
-  Settings,
-  BookOpen,
-  Link,
-  LogOut,
-  User,
-  Shield,
-  Rocket
-} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserMode } from '@/hooks/useUserMode';
 import ModeSwitcher from '@/components/layout/ModeSwitcher';
+import NeuralFlowIcon, { NeuralFlowIconName } from '@/components/ui/NeuralFlowIcon';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,112 +35,120 @@ const Layout: React.FC = () => {
     }
   };
 
+  // Navigation item type
+  type NavItem = {
+    name: string;
+    href: string;
+    description: string;
+    icon: NeuralFlowIconName;
+  };
+
   // Simple Mode Navigation (3 items)
-  const simpleNavItems = [
+  const simpleNavItems: NavItem[] = [
     {
       name: 'Autopilot Dashboard',
       href: '/app/autopilot',
-      icon: Rocket,
+      icon: 'autopilot',
       description: 'Your marketing results'
     },
     {
       name: 'AI Chat',
       href: '/app/conversational-dashboard',
-      icon: LayoutDashboard,
+      icon: 'dashboard',
       description: 'Ask me anything'
     },
     {
       name: 'Settings',
       href: '/app/settings',
-      icon: Settings,
+      icon: 'settings',
       description: 'Configure autopilot'
     }
   ];
 
   // Advanced Mode Navigation (All items)
-  const advancedNavItems = [
+  const advancedNavItems: NavItem[] = [
     {
       name: 'Autopilot',
       href: '/app/autopilot',
-      icon: Rocket,
+      icon: 'autopilot',
       description: 'Marketing automation'
     },
     {
       name: 'AI Dashboard',
       href: '/app/conversational-dashboard',
-      icon: LayoutDashboard,
+      icon: 'dashboard',
       description: 'AI-powered insights & chat'
     },
     {
       name: 'Admin Dashboard',
       href: '/app/admin',
-      icon: Shield,
+      icon: 'admin',
       description: 'Business metrics & system'
     },
     {
       name: 'Campaign Management',
       href: '/app/campaign-management',
-      icon: Zap,
+      icon: 'campaigns',
       description: 'Advanced campaign tools'
     },
     {
       name: 'Leads',
       href: '/app/leads',
-      icon: Users,
+      icon: 'leads',
       description: 'Lead management'
     },
     {
       name: 'Content',
       href: '/app/content',
-      icon: FileText,
+      icon: 'content',
       description: 'Content creation'
     },
     {
       name: 'Social',
       href: '/app/social',
-      icon: Share2,
+      icon: 'social',
       description: 'Social media'
     },
     {
       name: 'Email',
       href: '/app/email',
-      icon: Mail,
+      icon: 'email',
       description: 'Email automation'
     },
     {
       name: 'Analytics',
       href: '/app/analytics',
-      icon: BarChart3,
+      icon: 'analytics',
       description: 'Performance metrics'
     },
     {
       name: 'Workflows',
       href: '/app/workflows',
-      icon: Workflow,
+      icon: 'workflows',
       description: 'Automation workflows'
     },
     {
       name: 'Proposals',
       href: '/app/proposals',
-      icon: FileCheck,
+      icon: 'proposals',
       description: 'Proposal generation'
     },
     {
       name: 'Settings',
       href: '/app/settings',
-      icon: Settings,
+      icon: 'settings',
       description: 'System configuration'
     },
     {
       name: 'User Manual',
       href: '/app/user-manual',
-      icon: BookOpen,
+      icon: 'documentation',
       description: 'Documentation'
     },
     {
       name: 'Connect Platforms',
       href: '/app/connect-platforms',
-      icon: Link,
+      icon: 'integrations',
       description: 'Integration setup'
     }
   ];
@@ -185,22 +176,22 @@ const Layout: React.FC = () => {
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-center space-x-2 mb-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-blue-600" />
+                  <NeuralFlowIcon name="profile" size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
                 </div>
               </div>
-              
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     disabled={isLoggingOut}
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
+                    <NeuralFlowIcon name="sign-out" size={16} className="mr-2" />
                     {isLoggingOut ? 'Signing out...' : 'Sign out'}
                   </Button>
                 </AlertDialogTrigger>
@@ -226,9 +217,8 @@ const Layout: React.FC = () => {
         <nav className="px-3 pb-6">
           <div className="space-y-1">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.href;
-              
+
               return (
                 <NavLink
                   key={item.name}
@@ -239,11 +229,9 @@ const Layout: React.FC = () => {
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <Icon 
-                    className={`mr-3 h-5 w-5 transition-colors duration-200 ${
-                      isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
-                    }`}
-                  />
+                  <div className="mr-3 flex-shrink-0">
+                    <NeuralFlowIcon name={item.icon} size={20} />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="truncate">{item.name}</span>
