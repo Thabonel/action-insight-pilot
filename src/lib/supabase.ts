@@ -1,9 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = "https://kciuuxoqxfsogjuqflou.supabase.co";
-const supabaseAnonKey = "<JWT_TOKEN>";
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the single supabase client from integrations to avoid multiple GoTrue instances
+export { supabase } from '@/integrations/supabase/client';
 
 export type AuthUser = {
   id: string;
