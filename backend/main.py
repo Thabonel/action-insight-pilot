@@ -39,7 +39,7 @@ app.add_middleware(
 
 # Only load essential routers that don't have complex dependencies
 essential_routers = [
-    ("routes.system_health", "router"),
+    ("backend.routes.system_health", "router"),
 ]
 
 loaded_routers = []
@@ -60,18 +60,18 @@ for module_path, router_name in essential_routers:
 
 # Try to load other routers with better error handling
 optional_routers = [
-    ("routes.unified_agents", "router"),
-    ("routes.campaigns", "router"),
-    ("routes.lead_capture", "router"),
-    ("routes.email", "router"),
-    ("routes.workflows", "router"),
-    ("routes.brand", "router"),
-    ("routes.keyword_research", "router"),
-    ("routes.research", "router"),
-    ("routes.ai_video", "router"),
-    ("routes.user", "router"),
-    ("routes.support", "router"),
-    ("routes.assessments", "router"),
+    ("backend.routes.unified_agents", "router"),
+    ("backend.routes.campaigns", "router"),
+    ("backend.routes.lead_capture", "router"),
+    ("backend.routes.email", "router"),
+    ("backend.routes.workflows", "router"),
+    ("backend.routes.brand", "router"),
+    ("backend.routes.keyword_research", "router"),
+    ("backend.routes.research", "router"),
+    ("backend.routes.ai_video", "router"),
+    ("backend.routes.user", "router"),
+    ("backend.routes.support", "router"),
+    ("backend.routes.assessments", "router"),
 ]
 
 for module_path, router_name in optional_routers:
