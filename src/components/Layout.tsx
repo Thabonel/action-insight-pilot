@@ -1,27 +1,9 @@
 import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  Zap,
-  Users,
-  FileText,
-  Share2,
-  Mail,
-  BarChart3,
-  Workflow,
-  FileCheck,
-  Settings,
-  BookOpen,
-  Link,
-  LogOut,
-  User,
-  Video,
-  Rocket
-} from 'lucide-react';
-import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserMode } from '@/hooks/useUserMode';
 import ModeSwitcher from '@/components/layout/ModeSwitcher';
+import NeuralFlowIcon, { NeuralFlowIconName } from '@/components/ui/NeuralFlowIcon';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,112 +34,120 @@ const Layout: React.FC = () => {
     }
   };
 
+  // Navigation item type
+  type NavItem = {
+    name: string;
+    href: string;
+    iconName: NeuralFlowIconName;
+    description: string;
+  };
+
   // Simple mode navigation items (3 items)
-  const simpleNavItems = [
+  const simpleNavItems: NavItem[] = [
     {
       name: 'Autopilot Dashboard',
       href: '/app/autopilot',
-      icon: Rocket,
+      iconName: 'autopilot',
       description: 'Your marketing results'
     },
     {
       name: 'AI Chat',
       href: '/app/conversational-dashboard',
-      icon: LayoutDashboard,
+      iconName: 'dashboard',
       description: 'Ask me anything'
     },
     {
       name: 'Settings',
       href: '/app/settings',
-      icon: Settings,
+      iconName: 'settings',
       description: 'Configure autopilot'
     }
   ];
 
   // Advanced mode navigation items
-  const advancedNavItems = [
+  const advancedNavItems: NavItem[] = [
     {
       name: 'AI Dashboard',
       href: '/app/conversational-dashboard',
-      icon: LayoutDashboard,
+      iconName: 'dashboard',
       description: 'AI-powered insights'
     },
     {
       name: 'Campaigns',
       href: '/app/campaigns',
-      icon: Zap,
+      iconName: 'campaigns',
       description: 'Marketing campaigns'
     },
     {
       name: 'Campaign Management',
       href: '/app/campaign-management',
-      icon: Zap,
+      iconName: 'campaigns',
       description: 'Advanced campaign tools'
     },
     {
       name: 'Leads',
       href: '/app/leads',
-      icon: Users,
+      iconName: 'leads',
       description: 'Lead management'
     },
     {
       name: 'Content',
       href: '/app/content',
-      icon: FileText,
+      iconName: 'content',
       description: 'Content creation'
     },
     {
       name: 'Social',
       href: '/app/social',
-      icon: Share2,
+      iconName: 'social',
       description: 'Social media'
     },
     {
       name: 'Email',
       href: '/app/email',
-      icon: Mail,
+      iconName: 'email',
       description: 'Email automation'
     },
     {
       name: 'Analytics',
       href: '/app/analytics',
-      icon: BarChart3,
+      iconName: 'analytics',
       description: 'Performance metrics'
     },
     {
       name: 'Viral Video Marketing',
       href: '/app/viral-video-marketing',
-      icon: Video,
+      iconName: 'content',
       description: 'Video content automation'
     },
     {
       name: 'Proposals',
       href: '/app/proposals',
-      icon: FileCheck,
+      iconName: 'proposals',
       description: 'Proposal generation'
     },
     {
       name: 'Knowledge',
       href: '/app/knowledge',
-      icon: LogoMarkIcon,
+      iconName: 'dashboard',
       description: 'AI knowledge base'
     },
     {
       name: 'Settings',
       href: '/app/settings',
-      icon: Settings,
+      iconName: 'settings',
       description: 'System configuration'
     },
     {
       name: 'User Manual',
       href: '/app/user-manual',
-      icon: BookOpen,
+      iconName: 'documentation',
       description: 'Documentation'
     },
     {
       name: 'Connect Platforms',
       href: '/app/connect-platforms',
-      icon: Link,
+      iconName: 'integrations',
       description: 'Integration setup'
     }
   ];
@@ -183,7 +173,6 @@ const Layout: React.FC = () => {
         <nav className="flex-1 px-3 pb-6 overflow-y-auto">
           <div className="space-y-1">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.href;
 
               return (
@@ -196,11 +185,9 @@ const Layout: React.FC = () => {
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <Icon
-                    className={`mr-3 h-5 w-5 transition-colors duration-200 ${
-                      isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
-                    }`}
-                  />
+                  <div className="mr-3 flex-shrink-0">
+                    <NeuralFlowIcon name={item.iconName} size={24} />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="truncate">{item.name}</span>
@@ -225,7 +212,7 @@ const Layout: React.FC = () => {
           <div className="p-4 border-t border-gray-200 flex-shrink-0">
             <div className="flex items-center space-x-2 mb-3">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-blue-600" />
+                <NeuralFlowIcon name="profile" size={16} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
@@ -240,7 +227,7 @@ const Layout: React.FC = () => {
                   className="w-full justify-start text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   disabled={isLoggingOut}
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <NeuralFlowIcon name="sign-out" size={16} className="mr-2" />
                   {isLoggingOut ? 'Signing out...' : 'Sign out'}
                 </Button>
               </AlertDialogTrigger>
