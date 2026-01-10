@@ -34,9 +34,10 @@ export const UserModeProvider: React.FC<{ children: ReactNode }> = ({ children }
             filter: `user_id=eq.${user.id}`
           },
           (payload) => {
-            if (payload.new && payload.new.interface_mode) {
-              const newMode = payload.new.interface_mode;
-              setModeState(newMode as UserMode);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const newPayload = payload.new as any;
+            if (newPayload && newPayload.interface_mode) {
+              setModeState(newPayload.interface_mode as UserMode);
             }
           }
         )
@@ -54,16 +55,17 @@ export const UserModeProvider: React.FC<{ children: ReactNode }> = ({ children }
     try {
       const { data, error } = await supabase
         .from('user_preferences')
-        .select('interface_mode')
+        .select('*')
         .eq('user_id', user?.id)
+        .eq('preference_category', 'general')
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
 
-      const savedMode = data?.interface_mode || 'simple';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const savedMode = (data as any)?.interface_mode || 'simple';
       setModeState(savedMode as UserMode);
     } catch (error) {
-      console.error('Error fetching user mode:', error);
       setModeState('simple');
     } finally {
       setIsLoading(false);
@@ -87,7 +89,7 @@ export const UserModeProvider: React.FC<{ children: ReactNode }> = ({ children }
             interface_mode: newMode
           },
           {
-            onConflict: 'user_id'
+            onConflict: 'user_id,preference_category'
           }
         );
 
