@@ -173,23 +173,29 @@ const Layout: React.FC = () => {
     <div className="flex h-screen bg-gray-50 dark:bg-[#0B0D10]">
       {/* Sidebar */}
       <aside className={`${collapsed ? 'w-16' : 'w-64'} bg-white dark:bg-[#0B0D10] shadow-sm dark:shadow-none border-r border-gray-200 dark:border-[#273140] flex flex-col transition-all duration-200`}>
-        <div className={`flex items-center ${collapsed ? 'p-3' : 'p-6'} gap-2 flex-shrink-0`}>
-          <LogoMarkIcon className={`flex-shrink-0 ${collapsed ? 'h-6 w-6' : 'h-7 w-7'} relative top-[1px]`} />
+        <div className={`${collapsed ? 'p-3' : 'p-6'} flex flex-col gap-2 flex-shrink-0`}>
+          <div className={`${collapsed ? 'flex items-center justify-center' : 'flex items-baseline gap-2'}`}>
+            <LogoMarkIcon className={`${collapsed ? 'h-6 w-6' : 'h-7 w-7'} relative top-[2px]`} />
+            {!collapsed && (
+              <h2 className="text-xl font-bold leading-tight text-gray-900 dark:text-[#E9EEF5] whitespace-normal">
+                I Boost Campaign
+              </h2>
+            )}
+          </div>
           {!collapsed && (
-            <div className="min-w-0" aria-label="AI Boost Campaign">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-[#E9EEF5] truncate">I Boost Campaign</h2>
-              <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1 truncate">
-                {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
-              </p>
-            </div>
+            <p className="text-sm text-gray-600 dark:text-[#94A3B8]">
+              {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
+            </p>
           )}
-          <button
-            onClick={toggleCollapsed}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className={`ml-auto rounded-md p-2 hover:bg-gray-50 dark:hover:bg-[#1C2430] text-gray-600 dark:text-[#94A3B8]`}
-          >
-            {collapsed ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
-          </button>
+          <div className={`${collapsed ? 'mt-0' : 'mt-2'} ${collapsed ? 'flex justify-center' : 'flex justify-end'}`}>
+            <button
+              onClick={toggleCollapsed}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className={`rounded-md p-2 hover:bg-gray-50 dark:hover:bg-[#1C2430] text-gray-600 dark:text-[#94A3B8]`}
+            >
+              {collapsed ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
         {/* Mode Switcher */}
