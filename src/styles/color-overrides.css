@@ -150,9 +150,16 @@ html.dark [class*="border-slate"],
 html.dark .text-blue-600,
 html.dark .text-blue-500,
 html.dark .text-blue-700,
+html.dark .text-blue-600,
+html.dark .text-blue-500,
+html.dark .text-blue-700,
+html.dark .text-blue-800,
+html.dark .text-blue-900,
 .dark .text-blue-600,
 .dark .text-blue-500,
-.dark .text-blue-700 {
+.dark .text-blue-700,
+.dark .text-blue-800,
+.dark .text-blue-900 {
   color: #60A5FA !important;
   filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.3));
 }
@@ -169,9 +176,27 @@ html.dark .bg-blue-700,
 
 html.dark .bg-blue-50,
 html.dark .bg-blue-100,
+html.dark .bg-blue-50,
+html.dark .bg-blue-100,
 .dark .bg-blue-50,
 .dark .bg-blue-100 {
   background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Light color utility surfaces on dark - unify to elevated slate */
+html.dark .bg-green-50,
+html.dark .bg-purple-50,
+html.dark .bg-orange-50,
+html.dark .bg-yellow-50,
+html.dark .bg-red-50,
+html.dark .bg-sky-50,
+.dark .bg-green-50,
+.dark .bg-purple-50,
+.dark .bg-orange-50,
+.dark .bg-yellow-50,
+.dark .bg-red-50,
+.dark .bg-sky-50 {
+  background-color: #1C2430 !important;
 }
 
 /* ===== HOVER STATES ===== */
