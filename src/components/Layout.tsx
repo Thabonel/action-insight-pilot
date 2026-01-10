@@ -173,16 +173,19 @@ const Layout: React.FC = () => {
     <div className="flex h-screen bg-gray-50 dark:bg-[#0B0D10]">
       {/* Sidebar */}
       <aside className={`${collapsed ? 'w-16' : 'w-64'} bg-white dark:bg-[#0B0D10] shadow-sm dark:shadow-none border-r border-gray-200 dark:border-[#273140] flex flex-col transition-all duration-200`}>
-        <div className={`${collapsed ? 'p-3' : 'p-6'} flex items-center gap-2 flex-shrink-0 sidebar-header`}>
-          <div className="logo-container flex items-center flex-shrink-0">
-            <LogoMarkIcon className={`${collapsed ? 'h-6 w-6' : 'h-7 w-7'} relative top-[2px]`} />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <h2 className="text-xl font-bold leading-tight text-gray-900 dark:text-[#E9EEF5]">
-                I Boost Campaign
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">
+        <div className={`${collapsed ? 'p-3' : 'p-6'} flex ${collapsed ? 'items-center justify-center' : 'items-start'} gap-2 flex-shrink-0 sidebar-header`}>
+          {collapsed ? (
+            <LogoMarkIcon className={`h-6 w-6`} />
+          ) : (
+            <div className="min-w-0 w-full">
+              {/* Title row: logo + name on the same baseline */}
+              <div className="flex items-baseline gap-2">
+                <LogoMarkIcon className="h-[1.35em] w-[1.35em] align-baseline relative top-[2px]" />
+                <h2 className="text-xl font-bold leading-tight text-gray-900 dark:text-[#E9EEF5] whitespace-normal">
+                  I Boost Campaign
+                </h2>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1">
                 {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
               </p>
             </div>
