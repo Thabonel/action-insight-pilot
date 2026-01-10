@@ -9,10 +9,10 @@ import { PageHelpModal } from '@/components/common/PageHelpModal';
 
 const Analytics: React.FC = () => {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics & Insights</h1>
-        <p className="text-gray-600 mt-2">AI-powered analytics that predict performance and suggest optimizations</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Analytics & Insights</h1>
+        <p className="text-gray-600 dark:text-[#94A3B8] mt-2">AI-powered analytics that predict performance and suggest optimizations</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

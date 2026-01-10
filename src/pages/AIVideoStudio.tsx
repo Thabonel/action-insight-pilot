@@ -320,14 +320,14 @@ const AIVideoStudio: React.FC = () => {
   // ============================================================================
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className="p-6 space-y-6 bg-gray-50 dark:bg-[#0B0D10] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5] flex items-center gap-2">
             AI Video Studio
           </h1>
-          <p className="text-gray-600 mt-1">Create professional marketing videos with AI</p>
+          <p className="text-gray-600 dark:text-[#94A3B8] mt-1">Create professional marketing videos with AI</p>
         </div>
 
         <div className="flex gap-2">
@@ -561,7 +561,7 @@ const AIVideoStudio: React.FC = () => {
             <CardContent className="space-y-4">
               {!videoUrl && (
                 <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">Ready to generate your video?</p>
+                  <p className="text-gray-600 dark:text-[#94A3B8] mb-4">Ready to generate your video?</p>
 
                   <Button
                     onClick={handleGenerateVideo}

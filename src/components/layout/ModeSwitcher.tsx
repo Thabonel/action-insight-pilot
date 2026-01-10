@@ -70,7 +70,7 @@ const ModeSwitcher: React.FC = () => {
             </div>
             {mode === 'simple' && <Badge className="bg-blue-600">Active</Badge>}
           </div>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-600 dark:text-[#94A3B8]">
             Autopilot dashboard with weekly results and lead inbox. Perfect for hands-off marketing.
           </p>
         </DropdownMenuItem>
@@ -87,14 +87,14 @@ const ModeSwitcher: React.FC = () => {
             </div>
             {mode === 'advanced' && <Badge className="bg-purple-600">Active</Badge>}
           </div>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-600 dark:text-[#94A3B8]">
             Full access to all marketing tools, analytics, and campaign controls. For power users.
           </p>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
-        <div className="px-2 py-2 text-xs text-gray-500">
+        <div className="px-2 py-2 text-xs text-gray-500 dark:text-[#64748B]">
           You can switch modes anytime
         </div>
       </DropdownMenuContent>

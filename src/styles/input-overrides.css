@@ -1,31 +1,18 @@
 
-/* Input Field Overrides - Ensuring White Backgrounds and Black Text */
+/* Input Field Overrides - Light Mode Default, Dark Mode Support */
 
-/* Global input field styling with higher specificity */
-input,
-textarea,
-select,
-.bg-background input,
-.bg-background textarea,
-.bg-background select,
-[class*="bg-"] input,
-[class*="bg-"] textarea,
-[class*="bg-"] select {
+/* ===== LIGHT MODE INPUTS ===== */
+:root:not(.dark) input,
+:root:not(.dark) textarea,
+:root:not(.dark) select {
   background-color: white !important;
   color: black !important;
   border: 1px solid #d1d5db !important;
 }
 
-/* Focus states with higher specificity */
-input:focus,
-textarea:focus,
-select:focus,
-.bg-background input:focus,
-.bg-background textarea:focus,
-.bg-background select:focus,
-[class*="bg-"] input:focus,
-[class*="bg-"] textarea:focus,
-[class*="bg-"] select:focus {
+:root:not(.dark) input:focus,
+:root:not(.dark) textarea:focus,
+:root:not(.dark) select:focus {
   background-color: white !important;
   color: black !important;
   border-color: #2563eb !important;
@@ -33,125 +20,156 @@ select:focus,
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
 }
 
-/* Placeholder text with higher specificity */
-input::placeholder,
-textarea::placeholder,
-.bg-background input::placeholder,
-.bg-background textarea::placeholder,
-[class*="bg-"] input::placeholder,
-[class*="bg-"] textarea::placeholder {
+:root:not(.dark) input::placeholder,
+:root:not(.dark) textarea::placeholder {
   color: #6b7280 !important;
   opacity: 1 !important;
 }
 
-/* Disabled state */
-input:disabled,
-textarea:disabled,
-select:disabled {
+:root:not(.dark) input:disabled,
+:root:not(.dark) textarea:disabled,
+:root:not(.dark) select:disabled {
   background-color: #f9fafb !important;
   color: #6b7280 !important;
   border-color: #d1d5db !important;
   opacity: 0.7 !important;
 }
 
-/* Shadcn UI component overrides */
-.bg-background {
+:root:not(.dark) select option {
   background-color: white !important;
-}
-
-.text-foreground {
   color: black !important;
 }
 
-/* Override any theme-based styling */
-[data-theme] input,
-[data-theme] textarea,
-[data-theme] select {
+/* ===== DARK MODE INPUTS ===== */
+html.dark input,
+html.dark textarea,
+html.dark select,
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
+  border: 1px solid #273140 !important;
+}
+
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus,
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
+  border-color: #3B82F6 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder,
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748B !important;
+  opacity: 1 !important;
+}
+
+html.dark input:disabled,
+html.dark textarea:disabled,
+html.dark select:disabled,
+.dark input:disabled,
+.dark textarea:disabled,
+.dark select:disabled {
+  background-color: #0B0D10 !important;
+  color: #64748B !important;
+  border-color: #273140 !important;
+  opacity: 0.7 !important;
+}
+
+html.dark select option,
+.dark select option {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
+}
+
+/* ===== REACT SELECT OVERRIDES ===== */
+/* Light mode */
+:root:not(.dark) .react-select__control {
   background-color: white !important;
-  color: black !important;
   border-color: #d1d5db !important;
 }
 
-/* System dark mode override */
-@media (prefers-color-scheme: dark) {
-  input,
-  textarea,
-  select {
-    background-color: white !important;
-    color: black !important;
-    border-color: #d1d5db !important;
-  }
+:root:not(.dark) .react-select__single-value,
+:root:not(.dark) .react-select__input {
+  color: black !important;
 }
 
-/* Select dropdown styling */
-select option {
+:root:not(.dark) .react-select__menu {
+  background-color: white !important;
+}
+
+:root:not(.dark) .react-select__option {
   background-color: white !important;
   color: black !important;
 }
 
-/* React Select and other third-party component overrides */
-.react-select__control,
-.react-select__control--is-focused {
-  background-color: white !important;
-  border-color: #d1d5db !important;
-}
-
-.react-select__single-value,
-.react-select__input {
-  color: black !important;
-}
-
-.react-select__menu {
-  background-color: white !important;
-}
-
-.react-select__option {
-  background-color: white !important;
-  color: black !important;
-}
-
-.react-select__option--is-focused {
+:root:not(.dark) .react-select__option--is-focused {
   background-color: #f3f4f6 !important;
-  color: black !important;
 }
 
-/* Additional overrides for component library inputs */
-.form-control,
-.form-input,
-.input-field,
-[role="textbox"],
-[role="combobox"] {
+/* Dark mode */
+html.dark .react-select__control,
+.dark .react-select__control {
+  background-color: #151A21 !important;
+  border-color: #273140 !important;
+}
+
+html.dark .react-select__single-value,
+html.dark .react-select__input,
+.dark .react-select__single-value,
+.dark .react-select__input {
+  color: #E9EEF5 !important;
+}
+
+html.dark .react-select__menu,
+.dark .react-select__menu {
+  background-color: #151A21 !important;
+}
+
+html.dark .react-select__option,
+.dark .react-select__option {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
+}
+
+html.dark .react-select__option--is-focused,
+.dark .react-select__option--is-focused {
+  background-color: #1C2430 !important;
+}
+
+/* ===== FORM CONTROL OVERRIDES ===== */
+/* Light mode */
+:root:not(.dark) .form-control,
+:root:not(.dark) .form-input,
+:root:not(.dark) .input-field,
+:root:not(.dark) [role="textbox"],
+:root:not(.dark) [role="combobox"] {
   background-color: white !important;
   color: black !important;
   border: 1px solid #d1d5db !important;
 }
 
-/* Override any inherited dark theme styling */
-* input,
-* textarea,
-* select {
-  background-color: white !important;
-  color: black !important;
-}
-
-/* Ensure buttons in dark containers have proper text color */
-.bg-gray-900 button,
-.bg-slate-900 button,
-.bg-black button {
-  color: white !important;
-}
-
-/* But inputs in dark containers should remain light */
-.bg-gray-900 input,
-.bg-gray-900 textarea,
-.bg-gray-900 select,
-.bg-slate-900 input,
-.bg-slate-900 textarea,
-.bg-slate-900 select,
-.bg-black input,
-.bg-black textarea,
-.bg-black select {
-  background-color: white !important;
-  color: black !important;
-  border: 1px solid #d1d5db !important;
+/* Dark mode */
+html.dark .form-control,
+html.dark .form-input,
+html.dark .input-field,
+html.dark [role="textbox"],
+html.dark [role="combobox"],
+.dark .form-control,
+.dark .form-input,
+.dark .input-field,
+.dark [role="textbox"],
+.dark [role="combobox"] {
+  background-color: #151A21 !important;
+  color: #E9EEF5 !important;
+  border: 1px solid #273140 !important;
 }

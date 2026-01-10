@@ -88,13 +88,13 @@ const Workflows: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0B0D10] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Workflows</h1>
-            <p className="text-gray-600 mt-1">Automate your marketing processes</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Workflows</h1>
+            <p className="text-gray-600 dark:text-[#94A3B8] mt-1">Automate your marketing processes</p>
           </div>
           <Button>
             Create Workflow
@@ -114,8 +114,8 @@ const Workflows: React.FC = () => {
                     key={workflow.id}
                     className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                       selectedWorkflow.id === workflow.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-[rgba(59,130,246,0.15)]'
+                        : 'border-gray-200 dark:border-[#273140] hover:border-gray-300 dark:hover:border-[#334155]'
                     }`}
                     onClick={() => setSelectedWorkflow(workflow)}
                   >
@@ -125,7 +125,7 @@ const Workflows: React.FC = () => {
                         {workflow.status}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-600 mb-2">
+                    <p className="text-xs text-gray-600 dark:text-[#94A3B8] mb-2">
                       {workflow.description}
                     </p>
                     <div className="flex items-center space-x-2">

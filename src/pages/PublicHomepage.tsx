@@ -63,20 +63,20 @@ const PublicHomepage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-[#0B0D10]">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-gray-200 dark:border-[#273140] bg-white/80 dark:bg-[#151A21]/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <LogoMarkIcon className="h-8 w-8" />
-              <span className="text-xl font-bold text-black">AI Boost Campaign</span>
+              <span className="text-xl font-bold text-black dark:text-[#E9EEF5]">AI Boost Campaign</span>
             </div>
             <div className="flex items-center space-x-4">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('/auth')}
-                className="text-black hover:text-blue-600 hover:bg-blue-50"
+                className="text-black dark:text-[#E9EEF5] hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-[#1C2430]"
               >
                 Sign In
               </Button>
@@ -142,13 +142,13 @@ const PublicHomepage: React.FC = () => {
       </section>
 
       {/* Problem Statement */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-[#0B0D10]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-black mb-6">
+            <h2 className="text-4xl font-bold text-black dark:text-[#E9EEF5] mb-6">
               Marketing Shouldn't Be This Hard
             </h2>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-700 dark:text-[#94A3B8] max-w-3xl mx-auto">
               You know you need to run campaigns, create content, and track performance.
               But juggling multiple tools and learning complex platforms takes time you don't have.
             </p>
@@ -157,22 +157,22 @@ const PublicHomepage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="p-6 border-red-200 bg-red-50">
               <CardContent className="p-0">
-                <h3 className="text-lg font-semibold text-black mb-2">Too Many Tools</h3>
-                <p className="text-gray-700">Email here, social there, analytics somewhere else. Logging into five platforms just to post one campaign.</p>
+                <h3 className="text-lg font-semibold text-black dark:text-[#E9EEF5] mb-2">Too Many Tools</h3>
+                <p className="text-gray-700 dark:text-[#94A3B8]">Email here, social there, analytics somewhere else. Logging into five platforms just to post one campaign.</p>
               </CardContent>
             </Card>
 
             <Card className="p-6 border-orange-200 bg-orange-50">
               <CardContent className="p-0">
-                <h3 className="text-lg font-semibold text-black mb-2">Learning Curve</h3>
-                <p className="text-gray-700">Every platform has its own interface, rules, and best practices. Just when you figure one out, they update it.</p>
+                <h3 className="text-lg font-semibold text-black dark:text-[#E9EEF5] mb-2">Learning Curve</h3>
+                <p className="text-gray-700 dark:text-[#94A3B8]">Every platform has its own interface, rules, and best practices. Just when you figure one out, they update it.</p>
               </CardContent>
             </Card>
 
             <Card className="p-6 border-yellow-200 bg-yellow-50">
               <CardContent className="p-0">
-                <h3 className="text-lg font-semibold text-black mb-2">No Time</h3>
-                <p className="text-gray-700">You're running a business. Marketing should work for you, not become another full-time job.</p>
+                <h3 className="text-lg font-semibold text-black dark:text-[#E9EEF5] mb-2">No Time</h3>
+                <p className="text-gray-700 dark:text-[#94A3B8]">You're running a business. Marketing should work for you, not become another full-time job.</p>
               </CardContent>
             </Card>
           </div>
@@ -183,10 +183,10 @@ const PublicHomepage: React.FC = () => {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-black mb-6">
+            <h2 className="text-4xl font-bold text-black dark:text-[#E9EEF5] mb-6">
               Everything You Need in One Place
             </h2>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-700 dark:text-[#94A3B8] max-w-3xl mx-auto">
               Manage campaigns, create content, track leads, and see what's working. All in one dashboard.
             </p>
           </div>
@@ -195,13 +195,13 @@ const PublicHomepage: React.FC = () => {
             {features.map((feature, index) => (
               <div key={index} className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12`}>
                 <div className="flex-1">
-                  <Card className="p-8 border-0 shadow-lg bg-white">
+                  <Card className="p-8 border-0 shadow-lg bg-white dark:bg-[#151A21] dark:shadow-none dark:border dark:border-[#273140]">
                     <CardContent className="p-0">
-                      <h3 className="text-2xl font-bold text-black mb-4">{feature.title}</h3>
-                      <p className="text-lg text-gray-700 mb-6 leading-relaxed">{feature.description}</p>
+                      <h3 className="text-2xl font-bold text-black dark:text-[#E9EEF5] mb-4">{feature.title}</h3>
+                      <p className="text-lg text-gray-700 dark:text-[#94A3B8] mb-6 leading-relaxed">{feature.description}</p>
                       <ul className="space-y-3 list-disc list-inside">
                         {feature.benefits.map((benefit, benefitIndex) => (
-                          <li key={benefitIndex} className="text-black">
+                          <li key={benefitIndex} className="text-black dark:text-[#E9EEF5]">
                             {benefit}
                           </li>
                         ))}
@@ -246,9 +246,9 @@ const PublicHomepage: React.FC = () => {
       </section>
 
       {/* Support Section */}
-      <section className="py-12 bg-gray-50 border-t border-gray-200">
+      <section className="py-12 bg-gray-50 dark:bg-[#0B0D10] border-t border-gray-200 dark:border-[#273140]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-lg text-gray-700 mb-4">
+          <p className="text-lg text-gray-700 dark:text-[#94A3B8] mb-4">
             If something does not work, let me know and I will fix it immediately.
           </p>
           <SupportTicketDialog />
@@ -256,30 +256,30 @@ const PublicHomepage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white text-black py-12 border-t border-gray-200">
+      <footer className="bg-white dark:bg-[#151A21] text-black dark:text-[#E9EEF5] py-12 border-t border-gray-200 dark:border-[#273140]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center space-x-2 mb-4 md:mb-0">
                 <LogoMarkIcon className="h-8 w-8" />
-                <span className="text-xl font-bold text-black">AI Boost Campaign</span>
+                <span className="text-xl font-bold text-black dark:text-[#E9EEF5]">AI Boost Campaign</span>
               </div>
               <div className="flex flex-wrap justify-center gap-6 text-sm">
-                <button onClick={() => navigate('/privacy')} className="text-gray-600 hover:text-blue-600">
+                <button onClick={() => navigate('/privacy')} className="text-gray-600 dark:text-[#94A3B8] hover:text-blue-600">
                   Privacy Policy
                 </button>
-                <button onClick={() => navigate('/terms')} className="text-gray-600 hover:text-blue-600">
+                <button onClick={() => navigate('/terms')} className="text-gray-600 dark:text-[#94A3B8] hover:text-blue-600">
                   Terms of Service
                 </button>
-                <button onClick={() => navigate('/cookies')} className="text-gray-600 hover:text-blue-600">
+                <button onClick={() => navigate('/cookies')} className="text-gray-600 dark:text-[#94A3B8] hover:text-blue-600">
                   Cookie Policy
                 </button>
-                <button onClick={() => navigate('/acceptable-use')} className="text-gray-600 hover:text-blue-600">
+                <button onClick={() => navigate('/acceptable-use')} className="text-gray-600 dark:text-[#94A3B8] hover:text-blue-600">
                   Acceptable Use
                 </button>
               </div>
             </div>
-            <div className="text-center text-gray-600 text-sm">
+            <div className="text-center text-gray-600 dark:text-[#64748B] text-sm">
               © {new Date().getFullYear()} AI Boost Campaign. All rights reserved.
             </div>
           </div>

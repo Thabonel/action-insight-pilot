@@ -7,15 +7,15 @@ const PrivacyPolicy: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
+    <div className="min-h-screen bg-white dark:bg-[#0B0D10]">
+      <header className="border-b border-gray-200 dark:border-[#273140] bg-white dark:bg-[#151A21] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <LogoMarkIcon className="h-8 w-8" />
-              <span className="text-xl font-bold text-black">AI Boost Campaign</span>
+              <span className="text-xl font-bold text-black dark:text-[#E9EEF5]">AI Boost Campaign</span>
             </div>
-            <Button variant="ghost" onClick={() => navigate('/')} className="text-black hover:text-blue-600">
+            <Button variant="ghost" onClick={() => navigate('/')} className="text-black dark:text-[#E9EEF5] hover:text-blue-600">
               Back to Home
             </Button>
           </div>
@@ -23,8 +23,8 @@ const PrivacyPolicy: React.FC = () => {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-bold text-black mb-4">Privacy Policy</h1>
-        <p className="text-gray-600 mb-8">Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <h1 className="text-4xl font-bold text-black dark:text-[#E9EEF5] mb-4">Privacy Policy</h1>
+        <p className="text-gray-600 dark:text-[#94A3B8] mb-8">Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 
         <div className="prose prose-lg max-w-none space-y-8">
           <section>

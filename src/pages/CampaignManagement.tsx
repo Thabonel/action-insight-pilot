@@ -16,10 +16,10 @@ const CampaignManagement: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-white dark:bg-[#0B0D10] min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Campaign Intelligence Hub</h1>
-        <p className="text-slate-600">Manage campaigns, create content, and leverage AI-powered tools</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-[#E9EEF5] mb-2">Campaign Intelligence Hub</h1>
+        <p className="text-slate-600 dark:text-[#94A3B8]">Manage campaigns, create content, and leverage AI-powered tools</p>
       </div>
 
       <Tabs value={activeView} onValueChange={(value) => setActiveView(value as typeof activeView)} className="space-y-6">

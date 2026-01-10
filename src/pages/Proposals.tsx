@@ -101,11 +101,11 @@ const Proposals: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Proposal Generator</h1>
-          <p className="text-slate-600 mt-2">Create professional proposals with AI assistance</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-[#E9EEF5]">Proposal Generator</h1>
+          <p className="text-slate-600 dark:text-[#94A3B8] mt-2">Create professional proposals with AI assistance</p>
         </div>
         <Button onClick={() => setActiveTab('create')} className="flex items-center gap-2">
           New Proposal

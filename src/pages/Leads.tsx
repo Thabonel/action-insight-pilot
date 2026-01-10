@@ -122,12 +122,12 @@ const Leads: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white dark:bg-[#0B0D10] min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lead Generation Intelligence</h1>
-          <p className="text-gray-600 mt-2">AI-powered lead scoring and conversion optimization</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-[#E9EEF5]">Lead Generation Intelligence</h1>
+          <p className="text-gray-600 dark:text-[#94A3B8] mt-2">AI-powered lead scoring and conversion optimization</p>
         </div>
         
         <div className="flex space-x-3">
@@ -158,7 +158,7 @@ const Leads: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Total Leads</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Total Leads</p>
               <p className="text-2xl font-bold">{stats.totalLeads.toLocaleString()}</p>
               {stats.totalLeads === 0 && (
                 <p className="text-xs text-gray-400">No leads yet</p>
@@ -170,7 +170,7 @@ const Leads: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Hot Leads</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Hot Leads</p>
               <p className="text-2xl font-bold">{stats.hotLeads.toLocaleString()}</p>
               <p className="text-xs text-blue-600">85%+ score</p>
             </div>
@@ -180,7 +180,7 @@ const Leads: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Conversion Rate</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Conversion Rate</p>
               <p className="text-2xl font-bold">{stats.conversionRate}%</p>
               {stats.totalLeads > 0 && (
                 <p className="text-xs text-green-600">
@@ -194,7 +194,7 @@ const Leads: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div>
-              <p className="text-sm text-gray-600">Avg. Time to Convert</p>
+              <p className="text-sm text-gray-600 dark:text-[#94A3B8]">Avg. Time to Convert</p>
               <p className="text-2xl font-bold">{stats.avgTimeToConvert}d</p>
               <p className="text-xs text-purple-600">Improving</p>
             </div>

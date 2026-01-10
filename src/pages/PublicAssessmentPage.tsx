@@ -154,12 +154,12 @@ export default function PublicAssessmentPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:bg-[#0B0D10] flex items-center justify-center p-4">
         <Card className="w-full max-w-2xl">
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading assessment...</p>
+              <p className="mt-4 text-gray-600 dark:text-[#94A3B8]">Loading assessment...</p>
             </div>
           </CardContent>
         </Card>
@@ -170,13 +170,13 @@ export default function PublicAssessmentPage() {
   // Error state
   if (error && !assessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:bg-[#0B0D10] flex items-center justify-center p-4">
         <Card className="w-full max-w-2xl">
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <div className="text-red-500 text-5xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Assessment Not Available</h2>
-              <p className="text-gray-600">{error}</p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-[#E9EEF5] mb-2">Assessment Not Available</h2>
+              <p className="text-gray-600 dark:text-[#94A3B8]">{error}</p>
             </div>
           </CardContent>
         </Card>
@@ -192,17 +192,17 @@ export default function PublicAssessmentPage() {
   const canProceed = currentAnswer !== undefined && currentAnswer !== '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:bg-[#0B0D10] py-8 px-4">
       <div className="max-w-3xl mx-auto">
 
         {/* Landing Page */}
         {currentStep === 'landing' && (
           <Card className="shadow-xl">
             <CardHeader className="text-center space-y-4 pb-8">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-[#E9EEF5] leading-tight">
                 {assessment.headline}
               </h1>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-gray-600 dark:text-[#94A3B8]">
                 {assessment.subheadline}
               </p>
             </CardHeader>
