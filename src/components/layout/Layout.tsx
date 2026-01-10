@@ -17,7 +17,7 @@ import {
   LogOut,
   User,
   Shield,
-  Sparkles
+  Rocket
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserMode } from '@/hooks/useUserMode';
@@ -57,7 +57,7 @@ const Layout: React.FC = () => {
     {
       name: 'Autopilot Dashboard',
       href: '/app/autopilot',
-      icon: Sparkles,
+      icon: Rocket,
       description: 'Your marketing results'
     },
     {
@@ -79,7 +79,7 @@ const Layout: React.FC = () => {
     {
       name: 'Autopilot',
       href: '/app/autopilot',
-      icon: Sparkles,
+      icon: Rocket,
       description: 'Marketing automation'
     },
     {

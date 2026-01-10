@@ -16,7 +16,7 @@ import {
   LogOut,
   User,
   Video,
-  Sparkles
+  Rocket
 } from 'lucide-react';
 import LogoMarkIcon from '@/components/LogoMarkIcon';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,7 +57,7 @@ const Layout: React.FC = () => {
     {
       name: 'Autopilot Dashboard',
       href: '/app/autopilot',
-      icon: Sparkles,
+      icon: Rocket,
       description: 'Your marketing results'
     },
     {
