@@ -174,10 +174,10 @@ const Layout: React.FC = () => {
       {/* Sidebar */}
       <aside className={`${collapsed ? 'w-16' : 'w-64'} bg-white dark:bg-[#0B0D10] shadow-sm dark:shadow-none border-r border-gray-200 dark:border-[#273140] flex flex-col transition-all duration-200`}>
         <div className={`flex items-center ${collapsed ? 'p-3' : 'p-6'} gap-2 flex-shrink-0`}>
-          <LogoMarkIcon className={`flex-shrink-0 ${collapsed ? 'h-6 w-6' : 'h-7 w-7'}`} />
+          <LogoMarkIcon className={`flex-shrink-0 ${collapsed ? 'h-6 w-6' : 'h-7 w-7'} relative top-[1px]`} />
           {!collapsed && (
-            <div className="min-w-0">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-[#E9EEF5] truncate">AI Boost Campaign</h2>
+            <div className="min-w-0" aria-label="AI Boost Campaign">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-[#E9EEF5] truncate">I Boost Campaign</h2>
               <p className="text-sm text-gray-600 dark:text-[#94A3B8] mt-1 truncate">
                 {mode === 'simple' ? 'Autopilot Mode' : 'Intelligent Automation Platform'}
               </p>
