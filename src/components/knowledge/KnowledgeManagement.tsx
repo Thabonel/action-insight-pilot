@@ -8,6 +8,7 @@ import { CreateBucketDialog } from './CreateBucketDialog'
 import { BucketCard } from './BucketCard'
 import { DocumentUploadDialog } from './DocumentUploadDialog'
 import { KnowledgeSearch } from './KnowledgeSearch'
+import { DocumentsList } from './DocumentsList'
 
 const KnowledgeManagement: React.FC = () => {
   const { buckets, isLoading, createBucket } = useKnowledgeBuckets()
@@ -165,6 +166,12 @@ const KnowledgeManagement: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {selectedBucket && (
+        <div className="space-y-4">
+          <DocumentsList bucketId={selectedBucket} />
+        </div>
+      )}
 
       <CreateBucketDialog
         open={showCreateDialog}
