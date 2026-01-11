@@ -10,6 +10,7 @@ export type NeuralFlowIconName =
   | 'close'
   | 'content'
   | 'video'
+  | 'viral-video'
   | 'copy'
   | 'dashboard'
   | 'delete'

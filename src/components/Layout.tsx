@@ -122,7 +122,7 @@ const Layout: React.FC = () => {
     {
       name: 'Viral Video Marketing',
       href: '/app/viral-video-marketing',
-      iconName: 'video',
+      iconName: 'viral-video',
       description: 'Video content automation'
     },
     {
