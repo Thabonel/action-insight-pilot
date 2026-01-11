@@ -28,9 +28,13 @@ export const CreateBucketDialog: React.FC<CreateBucketDialogProps> = ({
 
   const { campaigns } = useCampaigns()
 
+  // Campaign bucket requires a campaign selection
+  const isCampaignTypeValid = bucketType === 'general' || (bucketType === 'campaign' && selectedCampaign)
+  const canSubmit = name.trim() && isCampaignTypeValid
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim()) return
+    if (!canSubmit) return
 
     try {
       setIsSubmitting(true)
@@ -90,19 +94,25 @@ export const CreateBucketDialog: React.FC<CreateBucketDialogProps> = ({
 
           {bucketType === 'campaign' && (
             <div className="space-y-2">
-              <Label htmlFor="campaign">Campaign</Label>
-              <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a campaign" />
-                </SelectTrigger>
-                <SelectContent>
-                  {campaigns.map(campaign => (
-                    <SelectItem key={campaign.id} value={campaign.id}>
-                      {campaign.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="campaign">Campaign <span className="text-red-500">*</span></Label>
+              {campaigns.length === 0 ? (
+                <p className="text-sm text-muted-foreground p-3 bg-muted rounded-md">
+                  No campaigns available. Please create a campaign first before creating a campaign-specific knowledge bucket.
+                </p>
+              ) : (
+                <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a campaign" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {campaigns.map(campaign => (
+                      <SelectItem key={campaign.id} value={campaign.id}>
+                        {campaign.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           )}
 
@@ -121,7 +131,7 @@ export const CreateBucketDialog: React.FC<CreateBucketDialogProps> = ({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !name.trim()}>
+            <Button type="submit" disabled={isSubmitting || !canSubmit}>
               {isSubmitting ? 'Creating...' : 'Create Bucket'}
             </Button>
           </DialogFooter>
