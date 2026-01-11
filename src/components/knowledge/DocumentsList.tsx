@@ -8,9 +8,10 @@ import { DocumentViewerDialog } from './DocumentViewerDialog'
 
 interface DocumentsListProps {
   bucketId: string
+  inDialog?: boolean
 }
 
-export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
+export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId, inDialog = false }) => {
   const { documents, reload, reprocessDocument } = useKnowledgeDocuments(bucketId)
   const [filter, setFilter] = useState('')
   const [viewerOpen, setViewerOpen] = useState(false)
@@ -58,52 +59,70 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId }) => {
     d.content.toLowerCase().includes(filter.toLowerCase())
   )
 
+  const content = (
+    <>
+      {/* Filter Bar */}
+      <div className={`flex items-center justify-between ${inDialog ? 'mb-4' : ''}`}>
+        <span className="font-medium">{inDialog ? '' : 'Documents'}</span>
+        <Input
+          placeholder="Filter documents..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-64"
+        />
+      </div>
+
+      {/* Documents */}
+      {visible.length === 0 ? (
+        <div className="text-muted-foreground py-8 text-center">No documents found</div>
+      ) : (
+        <div className="space-y-3">
+          {visible.map(doc => (
+            <div
+              key={doc.id}
+              className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+              onClick={() => { setActiveDoc(doc); setViewerOpen(true) }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{doc.title}</div>
+                  <div className="text-sm text-muted-foreground line-clamp-2 mt-1">{doc.content}</div>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setActiveDoc(doc); setViewerOpen(true) }}>View</Button>
+                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); downloadDoc(doc) }}>Download</Button>
+                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); reprocessDocument(doc.id) }}>Reprocess</Button>
+                  <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={(e) => { e.stopPropagation(); onDelete(doc) }}>Delete</Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <DocumentViewerDialog
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        document={activeDoc}
+        onSave={async (t, c) => { setEditTitle(t); setEditContent(c); await onSave(); }}
+        onDelete={async () => { if (activeDoc) await onDelete(activeDoc) }}
+        onReprocess={async () => { if (activeDoc) await reprocessDocument(activeDoc.id) }}
+        onDownload={(edited) => activeDoc && downloadDoc({ ...activeDoc, title: editTitle, content: editContent }, edited)}
+      />
+    </>
+  )
+
+  if (inDialog) {
+    return content
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Documents</span>
-          <Input
-            placeholder="Filter documents"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="w-64"
-          />
-        </CardTitle>
+        <CardTitle>Documents</CardTitle>
       </CardHeader>
       <CardContent>
-        {visible.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">No documents found</div>
-        ) : (
-          <div className="space-y-3">
-            {visible.map(doc => (
-              <div key={doc.id} className="border rounded-lg p-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-medium">{doc.title}</div>
-                    <div className="text-sm text-muted-foreground line-clamp-2">{doc.content}</div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => { setActiveDoc(doc); setViewerOpen(true) }}>View</Button>
-                    <Button size="sm" variant="outline" onClick={() => downloadDoc(doc)}>Download</Button>
-                    <Button size="sm" variant="outline" onClick={() => reprocessDocument(doc.id)}>Reprocess</Button>
-                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => onDelete(doc)}>Delete</Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <DocumentViewerDialog
-          open={viewerOpen}
-          onOpenChange={setViewerOpen}
-          document={activeDoc}
-          onSave={async (t, c) => { setEditTitle(t); setEditContent(c); await onSave(); }}
-          onDelete={async () => { if (activeDoc) await onDelete(activeDoc) }}
-          onReprocess={async () => { if (activeDoc) await reprocessDocument(activeDoc.id) }}
-          onDownload={(edited) => activeDoc && downloadDoc({ ...activeDoc, title: editTitle, content: editContent }, edited)}
-        />
+        {content}
       </CardContent>
     </Card>
   )
