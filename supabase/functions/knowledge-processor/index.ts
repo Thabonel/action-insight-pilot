@@ -110,15 +110,12 @@ async function uploadDocument(supabaseClient: SupabaseClient, userId: string, pa
       file_type,
       file_size,
       created_by: userId,
-      status: 'processing'
+      status: 'ready'
     })
     .select()
     .single()
 
   if (error) throw error
-
-  // Process document in background
-  processDocumentBackground(supabaseClient, data.id, content)
 
   return new Response(
     JSON.stringify({ success: true, data }),
@@ -406,27 +403,20 @@ async function processDocument(supabaseClient: SupabaseClient, userId: string, p
     throw new Error('Document not found')
   }
 
-  if (document.status === 'processing') {
-    throw new Error('Document is already being processed')
-  }
-
-  // Update status and reprocess
-  await supabaseClient
-    .from('knowledge_documents')
-    .update({ status: 'processing' })
-    .eq('id', document_id)
-
   // Delete existing chunks
   await supabaseClient
     .from('knowledge_chunks')
     .delete()
     .eq('document_id', document_id)
 
-  // Process in background
-  processDocumentBackground(supabaseClient, document_id, document.content)
+  // Mark as ready (embedding generation disabled for now)
+  await supabaseClient
+    .from('knowledge_documents')
+    .update({ status: 'ready', processing_error: null })
+    .eq('id', document_id)
 
   return new Response(
-    JSON.stringify({ success: true, message: 'Document processing started' }),
+    JSON.stringify({ success: true, message: 'Document processed' }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
 }
