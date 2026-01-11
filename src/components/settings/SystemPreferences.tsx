@@ -151,7 +151,7 @@ const SystemPreferences: React.FC = () => {
       try {
         const defaultPrefs = preferences.map(pref => ({
           ...pref,
-          value: getDefaultValue(pref.type)
+          value: getDefaultValue(pref.type, pref.id)
         }));
 
         setPreferences(defaultPrefs);
@@ -178,13 +178,16 @@ const SystemPreferences: React.FC = () => {
     }
   };
 
-  const getDefaultValue = (type: string) => {
-    switch (type) {
-      case 'boolean': return true;
-      case 'select': return '';
-      case 'number': return 0;
-      default: return '';
+  const getDefaultValue = (type: string, id?: string) => {
+    if (type === 'boolean') return true;
+    if (type === 'number') return 0;
+    if (type === 'select') {
+      if (id === 'theme') return 'auto';
+      if (id === 'language') return 'en';
+      if (id === 'timezone') return 'UTC';
+      return 'auto';
     }
+    return '';
   };
 
 
