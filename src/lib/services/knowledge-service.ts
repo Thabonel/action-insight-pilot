@@ -11,7 +11,8 @@ export interface KnowledgeBucket {
   created_at: string
   updated_at: string
   metadata: Record<string, unknown>
-  knowledge_documents?: KnowledgeDocument[]
+  document_count?: number
+  knowledge_documents?: { count: number }[]
 }
 
 export interface KnowledgeDocument {

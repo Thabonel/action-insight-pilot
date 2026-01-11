@@ -351,8 +351,16 @@ async function getKnowledgeBuckets(supabaseClient: SupabaseClient, userId: strin
 
   if (error) throw error
 
+  // Add document_count field for easier access
+  const bucketsWithCount = (data || []).map((bucket: Record<string, unknown>) => ({
+    ...bucket,
+    document_count: Array.isArray(bucket.knowledge_documents) && bucket.knowledge_documents.length > 0
+      ? (bucket.knowledge_documents[0] as { count: number }).count
+      : 0
+  }))
+
   return new Response(
-    JSON.stringify({ success: true, data }),
+    JSON.stringify({ success: true, data: bucketsWithCount }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   )
 }
