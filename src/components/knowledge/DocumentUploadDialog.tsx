@@ -90,9 +90,9 @@ export const DocumentUploadDialog: React.FC<DocumentUploadDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upload Document</DialogTitle>
+          <DialogTitle>Add Document</DialogTitle>
           <DialogDescription>
-            Upload a document to add knowledge to your AI agents
+            Add knowledge content for your AI agents - upload a file or type directly
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -156,7 +156,7 @@ export const DocumentUploadDialog: React.FC<DocumentUploadDialogProps> = ({
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting || !title.trim() || !content.trim() || !selectedBucket}>
-              {isSubmitting ? 'Uploading...' : 'Upload Document'}
+              {isSubmitting ? 'Adding...' : 'Add Document'}
             </Button>
           </DialogFooter>
         </form>
