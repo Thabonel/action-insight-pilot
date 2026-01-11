@@ -158,9 +158,10 @@ export class KnowledgeService {
         body: { action: 'update_document', document_id, ...updates }
       })
       if (!error && data?.success) return data.data as KnowledgeDocument
-    } catch {}
+    } catch { /* edge function unavailable, use fallback */ }
 
-    // Fallback direct update
+    // Fallback direct update (table not in generated types)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('knowledge_documents')
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -177,8 +178,9 @@ export class KnowledgeService {
         body: { action: 'delete_document', document_id }
       })
       if (!error && data?.success) return
-    } catch {}
+    } catch { /* edge function unavailable, use fallback */ }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from('knowledge_documents')
       .delete()
