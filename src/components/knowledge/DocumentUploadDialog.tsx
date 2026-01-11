@@ -14,19 +14,28 @@ interface DocumentUploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   buckets: KnowledgeBucket[]
+  defaultBucketId?: string
 }
 
 export const DocumentUploadDialog: React.FC<DocumentUploadDialogProps> = ({
   open,
   onOpenChange,
-  buckets
+  buckets,
+  defaultBucketId
 }) => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
-  const [selectedBucket, setSelectedBucket] = useState('')
+  const [selectedBucket, setSelectedBucket] = useState(defaultBucketId || '')
   const [file, setFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+
+  // Update selected bucket when defaultBucketId changes (e.g., opening from different bucket)
+  React.useEffect(() => {
+    if (open && defaultBucketId) {
+      setSelectedBucket(defaultBucketId)
+    }
+  }, [open, defaultBucketId])
 
   const { uploadDocument } = useKnowledgeDocuments()
 
