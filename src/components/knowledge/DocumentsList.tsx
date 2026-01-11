@@ -9,10 +9,18 @@ import { DocumentViewerDialog } from './DocumentViewerDialog'
 interface DocumentsListProps {
   bucketId: string
   inDialog?: boolean
+  onCountChange?: (count: number) => void
 }
 
-export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId, inDialog = false }) => {
+export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId, inDialog = false, onCountChange }) => {
   const { documents, reload, reprocessDocument } = useKnowledgeDocuments(bucketId)
+
+  // Report document count to parent when it changes
+  useEffect(() => {
+    if (onCountChange) {
+      onCountChange(documents.length)
+    }
+  }, [documents.length, onCountChange])
   const [filter, setFilter] = useState('')
   const [viewerOpen, setViewerOpen] = useState(false)
   const [activeDoc, setActiveDoc] = useState<KnowledgeDocument | null>(null)

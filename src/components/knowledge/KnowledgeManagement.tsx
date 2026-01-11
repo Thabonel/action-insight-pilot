@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -16,10 +16,16 @@ import { ChevronDown, ChevronRight, Upload } from 'lucide-react'
 const KnowledgeManagement: React.FC = () => {
   const { buckets, isLoading, createBucket } = useKnowledgeBuckets()
   const [expandedBuckets, setExpandedBuckets] = useState<Set<string>>(new Set())
+  const [documentCounts, setDocumentCounts] = useState<Record<string, number>>({})
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [uploadBucketId, setUploadBucketId] = useState<string | undefined>(undefined)
   const [showSearch, setShowSearch] = useState(false)
+
+  // Callback to update document count when DocumentsList loads
+  const handleDocumentCountChange = useCallback((bucketId: string, count: number) => {
+    setDocumentCounts(prev => ({ ...prev, [bucketId]: count }))
+  }, [])
 
   const toggleBucket = (bucketId: string) => {
     setExpandedBuckets(prev => {
@@ -59,7 +65,8 @@ const KnowledgeManagement: React.FC = () => {
 
   const renderBucketItem = (bucket: KnowledgeBucket) => {
     const isExpanded = expandedBuckets.has(bucket.id)
-    const documentCount = bucket.knowledge_documents?.length || 0
+    // Use tracked count if available, otherwise fall back to API data
+    const documentCount = documentCounts[bucket.id] ?? bucket.knowledge_documents?.length ?? 0
 
     return (
       <div key={bucket.id} className="border rounded-lg overflow-hidden">
@@ -112,7 +119,11 @@ const KnowledgeManagement: React.FC = () => {
         {/* Documents List - shown when expanded */}
         {isExpanded && (
           <div className="p-4 bg-background">
-            <DocumentsList bucketId={bucket.id} inDialog />
+            <DocumentsList
+              bucketId={bucket.id}
+              inDialog
+              onCountChange={(count) => handleDocumentCountChange(bucket.id, count)}
+            />
           </div>
         )}
       </div>
@@ -172,7 +183,11 @@ const KnowledgeManagement: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {buckets.reduce((sum, bucket) => sum + (bucket.knowledge_documents?.length || 0), 0)}
+              {buckets.reduce((sum, bucket) => {
+                // Use tracked count if available, otherwise fall back to API data
+                const count = documentCounts[bucket.id] ?? bucket.knowledge_documents?.length ?? 0
+                return sum + count
+              }, 0)}
             </div>
           </CardContent>
         </Card>
