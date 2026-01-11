@@ -129,9 +129,9 @@ export function useKnowledgeDocuments(bucketId?: string) {
     try {
       await KnowledgeService.reprocessDocument(document_id)
       // Update document status in local state
-      setDocuments(prev => 
-        prev.map(doc => 
-          doc.id === document_id 
+      setDocuments(prev =>
+        prev.map(doc =>
+          doc.id === document_id
             ? { ...doc, status: 'processing' as const, processing_error: undefined }
             : doc
         )
@@ -140,6 +140,25 @@ export function useKnowledgeDocuments(bucketId?: string) {
         title: "Success",
         description: "Document reprocessing started"
       })
+
+      // Poll for status updates (processing typically completes within 5-15 seconds)
+      if (bucketId) {
+        const pollInterval = setInterval(async () => {
+          const docs = await KnowledgeService.getDocuments(bucketId)
+          const doc = docs.find(d => d.id === document_id)
+          if (doc && doc.status !== 'processing') {
+            setDocuments(docs)
+            clearInterval(pollInterval)
+            if (doc.status === 'ready') {
+              toast({ title: "Complete", description: "Document processing finished" })
+            } else if (doc.status === 'failed') {
+              toast({ title: "Failed", description: doc.processing_error || "Document processing failed", variant: "destructive" })
+            }
+          }
+        }, 2000)
+        // Stop polling after 30 seconds
+        setTimeout(() => clearInterval(pollInterval), 30000)
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to reprocess document'
       toast({

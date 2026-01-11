@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { KnowledgeDocument } from '@/lib/services/knowledge-service'
@@ -71,6 +72,10 @@ export const DocumentViewerDialog: React.FC<DocumentViewerDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] w-[1200px] max-h-[90vh] h-[85vh] p-0 gap-0 overflow-hidden flex flex-col">
+        <VisuallyHidden>
+          <DialogTitle>Document Viewer</DialogTitle>
+          <DialogDescription>View and edit document content</DialogDescription>
+        </VisuallyHidden>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/30 dark:bg-slate-800/50">
           <div className="flex items-center gap-3">
