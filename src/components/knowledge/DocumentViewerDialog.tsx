@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -149,15 +150,22 @@ export const DocumentViewerDialog: React.FC<DocumentViewerDialogProps> = ({
 
             {/* Content Section */}
             <div className="space-y-2 flex-1">
-              <label className="text-sm font-medium text-muted-foreground">Content</label>
+              <label className="text-sm font-medium text-muted-foreground">
+                Content {!editing && <span className="text-xs">(Markdown rendered)</span>}
+              </label>
               <div className="relative">
-                <textarea
-                  className="w-full min-h-[400px] h-[calc(100vh-420px)] rounded-lg border p-4 bg-background dark:bg-slate-900/50 resize-none focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-relaxed"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  disabled={disabled}
-                  placeholder="Document content..."
-                />
+                {editing ? (
+                  <textarea
+                    className="w-full min-h-[400px] h-[calc(100vh-420px)] rounded-lg border p-4 bg-background dark:bg-slate-900/50 resize-none focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-relaxed font-mono"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Document content (supports Markdown)..."
+                  />
+                ) : (
+                  <div className="w-full min-h-[400px] h-[calc(100vh-420px)] rounded-lg border p-4 bg-background dark:bg-slate-900/50 overflow-auto prose prose-sm dark:prose-invert max-w-none prose-headings:mt-4 prose-headings:mb-2 prose-p:my-2 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-strong:text-foreground">
+                    <ReactMarkdown>{content || 'No content'}</ReactMarkdown>
+                  </div>
+                )}
               </div>
             </div>
           </div>
