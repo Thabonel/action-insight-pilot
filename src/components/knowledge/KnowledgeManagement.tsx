@@ -3,19 +3,29 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useKnowledgeBuckets } from '@/hooks/useKnowledge'
 import { CreateBucketDialog } from './CreateBucketDialog'
 import { BucketCard } from './BucketCard'
 import { DocumentUploadDialog } from './DocumentUploadDialog'
 import { KnowledgeSearch } from './KnowledgeSearch'
 import { DocumentsList } from './DocumentsList'
+import { FolderOpen, X } from 'lucide-react'
 
 const KnowledgeManagement: React.FC = () => {
   const { buckets, isLoading, createBucket } = useKnowledgeBuckets()
   const [selectedBucket, setSelectedBucket] = useState<string | null>(null)
+  const [showDocumentsDialog, setShowDocumentsDialog] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+
+  const handleSelectBucket = (bucketId: string) => {
+    setSelectedBucket(bucketId)
+    setShowDocumentsDialog(true)
+  }
+
+  const selectedBucketData = buckets.find(b => b.id === selectedBucket)
 
   const campaignBuckets = buckets.filter(b => b.bucket_type === 'campaign')
   const generalBuckets = buckets.filter(b => b.bucket_type === 'general')
@@ -118,10 +128,10 @@ const KnowledgeManagement: React.FC = () => {
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {campaignBuckets.map(bucket => (
-                    <BucketCard 
+                    <BucketCard
                       key={bucket.id}
                       bucket={bucket}
-                      onSelect={setSelectedBucket}
+                      onSelect={handleSelectBucket}
                       isSelected={selectedBucket === bucket.id}
                     />
                   ))}
@@ -153,10 +163,10 @@ const KnowledgeManagement: React.FC = () => {
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {generalBuckets.map(bucket => (
-                    <BucketCard 
+                    <BucketCard
                       key={bucket.id}
                       bucket={bucket}
-                      onSelect={setSelectedBucket}
+                      onSelect={handleSelectBucket}
                       isSelected={selectedBucket === bucket.id}
                     />
                   ))}
@@ -167,11 +177,35 @@ const KnowledgeManagement: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {selectedBucket && (
-        <div className="space-y-4">
-          <DocumentsList bucketId={selectedBucket} />
-        </div>
-      )}
+      {/* Documents Dialog - opens when clicking View on a bucket */}
+      <Dialog open={showDocumentsDialog} onOpenChange={setShowDocumentsDialog}>
+        <DialogContent className="max-w-[90vw] w-[1000px] max-h-[85vh] p-0 gap-0 overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/30 dark:bg-slate-800/50">
+            <div className="flex items-center gap-3">
+              <FolderOpen className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <h2 className="text-lg font-semibold">{selectedBucketData?.name || 'Documents'}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedBucketData?.description || 'View and manage documents in this bucket'}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowDocumentsDialog(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Documents List */}
+          <div className="flex-1 overflow-auto p-6">
+            {selectedBucket && <DocumentsList bucketId={selectedBucket} inDialog />}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <CreateBucketDialog
         open={showCreateDialog}
