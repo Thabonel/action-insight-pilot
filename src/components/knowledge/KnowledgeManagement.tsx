@@ -144,7 +144,7 @@ const KnowledgeManagement: React.FC = () => {
             Search Knowledge
           </Button>
           <Button onClick={handleOpenUploadDialog} variant="outline">
-            Upload Document
+            Add Document
           </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
             New Bucket
