@@ -27,6 +27,16 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId, inDialog
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
 
+  // Sync activeDoc with updated documents list (for status changes after reprocess)
+  useEffect(() => {
+    if (activeDoc) {
+      const updated = documents.find(d => d.id === activeDoc.id)
+      if (updated && updated !== activeDoc) {
+        setActiveDoc(updated)
+      }
+    }
+  }, [documents, activeDoc])
+
   useEffect(() => {
     if (activeDoc) {
       setEditTitle(activeDoc.title)
