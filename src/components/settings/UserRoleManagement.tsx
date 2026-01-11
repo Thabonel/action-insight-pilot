@@ -91,11 +91,12 @@ const UserRoleManagement: React.FC = () => {
           return;
         }
 
+        type ProfileRow = { id: string; first_name: string; last_name: string; avatar_url: string | null };
         const profileMap = new Map<string, { first_name: string; last_name: string; avatar_url: string | null }>();
-        (profiles || []).forEach(p => profileMap.set(p.id as string, {
-          first_name: (p as any).first_name,
-          last_name: (p as any).last_name,
-          avatar_url: (p as any).avatar_url ?? null
+        (profiles as ProfileRow[] || []).forEach(p => profileMap.set(p.id, {
+          first_name: p.first_name,
+          last_name: p.last_name,
+          avatar_url: p.avatar_url ?? null
         }));
 
         const merged: UserRole[] = (rolesOnly || []).map(r => ({

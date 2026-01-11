@@ -22,8 +22,8 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
   buckets
 }) => {
   const [query, setQuery] = useState('')
-  const [bucketType, setBucketType] = useState<'campaign' | 'general' | ''>('')
-  const [campaignId, setCampaignId] = useState('')
+  const [bucketType, setBucketType] = useState<'campaign' | 'general' | 'all'>('all')
+  const [campaignId, setCampaignId] = useState('all')
   
   const { searchKnowledge, searchResults, isSearching, clearResults } = useKnowledgeSearch()
 
@@ -35,22 +35,22 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
 
     await searchKnowledge(
       query.trim(),
-      bucketType || undefined,
-      campaignId || undefined,
+      bucketType === 'all' ? undefined : bucketType,
+      campaignId === 'all' ? undefined : campaignId,
       10
     )
   }
 
   const handleClose = () => {
     setQuery('')
-    setBucketType('')
-    setCampaignId('')
+    setBucketType('all')
+    setCampaignId('all')
     clearResults()
     onOpenChange(false)
   }
 
   const handleBucketTypeChange = (value: string) => {
-    setBucketType(value as 'campaign' | 'general' | '')
+    setBucketType(value as 'campaign' | 'general' | 'all')
   }
 
   return (
@@ -83,7 +83,7 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="general">General Knowledge</SelectItem>
                   <SelectItem value="campaign">Campaign Knowledge</SelectItem>
                 </SelectContent>
@@ -98,9 +98,9 @@ export const KnowledgeSearch: React.FC<KnowledgeSearchProps> = ({
                     <SelectValue placeholder="All campaigns" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Campaigns</SelectItem>
+                    <SelectItem value="all">All Campaigns</SelectItem>
                     {campaignBuckets.map(bucket => (
-                      <SelectItem key={bucket.id} value={bucket.campaign_id!}>
+                      <SelectItem key={bucket.id} value={bucket.campaign_id || bucket.id}>
                         {bucket.name}
                       </SelectItem>
                     ))}

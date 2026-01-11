@@ -62,6 +62,7 @@ for module_path, router_name in essential_routers:
 optional_routers = [
     ("backend.routes.unified_agents", "router"),
     ("backend.routes.campaigns", "router"),
+    ("backend.routes.leads", "router"),
     ("backend.routes.lead_capture", "router"),
     ("backend.routes.email", "router"),
     ("backend.routes.workflows", "router"),

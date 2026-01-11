@@ -165,7 +165,7 @@ const Layout: React.FC = () => {
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
       const next = !prev;
-      try { localStorage.setItem('sidebarCollapsed', next ? '1' : '0'); } catch {}
+      try { localStorage.setItem('sidebarCollapsed', next ? '1' : '0'); } catch { /* localStorage unavailable */ }
       return next;
     });
   };
