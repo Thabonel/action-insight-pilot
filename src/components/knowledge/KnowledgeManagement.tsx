@@ -66,7 +66,7 @@ const KnowledgeManagement: React.FC = () => {
   const renderBucketItem = (bucket: KnowledgeBucket) => {
     const isExpanded = expandedBuckets.has(bucket.id)
     // Use tracked count if available, otherwise fall back to API data
-    const documentCount = documentCounts[bucket.id] ?? bucket.knowledge_documents?.length ?? 0
+    const documentCount = documentCounts[bucket.id] ?? bucket.document_count ?? 0
 
     return (
       <div key={bucket.id} className="border rounded-lg overflow-hidden">
@@ -185,7 +185,7 @@ const KnowledgeManagement: React.FC = () => {
             <div className="text-2xl font-bold">
               {buckets.reduce((sum, bucket) => {
                 // Use tracked count if available, otherwise fall back to API data
-                const count = documentCounts[bucket.id] ?? bucket.knowledge_documents?.length ?? 0
+                const count = documentCounts[bucket.id] ?? bucket.document_count ?? 0
                 return sum + count
               }, 0)}
             </div>
