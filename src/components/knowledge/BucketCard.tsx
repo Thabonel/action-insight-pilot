@@ -9,12 +9,14 @@ import { formatDistanceToNow } from 'date-fns'
 interface BucketCardProps {
   bucket: KnowledgeBucket
   onSelect: (bucketId: string) => void
+  onUpload: (bucketId: string) => void
   isSelected: boolean
 }
 
 export const BucketCard: React.FC<BucketCardProps> = ({
   bucket,
   onSelect,
+  onUpload,
   isSelected
 }) => {
   const documentCount = bucket.knowledge_documents?.length || 0
@@ -58,7 +60,7 @@ export const BucketCard: React.FC<BucketCardProps> = ({
             variant="outline"
             onClick={(e) => {
               e.stopPropagation()
-              onSelect(bucket.id)
+              onUpload(bucket.id)
             }}
             title="Upload to this bucket"
           >

@@ -3,29 +3,45 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useKnowledgeBuckets } from '@/hooks/useKnowledge'
 import { CreateBucketDialog } from './CreateBucketDialog'
-import { BucketCard } from './BucketCard'
 import { DocumentUploadDialog } from './DocumentUploadDialog'
 import { KnowledgeSearch } from './KnowledgeSearch'
 import { DocumentsList } from './DocumentsList'
-import { FolderOpen, X } from 'lucide-react'
+import { KnowledgeBucket } from '@/lib/services/knowledge-service'
+import { Badge } from '@/components/ui/badge'
+import { formatDistanceToNow } from 'date-fns'
+import { ChevronDown, ChevronRight, Upload } from 'lucide-react'
 
 const KnowledgeManagement: React.FC = () => {
   const { buckets, isLoading, createBucket } = useKnowledgeBuckets()
-  const [selectedBucket, setSelectedBucket] = useState<string | null>(null)
-  const [showDocumentsDialog, setShowDocumentsDialog] = useState(false)
+  const [expandedBuckets, setExpandedBuckets] = useState<Set<string>>(new Set())
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [uploadBucketId, setUploadBucketId] = useState<string | undefined>(undefined)
   const [showSearch, setShowSearch] = useState(false)
 
-  const handleSelectBucket = (bucketId: string) => {
-    setSelectedBucket(bucketId)
-    setShowDocumentsDialog(true)
+  const toggleBucket = (bucketId: string) => {
+    setExpandedBuckets(prev => {
+      const next = new Set(prev)
+      if (next.has(bucketId)) {
+        next.delete(bucketId)
+      } else {
+        next.add(bucketId)
+      }
+      return next
+    })
   }
 
-  const selectedBucketData = buckets.find(b => b.id === selectedBucket)
+  const handleUploadToBucket = (bucketId: string) => {
+    setUploadBucketId(bucketId)
+    setShowUploadDialog(true)
+  }
+
+  const handleOpenUploadDialog = () => {
+    setUploadBucketId(undefined)
+    setShowUploadDialog(true)
+  }
 
   const campaignBuckets = buckets.filter(b => b.bucket_type === 'campaign')
   const generalBuckets = buckets.filter(b => b.bucket_type === 'general')
@@ -37,6 +53,68 @@ const KnowledgeManagement: React.FC = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading knowledge buckets...</p>
         </div>
+      </div>
+    )
+  }
+
+  const renderBucketItem = (bucket: KnowledgeBucket) => {
+    const isExpanded = expandedBuckets.has(bucket.id)
+    const documentCount = bucket.knowledge_documents?.length || 0
+
+    return (
+      <div key={bucket.id} className="border rounded-lg overflow-hidden">
+        {/* Bucket Header - clickable to expand */}
+        <div
+          className={`flex items-center justify-between p-4 cursor-pointer transition-colors hover:bg-muted/50 ${isExpanded ? 'bg-muted/30 border-b' : ''}`}
+          onClick={() => toggleBucket(bucket.id)}
+        >
+          <div className="flex items-center gap-3">
+            {isExpanded ? (
+              <ChevronDown className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            )}
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{bucket.name}</span>
+                <Badge variant={bucket.bucket_type === 'campaign' ? 'default' : 'secondary'} className="text-xs">
+                  {bucket.bucket_type === 'campaign' ? 'Campaign' : 'General'}
+                </Badge>
+              </div>
+              {bucket.description && (
+                <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{bucket.description}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">
+              {documentCount} {documentCount === 1 ? 'document' : 'documents'}
+            </span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              Created {formatDistanceToNow(new Date(bucket.created_at), { addSuffix: true })}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleUploadToBucket(bucket.id)
+              }}
+              className="gap-1"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">Upload</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Documents List - shown when expanded */}
+        {isExpanded && (
+          <div className="p-4 bg-background">
+            <DocumentsList bucketId={bucket.id} inDialog />
+          </div>
+        )}
       </div>
     )
   }
@@ -54,7 +132,7 @@ const KnowledgeManagement: React.FC = () => {
           <Button onClick={() => setShowSearch(true)} variant="outline">
             Search Knowledge
           </Button>
-          <Button onClick={() => setShowUploadDialog(true)} variant="outline">
+          <Button onClick={handleOpenUploadDialog} variant="outline">
             Upload Document
           </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
@@ -126,15 +204,8 @@ const KnowledgeManagement: React.FC = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {campaignBuckets.map(bucket => (
-                    <BucketCard
-                      key={bucket.id}
-                      bucket={bucket}
-                      onSelect={handleSelectBucket}
-                      isSelected={selectedBucket === bucket.id}
-                    />
-                  ))}
+                <div className="space-y-3">
+                  {campaignBuckets.map(bucket => renderBucketItem(bucket))}
                 </div>
               )}
             </CardContent>
@@ -161,51 +232,14 @@ const KnowledgeManagement: React.FC = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {generalBuckets.map(bucket => (
-                    <BucketCard
-                      key={bucket.id}
-                      bucket={bucket}
-                      onSelect={handleSelectBucket}
-                      isSelected={selectedBucket === bucket.id}
-                    />
-                  ))}
+                <div className="space-y-3">
+                  {generalBuckets.map(bucket => renderBucketItem(bucket))}
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Documents Dialog - opens when clicking View on a bucket */}
-      <Dialog open={showDocumentsDialog} onOpenChange={setShowDocumentsDialog}>
-        <DialogContent className="max-w-[90vw] w-[1000px] max-h-[85vh] p-0 gap-0 overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/30 dark:bg-slate-800/50">
-            <div className="flex items-center gap-3">
-              <FolderOpen className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <h2 className="text-lg font-semibold">{selectedBucketData?.name || 'Documents'}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {selectedBucketData?.description || 'View and manage documents in this bucket'}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowDocumentsDialog(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Documents List */}
-          <div className="flex-1 overflow-auto p-6">
-            {selectedBucket && <DocumentsList bucketId={selectedBucket} inDialog />}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <CreateBucketDialog
         open={showCreateDialog}
@@ -217,6 +251,7 @@ const KnowledgeManagement: React.FC = () => {
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
         buckets={buckets}
+        defaultBucketId={uploadBucketId}
       />
 
       <KnowledgeSearch

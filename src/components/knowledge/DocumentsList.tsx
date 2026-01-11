@@ -89,7 +89,6 @@ export const DocumentsList: React.FC<DocumentsListProps> = ({ bucketId, inDialog
                   <div className="text-sm text-muted-foreground line-clamp-2 mt-1">{doc.content}</div>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setActiveDoc(doc); setViewerOpen(true) }}>View</Button>
                   <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); downloadDoc(doc) }}>Download</Button>
                   <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); reprocessDocument(doc.id) }}>Reprocess</Button>
                   <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={(e) => { e.stopPropagation(); onDelete(doc) }}>Delete</Button>
