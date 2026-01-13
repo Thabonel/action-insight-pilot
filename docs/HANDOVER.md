@@ -1,4 +1,4 @@
-# Handover – AI Boost Campaign (Jan 2026)
+# Handover – AI Boost Campaign (January 2026)
 
 This document summarizes the changes completed in the last iteration, the current state of the codebase, and recommendations for next steps. It is intended for engineers picking up the work and for product/QA to validate.
 
@@ -15,7 +15,7 @@ This document summarizes the changes completed in the last iteration, the curren
   - Legacy layout now re-exports the canonical layout to guarantee uniform behavior.
   - Added collapsible sidebar with persisted state and tooltips for names/descriptions.
   - Header branding: LogoMark used as the “A” in “AI Boost Campaign”, baseline-aligned; subtitle set to “Smart Campaigns”.
-  - Moved collapse toggle to the sidebar footer to prevent truncation/shift of the header.
+  - Moved collapse toggle to the sidebar footer to prevent truncation/shift of the header; tooltips for all items.
   - Files: `src/components/Layout.tsx`, `src/components/layout/Layout.tsx` (re-export only).
 
 - Icons
@@ -110,4 +110,3 @@ This document summarizes the changes completed in the last iteration, the curren
 - Edge functions (backend-managed): `knowledge-processor` (deployed in Supabase).
 
 Please reach out if you need a quick pairing session to walk through any part of this handover.
-

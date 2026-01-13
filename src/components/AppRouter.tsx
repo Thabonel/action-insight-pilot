@@ -11,6 +11,7 @@ import CampaignManagement from '@/pages/CampaignManagement'
 import Leads from '@/pages/Leads'
 import LeadCaptureForms from '@/pages/LeadCaptureForms'
 import Content from '@/pages/Content'
+import Email from '@/pages/Email'
 import Analytics from '@/pages/Analytics'
 import Settings from '@/pages/Settings'
 import CampaignDetails from '@/pages/CampaignDetails'
@@ -47,6 +48,7 @@ const AppRouter: React.FC = () => {
         <Route path="lead-capture-forms" element={<LeadCaptureForms />} />
         <Route path="content" element={<Content />} />
         <Route path="social" element={<Social />} />
+        <Route path="email" element={<Email />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="viral-video-marketing" element={<ViralVideoMarketing />} />
         <Route path="proposals" element={<Proposals />} />
