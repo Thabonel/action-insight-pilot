@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { DemoDataBadge } from '@/components/common/DemoDataBadge';
 
 interface EmailInsights {
   optimalSendTime: string;
@@ -86,7 +87,10 @@ const EmailAIAssistant: React.FC = () => {
   return (
     <Card className="h-fit">
       <CardHeader>
-        <CardTitle>Email AI Assistant</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Email AI Assistant</CardTitle>
+          <DemoDataBadge />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Performance Insights */}

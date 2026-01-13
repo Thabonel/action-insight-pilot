@@ -1,8 +1,15 @@
 
-import React from 'react';
-import { useChatLogic } from '@/hooks/useChatLogic';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useChatPersistence } from '@/hooks/useChatPersistence';
+import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
+import { ApiResponse } from '@/lib/api-client-interface';
+import { useAuth } from '@/contexts/AuthContext';
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
+import { Button } from '@/components/ui/button';
+import { MessageSquarePlus, History, Trash2 } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatMessage {
   id: string;
@@ -16,40 +23,218 @@ interface DashboardChatInterfaceProps {
 }
 
 const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatUpdate }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [chatMessage, setChatMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
   const {
-    chatMessage,
-    setChatMessage,
-    chatHistory,
-    isTyping,
-    handleChatSubmit,
-    user
-  } = useChatLogic({ onChatUpdate });
+    sessions,
+    currentSession,
+    messages: persistedMessages,
+    isLoading,
+    createSession,
+    loadSession,
+    addMessage,
+    deleteSession
+  } = useChatPersistence({
+    autoLoadLatestSession: true
+  });
+
+  // Convert persisted messages to the format expected by ChatHistory
+  const chatHistory: ChatMessage[] = useMemo(() => {
+    return persistedMessages.map(msg => ({
+      id: msg.id,
+      message: msg.user_message,
+      response: msg.ai_response?.response || '',
+      timestamp: new Date(msg.timestamp)
+    }));
+  }, [persistedMessages]);
+
+  // Notify parent of chat updates
+  useEffect(() => {
+    onChatUpdate?.(chatHistory);
+  }, [chatHistory, onChatUpdate]);
+
+  const handleChatSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatMessage.trim()) return;
+
+    setIsTyping(true);
+    const messageToSend = chatMessage;
+    setChatMessage('');
+
+    try {
+      // Create session if none exists
+      let session = currentSession;
+      if (!session) {
+        session = await createSession();
+        if (!session) {
+          throw new Error('Failed to create chat session');
+        }
+      }
+
+      // Call the API
+      const result = await apiClient.queryAgent(messageToSend) as ApiResponse<{ message: string }>;
+
+      if (result.success) {
+        const responseData = result.data || { message: 'No response received' };
+
+        // Save to database
+        await addMessage(
+          messageToSend,
+          { response: responseData.message },
+          'general'
+        );
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to send message",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTyping(false);
+    }
+  }, [chatMessage, currentSession, createSession, addMessage, toast]);
+
+  const handleNewConversation = async () => {
+    await createSession();
+    toast({
+      title: "New Conversation",
+      description: "Started a new chat session",
+    });
+  };
+
+  const handleLoadSession = async (sessionId: string) => {
+    await loadSession(sessionId);
+    setShowHistory(false);
+  };
+
+  const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const success = await deleteSession(sessionId);
+    if (success) {
+      toast({
+        title: "Deleted",
+        description: "Chat session deleted",
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <div className="bg-white dark:bg-[#151A21] border-b border-gray-200 dark:border-[#273140] px-6 py-4 flex-shrink-0">
-        <h3 className="text-lg font-medium text-slate-900 dark:text-[#E9EEF5]">AI Marketing Assistant</h3>
-        <p className="text-sm text-slate-600 dark:text-[#94A3B8]">Ask me anything about your marketing automation</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium text-slate-900 dark:text-[#E9EEF5]">
+              {currentSession?.title || 'AI Marketing Assistant'}
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-[#94A3B8]">
+              Ask me anything about your marketing automation
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistory(!showHistory)}
+              className="gap-1"
+            >
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">History</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNewConversation}
+              className="gap-1"
+            >
+              <MessageSquarePlus className="h-4 w-4" />
+              <span className="hidden sm:inline">New Chat</span>
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0B0D10]">
-        <ChatHistory
-          chatHistory={chatHistory}
-          isTyping={isTyping}
-          currentMessage={chatMessage}
-          user={user}
-        />
-      </div>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Chat history sidebar */}
+        {showHistory && (
+          <div className="w-64 border-r border-gray-200 dark:border-[#273140] bg-white dark:bg-[#151A21] flex-shrink-0">
+            <ScrollArea className="h-full">
+              <div className="p-4 space-y-2">
+                <h4 className="text-sm font-medium text-slate-700 dark:text-[#94A3B8] mb-3">
+                  Past Conversations
+                </h4>
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                ) : sessions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No conversations yet</p>
+                ) : (
+                  sessions.map(session => (
+                    <div
+                      key={session.id}
+                      onClick={() => handleLoadSession(session.id)}
+                      className={`p-3 rounded-lg cursor-pointer group transition-colors ${
+                        currentSession?.id === session.id
+                          ? 'bg-primary/10 border border-primary/20'
+                          : 'hover:bg-gray-100 dark:hover:bg-[#1E2632]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium truncate flex-1">
+                          {session.title}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => handleDeleteSession(session.id, e)}
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(session.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
 
-      <div className="border-t border-gray-200 dark:border-[#273140] bg-white dark:bg-[#151A21] p-4 flex-shrink-0">
-        <div className="max-w-4xl mx-auto">
-          <ChatInput
-            chatMessage={chatMessage}
-            setChatMessage={setChatMessage}
-            onSubmit={handleChatSubmit}
-            user={user}
-            isTyping={isTyping}
-          />
+        {/* Main chat area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0B0D10]">
+            <ChatHistory
+              chatHistory={chatHistory}
+              isTyping={isTyping}
+              currentMessage={chatMessage}
+              user={user}
+            />
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-[#273140] bg-white dark:bg-[#151A21] p-4 flex-shrink-0">
+            <div className="max-w-4xl mx-auto">
+              <ChatInput
+                chatMessage={chatMessage}
+                setChatMessage={setChatMessage}
+                onSubmit={handleChatSubmit}
+                user={user}
+                isTyping={isTyping}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { DemoDataBadge } from '@/components/common/DemoDataBadge';
 
 const BehavioralAutomation: React.FC = () => {
   const [automations, setAutomations] = useState([
@@ -122,7 +123,10 @@ const BehavioralAutomation: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Behavioral Automation</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Behavioral Automation</CardTitle>
+          <DemoDataBadge />
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Active Automations */}
