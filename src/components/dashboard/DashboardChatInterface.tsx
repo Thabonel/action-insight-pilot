@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useChatPersistence } from '@/hooks/useChatPersistence';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
@@ -28,6 +28,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   const [chatMessage, setChatMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     sessions,
@@ -56,6 +57,16 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   useEffect(() => {
     onChatUpdate?.(chatHistory);
   }, [chatHistory, onChatUpdate]);
+
+  // Scroll to bottom when new messages arrive or when typing starts
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [chatHistory.length, isTyping]);
 
   const handleChatSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,7 +226,10 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
 
         {/* Main chat area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0B0D10]">
+          <div
+            ref={chatContainerRef}
+            className="flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0B0D10]"
+          >
             <ChatHistory
               chatHistory={chatHistory}
               isTyping={isTyping}

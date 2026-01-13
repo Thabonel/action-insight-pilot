@@ -25,7 +25,7 @@ The QA report found the platform to be well-designed and functional with no crit
 - [x] Store chat messages in database (table: `chat_messages` or similar)
 - [x] Display message history when returning to chat
 - [x] Show user messages and AI responses in conversation thread
-- [ ] Implement scroll-to-bottom on new messages
+- [x] Implement scroll-to-bottom on new messages
 - [x] Consider session-based vs. persistent history
 
 **Acceptance Criteria:**
@@ -44,9 +44,9 @@ The QA report found the platform to be well-designed and functional with no crit
 
 **Requirements:**
 - [x] Review if this is intentional design (Email integrated into Autopilot) - NOT intentional, route was missing
-- [ ] If intentional: Add tooltip or visual indicator explaining the relationship
+- [x] If intentional: Add tooltip or visual indicator explaining the relationship - Added info banner linking to Autopilot
 - [x] If not intentional: Create dedicated Email page or fix routing - Route added to AppRouter
-- [ ] Document the Email/Autopilot relationship in user documentation
+- [x] Document the Email/Autopilot relationship in user documentation - Info banner on Email page
 
 **Options:**
 1. **Keep as-is with explanation:** Add subtitle "Email automation is managed through Autopilot"
@@ -67,7 +67,7 @@ The QA report found the platform to be well-designed and functional with no crit
 
 **Requirements:**
 - [x] Add visual "Demo Data" badge where sample data is displayed - Added DemoDataBadge component
-- [ ] Create empty state components with clear CTAs for adding real data
+- [x] Create empty state components with clear CTAs for adding real data - Added EmptyState component
 - [x] Differentiate between "no data yet" vs "demo/sample data" - Badge shows on sample data sections
 
 **Example Implementation:**

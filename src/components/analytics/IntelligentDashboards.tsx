@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { DemoDataBadge } from '@/components/common/DemoDataBadge';
 
 const IntelligentDashboards: React.FC = () => {
   const [activeView, setActiveView] = useState<'overview' | 'channels' | 'campaigns'>('overview');
@@ -72,6 +73,7 @@ const IntelligentDashboards: React.FC = () => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
             <span>Intelligent Analytics Dashboard</span>
+            <DemoDataBadge />
           </CardTitle>
           <div className="flex space-x-2">
             <Button

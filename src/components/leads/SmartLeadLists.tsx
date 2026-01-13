@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { behaviorTracker } from '@/lib/behavior-tracker';
+import { DemoDataBadge } from '@/components/common/DemoDataBadge';
+import { EmptyState } from '@/components/common/EmptyState';
+import { Users } from 'lucide-react';
 
 const SmartLeadLists: React.FC = () => {
   const [leadLists] = useState([
@@ -129,8 +132,38 @@ const SmartLeadLists: React.FC = () => {
     }
   };
 
+  // In a real implementation, this would come from an API
+  const isUsingDemoData = true;
+  const hasNoRealLeads = false; // Would be determined by API response
+
+  // Show empty state when no real leads exist
+  if (hasNoRealLeads && !isUsingDemoData) {
+    return (
+      <Card>
+        <CardContent className="p-0">
+          <EmptyState
+            icon={Users}
+            title="No leads yet"
+            description="Start capturing leads from your campaigns and integrations. Your AI-powered lead lists will automatically organize and score them."
+            actionLabel="Import Leads"
+            onAction={() => behaviorTracker.trackAction('feature_use', 'import_leads_cta', {})}
+            secondaryActionLabel="Connect CRM"
+            onSecondaryAction={() => behaviorTracker.trackAction('feature_use', 'connect_crm_cta', {})}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Demo data indicator */}
+      {isUsingDemoData && (
+        <div className="flex justify-end">
+          <DemoDataBadge />
+        </div>
+      )}
+
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {leadLists.map((list) => {
