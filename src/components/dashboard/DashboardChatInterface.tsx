@@ -130,8 +130,16 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
         }
       }
 
-      // Call the API
-      const result = await apiClient.queryAgent(messageToSend) as ApiResponse<{ message: string }>;
+      // Call the API with session context for conversation continuity
+      const result = await apiClient.queryAgent(messageToSend, { conversationId: session.id }) as ApiResponse<{ message: string; conversationId?: string; campaignCreated?: boolean; campaignId?: string }>;
+
+      // Handle campaign creation notification
+      if (result.success && result.data?.campaignCreated && result.data?.campaignId) {
+        toast({
+          title: "Campaign Created",
+          description: "Your campaign has been created and launched successfully!",
+        });
+      }
 
       if (result.success) {
         const responseData = result.data || { message: 'No response received' };
