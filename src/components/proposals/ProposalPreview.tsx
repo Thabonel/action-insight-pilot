@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { GeneratedProposal } from '@/types/proposals';
-import { generateProposalPDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface ProposalPreviewProps {
   proposal: GeneratedProposal | null;
@@ -13,11 +13,15 @@ interface ProposalPreviewProps {
 
 const ProposalPreview: React.FC<ProposalPreviewProps> = ({ proposal, onExport }) => {
   const { toast } = useToast();
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handlePDFDownload = async () => {
     if (!proposal) return;
-    
+
+    setIsGeneratingPDF(true);
     try {
+      // Dynamic import to avoid loading PDF libraries until needed
+      const { generateProposalPDF } = await import('@/utils/pdfGenerator');
       await generateProposalPDF(proposal);
       toast({
         title: "PDF Generated",
@@ -30,6 +34,8 @@ const ProposalPreview: React.FC<ProposalPreviewProps> = ({ proposal, onExport })
         description: "Failed to generate PDF. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -54,8 +60,16 @@ const ProposalPreview: React.FC<ProposalPreviewProps> = ({ proposal, onExport })
           <Button
             variant="outline"
             onClick={handlePDFDownload}
+            disabled={isGeneratingPDF}
           >
-            Export PDF
+            {isGeneratingPDF ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              'Export PDF'
+            )}
           </Button>
           <Button
             variant="outline"
