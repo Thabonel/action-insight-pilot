@@ -93,14 +93,15 @@ serve(async (req) => {
       enrichedContext.conversationCampaign = conversationCampaign;
     }
 
-    const { data: apiKeyData, error: keyError } = await supabase
+    // Query for API keys - prefer Anthropic, fallback to Gemini
+    const { data: apiKeys, error: keyError } = await supabase
       .from('user_secrets')
       .select('encrypted_value, service_name')
       .eq('user_id', user.id)
-      .in('service_name', ['anthropic_api_key', 'gemini_api_key_encrypted'])
-      .maybeSingle();
+      .in('service_name', ['anthropic_api_key', 'gemini_api_key_encrypted']);
 
-    if (keyError || !apiKeyData) {
+    if (keyError || !apiKeys || apiKeys.length === 0) {
+      console.error('API key query error:', keyError);
       return new Response(
         JSON.stringify({
           error: 'API key not configured',
@@ -109,6 +110,22 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-type': 'application/json' } }
       );
     }
+
+    // Prefer Anthropic Claude, fallback to Gemini
+    const apiKeyData = apiKeys.find(k => k.service_name === 'anthropic_api_key')
+      || apiKeys.find(k => k.service_name === 'gemini_api_key_encrypted');
+
+    if (!apiKeyData) {
+      return new Response(
+        JSON.stringify({
+          error: 'API key not configured',
+          message: 'Please add your Anthropic Claude or Gemini API key in Settings > Integrations to enable AI chat.'
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-type': 'application/json' } }
+      );
+    }
+
+    console.log('Using AI service:', apiKeyData.service_name);
 
     const systemPrompt = buildSystemPrompt(enrichedContext);
     const userPrompt = buildUserPrompt(query, enrichedContext);
