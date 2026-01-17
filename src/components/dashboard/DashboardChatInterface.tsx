@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 import ChatHistory from './ChatHistory';
 import ChatInput, { ChatInputHandle } from './ChatInput';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,10 @@ interface ChatMessage {
 
 interface DashboardChatInterfaceProps {
   onChatUpdate?: (chatHistory: ChatMessage[]) => void;
+  campaignId?: string;
 }
 
-const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatUpdate }) => {
+const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatUpdate, campaignId }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [chatMessage, setChatMessage] = useState('');
@@ -71,7 +73,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
 
         setHasAutopilot(autopilotConfig?.is_active ?? false);
       } catch (error) {
-        console.error('Error fetching user context:', error);
+        logger.error('Failed to fetch user context', { error, userId: user?.id });
       }
     };
 
@@ -131,7 +133,11 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
       }
 
       // Call the API with session context for conversation continuity
-      const result = await apiClient.queryAgent(messageToSend, { conversationId: session.id }) as ApiResponse<{ message: string; conversationId?: string; campaignCreated?: boolean; campaignId?: string }>;
+      // Include campaignId if available to load campaign-specific knowledge
+      const result = await apiClient.queryAgent(messageToSend, {
+        conversationId: session.id,
+        campaignId: campaignId
+      }) as ApiResponse<{ message: string; conversationId?: string; campaignCreated?: boolean; campaignId?: string }>;
 
       // Handle campaign creation notification
       if (result.success && result.data?.campaignCreated && result.data?.campaignId) {
@@ -158,7 +164,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
         });
       }
     } catch (error) {
-      console.error('Chat error:', error);
+      logger.error('Chat message failed', { error, sessionId: currentSession?.id, campaignId });
       toast({
         title: "Error",
         description: "Failed to send message",
@@ -167,7 +173,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
     } finally {
       setIsTyping(false);
     }
-  }, [chatMessage, currentSession, createSession, addMessage, toast]);
+  }, [chatMessage, currentSession, createSession, addMessage, toast, campaignId]);
 
   const handleNewConversation = async () => {
     await createSession();

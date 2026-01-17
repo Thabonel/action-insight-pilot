@@ -9,6 +9,8 @@ import LeadInbox from '@/components/autopilot/LeadInbox';
 import ActivityFeed from '@/components/autopilot/ActivityFeed';
 import { Link } from 'react-router-dom';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
+import { QuickStartWizard } from '@/components/campaigns/QuickStartWizard';
+import { Rocket } from 'lucide-react';
 
 interface DashboardStats {
   this_week_leads: number;
@@ -47,6 +49,7 @@ const SimpleDashboard: React.FC = () => {
   const [autopilotConfig, setAutopilotConfig] = useState<AutopilotConfig | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showQuickStartWizard, setShowQuickStartWizard] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -147,12 +150,22 @@ const SimpleDashboard: React.FC = () => {
               Let AI handle your marketing automatically while you focus on your business
             </p>
             <Link to="/app/autopilot/setup">
-              <Button size="lg">
-                Get Started
-              </Button>
+              <Button size="lg">Get Started</Button>
             </Link>
+            <p className="text-sm text-gray-500 mt-4">or</p>
+            <Button
+              variant="link"
+              onClick={() => setShowQuickStartWizard(true)}
+              className="mt-2"
+            >
+              Start a campaign without autopilot
+            </Button>
           </CardContent>
         </Card>
+        <QuickStartWizard
+          open={showQuickStartWizard}
+          onOpenChange={setShowQuickStartWizard}
+        />
       </div>
     );
   }
@@ -166,6 +179,14 @@ const SimpleDashboard: React.FC = () => {
           <p className="text-gray-600 dark:text-[#94A3B8] mt-1">Your AI is running your marketing 24/7</p>
         </div>
         <div className="flex gap-3">
+          <Button
+            onClick={() => setShowQuickStartWizard(true)}
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Rocket className="h-4 w-4 mr-2" />
+            Start New Campaign
+          </Button>
           <Link to="/app/settings">
             <Button variant="outline" size="sm">
               Settings
@@ -366,6 +387,12 @@ const SimpleDashboard: React.FC = () => {
         </CardContent>
       </Card>
       <PageHelpModal helpKey="dashboard" />
+
+      {/* Quick Start Wizard */}
+      <QuickStartWizard
+        open={showQuickStartWizard}
+        onOpenChange={setShowQuickStartWizard}
+      />
     </div>
   );
 };

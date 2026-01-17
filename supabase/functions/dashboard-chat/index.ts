@@ -74,6 +74,12 @@ interface ChatContext {
   conversationCampaign?: ConversationCampaign;
   conversationHistory?: string;
   knowledge?: KnowledgeContext;
+  activeCampaign?: {
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+  };
 }
 
 interface ExtractedCampaignData {
@@ -107,7 +113,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query, context, conversationId } = await req.json();
+    const { query, context, conversationId, campaignId } = await req.json();
 
     if (!query) {
       return new Response(
@@ -150,8 +156,13 @@ serve(async (req) => {
     // Fetch conversation history for this session
     const conversationHistory = await getConversationHistory(supabase, sessionId);
 
-    const enrichedContext = await enrichContext(supabase, user.id, context);
+    const enrichedContext = await enrichContext(supabase, user.id, context, campaignId);
     enrichedContext.conversationHistory = conversationHistory;
+
+    // Log campaign context if provided
+    if (campaignId) {
+      console.log('Chat context includes specific campaign:', campaignId);
+    }
 
     // Detect campaign-related intents
     const wantsToCreateCampaign = detectCampaignCreationIntent(query);
@@ -976,7 +987,8 @@ async function saveConversationCampaign(
 async function enrichContext(
   supabase: ReturnType<typeof createClient>,
   userId: string,
-  providedContext?: Record<string, unknown>
+  providedContext?: Record<string, unknown>,
+  campaignId?: string
 ): Promise<ChatContext> {
   const context: ChatContext = {};
 
@@ -989,6 +1001,26 @@ async function enrichContext(
       .limit(10);
 
     context.campaigns = campaigns || [];
+
+    // If specific campaign is provided, fetch its details
+    if (campaignId) {
+      const { data: activeCampaign } = await supabase
+        .from('campaigns')
+        .select('id, name, type, status, description')
+        .eq('id', campaignId)
+        .eq('created_by', userId)
+        .single();
+
+      if (activeCampaign) {
+        context.activeCampaign = {
+          id: activeCampaign.id,
+          name: activeCampaign.name,
+          type: activeCampaign.type,
+          status: activeCampaign.status
+        };
+        console.log('Loaded active campaign context:', activeCampaign.name);
+      }
+    }
 
     const { data: autopilotConfig } = await supabase
       .from('marketing_autopilot_config')
@@ -1007,8 +1039,8 @@ async function enrichContext(
 
     context.recentActivity = recentActivity || [];
 
-    // Fetch knowledge documents for context
-    context.knowledge = await fetchKnowledgeContext(supabase, userId);
+    // Fetch knowledge documents for context - prioritize campaign-specific knowledge if campaignId provided
+    context.knowledge = await fetchKnowledgeContext(supabase, userId, campaignId);
   } catch (error) {
     console.error('Error enriching context:', error);
   }
@@ -1016,9 +1048,36 @@ async function enrichContext(
   return context;
 }
 
+// Helper function to process documents from a bucket into the knowledge context
+function processBucketDocuments(
+  bucket: { name: string; bucket_type: string; knowledge_documents?: Array<{ id: string; title: string; content: string; summary?: string; status: string }> },
+  knowledgeContext: KnowledgeContext
+): void {
+  const docs = bucket.knowledge_documents || [];
+  const readyDocs = docs.filter((d) => d.status === 'ready');
+
+  for (const doc of readyDocs) {
+    knowledgeContext.documents.push({
+      id: doc.id,
+      title: doc.title,
+      content: doc.content?.slice(0, 2000) || '',
+      summary: doc.summary,
+      bucket_name: bucket.name,
+      bucket_type: bucket.bucket_type as 'campaign' | 'general'
+    });
+
+    if (doc.summary) {
+      knowledgeContext.summaries.push(`[${bucket.name}] ${doc.title}: ${doc.summary}`);
+    }
+  }
+
+  knowledgeContext.documentCount = knowledgeContext.documents.length;
+}
+
 async function fetchKnowledgeContext(
   supabase: ReturnType<typeof createClient>,
-  userId: string
+  userId: string,
+  campaignId?: string
 ): Promise<KnowledgeContext> {
   const knowledgeContext: KnowledgeContext = {
     hasKnowledge: false,
@@ -1029,13 +1088,14 @@ async function fetchKnowledgeContext(
   };
 
   try {
-    // Fetch buckets with their documents
-    const { data: buckets, error: bucketsError } = await supabase
+    // Build query for buckets with their documents
+    const bucketsQuery = supabase
       .from('knowledge_buckets')
       .select(`
         id,
         name,
         bucket_type,
+        campaign_id,
         knowledge_documents (
           id,
           title,
@@ -1045,6 +1105,56 @@ async function fetchKnowledgeContext(
         )
       `)
       .eq('created_by', userId);
+
+    // If campaignId is provided, prioritize that campaign's bucket but also include general buckets
+    // This ensures campaign-specific docs come first but general knowledge is still available
+    if (campaignId) {
+      // First fetch campaign-specific bucket
+      const { data: campaignBuckets, error: campaignBucketsError } = await bucketsQuery
+        .eq('campaign_id', campaignId);
+
+      if (!campaignBucketsError && campaignBuckets && campaignBuckets.length > 0) {
+        // Process campaign-specific documents first
+        for (const bucket of campaignBuckets) {
+          processBucketDocuments(bucket, knowledgeContext);
+        }
+        console.log(`Loaded ${knowledgeContext.documentCount} documents from campaign-specific bucket`);
+      }
+
+      // Also fetch general buckets (not linked to any campaign)
+      const { data: generalBuckets, error: generalBucketsError } = await supabase
+        .from('knowledge_buckets')
+        .select(`
+          id,
+          name,
+          bucket_type,
+          campaign_id,
+          knowledge_documents (
+            id,
+            title,
+            content,
+            summary,
+            status
+          )
+        `)
+        .eq('created_by', userId)
+        .is('campaign_id', null);
+
+      if (!generalBucketsError && generalBuckets) {
+        for (const bucket of generalBuckets) {
+          processBucketDocuments(bucket, knowledgeContext);
+        }
+      }
+
+      knowledgeContext.bucketCount = (campaignBuckets?.length || 0) + (generalBuckets?.length || 0);
+      knowledgeContext.hasKnowledge = knowledgeContext.documentCount > 0;
+
+      console.log(`Total knowledge context: ${knowledgeContext.bucketCount} buckets, ${knowledgeContext.documentCount} documents (campaign: ${campaignId})`);
+      return knowledgeContext;
+    }
+
+    // No campaignId - fetch all buckets
+    const { data: buckets, error: bucketsError } = await bucketsQuery;
 
     if (bucketsError) {
       console.error('Error fetching knowledge buckets:', bucketsError);
@@ -1057,28 +1167,11 @@ async function fetchKnowledgeContext(
 
     knowledgeContext.bucketCount = buckets.length;
 
-    // Process documents from all buckets
+    // Process documents from all buckets using the helper function
     for (const bucket of buckets) {
-      const docs = bucket.knowledge_documents || [];
-      const readyDocs = docs.filter((d: { status: string }) => d.status === 'ready');
-
-      for (const doc of readyDocs) {
-        knowledgeContext.documents.push({
-          id: doc.id,
-          title: doc.title,
-          content: doc.content?.slice(0, 2000) || '', // Limit content size
-          summary: doc.summary,
-          bucket_name: bucket.name,
-          bucket_type: bucket.bucket_type
-        });
-
-        if (doc.summary) {
-          knowledgeContext.summaries.push(`[${bucket.name}] ${doc.title}: ${doc.summary}`);
-        }
-      }
+      processBucketDocuments(bucket, knowledgeContext);
     }
 
-    knowledgeContext.documentCount = knowledgeContext.documents.length;
     knowledgeContext.hasKnowledge = knowledgeContext.documentCount > 0;
 
     console.log(`Loaded knowledge context: ${knowledgeContext.bucketCount} buckets, ${knowledgeContext.documentCount} documents`);
@@ -1095,6 +1188,19 @@ function buildStrategicSystemPrompt(context: ChatContext): string {
   const autopilotEnabled = context.autopilotConfig?.is_active || false;
   const businessDesc = context.autopilotConfig?.business_description || 'your business';
   const knowledge = context.knowledge;
+  const activeCampaign = context.activeCampaign;
+
+  // Build active campaign section if present
+  let activeCampaignSection = '';
+  if (activeCampaign) {
+    activeCampaignSection = `
+ACTIVE CAMPAIGN CONTEXT:
+You are specifically helping to plan the campaign: "${activeCampaign.name}"
+- Campaign Type: ${activeCampaign.type}
+- Status: ${activeCampaign.status}
+Focus your recommendations on developing this specific campaign. The user has already created the campaign shell and now needs help with strategy and execution.
+`;
+  }
 
   // Build knowledge section
   let knowledgeSection = '';
@@ -1124,7 +1230,7 @@ PLATFORM CONTEXT:
 - User is managing ${activeCampaigns} active campaign(s)
 - Marketing Autopilot: ${autopilotEnabled ? 'ENABLED' : 'DISABLED'}
 - Business: ${businessDesc}
-${knowledgeSection}
+${activeCampaignSection}${knowledgeSection}
 YOUR ROLE:
 You are helping the user develop a comprehensive marketing campaign strategy. Have a natural, strategic conversation to understand their:
 1. Product/service they want to promote
@@ -1159,6 +1265,19 @@ function buildSystemPrompt(context: ChatContext, completeness?: CompletenessChec
   const businessDesc = context.autopilotConfig?.business_description || 'your business';
   const hasHistory = context.conversationHistory && context.conversationHistory.length > 100;
   const knowledge = context.knowledge;
+  const activeCampaign = context.activeCampaign;
+
+  // Build active campaign section if present
+  let activeCampaignSection = '';
+  if (activeCampaign) {
+    activeCampaignSection = `
+ACTIVE CAMPAIGN CONTEXT:
+You are specifically helping to plan the campaign: "${activeCampaign.name}"
+- Campaign Type: ${activeCampaign.type}
+- Status: ${activeCampaign.status}
+Focus your recommendations on developing this specific campaign.
+`;
+  }
 
   // Build knowledge section
   let knowledgeSection = '';
@@ -1199,7 +1318,7 @@ PLATFORM CONTEXT:
 - Marketing Autopilot: ${autopilotEnabled ? 'ENABLED' : 'DISABLED'}
 - Business: ${businessDesc}
 ${hasHistory ? '- You have been having a conversation with this user (see history below)' : ''}
-${knowledgeSection}
+${activeCampaignSection}${knowledgeSection}
 ${context.conversationHistory ? `\nPREVIOUS CONVERSATION:\n${context.conversationHistory.slice(-12000)}\n` : ''}
 
 YOUR CAPABILITIES:
