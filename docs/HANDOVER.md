@@ -1,93 +1,109 @@
-# Handover - AI Boost Campaign (January 17, 2026)
+# Handover - AI Boost Campaign (January 18, 2026)
 
 This document summarizes the changes completed in the last iteration, the current state of the codebase, and recommendations for next steps. It is intended for engineers picking up the work and for product/QA to validate.
 
 ---
 
-## Recent Changes (January 2026)
+## Recent Changes (January 18, 2026)
 
-### Quick Start Campaign Wizard
-**Commit:** `ef7ad29` - feat(quick-start): add Quick Start Campaign wizard with AI planning integration
+### Quick Post - Auto-Generate & Publish Flow
+**Commits:** `53190cc`, `4097724`, `ea59bc2`
 
-A streamlined 3-step wizard for creating campaigns without going through full autopilot setup:
+A streamlined content creation flow for the Organic Marketing page that lets users generate and publish social content without writing topics manually.
 
-1. **Step 1 - Name Campaign**: Enter campaign name (required) and select type (optional, defaults to multi_channel)
-2. **Step 2 - Upload Documents**: Drag-drop or file picker for .txt, .md, .json, .csv files
-3. **Step 3 - Summary**: Review and click "Start Planning with AI"
-
-**Key Files:**
-- `src/components/campaigns/QuickStartWizard.tsx` - The wizard component
-- `supabase/functions/quick-start-campaign/index.ts` - Backend Edge Function
-- `src/lib/logger.ts` - Structured logging utility
-
-**Backend Behavior:**
-- Creates a draft campaign in `campaigns` table
-- Auto-creates a linked knowledge bucket in `knowledge_buckets` with `bucket_type: 'campaign'`
-- If bucket creation fails, rolls back the campaign creation
-- Returns both campaign and bucket IDs for frontend use
-
-**UI Integration:**
-- SimpleDashboard welcome screen: Subtle "Start a campaign without autopilot" link below main CTA
-- SimpleDashboard header: "Start New Campaign" button when autopilot is configured
-- Navigates to `/app/conversational-dashboard?campaignId={id}` on completion
-
-### Dashboard Chat AI Integration
-**Commits:** `001d6e8`, `83785df`, `c8f5a3c`
-
-Enhanced the conversational dashboard AI chat with:
-
-1. **Knowledge Management Integration**: AI now has access to user's knowledge buckets and documents
-2. **Campaign Context**: Accepts `campaignId` URL parameter to load campaign-specific knowledge
-3. **Intelligent Campaign Creation**: AI can create campaigns directly from conversation
-4. **Updated AI Models**: Using Claude Opus 4.5 (claude-opus-4-5-20251101) and Gemini 3
+**The Problem Solved:**
+- Users said "I am not a writer, AI is so much better at writing"
+- Previous flow required manually entering a topic before generating content
+- New flow: Select Platform -> AI Auto-Generates -> Approve/Regenerate -> Publish
 
 **Key Files:**
-- `supabase/functions/dashboard-chat/index.ts` - Main chat Edge Function
-- `src/components/dashboard/DashboardChatInterface.tsx` - Chat UI component
-- `src/pages/ConversationalDashboard.tsx` - Dashboard page with URL param handling
-- `src/lib/api-client.ts` - API client updates
+- `src/components/organic/QuickPost.tsx` - New streamlined component
+- `supabase/functions/organic-content-agent/index.ts` - Enhanced with `autoGenerate` mode
+- `src/pages/OrganicMarketingPage.tsx` - Added Quick Post as first tab
 
-**Database Tables Used:**
-- `knowledge_buckets` - User's document collections
-- `knowledge_documents` - Individual documents with content/summaries
-- `conversation_campaigns` - Campaign creation tracking from conversations
-- `campaigns` - Main campaigns table
+**Features:**
+- Platform selection: LinkedIn, Twitter/X, Instagram, Facebook, YouTube, Reddit
+- Checks prerequisites (positioning, audience research, config) before allowing generation
+- Shows connected vs unconnected platform status
+- Auto-generates content using stored marketing context:
+  - Business positioning statement
+  - Audience research and pain points
+  - Brand personality traits
+  - Knowledge documents (product docs, etc.)
+- Quality scoring displayed
+- Edit capability for minor tweaks
+- Direct publish to connected platforms
+- Regenerate for different angle/message
 
-### SimpleDashboard Layout Fix
-**Issue:** Welcome screen had side-by-side buttons that looked broken
-**Fix:** Reverted to original vertical layout with:
-- Single prominent "Get Started" button linking to autopilot setup
-- "or" separator text
-- Subtle link-style button "Start a campaign without autopilot"
+**Backend Enhancement (organic-content-agent):**
+- Added `autoGenerate: boolean` option to request schema
+- Made `topic` parameter optional when `autoGenerate: true`
+- Fetches and injects knowledge documents into AI prompt
+- Returns `knowledgeDocsUsed` count in response
+
+### Performance Optimizations (Lighthouse)
+**Commits:** `53190cc`, `4097724`
+
+Improved Lighthouse performance score from **61 to 69** through aggressive code splitting:
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Performance Score | 61 | 69 | +8 |
+| FCP | 4.5s | 2.7s | -40% |
+| LCP | 11.5s | 9.5s | -17% |
+| TBT | 50ms | 20ms | -60% |
+| Unused JS | 533 KiB | 207 KiB | -61% |
+
+**Optimizations Applied:**
+
+1. **Disabled modulepreload** (`vite.config.ts`)
+   - Prevents Vite from preloading all chunks in index.html
+   - Chunks now load on-demand only
+
+2. **Lazy Loading Routes** (`App.tsx`, `AppRouter.tsx`)
+   - All routes use `React.lazy()` with `Suspense`
+   - Created `PageLoader.tsx` component for loading states
+
+3. **Dynamic Import for PDF** (`ProposalPreview.tsx`, `Proposals.tsx`)
+   - PDF generator uses `await import()` instead of static import
+   - ProposalPreview component itself is lazy-loaded
+   - vendor-pdf chunk (741KB) only loads when user exports a PDF
+
+4. **Function-based Manual Chunks** (`vite.config.ts`)
+   - Converted array-based `manualChunks` to function-based for better isolation
+   - Separated: vendor-react, vendor-ui, vendor-supabase, vendor-charts, vendor-pdf, vendor-forms, vendor-utils
+
+**Bundle Chunks:**
+```
+vendor-react     165 KB  (React, React DOM, React Router)
+vendor-ui        159 KB  (Radix UI components)
+vendor-supabase  173 KB  (Supabase client)
+vendor-charts    411 KB  (Recharts - only on analytics pages)
+vendor-pdf       741 KB  (jspdf, html2canvas - only when exporting PDFs)
+```
 
 ---
 
-## Previous Changes (Earlier January 2026)
+## Previous Changes (January 17, 2026)
 
-### Dark Mode Stability
-- Strengthened global dark overrides with `html.dark` specificity
-- Rewrote input overrides for light/dark support
-- Removed white flashes on navigation
-- Key files: `src/styles/color-overrides.css`, `src/styles/input-overrides.css`
+### Quick Start Campaign Wizard
+**Commit:** `ef7ad29`
 
-### Layout Unification & Sidebar UX
-- Collapsible sidebar with persisted state and tooltips
-- Header branding: LogoMark as "A" in "AI Boost Campaign"
-- Files: `src/components/Layout.tsx`, `src/components/layout/Layout.tsx`
+A streamlined 3-step wizard for creating campaigns without full autopilot setup:
 
-### Knowledge Management Viewer/Editor
-- View modal with title/content editor
-- Actions: Save, Download, Reprocess, Delete
-- Service fallbacks for edge-function-first, then direct table operations
-- Files: `src/components/knowledge/DocumentViewerDialog.tsx`, `src/lib/services/knowledge-service.ts`
+1. **Step 1 - Name Campaign**: Enter campaign name and select type
+2. **Step 2 - Upload Documents**: Drag-drop file upload
+3. **Step 3 - Summary**: Review and click "Start Planning with AI"
 
-### Settings - Users & Roles
-- Fixed 400 error with embedded relation fallback
-- File: `src/components/settings/UserRoleManagement.tsx`
+**Key Files:**
+- `src/components/campaigns/QuickStartWizard.tsx`
+- `supabase/functions/quick-start-campaign/index.ts`
 
-### System Preferences
-- Prevented empty Select values crash
-- Defaults: theme=auto, language=en, timezone=UTC
+### Dashboard Chat AI Integration
+Enhanced conversational dashboard with:
+- Knowledge Management integration
+- Campaign context via URL parameter
+- Using Claude Opus 4.5 and Gemini 3
 
 ---
 
@@ -107,26 +123,23 @@ All AI features use user-provided API keys (no platform markup):
 ### Key Edge Functions
 | Function | Purpose |
 |----------|---------|
+| `organic-content-agent` | Content generation with auto-topic support |
 | `dashboard-chat` | AI chat with knowledge integration |
 | `quick-start-campaign` | Create campaign + bucket in one transaction |
 | `knowledge-processor` | Document CRUD, search, reprocess |
 | `autopilot-orchestrator` | Daily campaign optimization (2 AM UTC) |
+| `social-post` | Publish content to connected platforms |
 
-### Database Schema (Key Tables)
+### Organic Marketing Flow
 ```
-campaigns
-  - id, name, type, status, created_by
-  - Links to knowledge_buckets via campaign_id
+User Setup Required:
+1. Business description (organic_marketing_config)
+2. Audience audit (audience_research)
+3. Positioning definition (positioning_definitions)
+4. Platform connected (oauth_connections)
 
-knowledge_buckets
-  - id, name, bucket_type, campaign_id, created_by
-  - bucket_type: 'general' | 'campaign'
-
-knowledge_documents
-  - id, bucket_id, title, content, summary, status
-
-conversation_campaigns
-  - Tracks campaigns created from AI conversations
+Quick Post Flow:
+Select Platform -> Generate (auto-topic) -> Quality Check -> Publish
 ```
 
 ---
@@ -145,50 +158,47 @@ npm run test
 npm run build
 ```
 
+### Performance Testing
+```bash
+# Build and check chunk sizes
+npm run build
+
+# Run Lighthouse (use Chrome DevTools or CLI)
+npx lighthouse https://your-deployed-url --output=json
+```
+
 ### Pre-Push Quality Gate
-The repo has a pre-push hook that runs:
-1. TypeScript type check
-2. ESLint
-3. Frontend tests (Vitest)
-4. Backend tests (Pytest - requires Python env)
-5. Production build
-
 Bypass with `git push --no-verify` if needed (validate locally first).
-
-### Supabase
-- Use singleton client from `@/integrations/supabase/client`
-- Edge functions require `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`
-- User secrets stored in `user_secrets` table (encrypted)
 
 ---
 
 ## Verification Checklist
 
-### Quick Start Wizard
-- [ ] Click "Start a campaign without autopilot" on SimpleDashboard welcome screen
-- [ ] Enter campaign name, click Next
-- [ ] Upload 1-2 documents (or skip)
-- [ ] Click "Start Planning with AI"
-- [ ] Verify: AI Chat opens with campaign context
-- [ ] Verify: Campaign appears in Campaigns list as "draft"
-- [ ] Verify: Knowledge bucket exists linked to campaign
+### Quick Post (NEW)
+- [ ] Navigate to `/app/organic`
+- [ ] Quick Post tab should be first/default
+- [ ] If setup incomplete, shows "Complete Setup First" with checklist
+- [ ] Select a connected platform
+- [ ] Click "Generate Post"
+- [ ] Content generates using stored positioning/audience/knowledge
+- [ ] Quality score displays (70+ expected)
+- [ ] Click "Edit" - can modify content
+- [ ] Click "Regenerate" - different content generated
+- [ ] Click "Publish Now" - posts to platform
+- [ ] Verify Reddit platform is in the list
 
-### Dashboard Chat
-- [ ] Navigate to `/app/conversational-dashboard`
-- [ ] Send a message - AI should respond
-- [ ] Ask about uploaded documents - AI should reference them
-- [ ] Navigate with `?campaignId=xxx` - AI should know campaign context
+### Performance (NEW)
+- [ ] Run `npm run build` - no errors
+- [ ] Check dist/index.html - no modulepreload links for vendor-pdf
+- [ ] Navigate to landing page - vendor-pdf should NOT be in Network tab
+- [ ] Navigate to Proposals > Preview tab - vendor-pdf loads on demand
+
+### Quick Start Wizard
+- [ ] Click "Start a campaign without autopilot" on SimpleDashboard
+- [ ] Complete wizard, verify AI Chat opens with context
 
 ### Dark Mode
-- [ ] Toggle dark/light without white flashes on:
-  - `/app/conversational-dashboard`
-  - `/app/autopilot`
-  - `/app/settings`
-  - `/app/campaigns`
-
-### Sidebar
-- [ ] Collapse/expand persists across navigation
-- [ ] Tooltips show on collapsed items
+- [ ] Toggle dark/light without white flashes
 
 ---
 
@@ -198,23 +208,30 @@ Bypass with `git push --no-verify` if needed (validate locally first).
 1. **Dependabot Alerts**: 13 vulnerabilities flagged on GitHub (1 critical, 2 high)
    - Review at: https://github.com/Thabonel/action-insight-pilot/security/dependabot
 
-2. **ESLint Warnings**: 49 warnings (mostly `react-hooks/exhaustive-deps`)
-   - Not blocking but should be addressed for code quality
+2. **TypeScript Errors**: Supabase type mismatches for newer tables
+   - `marketing_autopilot_config`, `autopilot_lead_inbox`, `autopilot_activity_log`
+   - Need to regenerate Supabase types: `npx supabase gen types typescript`
 
-3. **Backend Tests**: pytest not available in default Python environment
-   - Pre-push hook fails on Step 4 - need to configure Python venv
+3. **LCP Still High**: 9.5s LCP - consider:
+   - Server-side rendering for landing page
+   - Image optimization
+   - Critical CSS inlining
 
 ### Medium Priority
-4. **Knowledge Editor Polish**: Swap textarea for MDX/Markdown editor with preview
+4. **Lighthouse Target**: Aim for 80+ performance score
+   - Current blockers: Large vendor-charts chunk, SSR needed
 
-5. **Edge Function Parity**: Ensure `knowledge-processor` implements all CRUD operations
+5. **Quick Post Enhancements**:
+   - Add scheduling option (not just immediate publish)
+   - Show recent posts history
+   - Multi-platform posting (post to multiple at once)
 
-6. **Dark Mode Audit Rule**: Add pre-push lint for missing `dark:` variants
+6. **ESLint Warnings**: 49 warnings (mostly `react-hooks/exhaustive-deps`)
 
 ### Low Priority
-7. **Icon Audit**: Flag icon names without corresponding assets
+7. **Backend Tests**: pytest not available in default Python environment
 
-8. **Asset Caching**: Add versioning/cache-busting for deployments
+8. **Knowledge Editor Polish**: Swap textarea for MDX editor with preview
 
 ---
 
@@ -223,26 +240,35 @@ Bypass with `git push --no-verify` if needed (validate locally first).
 ```
 src/
   components/
-    campaigns/
-      QuickStartWizard.tsx      # New campaign wizard
-    dashboard/
-      DashboardChatInterface.tsx # AI chat component
-    knowledge/                   # Knowledge management UI
-    layout/                      # Sidebar, header
+    organic/
+      QuickPost.tsx             # NEW: Quick post generation
+      ContentCreator.tsx        # Original content creator (still available)
+    proposals/
+      ProposalPreview.tsx       # Updated: Dynamic PDF import
+    common/
+      PageLoader.tsx            # NEW: Suspense fallback component
   pages/
-    SimpleDashboard.tsx          # Main autopilot dashboard
-    ConversationalDashboard.tsx  # AI chat page
-  lib/
-    services/
-      knowledge-service.ts       # Knowledge CRUD operations
-    logger.ts                    # Structured logging
-    api-client.ts                # Backend API client
+    Proposals.tsx               # Updated: Lazy loads ProposalPreview
+    OrganicMarketingPage.tsx    # Updated: Quick Post as first tab
 
 supabase/
   functions/
-    dashboard-chat/              # AI chat Edge Function
-    quick-start-campaign/        # Campaign creation Edge Function
-    knowledge-processor/         # Document processing
+    organic-content-agent/      # Updated: autoGenerate mode
+
+vite.config.ts                  # Updated: Performance optimizations
+```
+
+---
+
+## Git History (Recent)
+
+```
+53190cc perf: disable modulepreload to prevent loading unused chunks
+4097724 perf: use dynamic import for PDF generator to reduce initial bundle
+ea59bc2 feat(organic): add Reddit to Quick Post platforms
+d2dc980 feat(organic): add Seven Ideas organic marketing system
+e783323 feat(ux): add beginner-friendly instructions throughout platform
+ef7ad29 feat(quick-start): add Quick Start Campaign wizard
 ```
 
 ---
@@ -258,5 +284,5 @@ Please reach out if you need a pairing session to walk through any part of this 
 
 ---
 
-*Last Updated: January 17, 2026*
-*Latest Commit: ef7ad29*
+*Last Updated: January 18, 2026*
+*Latest Commit: 53190cc*
