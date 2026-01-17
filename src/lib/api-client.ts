@@ -747,7 +747,8 @@ export class ApiClient {
         body: {
           query,
           context,
-          conversationId: context?.conversationId || null
+          conversationId: context?.conversationId || null,
+          campaignId: context?.campaignId || null
         }
       });
 
