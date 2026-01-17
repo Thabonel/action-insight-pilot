@@ -9,10 +9,17 @@ const corsHeaders = {
 
 // Decryption utilities for API keys
 async function generateKey(): Promise<CryptoKey> {
+  console.log('[DEBUG] generateKey: Checking SECRET_MASTER_KEY...');
   const masterKeyString = Deno.env.get('SECRET_MASTER_KEY');
-  if (!masterKeyString || masterKeyString.length !== 64) {
+  if (!masterKeyString) {
+    console.error('[DEBUG] generateKey: SECRET_MASTER_KEY is not set!');
     throw new Error('Master key must be 64 hex characters (32 bytes)');
   }
+  if (masterKeyString.length !== 64) {
+    console.error('[DEBUG] generateKey: SECRET_MASTER_KEY wrong length:', masterKeyString.length, 'expected: 64');
+    throw new Error('Master key must be 64 hex characters (32 bytes)');
+  }
+  console.log('[DEBUG] generateKey: SECRET_MASTER_KEY is valid (64 chars)');
 
   const keyBytes = new Uint8Array(32);
   for (let i = 0; i < 32; i++) {
@@ -29,17 +36,36 @@ async function generateKey(): Promise<CryptoKey> {
 }
 
 async function decryptSecret(encryptedValue: string, iv: string): Promise<string> {
+  console.log('[DEBUG] decryptSecret: Starting decryption...');
+  console.log('[DEBUG] decryptSecret: Encrypted value length:', encryptedValue?.length || 0);
+  console.log('[DEBUG] decryptSecret: IV length:', iv?.length || 0);
+
   const key = await generateKey();
-  const encryptedData = Uint8Array.from(atob(encryptedValue), c => c.charCodeAt(0));
-  const ivData = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
+  console.log('[DEBUG] decryptSecret: CryptoKey generated successfully');
 
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: ivData },
-    key,
-    encryptedData
-  );
+  try {
+    const encryptedData = Uint8Array.from(atob(encryptedValue), c => c.charCodeAt(0));
+    console.log('[DEBUG] decryptSecret: Encrypted data decoded, bytes:', encryptedData.length);
 
-  return new TextDecoder().decode(decrypted);
+    const ivData = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
+    console.log('[DEBUG] decryptSecret: IV decoded, bytes:', ivData.length);
+
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: ivData },
+      key,
+      encryptedData
+    );
+    console.log('[DEBUG] decryptSecret: Decryption successful, result bytes:', decrypted.byteLength);
+
+    const result = new TextDecoder().decode(decrypted);
+    console.log('[DEBUG] decryptSecret: Text decoded, length:', result.length);
+    return result;
+  } catch (decryptError) {
+    console.error('[DEBUG] decryptSecret: Decryption failed!');
+    console.error('[DEBUG] decryptSecret: Error name:', decryptError?.name);
+    console.error('[DEBUG] decryptSecret: Error message:', decryptError?.message);
+    throw decryptError;
+  }
 }
 
 interface ConversationCampaign {
@@ -73,7 +99,13 @@ serve(async (req) => {
   }
 
   try {
+    console.log('[DEBUG] ========================================');
+    console.log('[DEBUG] dashboard-chat: New request received');
+    console.log('[DEBUG] Timestamp:', new Date().toISOString());
+
     const { query, context, conversationId } = await req.json();
+    console.log('[DEBUG] Request parsed successfully');
+    console.log('[DEBUG] Query length:', query?.length || 0);
 
     if (!query) {
       return new Response(
@@ -168,18 +200,44 @@ serve(async (req) => {
       );
     }
 
-    console.log('Using AI service:', apiKeyData.service_name);
+    console.log('[DEBUG] Using AI service:', apiKeyData.service_name);
+    console.log('[DEBUG] API key data found:');
+    console.log('[DEBUG]   - encrypted_value exists:', !!apiKeyData.encrypted_value);
+    console.log('[DEBUG]   - encrypted_value length:', apiKeyData.encrypted_value?.length || 0);
+    console.log('[DEBUG]   - initialization_vector exists:', !!apiKeyData.initialization_vector);
+    console.log('[DEBUG]   - initialization_vector length:', apiKeyData.initialization_vector?.length || 0);
 
     // Decrypt the API key
     let decryptedApiKey: string;
     try {
+      console.log('[DEBUG] Starting decryption process...');
       decryptedApiKey = await decryptSecret(apiKeyData.encrypted_value, apiKeyData.initialization_vector);
+      console.log('[DEBUG] API key decrypted successfully!');
+      console.log('[DEBUG]   - Decrypted key length:', decryptedApiKey.length);
+
+      // Validate API key format
+      if (apiKeyData.service_name === 'anthropic_api_key') {
+        const isValidFormat = decryptedApiKey.startsWith('sk-ant-');
+        console.log('[DEBUG]   - Anthropic key format valid (starts with sk-ant-):', isValidFormat);
+        console.log('[DEBUG]   - Key prefix:', decryptedApiKey.substring(0, 10) + '...');
+        if (!isValidFormat) {
+          console.warn('[DEBUG] WARNING: Anthropic key does not start with sk-ant-');
+        }
+      } else {
+        console.log('[DEBUG]   - Gemini key prefix:', decryptedApiKey.substring(0, 6) + '...');
+      }
     } catch (decryptError) {
-      console.error('Failed to decrypt API key:', decryptError);
+      console.error('[DEBUG] DECRYPTION FAILED!');
+      console.error('[DEBUG] Error details:', {
+        name: decryptError?.name,
+        message: decryptError?.message,
+        stack: decryptError?.stack
+      });
       return new Response(
         JSON.stringify({
           error: 'API key decryption failed',
-          message: 'There was an issue with your API key. Please re-enter it in Settings > Integrations.'
+          message: 'There was an issue with your API key. Please re-enter it in Settings > Integrations.',
+          debug: { errorName: decryptError?.name, errorMessage: decryptError?.message }
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-type': 'application/json' } }
       );
@@ -187,14 +245,23 @@ serve(async (req) => {
 
     const systemPrompt = buildSystemPrompt(enrichedContext);
     const userPrompt = buildUserPrompt(query, enrichedContext);
+    console.log('[DEBUG] Prompts built successfully');
 
     let aiResponse: string;
 
+    console.log('[DEBUG] About to call AI API...');
+    console.log('[DEBUG] Service:', apiKeyData.service_name === 'anthropic_api_key' ? 'Claude (Anthropic)' : 'Gemini (Google)');
+
     if (apiKeyData.service_name === 'anthropic_api_key') {
+      console.log('[DEBUG] Calling Claude API...');
       aiResponse = await callClaude(decryptedApiKey, systemPrompt, userPrompt);
+      console.log('[DEBUG] Claude API call completed successfully');
     } else {
+      console.log('[DEBUG] Calling Gemini API...');
       aiResponse = await callGemini(decryptedApiKey, systemPrompt, userPrompt);
+      console.log('[DEBUG] Gemini API call completed successfully');
     }
+    console.log('[DEBUG] AI response length:', aiResponse?.length || 0);
 
     const actionSuggestions = detectActions(query, aiResponse);
 
@@ -225,7 +292,10 @@ serve(async (req) => {
       }
     }
 
-    console.log('Successfully processed dashboard chat query');
+    console.log('[DEBUG] ========================================');
+    console.log('[DEBUG] SUCCESS! Chat query processed completely');
+    console.log('[DEBUG] Response ready to send');
+    console.log('[DEBUG] ========================================');
 
     return new Response(
       JSON.stringify({
@@ -239,11 +309,50 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: unknown) {
-    console.error('dashboard-chat error:', error);
+    console.error('[DEBUG] MAIN ERROR HANDLER CAUGHT EXCEPTION!');
+    console.error('[DEBUG] Error type:', typeof error);
+    console.error('[DEBUG] Error name:', error instanceof Error ? error.name : 'N/A');
+    console.error('[DEBUG] Error message:', error instanceof Error ? error.message : String(error));
+    console.error('[DEBUG] Error stack:', error instanceof Error ? error.stack : 'N/A');
+    console.error('[DEBUG] Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error || {})));
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorName = error instanceof Error ? error.name : 'UnknownError';
+
+    // Categorize the error for better debugging
+    let errorCode = 'UNKNOWN_ERROR';
+    let userMessage = 'An unexpected error occurred. Please try again.';
+
+    if (errorMessage.includes('SECRET_MASTER_KEY')) {
+      errorCode = 'SECRET_KEY_ERROR';
+      userMessage = 'Server configuration issue. Please contact support.';
+    } else if (errorMessage.includes('Decryption failed') || errorName === 'OperationError') {
+      errorCode = 'DECRYPTION_FAILED';
+      userMessage = 'Unable to decrypt your API key. Please re-save it in Settings.';
+    } else if (errorMessage.includes('Claude API error: 401')) {
+      errorCode = 'CLAUDE_AUTH_ERROR';
+      userMessage = 'Your Claude API key is invalid. Please check and update it in Settings.';
+    } else if (errorMessage.includes('Claude API error: 429')) {
+      errorCode = 'CLAUDE_RATE_LIMIT';
+      userMessage = 'Rate limit reached. Please wait a moment and try again.';
+    } else if (errorMessage.includes('Claude API error')) {
+      errorCode = 'CLAUDE_API_ERROR';
+      userMessage = 'Error communicating with Claude API.';
+    } else if (errorMessage.includes('Gemini API error')) {
+      errorCode = 'GEMINI_API_ERROR';
+      userMessage = 'Error communicating with Gemini API.';
+    }
+
     return new Response(
       JSON.stringify({
-        error: 'An unexpected error occurred',
-        message: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Failed to process chat'
+        error: errorCode,
+        message: userMessage,
+        debug: {
+          errorName,
+          errorMessage,
+          errorType: typeof error,
+          timestamp: new Date().toISOString()
+        }
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -639,61 +748,119 @@ function buildUserPrompt(query: string, context: ChatContext): string {
 }
 
 async function callClaude(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json',
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5-20250514',
-      max_tokens: 4000,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.7,
-    }),
-  });
+  console.log('[DEBUG] callClaude: Starting Claude API call...');
+  console.log('[DEBUG] callClaude: API key length:', apiKey?.length || 0);
+  console.log('[DEBUG] callClaude: API key prefix:', apiKey?.substring(0, 10) + '...');
+  console.log('[DEBUG] callClaude: System prompt length:', systemPrompt?.length || 0);
+  console.log('[DEBUG] callClaude: User prompt length:', userPrompt?.length || 0);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Claude API error:', response.status, errorText);
-    throw new Error(`Claude API error: ${response.status}`);
+  // Use explicit model version for reliability
+  const model = 'claude-sonnet-4-5-20250929';
+  console.log('[DEBUG] callClaude: Using model:', model);
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.7,
+      }),
+    });
+
+    console.log('[DEBUG] callClaude: Response received');
+    console.log('[DEBUG] callClaude: Status:', response.status);
+    console.log('[DEBUG] callClaude: Status text:', response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[DEBUG] callClaude: API ERROR!');
+      console.error('[DEBUG] callClaude: Status:', response.status);
+      console.error('[DEBUG] callClaude: Error body:', errorText);
+
+      // Parse error for more details
+      try {
+        const errorJson = JSON.parse(errorText);
+        console.error('[DEBUG] callClaude: Error type:', errorJson?.error?.type);
+        console.error('[DEBUG] callClaude: Error message:', errorJson?.error?.message);
+      } catch {
+        // Not JSON, that's ok
+      }
+
+      throw new Error(`Claude API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('[DEBUG] callClaude: Response parsed successfully');
+    console.log('[DEBUG] callClaude: Response has content:', !!data.content);
+    console.log('[DEBUG] callClaude: Content length:', data.content?.[0]?.text?.length || 0);
+
+    return data.content?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
+  } catch (fetchError) {
+    console.error('[DEBUG] callClaude: FETCH ERROR!');
+    console.error('[DEBUG] callClaude: Error name:', fetchError?.name);
+    console.error('[DEBUG] callClaude: Error message:', fetchError?.message);
+    console.error('[DEBUG] callClaude: Error stack:', fetchError?.stack);
+    throw fetchError;
   }
-
-  const data = await response.json();
-  return data.content?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
 }
 
 async function callGemini(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: `${systemPrompt}\n\nUser Query: ${userPrompt}`
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 4000,
+  console.log('[DEBUG] callGemini: Starting Gemini API call...');
+  console.log('[DEBUG] callGemini: API key length:', apiKey?.length || 0);
+  console.log('[DEBUG] callGemini: API key prefix:', apiKey?.substring(0, 6) + '...');
+
+  const model = 'gemini-2.5-flash';
+  console.log('[DEBUG] callGemini: Using model:', model);
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    }),
-  });
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\nUser Query: ${userPrompt}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 4000,
+        },
+      }),
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Gemini API error:', response.status, errorText);
-    throw new Error(`Gemini API error: ${response.status}`);
+    console.log('[DEBUG] callGemini: Response received');
+    console.log('[DEBUG] callGemini: Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[DEBUG] callGemini: API ERROR!');
+      console.error('[DEBUG] callGemini: Status:', response.status);
+      console.error('[DEBUG] callGemini: Error body:', errorText);
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('[DEBUG] callGemini: Response parsed successfully');
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
+  } catch (fetchError) {
+    console.error('[DEBUG] callGemini: FETCH ERROR!');
+    console.error('[DEBUG] callGemini: Error name:', fetchError?.name);
+    console.error('[DEBUG] callGemini: Error message:', fetchError?.message);
+    throw fetchError;
   }
-
-  const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
 }
 
 function detectActions(query: string, response: string): string[] {
