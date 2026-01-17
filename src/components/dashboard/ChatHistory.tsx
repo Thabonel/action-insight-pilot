@@ -18,20 +18,32 @@ interface ChatHistoryProps {
   isTyping: boolean;
   currentMessage: string;
   user: User | null;
+  onSuggestionClick?: (suggestion: string) => void;
+  hasCampaigns?: boolean;
+  hasAutopilot?: boolean;
 }
 
 const ChatHistory: React.FC<ChatHistoryProps> = ({
   chatHistory,
   isTyping,
   currentMessage,
-  user
+  user,
+  onSuggestionClick,
+  hasCampaigns = false,
+  hasAutopilot = false
 }) => {
   return (
     <div className="w-full h-full">
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         {!user && <AuthenticationPrompt />}
 
-        {chatHistory.length === 0 && !isTyping && user && <EmptyChatState />}
+        {chatHistory.length === 0 && !isTyping && user && (
+          <EmptyChatState
+            onSuggestionClick={onSuggestionClick}
+            hasCampaigns={hasCampaigns}
+            hasAutopilot={hasAutopilot}
+          />
+        )}
 
         {chatHistory.map((chat) => (
           <ChatMessage key={chat.id} chat={chat} />

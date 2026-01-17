@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 
 interface ChatInputProps {
@@ -10,17 +10,30 @@ interface ChatInputProps {
   isTyping: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({
+export interface ChatInputHandle {
+  focus: () => void;
+}
+
+const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({
   chatMessage,
   setChatMessage,
   onSubmit,
   user,
   isTyping
-}) => {
+}, ref) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      textareaRef.current?.focus();
+    }
+  }));
+
   return (
     <form onSubmit={onSubmit} className="flex items-end gap-3">
       <div className="flex-1">
         <textarea
+          ref={textareaRef}
           value={chatMessage}
           onChange={(e) => setChatMessage(e.target.value)}
           placeholder={user ? "What can I help you with today?" : "Please log in to chat..."}
@@ -49,6 +62,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
       </button>
     </form>
   );
-};
+});
+
+ChatInput.displayName = 'ChatInput';
 
 export default ChatInput;
