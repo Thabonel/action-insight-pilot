@@ -63,6 +63,7 @@ const PLATFORMS: PlatformConfig[] = [
   { id: 'instagram', name: 'Instagram', emoji: 'IG', color: 'text-pink-600', bgColor: 'bg-pink-100 dark:bg-pink-950' },
   { id: 'facebook', name: 'Facebook', emoji: 'fb', color: 'text-blue-700', bgColor: 'bg-blue-100 dark:bg-blue-950' },
   { id: 'youtube', name: 'YouTube', emoji: 'YT', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-950' },
+  { id: 'reddit', name: 'Reddit', emoji: 'r/', color: 'text-orange-600', bgColor: 'bg-orange-100 dark:bg-orange-950' },
 ];
 
 interface Props {
@@ -431,7 +432,7 @@ const QuickPost: React.FC<Props> = ({ onContentCreated }) => {
           {/* Step 1: Platform Selection */}
           <div>
             <p className="font-medium mb-3">1. Where do you want to post?</p>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
               {PLATFORMS.map((platform) => {
                 const isConnected = setupStatus.connectedPlatforms.includes(platform.id);
                 const isSelected = selectedPlatform === platform.id;
