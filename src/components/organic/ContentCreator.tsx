@@ -71,7 +71,7 @@ const ContentCreator: React.FC<Props> = ({ onContentCreated }) => {
   const [platform, setPlatform] = useState('linkedin');
   const [contentType, setContentType] = useState('post');
   const [topic, setTopic] = useState('');
-  const [messageTag, setMessageTag] = useState('');
+  const [messageTag, setMessageTag] = useState('any');
   const [generatedContent, setGeneratedContent] = useState<ContentPiece | null>(null);
   const [qualityAssessment, setQualityAssessment] = useState<QualityAssessment | null>(null);
   const [contentId, setContentId] = useState<string | null>(null);
@@ -131,7 +131,7 @@ const ContentCreator: React.FC<Props> = ({ onContentCreated }) => {
           platform,
           contentType,
           topic,
-          messageTag: messageTag || undefined,
+          messageTag: (messageTag && messageTag !== 'any') ? messageTag : undefined,
           positioning: positioningData ? {
             positioningStatement: positioningData.positioning_statement,
             villain: positioningData.villain,
@@ -304,7 +304,7 @@ const ContentCreator: React.FC<Props> = ({ onContentCreated }) => {
                   <SelectValue placeholder="Choose a theme..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any theme</SelectItem>
+                  <SelectItem value="any">Any theme</SelectItem>
                   {coreMessages.map((msg, i) => (
                     <SelectItem key={i} value={msg}>{msg.slice(0, 50)}...</SelectItem>
                   ))}
