@@ -10,11 +10,11 @@ interface ChatInputProps {
   isTyping: boolean;
 }
 
-export interface ChatInputRef {
+export interface ChatInputHandle {
   focus: () => void;
 }
 
-const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
+const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(({
   chatMessage,
   setChatMessage,
   onSubmit,

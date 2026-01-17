@@ -5,9 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import ChatHistory from './ChatHistory';
-import ChatInput, { ChatInputRef } from './ChatInput';
+import ChatInput, { ChatInputHandle } from './ChatInput';
 import { Button } from '@/components/ui/button';
 import { MessageSquarePlus, History, Trash2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -32,7 +32,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   const [hasCampaigns, setHasCampaigns] = useState(false);
   const [hasAutopilot, setHasAutopilot] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const chatInputRef = useRef<ChatInputRef>(null);
+  const chatInputRef = useRef<ChatInputHandle>(null);
 
   const {
     sessions,
@@ -63,13 +63,13 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
         setHasCampaigns((campaigns?.length ?? 0) > 0);
 
         // Check if user has autopilot enabled
-        const { data: autopilot } = await supabase
+        const { data: autopilotConfig } = await supabase
           .from('marketing_autopilot_config')
           .select('is_active')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        setHasAutopilot(autopilot?.is_active ?? false);
+        setHasAutopilot(autopilotConfig?.is_active ?? false);
       } catch (error) {
         console.error('Error fetching user context:', error);
       }
@@ -103,10 +103,10 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
     }
   }, [chatHistory.length, isTyping]);
 
-  // Handle suggestion click - populate input and focus
+  // Handle clicking a suggestion button
   const handleSuggestionClick = useCallback((suggestion: string) => {
     setChatMessage(suggestion);
-    // Focus the input after a short delay to ensure state has updated
+    // Focus the input so user can just press Enter
     setTimeout(() => {
       chatInputRef.current?.focus();
     }, 50);
@@ -130,8 +130,16 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
         }
       }
 
-      // Call the API
-      const result = await apiClient.queryAgent(messageToSend) as ApiResponse<{ message: string }>;
+      // Call the API with session context for conversation continuity
+      const result = await apiClient.queryAgent(messageToSend, { conversationId: session.id }) as ApiResponse<{ message: string; conversationId?: string; campaignCreated?: boolean; campaignId?: string }>;
+
+      // Handle campaign creation notification
+      if (result.success && result.data?.campaignCreated && result.data?.campaignId) {
+        toast({
+          title: "Campaign Created",
+          description: "Your campaign has been created and launched successfully!",
+        });
+      }
 
       if (result.success) {
         const responseData = result.data || { message: 'No response received' };
@@ -191,7 +199,7 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium text-slate-900 dark:text-[#E9EEF5]">
-              {currentSession?.title || 'AI Marketing Assistant'}
+              {currentSession?.title || 'New Conversation'}
             </h3>
             <p className="text-sm text-slate-600 dark:text-[#94A3B8]">
               Ask me anything about your marketing automation
