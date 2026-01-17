@@ -5,8 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/lib/api-client-interface';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import ChatHistory from './ChatHistory';
-import ChatInput from './ChatInput';
+import ChatInput, { ChatInputRef } from './ChatInput';
 import { Button } from '@/components/ui/button';
 import { MessageSquarePlus, History, Trash2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -28,7 +29,10 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   const [chatMessage, setChatMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [hasCampaigns, setHasCampaigns] = useState(false);
+  const [hasAutopilot, setHasAutopilot] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<ChatInputRef>(null);
 
   const {
     sessions,
@@ -42,6 +46,37 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
   } = useChatPersistence({
     autoLoadLatestSession: true
   });
+
+  // Fetch user context for contextual suggestions
+  useEffect(() => {
+    const fetchUserContext = async () => {
+      if (!user) return;
+
+      try {
+        // Check if user has campaigns
+        const { data: campaigns } = await supabase
+          .from('campaigns')
+          .select('id')
+          .eq('created_by', user.id)
+          .limit(1);
+
+        setHasCampaigns((campaigns?.length ?? 0) > 0);
+
+        // Check if user has autopilot enabled
+        const { data: autopilot } = await supabase
+          .from('marketing_autopilot_config')
+          .select('is_active')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        setHasAutopilot(autopilot?.is_active ?? false);
+      } catch (error) {
+        console.error('Error fetching user context:', error);
+      }
+    };
+
+    fetchUserContext();
+  }, [user]);
 
   // Convert persisted messages to the format expected by ChatHistory
   const chatHistory: ChatMessage[] = useMemo(() => {
@@ -67,6 +102,15 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
       });
     }
   }, [chatHistory.length, isTyping]);
+
+  // Handle suggestion click - populate input and focus
+  const handleSuggestionClick = useCallback((suggestion: string) => {
+    setChatMessage(suggestion);
+    // Focus the input after a short delay to ensure state has updated
+    setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 50);
+  }, []);
 
   const handleChatSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,12 +279,16 @@ const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ onChatU
               isTyping={isTyping}
               currentMessage={chatMessage}
               user={user}
+              onSuggestionClick={handleSuggestionClick}
+              hasCampaigns={hasCampaigns}
+              hasAutopilot={hasAutopilot}
             />
           </div>
 
           <div className="border-t border-gray-200 dark:border-[#273140] bg-white dark:bg-[#151A21] p-4 flex-shrink-0">
             <div className="max-w-4xl mx-auto">
               <ChatInput
+                ref={chatInputRef}
                 chatMessage={chatMessage}
                 setChatMessage={setChatMessage}
                 onSubmit={handleChatSubmit}
