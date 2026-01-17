@@ -12,7 +12,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         <p>Track your latest marketing activities, campaign updates, and system notifications.</p>
 
         <h3 className="font-semibold text-lg mt-4">AI Chat Assistant</h3>
-        <p>Use the AI chat feature powered by Claude Opus 4.5 to get instant help with campaign strategy, content ideas, and marketing advice.</p>
+        <p>Use the AI chat feature to get instant help with campaign strategy, content ideas, and marketing advice.</p>
 
         <h3 className="font-semibold text-lg mt-4">Getting Started</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -100,7 +100,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Marketing Autopilot',
     content: (
       <div className="space-y-4">
-        <p>Let Claude Opus 4.5 automate your marketing campaigns 24/7 with intelligent optimization and video generation.</p>
+        <p>Let AI automate your marketing campaigns 24/7 with intelligent optimization and video generation.</p>
 
         <h3 className="font-semibold text-lg mt-4">Setup</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -114,9 +114,9 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         <h3 className="font-semibold text-lg mt-4">How Autopilot Works</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li>Runs automatically every day at 2 AM UTC</li>
-          <li>Claude Opus 4.5 analyzes your campaign performance and makes strategic decisions</li>
+          <li>AI analyzes your campaign performance and makes strategic decisions</li>
           <li>Automatically optimizes budgets and targeting based on ROI</li>
-          <li>Creates professional video ads using Gemini 3 and Veo 3 for low-performing campaigns</li>
+          <li>Creates professional video ads for low-performing campaigns</li>
           <li>Adjusts strategies based on real-time results</li>
           <li>Logs all actions to the Activity Feed for full transparency</li>
         </ul>
@@ -131,15 +131,15 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'AI Video Studio',
     content: (
       <div className="space-y-4">
-        <p>Create professional marketing videos using Google Gemini 3 and Veo 3 - no video editing skills required!</p>
+        <p>Create professional marketing videos using AI - no video editing skills required!</p>
 
         <h3 className="font-semibold text-lg mt-4">Creating Videos</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li>Enter your video concept or product description</li>
-          <li>Gemini 3 Flash generates scene-by-scene storyboard with advanced multimodal reasoning</li>
+          <li>AI generates scene-by-scene storyboard with advanced multimodal reasoning</li>
           <li>Review and edit scenes as needed</li>
-          <li>AI creates high-quality images for each scene using Nano Banana</li>
-          <li>Generate final video with Google Veo 3 (industry-leading video generation)</li>
+          <li>AI creates high-quality images for each scene</li>
+          <li>Generate final video with industry-leading AI video generation</li>
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">Video Types</h3>
@@ -151,14 +151,10 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">Requirements</h3>
-        <p>Make sure you have added your Google Gemini API key in Settings - Integrations. This is required for AI video generation with Gemini 3 and Veo 3.</p>
+        <p>Make sure you have added your Google Gemini API key in Settings - Integrations. This is required for AI video generation.</p>
 
         <h3 className="font-semibold text-lg mt-4">Pricing</h3>
-        <ul className="list-disc pl-5 space-y-2">
-          <li>Veo 3 Fast: $0.40/second (recommended for social media)</li>
-          <li>Veo 3 Standard: $0.75/second (premium quality)</li>
-          <li>Nano Banana: $0.039/image</li>
-        </ul>
+        <p>Video generation costs vary by quality setting. Check your API provider's current pricing for the most up-to-date rates.</p>
       </div>
     ),
   },
@@ -167,7 +163,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Content Generation',
     content: (
       <div className="space-y-4">
-        <p>Generate high-quality marketing content using Claude Opus 4.5 - the world's most advanced AI for creative writing and marketing copy.</p>
+        <p>Generate high-quality marketing content using advanced AI for creative writing and marketing copy.</p>
 
         <h3 className="font-semibold text-lg mt-4">Available Content Types</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -183,13 +179,13 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         <ul className="list-disc pl-5 space-y-2">
           <li>Select content type and platform</li>
           <li>Provide brief description or topic</li>
-          <li>Claude Opus 4.5 generates multiple high-quality variations</li>
+          <li>AI generates multiple high-quality variations</li>
           <li>Edit and customize as needed</li>
           <li>Publish directly or save for later</li>
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">Best Practices</h3>
-        <p>Be specific in your prompts. Include target audience, tone of voice, and key messages for better results. Claude excels at understanding context and creating persuasive, authentic content.</p>
+        <p>Be specific in your prompts. Include target audience, tone of voice, and key messages for better results. The AI excels at understanding context and creating persuasive, authentic content.</p>
       </div>
     ),
   },
@@ -198,7 +194,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Analytics & Insights',
     content: (
       <div className="space-y-4">
-        <p>Track and analyze your marketing performance with AI-powered insights from Claude Opus 4.5.</p>
+        <p>Track and analyze your marketing performance with AI-powered insights.</p>
 
         <h3 className="font-semibold text-lg mt-4">Key Metrics</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -209,7 +205,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
           <li>Channel performance comparison</li>
         </ul>
 
-        <h3 className="font-semibold text-lg mt-4">AI Insights (Powered by Claude Opus 4.5)</h3>
+        <h3 className="font-semibold text-lg mt-4">AI Insights</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li>Automated performance analysis with actionable recommendations</li>
           <li>Trend identification and predictions based on historical data</li>
@@ -269,8 +265,8 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
 
         <h3 className="font-semibold text-lg mt-4">API Keys (Required)</h3>
         <ul className="list-disc pl-5 space-y-2">
-          <li><strong>Anthropic Claude API Key</strong>: Required for all AI features including content generation, analytics, and chat. Get yours at https://console.anthropic.com/. Uses Claude Opus 4.5, Sonnet 4.5, and Haiku 4.5 models.</li>
-          <li><strong>Google Gemini API Key</strong>: Required for video generation (Veo 3), visual AI tasks, and image generation. Get yours at https://aistudio.google.com/apikey. Uses Gemini 3 Flash, Gemini 3 Pro, and Veo 3 models.</li>
+          <li><strong>Anthropic Claude API Key</strong>: Required for all AI features including content generation, analytics, and chat. Get yours at https://console.anthropic.com/.</li>
+          <li><strong>Google Gemini API Key</strong>: Required for video generation, visual AI tasks, and image generation. Get yours at https://aistudio.google.com/apikey.</li>
           <li>All keys are encrypted with AES-GCM and stored securely in the database</li>
           <li>Zero markup - you pay API providers directly at their standard rates</li>
         </ul>
@@ -292,7 +288,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Social Media Management',
     content: (
       <div className="space-y-4">
-        <p>Manage all your social media campaigns from one dashboard with Claude Opus 4.5 content generation.</p>
+        <p>Manage all your social media campaigns from one dashboard with AI content generation.</p>
 
         <h3 className="font-semibold text-lg mt-4">Supported Platforms</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -307,7 +303,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         <h3 className="font-semibold text-lg mt-4">Features</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li>Schedule posts across all platforms from one calendar</li>
-          <li>AI-generated platform-specific content with Claude Opus 4.5</li>
+          <li>AI-generated platform-specific content</li>
           <li>Optimal posting time recommendations based on audience engagement</li>
           <li>Engagement tracking and analytics across all channels</li>
           <li>Bulk post scheduling for efficiency</li>
@@ -315,7 +311,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">Best Practices</h3>
-        <p>Use platform-specific content. What works on LinkedIn may not work on TikTok. Claude Opus 4.5 automatically adapts tone, length, and style for each platform to maximize engagement.</p>
+        <p>Use platform-specific content. What works on LinkedIn may not work on TikTok. The AI automatically adapts tone, length, and style for each platform to maximize engagement.</p>
       </div>
     ),
   },
@@ -324,7 +320,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Email Campaigns',
     content: (
       <div className="space-y-4">
-        <p>Create and send automated email campaigns with Claude Opus 4.5 copywriting.</p>
+        <p>Create and send automated email campaigns with AI copywriting.</p>
 
         <h3 className="font-semibold text-lg mt-4">Campaign Types</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -340,14 +336,14 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         <ul className="list-disc pl-5 space-y-2">
           <li>Drag-and-drop email editor (no coding required)</li>
           <li>Pre-built conversion-optimized templates</li>
-          <li>AI-generated subject lines and content with Claude Opus 4.5</li>
+          <li>AI-generated subject lines and content</li>
           <li>A/B testing for subject lines, content, and send times</li>
           <li>Mobile-responsive designs that look great on all devices</li>
           <li>Personalization tokens for dynamic content</li>
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">Automation</h3>
-        <p>Set up triggers based on user behavior. Send targeted emails automatically based on actions, time delays, or conditions. Claude helps optimize send times and personalization for maximum engagement.</p>
+        <p>Set up triggers based on user behavior. Send targeted emails automatically based on actions, time delays, or conditions. AI helps optimize send times and personalization for maximum engagement.</p>
       </div>
     ),
   },
@@ -356,12 +352,12 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Proposal Generator',
     content: (
       <div className="space-y-4">
-        <p>Create professional marketing proposals with Claude Opus 4.5 assistance - persuasive, detailed, and tailored to your client.</p>
+        <p>Create professional marketing proposals with AI assistance - persuasive, detailed, and tailored to your client.</p>
 
         <h3 className="font-semibold text-lg mt-4">How to Create Proposals</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li>Enter client information and project details</li>
-          <li>Claude Opus 4.5 generates comprehensive proposal outline with persuasive copy</li>
+          <li>AI generates comprehensive proposal outline with persuasive copy</li>
           <li>Customize sections and pricing</li>
           <li>Add your branding and styling</li>
           <li>Send directly to clients or download PDF</li>
@@ -409,7 +405,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Competitive Intelligence',
     content: (
       <div className="space-y-4">
-        <p>Track and analyze competitor marketing strategies with Claude Opus 4.5 competitive analysis.</p>
+        <p>Track and analyze competitor marketing strategies with AI-powered competitive analysis.</p>
 
         <h3 className="font-semibold text-lg mt-4">What You Can Track</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -421,8 +417,8 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
           <li>Product launches and feature updates</li>
         </ul>
 
-        <h3 className="font-semibold text-lg mt-4">AI Insights (Claude Opus 4.5)</h3>
-        <p>Claude analyzes competitor data to identify strategic gaps, messaging opportunities, and differentiation strategies. Get actionable recommendations on how to position against competitors and capture market share.</p>
+        <h3 className="font-semibold text-lg mt-4">AI Insights</h3>
+        <p>AI analyzes competitor data to identify strategic gaps, messaging opportunities, and differentiation strategies. Get actionable recommendations on how to position against competitors and capture market share.</p>
       </div>
     ),
   },
@@ -431,7 +427,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Keyword Research',
     content: (
       <div className="space-y-4">
-        <p>Find high-value keywords for SEO and PPC campaigns with Claude Opus 4.5 semantic analysis.</p>
+        <p>Find high-value keywords for SEO and PPC campaigns with AI semantic analysis.</p>
 
         <h3 className="font-semibold text-lg mt-4">Features</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -444,7 +440,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">How to Use</h3>
-        <p>Enter your main topic or seed keywords. Claude Opus 4.5 will generate related keywords grouped by search intent (informational, commercial, transactional) and buyer journey stage. Get content recommendations for each keyword cluster.</p>
+        <p>Enter your main topic or seed keywords. AI will generate related keywords grouped by search intent (informational, commercial, transactional) and buyer journey stage. Get content recommendations for each keyword cluster.</p>
       </div>
     ),
   },
@@ -453,13 +449,13 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Landing Page Builder',
     content: (
       <div className="space-y-4">
-        <p>Create high-converting landing pages without coding, powered by Claude Opus 4.5 copywriting.</p>
+        <p>Create high-converting landing pages without coding, powered by AI copywriting.</p>
 
         <h3 className="font-semibold text-lg mt-4">Building Pages</h3>
         <ul className="list-disc pl-5 space-y-2">
           <li>Choose from conversion-optimized templates</li>
           <li>Drag-and-drop page elements (no coding required)</li>
-          <li>AI-generated headlines and copy with Claude Opus 4.5</li>
+          <li>AI-generated headlines and copy</li>
           <li>Add forms, CTAs, and media (images, videos)</li>
           <li>Mobile responsive by default</li>
           <li>SEO-optimized structure and meta tags</li>
@@ -470,7 +466,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
           <li>A/B testing built-in for headlines, CTAs, and layouts</li>
           <li>Conversion tracking and funnel analysis</li>
           <li>Heat maps and user behavior analytics</li>
-          <li>AI-powered SEO optimization suggestions from Claude</li>
+          <li>AI-powered SEO optimization suggestions</li>
           <li>Performance scoring and improvement recommendations</li>
         </ul>
       </div>
@@ -508,7 +504,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'AI Campaign Copilot',
     content: (
       <div className="space-y-4">
-        <p>Your AI assistant powered by Claude Opus 4.5 for campaign strategy and execution.</p>
+        <p>Your AI assistant for campaign strategy and execution.</p>
 
         <h3 className="font-semibold text-lg mt-4">How It Helps</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -521,7 +517,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">Using the Copilot</h3>
-        <p>Describe your campaign goals and constraints. Claude Opus 4.5 will generate a comprehensive strategy with actionable steps, including content ideas, timing recommendations, and success metrics.</p>
+        <p>Describe your campaign goals and constraints. AI will generate a comprehensive strategy with actionable steps, including content ideas, timing recommendations, and success metrics.</p>
       </div>
     ),
   },
@@ -530,7 +526,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Go-to-Market Planner',
     content: (
       <div className="space-y-4">
-        <p>Plan and execute product launches and market entry strategies with Claude Opus 4.5 strategic planning.</p>
+        <p>Plan and execute product launches and market entry strategies with AI strategic planning.</p>
 
         <h3 className="font-semibold text-lg mt-4">Planning Features</h3>
         <ul className="list-disc pl-5 space-y-2">
@@ -542,8 +538,8 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
           <li>Risk analysis and mitigation strategies</li>
         </ul>
 
-        <h3 className="font-semibold text-lg mt-4">AI Assistance (Claude Opus 4.5)</h3>
-        <p>Claude analyzes your market, identifies opportunities, suggests positioning strategies, and creates comprehensive launch plans based on industry best practices and competitive analysis.</p>
+        <h3 className="font-semibold text-lg mt-4">AI Assistance</h3>
+        <p>AI analyzes your market, identifies opportunities, suggests positioning strategies, and creates comprehensive launch plans based on industry best practices and competitive analysis.</p>
       </div>
     ),
   },
@@ -572,12 +568,12 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
     title: 'Viral Video Marketing',
     content: (
       <div className="space-y-4">
-        <p>Create and optimize videos for maximum social engagement using Claude Opus 4.5 and Gemini 3.</p>
+        <p>Create and optimize videos for maximum social engagement using AI.</p>
 
         <h3 className="font-semibold text-lg mt-4">Features</h3>
         <ul className="list-disc pl-5 space-y-2">
-          <li>AI-powered script generation with Claude Opus 4.5 (hooks, storytelling, CTAs)</li>
-          <li>Video generation with Google Veo 3 (industry-leading quality)</li>
+          <li>AI-powered script generation (hooks, storytelling, CTAs)</li>
+          <li>Industry-leading AI video generation</li>
           <li>Viral hooks and storytelling frameworks proven to drive engagement</li>
           <li>Platform-specific optimization (TikTok, Reels, YouTube Shorts)</li>
           <li>Trend analysis and recommendations based on current viral patterns</li>
@@ -585,7 +581,7 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
         </ul>
 
         <h3 className="font-semibold text-lg mt-4">Best Practices</h3>
-        <p>Hook viewers in first 3 seconds, keep it short (15-60s), include captions for accessibility, and end with clear CTA. Use Gemini 3's multimodal capabilities to create visually compelling narratives.</p>
+        <p>Hook viewers in first 3 seconds, keep it short (15-60s), include captions for accessibility, and end with clear CTA. Use AI's multimodal capabilities to create visually compelling narratives.</p>
       </div>
     ),
   },
@@ -649,6 +645,256 @@ export const helpContent: Record<string, { title: string; content: React.ReactNo
 
         <h3 className="font-semibold text-lg mt-4">How to Connect</h3>
         <p>Click on each platform, authorize the connection, and grant required permissions. Data will sync automatically.</p>
+      </div>
+    ),
+  },
+
+  // Marketing Glossary for Non-Marketers
+  marketingGlossary: {
+    title: 'Marketing Terms Explained',
+    content: (
+      <div className="space-y-4">
+        <p>New to marketing? Here are the key terms you'll see in this platform, explained in plain English.</p>
+
+        <h3 className="font-semibold text-lg mt-4">Performance Metrics</h3>
+        <ul className="list-disc pl-5 space-y-3">
+          <li>
+            <strong>ROI (Return on Investment)</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">For every $1 you spend, how much do you get back? If your ROI is 200%, you get $2 back for every $1 spent. Higher is better.</p>
+          </li>
+          <li>
+            <strong>Leads</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">People who showed interest in your business. They might fill out a form, sign up for something, or request more info. Each lead could become a customer.</p>
+          </li>
+          <li>
+            <strong>Conversions</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">When someone does what you wanted - buys something, signs up, downloads a file, etc. A "conversion rate" of 5% means 5 out of 100 visitors took that action.</p>
+          </li>
+          <li>
+            <strong>CTR (Click-Through Rate)</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Out of everyone who saw your ad, what percentage clicked it? A 2% CTR is good for most ads. 5% is excellent.</p>
+          </li>
+        </ul>
+
+        <h3 className="font-semibold text-lg mt-4">Audience Metrics</h3>
+        <ul className="list-disc pl-5 space-y-3">
+          <li>
+            <strong>Impressions</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">How many times your content was shown. One person might see it multiple times, so this can be higher than your reach.</p>
+          </li>
+          <li>
+            <strong>Reach</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">How many different people saw your content. Unlike impressions, each person is only counted once.</p>
+          </li>
+          <li>
+            <strong>Engagement</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Any interaction with your content - likes, comments, shares, clicks, saves. High engagement means people found it interesting.</p>
+          </li>
+          <li>
+            <strong>Target Audience</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">The specific group of people most likely to buy from you. Defined by age, location, interests, job, etc.</p>
+          </li>
+        </ul>
+
+        <h3 className="font-semibold text-lg mt-4">Campaign Terms</h3>
+        <ul className="list-disc pl-5 space-y-3">
+          <li>
+            <strong>Campaign</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">A coordinated set of marketing activities with one goal. Like a project with a budget, timeline, and objective.</p>
+          </li>
+          <li>
+            <strong>Budget</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">How much you're willing to spend on marketing. Start small ($500-1000/month), increase what works.</p>
+          </li>
+          <li>
+            <strong>CTA (Call to Action)</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">What you want people to do next. "Buy Now", "Sign Up Free", "Learn More" are all CTAs.</p>
+          </li>
+          <li>
+            <strong>A/B Testing</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Showing two versions of something to see which performs better. Like testing two headlines to see which gets more clicks.</p>
+          </li>
+        </ul>
+
+        <h3 className="font-semibold text-lg mt-4">Lead Scoring</h3>
+        <ul className="list-disc pl-5 space-y-3">
+          <li>
+            <strong>Lead Score (90-100)</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Hot Lead - Very interested, contact immediately. These are your best potential customers.</p>
+          </li>
+          <li>
+            <strong>Lead Score (70-89)</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Warm Lead - Showing interest, follow up soon. They're considering you but may need more info.</p>
+          </li>
+          <li>
+            <strong>Lead Score (50-69)</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Interested - Send them helpful content. They're curious but not ready to buy yet.</p>
+          </li>
+          <li>
+            <strong>Lead Score (0-49)</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Cold Lead - May need more time or nurturing. Keep them in your email list for later.</p>
+          </li>
+        </ul>
+
+        <h3 className="font-semibold text-lg mt-4">Channel Terms</h3>
+        <ul className="list-disc pl-5 space-y-3">
+          <li>
+            <strong>Organic</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Free marketing - like posting on social media or getting found on Google without paying for ads.</p>
+          </li>
+          <li>
+            <strong>Paid/PPC</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Marketing you pay for. PPC (Pay-Per-Click) means you only pay when someone clicks your ad.</p>
+          </li>
+          <li>
+            <strong>SEO</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Search Engine Optimization - making your website show up higher on Google for relevant searches.</p>
+          </li>
+          <li>
+            <strong>Funnel</strong>
+            <p className="text-sm text-gray-600 dark:text-gray-400">The journey from stranger to customer. Top of funnel = awareness, bottom = purchase. People "drop off" at each stage, like a funnel.</p>
+          </li>
+        </ul>
+
+        <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 mt-6">
+          <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">Quick Tip</p>
+          <p className="text-sm text-blue-600 dark:text-blue-400">
+            Don't worry about memorizing these! Hover over any metric in the dashboard to see its explanation. The Glossary button in the top right gives you quick access to all definitions.
+          </p>
+        </div>
+      </div>
+    ),
+  },
+
+  // Quick Start Guide for Non-Marketers
+  quickStartGuide: {
+    title: 'Getting Started - No Marketing Experience Needed',
+    content: (
+      <div className="space-y-4">
+        <p>New to marketing? This guide will get you started in under 10 minutes.</p>
+
+        <h3 className="font-semibold text-lg mt-4">Step 1: Choose Your Path</h3>
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+          <ul className="space-y-3">
+            <li>
+              <strong className="text-purple-600 dark:text-purple-400">AI Autopilot</strong> (Recommended for beginners)
+              <p className="text-sm text-gray-600 dark:text-gray-400">Just describe your business and set a budget. AI handles everything else - creating campaigns, writing content, optimizing results.</p>
+            </li>
+            <li>
+              <strong className="text-blue-600 dark:text-blue-400">Quick Start Campaign</strong>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Chat with AI to plan your campaign step by step. More control, but AI still does the heavy lifting.</p>
+            </li>
+          </ul>
+        </div>
+
+        <h3 className="font-semibold text-lg mt-4">Step 2: Add Your API Keys</h3>
+        <p>Go to Settings and add your API keys. You'll need:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li><strong>Anthropic Claude</strong> - For AI content and strategy (required)</li>
+          <li><strong>Google Gemini</strong> - For video generation (optional but recommended)</li>
+        </ul>
+        <p className="text-sm text-gray-500">You pay the AI providers directly - no markup from us.</p>
+
+        <h3 className="font-semibold text-lg mt-4">Step 3: Describe Your Business</h3>
+        <p>Tell the AI what you sell and who you want to reach. Be specific:</p>
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 text-sm">
+          <p className="text-gray-600 dark:text-gray-400 italic">"We sell handmade leather bags to professional women aged 30-50 who value quality and craftsmanship over fast fashion."</p>
+        </div>
+
+        <h3 className="font-semibold text-lg mt-4">Step 4: Set Your Budget</h3>
+        <p>Start small and increase what works:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li><strong>$500/month</strong> - Good for testing, expect 5-10 leads</li>
+          <li><strong>$1000/month</strong> - Recommended starter, expect 20-40 leads</li>
+          <li><strong>$2000+/month</strong> - For scaling what works</li>
+        </ul>
+
+        <h3 className="font-semibold text-lg mt-4">Step 5: Let AI Work</h3>
+        <p>Once set up, the AI will:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>Create and launch campaigns automatically</li>
+          <li>Write content for your ads and posts</li>
+          <li>Optimize your budget daily</li>
+          <li>Generate leads and report results</li>
+        </ul>
+        <p className="mt-2">Check your dashboard daily to see leads and performance. First results typically appear within 24-48 hours.</p>
+
+        <div className="bg-green-50 dark:bg-green-950 rounded-lg p-4 mt-6">
+          <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-2">You're Ready!</p>
+          <p className="text-sm text-green-600 dark:text-green-400">
+            That's all you need to get started. The platform will guide you through everything else. Don't worry about marketing jargon - hover over any term to see what it means.
+          </p>
+        </div>
+      </div>
+    ),
+  },
+
+  // Budget Guide for Non-Marketers
+  budgetGuide: {
+    title: 'How Much Should I Spend on Marketing?',
+    content: (
+      <div className="space-y-4">
+        <p>One of the most common questions! Here's a practical guide to setting your marketing budget.</p>
+
+        <h3 className="font-semibold text-lg mt-4">The General Rule</h3>
+        <p>Most businesses spend 5-15% of their revenue on marketing. But when you're starting out or testing a new product, start smaller and increase what works.</p>
+
+        <h3 className="font-semibold text-lg mt-4">Budget Levels Explained</h3>
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <h4 className="font-medium text-lg">$500/month - Testing Phase</h4>
+            <ul className="mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <li>Best for: Trying out the platform, testing 1-2 channels</li>
+              <li>Expect: 5-10 leads, basic data for learning</li>
+              <li>Limitation: May not have enough data to optimize well</li>
+            </ul>
+          </div>
+
+          <div className="border-2 border-blue-500 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <h4 className="font-medium text-lg">$1,000/month - Starter</h4>
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Recommended</span>
+            </div>
+            <ul className="mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <li>Best for: Small businesses, first real campaigns</li>
+              <li>Expect: 20-40 leads, enough data to optimize</li>
+              <li>Good balance of learning and results</li>
+            </ul>
+          </div>
+
+          <div className="border rounded-lg p-4">
+            <h4 className="font-medium text-lg">$2,000/month - Growth</h4>
+            <ul className="mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <li>Best for: Businesses ready to scale what works</li>
+              <li>Expect: 50-100 leads, test multiple channels</li>
+              <li>Enough to run serious A/B tests</li>
+            </ul>
+          </div>
+
+          <div className="border rounded-lg p-4">
+            <h4 className="font-medium text-lg">$5,000+/month - Aggressive</h4>
+            <ul className="mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+              <li>Best for: Proven products, rapid expansion</li>
+              <li>Expect: 150-300+ leads, full multi-channel</li>
+              <li>Only after you know what works</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 className="font-semibold text-lg mt-4">Our Recommendation</h3>
+        <p>Start with $1,000/month for your first month. This gives you enough data to see what's working. After 30 days:</p>
+        <ul className="list-disc pl-5 space-y-2">
+          <li>If ROI is positive, consider increasing budget</li>
+          <li>If results are mixed, let AI optimize for another month</li>
+          <li>If no results, review your business description and targets</li>
+        </ul>
+
+        <div className="bg-yellow-50 dark:bg-yellow-950 rounded-lg p-4 mt-6">
+          <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300 mb-2">Important</p>
+          <p className="text-sm text-yellow-600 dark:text-yellow-400">
+            Don't spend more than you can afford to lose while learning. Marketing takes time to optimize - expect to wait 30-60 days before judging results.
+          </p>
+        </div>
       </div>
     ),
   },
