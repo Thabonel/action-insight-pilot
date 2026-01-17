@@ -7,6 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Flame, ThermometerSun, Snowflake, Users } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface Lead {
   id: string;
@@ -158,6 +165,13 @@ const LeadInbox: React.FC = () => {
     return 'text-gray-600 bg-gray-50';
   };
 
+  const getScoreLabel = (score: number) => {
+    if (score >= 90) return { label: 'Hot Lead', icon: Flame, color: 'text-red-600', action: 'Contact immediately' };
+    if (score >= 70) return { label: 'Warm Lead', icon: ThermometerSun, color: 'text-orange-500', action: 'Follow up soon' };
+    if (score >= 50) return { label: 'Interested', icon: Users, color: 'text-blue-500', action: 'Nurture with content' };
+    return { label: 'Cold Lead', icon: Snowflake, color: 'text-gray-400', action: 'May need more time' };
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new': return 'bg-blue-500';
@@ -216,9 +230,20 @@ const LeadInbox: React.FC = () => {
 
       <CardContent>
         {filteredLeads.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p className="font-medium">No leads yet</p>
-            <p className="text-sm">Your AI autopilot is working on generating leads for you</p>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="h-8 w-8 text-blue-500" />
+            </div>
+            <p className="font-medium text-gray-700 dark:text-gray-300">Your leads will appear here</p>
+            <p className="text-sm text-gray-500 mt-2 max-w-md mx-auto">
+              Once people interact with your campaigns - fill out forms, click ads, or sign up - they become leads. This usually takes 24-48 hours after launching.
+            </p>
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg text-left max-w-md mx-auto">
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">What is a lead?</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                A lead is someone who showed interest in your business. They might have downloaded something, signed up for your newsletter, or requested more info. Each lead gets a score (0-100) showing how likely they are to become a customer.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
@@ -231,11 +256,39 @@ const LeadInbox: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="font-semibold">{lead.full_name || 'Unknown'}</h4>
-                      {lead.score && (
-                        <span className={`text-xs font-medium px-2 py-1 rounded ${getScoreColor(lead.score)}`}>
-                          {lead.score}
-                        </span>
-                      )}
+                      {lead.score && (() => {
+                        const scoreInfo = getScoreLabel(lead.score);
+                        const ScoreIcon = scoreInfo.icon;
+                        return (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className={`text-xs font-medium px-2 py-1 rounded flex items-center gap-1 cursor-help ${getScoreColor(lead.score)}`}>
+                                  <ScoreIcon className="h-3 w-3" />
+                                  {lead.score}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs p-3">
+                                <p className={`font-medium text-sm mb-1 ${scoreInfo.color}`}>
+                                  {scoreInfo.label} (Score: {lead.score})
+                                </p>
+                                <p className="text-xs text-gray-500 mb-2">
+                                  {scoreInfo.action}
+                                </p>
+                                <div className="text-xs text-gray-400 border-t pt-2 mt-2">
+                                  <p className="font-medium mb-1">Lead Score Guide:</p>
+                                  <ul className="space-y-1">
+                                    <li>90-100: Hot Lead - Contact immediately</li>
+                                    <li>70-89: Warm Lead - Follow up soon</li>
+                                    <li>50-69: Interested - Nurture with content</li>
+                                    <li>0-49: Cold - May need more time</li>
+                                  </ul>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        );
+                      })()}
                     </div>
                     {lead.company_name && (
                       <p className="text-sm text-gray-600 flex items-center gap-1">

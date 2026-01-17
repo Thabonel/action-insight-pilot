@@ -10,7 +10,14 @@ import ActivityFeed from '@/components/autopilot/ActivityFeed';
 import { Link } from 'react-router-dom';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
 import { QuickStartWizard } from '@/components/campaigns/QuickStartWizard';
-import { Rocket } from 'lucide-react';
+import { Rocket, HelpCircle } from 'lucide-react';
+import { GlossaryDialog } from '@/components/help/MarketingGlossary';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface DashboardStats {
   this_week_leads: number;
@@ -179,6 +186,7 @@ const SimpleDashboard: React.FC = () => {
           <p className="text-gray-600 dark:text-[#94A3B8] mt-1">Your AI is running your marketing 24/7</p>
         </div>
         <div className="flex gap-3">
+          <GlossaryDialog />
           <Button
             onClick={() => setShowQuickStartWizard(true)}
             size="sm"
@@ -230,41 +238,100 @@ const SimpleDashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Leads */}
-            <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
-              <div className="flex items-center justify-between mb-2">
-                <Badge className="bg-blue-100 text-blue-700">New</Badge>
+            <TooltipProvider>
+              <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
+                <div className="flex items-center justify-between mb-2">
+                  <Badge className="bg-blue-100 text-blue-700">New</Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <HelpCircle className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3">
+                      <p className="font-medium text-sm mb-1">Leads Generated</p>
+                      <p className="text-xs text-gray-500">
+                        People who showed interest in your business - they filled out a form, downloaded something, or signed up. These are potential customers worth following up with.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {stats.this_week_leads.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Leads Generated</p>
+                <p className="text-xs text-gray-400 mt-2">Potential customers to follow up with</p>
               </div>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats.this_week_leads.toLocaleString()}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">Leads Generated</p>
-            </div>
+            </TooltipProvider>
 
             {/* Spend */}
-            <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
-              <div className="flex items-center justify-between mb-2">
-                <Badge variant="outline">
+            <TooltipProvider>
+              <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
+                <div className="flex items-center justify-between mb-2">
+                  <Badge variant="outline">
+                    {autopilotConfig.monthly_budget
+                      ? `$${autopilotConfig.monthly_budget.toLocaleString()} budget`
+                      : 'Budget set'}
+                  </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <HelpCircle className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3">
+                      <p className="font-medium text-sm mb-1">Budget Spent</p>
+                      <p className="text-xs text-gray-500">
+                        How much you have spent on marketing this week. AI optimizes your budget to get the best results for every dollar spent.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  ${stats.this_week_spend.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Spend</p>
+                <p className="text-xs text-gray-400 mt-2">
                   {autopilotConfig.monthly_budget
-                    ? `$${autopilotConfig.monthly_budget.toLocaleString()} budget`
-                    : 'Budget set'}
-                </Badge>
+                    ? `${Math.round((stats.this_week_spend / autopilotConfig.monthly_budget) * 100)}% of monthly budget`
+                    : 'Your marketing investment'}
+                </p>
               </div>
-              <p className="text-3xl font-bold text-gray-900">
-                ${stats.this_week_spend.toLocaleString()}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">Total Spend</p>
-            </div>
+            </TooltipProvider>
 
             {/* ROI */}
-            <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
-              <div className="flex items-center justify-between mb-2">
-                <Badge className="bg-green-100 text-green-700">Strong</Badge>
+            <TooltipProvider>
+              <div className="bg-white dark:bg-[#151A21] rounded-lg p-4 shadow-sm dark:shadow-none border border-gray-200 dark:border-[#273140]">
+                <div className="flex items-center justify-between mb-2">
+                  <Badge className={stats.this_week_roi >= 2 ? "bg-green-100 text-green-700" : stats.this_week_roi >= 1 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}>
+                    {stats.this_week_roi >= 2 ? 'Strong' : stats.this_week_roi >= 1 ? 'Good' : 'Building'}
+                  </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <HelpCircle className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3">
+                      <p className="font-medium text-sm mb-1">Return on Investment (ROI)</p>
+                      <p className="text-xs text-gray-500 mb-2">
+                        For every $1 you spend, how much you get back. {stats.this_week_roi}x means for every $1 spent, you got ${stats.this_week_roi} back.
+                      </p>
+                      <p className="text-xs text-green-600">
+                        1x = break-even, 2x+ = strong return
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {stats.this_week_roi}x
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Return on Investment</p>
+                <p className="text-xs text-gray-400 mt-2">
+                  ${stats.this_week_roi} back for every $1 spent
+                </p>
               </div>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats.this_week_roi}x
-              </p>
-              <p className="text-sm text-gray-600 mt-1">Return on Investment</p>
-            </div>
+            </TooltipProvider>
           </div>
 
           {stats.this_week_leads === 0 && autopilotConfig.is_active && (
