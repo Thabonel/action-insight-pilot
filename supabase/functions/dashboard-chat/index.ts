@@ -46,7 +46,7 @@ interface ConversationCampaign {
   id: string;
   status: string;
   current_step: string;
-  collected_data: Record<string, any>;
+  collected_data: Record<string, unknown>;
 }
 
 interface ChatContext {
@@ -518,7 +518,7 @@ async function enrichContext(supabase: Record<string, unknown>, userId: string, 
 
     const { data: recentActivity } = await supabase
       .from('autopilot_activity_log')
-      .select('activity_type, description, created_at')
+      .select('activity_type, activity_description, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(5);
@@ -622,7 +622,7 @@ ${context.campaigns.map(c => `- ${c.name} (${c.type}): $${c.budget_spent || 0}/$
 
 ${context.recentActivity && context.recentActivity.length > 0 ? `
 Recent Activity:
-${context.recentActivity.map(a => `- ${a.activity_type}: ${a.description}`).join('\n')}
+${context.recentActivity.map(a => `- ${a.activity_type}: ${a.activity_description}`).join('\n')}
 ` : ''}
 
 Remember: You're part of an intelligent marketing automation platform. Help users succeed with their marketing goals.`;
@@ -647,7 +647,7 @@ async function callClaude(apiKey: string, systemPrompt: string, userPrompt: stri
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5-20250514',
       max_tokens: 4000,
       system: systemPrompt,
       messages: [
