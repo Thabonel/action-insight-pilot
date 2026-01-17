@@ -47,6 +47,7 @@ interface ConversationCampaign {
   status: string;
   current_step: string;
   collected_data: Record<string, unknown>;
+  conversation_history?: string;
 }
 
 interface ChatContext {
@@ -54,18 +55,33 @@ interface ChatContext {
   autopilotConfig?: Record<string, unknown>;
   recentActivity?: Record<string, unknown>[];
   conversationCampaign?: ConversationCampaign;
+  conversationHistory?: string;
 }
 
-const CAMPAIGN_CREATION_STEPS = [
-  'product',
-  'audience',
-  'budget',
-  'goals',
-  'timeline',
-  'review'
-] as const;
+interface ExtractedCampaignData {
+  product: string;
+  audience: string;
+  budget: number;
+  goals: string;
+  timeline: string;
+  channels: string[];
+  keyMessages: string[];
+  strategy: string;
+  sprints?: Array<{
+    name: string;
+    duration: string;
+    goals: string;
+    tactics: string[];
+    budget: number;
+  }>;
+}
 
-type CampaignStep = typeof CAMPAIGN_CREATION_STEPS[number];
+interface CompletenessCheck {
+  isComplete: boolean;
+  score: number;
+  missingFields: string[];
+  presentFields: string[];
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -113,27 +129,18 @@ serve(async (req) => {
 
     console.log('Processing dashboard chat query for user:', user.id);
 
+    // Fetch conversation history for this session
+    const conversationHistory = await getConversationHistory(supabase, sessionId);
+
     const enrichedContext = await enrichContext(supabase, user.id, context);
+    enrichedContext.conversationHistory = conversationHistory;
 
-    // Check if user wants to create a campaign
+    // Detect campaign-related intents
     const wantsToCreateCampaign = detectCampaignCreationIntent(query);
+    const wantsToImplementPlan = detectImplementationIntent(query);
 
-    // Get or create conversation campaign state
+    // Get existing conversation campaign state
     let conversationCampaign = await getConversationCampaign(supabase, user.id, sessionId);
-
-    // If user wants to create a campaign and no conversation exists, start one
-    if (wantsToCreateCampaign && !conversationCampaign) {
-      conversationCampaign = await createConversationCampaign(supabase, user.id, sessionId);
-      enrichedContext.conversationCampaign = conversationCampaign;
-    } else if (conversationCampaign && conversationCampaign.status === 'collecting_info') {
-      // Update conversation with user response
-      conversationCampaign = await updateConversationWithResponse(
-        supabase,
-        conversationCampaign,
-        query
-      );
-      enrichedContext.conversationCampaign = conversationCampaign;
-    }
 
     // Query for API keys - prefer Anthropic, fallback to Gemini
     const { data: apiKeys, error: keyError } = await supabase
@@ -185,45 +192,92 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = buildSystemPrompt(enrichedContext);
-    const userPrompt = buildUserPrompt(query, enrichedContext);
-
     let aiResponse: string;
+    let createdCampaign: Record<string, unknown> | null = null;
 
-    if (apiKeyData.service_name === 'anthropic_api_key') {
-      aiResponse = await callClaude(decryptedApiKey, systemPrompt, userPrompt);
-    } else {
-      aiResponse = await callGemini(decryptedApiKey, systemPrompt, userPrompt);
-    }
+    // Check conversation completeness to enable proactive campaign creation
+    const completeness = conversationHistory ? checkConversationCompleteness(conversationHistory) : { isComplete: false, score: 0, missingFields: [], presentFields: [] };
+    const hasSubstantialConversation = conversationHistory && conversationHistory.length > 500;
 
-    const actionSuggestions = detectActions(query, aiResponse);
+    // Check if user wants to implement a campaign plan from the conversation
+    if (wantsToImplementPlan && hasSubstantialConversation) {
+      console.log('User wants to implement campaign plan from conversation');
 
-    // Check if we need to create the campaign
-    let createdCampaign = null;
-    if (
-      conversationCampaign &&
-      conversationCampaign.status === 'collecting_info' &&
-      conversationCampaign.current_step === 'review' &&
-      isConfirmation(query)
-    ) {
-      // User confirmed, create and launch campaign
-      createdCampaign = await createAndLaunchCampaign(
-        supabase,
-        user.id,
-        conversationCampaign
+      // Use AI to extract campaign data from the conversation
+      const extractedData = await extractCampaignDataFromConversation(
+        decryptedApiKey,
+        conversationHistory,
+        query,
+        apiKeyData.service_name === 'anthropic_api_key'
       );
 
-      if (createdCampaign) {
-        await supabase
-          .from('conversation_campaigns')
-          .update({
-            status: 'completed',
-            campaign_id: createdCampaign.id,
-            completed_at: new Date().toISOString()
-          })
-          .eq('id', conversationCampaign.id);
+      if (extractedData && extractedData.product) {
+        // Create the campaign with extracted data
+        createdCampaign = await createCampaignFromExtractedData(
+          supabase,
+          user.id,
+          extractedData
+        );
+
+        if (createdCampaign) {
+          // Save or update conversation campaign record
+          await saveConversationCampaign(
+            supabase,
+            user.id,
+            sessionId,
+            extractedData,
+            createdCampaign.id as string
+          );
+
+          // Generate success response
+          aiResponse = generateCampaignCreatedResponse(extractedData, createdCampaign);
+        } else {
+          aiResponse = "I encountered an issue creating the campaign. Let me know if you'd like to try again or adjust any details.";
+        }
+      } else {
+        // Couldn't extract enough data, ask for clarification
+        aiResponse = await generateClarificationResponse(
+          decryptedApiKey,
+          conversationHistory,
+          query,
+          apiKeyData.service_name === 'anthropic_api_key'
+        );
+      }
+    } else if (wantsToCreateCampaign && !conversationCampaign) {
+      // User wants to create a campaign - start strategic conversation
+      conversationCampaign = await createConversationCampaign(supabase, user.id, sessionId);
+      enrichedContext.conversationCampaign = conversationCampaign;
+
+      const systemPrompt = buildStrategicSystemPrompt(enrichedContext);
+      const userPrompt = buildUserPrompt(query, enrichedContext);
+
+      if (apiKeyData.service_name === 'anthropic_api_key') {
+        aiResponse = await callClaude(decryptedApiKey, systemPrompt, userPrompt);
+      } else {
+        aiResponse = await callGemini(decryptedApiKey, systemPrompt, userPrompt);
+      }
+    } else {
+      // Normal conversation - strategic marketing discussion
+      // Include completeness awareness in the system prompt
+      const systemPrompt = buildSystemPrompt(enrichedContext, completeness);
+      const userPrompt = buildUserPrompt(query, enrichedContext);
+
+      if (apiKeyData.service_name === 'anthropic_api_key') {
+        aiResponse = await callClaude(decryptedApiKey, systemPrompt, userPrompt);
+      } else {
+        aiResponse = await callGemini(decryptedApiKey, systemPrompt, userPrompt);
+      }
+
+      // If conversation is complete enough, append a proactive offer
+      if (completeness.isComplete && hasSubstantialConversation && !aiResponse.includes('create the campaign')) {
+        aiResponse += `\n\n---\n\nI've gathered enough information to create your campaign now. Would you like me to go ahead and set it up? Just say **"yes"** or **"create the campaign"** and I'll put this plan into action.`;
       }
     }
+
+    // Save this exchange to conversation history
+    await saveConversationMessage(supabase, sessionId, user.id, query, aiResponse);
+
+    const actionSuggestions = detectActions(query, aiResponse, createdCampaign !== null);
 
     console.log('Successfully processed dashboard chat query');
 
@@ -243,14 +297,14 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         error: 'An unexpected error occurred',
-        message: error instanceof Error ? error instanceof Error ? error.message : String(error) : 'Failed to process chat'
+        message: error instanceof Error ? error.message : 'Failed to process chat'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
 
-// Helper Functions for Conversational Campaign Creation
+// Helper Functions
 
 function detectCampaignCreationIntent(query: string): boolean {
   const lowerQuery = query.toLowerCase();
@@ -266,37 +320,522 @@ function detectCampaignCreationIntent(query: string): boolean {
     'promote my',
     'market my product',
     'market my service',
-    'help me advertise'
+    'help me advertise',
+    'help me create my first'
   ];
 
   return triggers.some(trigger => lowerQuery.includes(trigger));
 }
 
+function detectImplementationIntent(query: string): boolean {
+  const lowerQuery = query.toLowerCase();
+  const triggers = [
+    'implement this',
+    'implement it',
+    'create it now',
+    'launch it',
+    'do it',
+    'do your thing',
+    'make it happen',
+    'execute this',
+    'execute the plan',
+    'create the campaign',
+    'set it up',
+    'let\'s do it',
+    'go ahead',
+    'proceed',
+    'start the campaign',
+    'can you now implement',
+    'now implement',
+    'create a new campaign',  // When said after planning
+    'yes',  // Affirmative response to "should I create this?"
+    'yes please',
+    'yes go ahead',
+    'sounds good',
+    'that sounds good',
+    'looks good',
+    'perfect',
+    'do it',
+    'make it so'
+  ];
+
+  return triggers.some(trigger => lowerQuery.includes(trigger));
+}
+
+// Check how complete the campaign data is from conversation
+function checkConversationCompleteness(conversationHistory: string): CompletenessCheck {
+  const check: CompletenessCheck = {
+    isComplete: false,
+    score: 0,
+    missingFields: [],
+    presentFields: []
+  };
+
+  const lowerHistory = conversationHistory.toLowerCase();
+
+  // Check for product/service (required)
+  const hasProduct = /(?:product|service|sell|offer|business|company|app|platform|tool|software)/i.test(lowerHistory);
+  if (hasProduct) {
+    check.presentFields.push('product');
+    check.score += 25;
+  } else {
+    check.missingFields.push('product');
+  }
+
+  // Check for audience (required)
+  const hasAudience = /(?:audience|target|customer|user|people|demographic|market|segment|who)/i.test(lowerHistory);
+  if (hasAudience) {
+    check.presentFields.push('audience');
+    check.score += 25;
+  } else {
+    check.missingFields.push('audience');
+  }
+
+  // Check for budget (optional but valuable)
+  const hasBudget = /(?:\$|dollar|budget|spend|cost|price|investment|\d{2,})/i.test(lowerHistory);
+  if (hasBudget) {
+    check.presentFields.push('budget');
+    check.score += 20;
+  } else {
+    check.missingFields.push('budget');
+  }
+
+  // Check for goals (required)
+  const hasGoals = /(?:goal|objective|aim|want to|trying to|increase|grow|generate|leads|sales|awareness|revenue|conversion)/i.test(lowerHistory);
+  if (hasGoals) {
+    check.presentFields.push('goals');
+    check.score += 20;
+  } else {
+    check.missingFields.push('goals');
+  }
+
+  // Check for channels (optional but valuable)
+  const hasChannels = /(?:channel|social|email|content|reddit|twitter|linkedin|facebook|instagram|youtube|ads|seo)/i.test(lowerHistory);
+  if (hasChannels) {
+    check.presentFields.push('channels');
+    check.score += 10;
+  }
+
+  // Consider complete if score >= 70 (has at least product + audience + goals or budget)
+  check.isComplete = check.score >= 70;
+
+  return check;
+}
+
+async function getConversationHistory(
+  supabase: ReturnType<typeof createClient>,
+  conversationId: string
+): Promise<string> {
+  try {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select('user_message, ai_response, created_at')
+      .eq('session_id', conversationId)
+      .order('created_at', { ascending: true })
+      .limit(20);
+
+    if (error || !data || data.length === 0) {
+      return '';
+    }
+
+    return data.map(msg => {
+      const response = typeof msg.ai_response === 'object'
+        ? (msg.ai_response as Record<string, unknown>).response || JSON.stringify(msg.ai_response)
+        : msg.ai_response;
+      return `User: ${msg.user_message}\n\nAssistant: ${response}`;
+    }).join('\n\n---\n\n');
+  } catch (error) {
+    console.error('Error fetching conversation history:', error);
+    return '';
+  }
+}
+
+async function saveConversationMessage(
+  supabase: ReturnType<typeof createClient>,
+  sessionId: string,
+  userId: string,
+  userMessage: string,
+  aiResponse: string
+): Promise<void> {
+  try {
+    await supabase
+      .from('chat_messages')
+      .insert({
+        session_id: sessionId,
+        user_id: userId,
+        user_message: userMessage,
+        ai_response: { response: aiResponse },
+        message_type: 'general'
+      });
+  } catch (error) {
+    console.error('Error saving conversation message:', error);
+  }
+}
+
+async function extractCampaignDataFromConversation(
+  apiKey: string,
+  conversationHistory: string,
+  currentQuery: string,
+  isAnthropic: boolean
+): Promise<ExtractedCampaignData | null> {
+  const extractionPrompt = `You are a data extraction assistant. Analyze this marketing conversation and extract structured campaign data.
+
+CONVERSATION HISTORY:
+${conversationHistory}
+
+CURRENT USER REQUEST: ${currentQuery}
+
+Extract the following campaign information from the conversation. Be thorough - the user provided detailed information during the planning discussion.
+
+Return ONLY a valid JSON object with this structure (no markdown, no explanation):
+{
+  "product": "The product or service being marketed",
+  "audience": "Target audience description",
+  "budget": 1000,
+  "goals": "Primary campaign goals",
+  "timeline": "Campaign duration (e.g., '90 days', '3 months')",
+  "channels": ["channel1", "channel2"],
+  "keyMessages": ["message1", "message2"],
+  "strategy": "Overall strategy summary",
+  "sprints": [
+    {
+      "name": "Sprint 1 Name",
+      "duration": "Days 1-30",
+      "goals": "Sprint goals",
+      "tactics": ["tactic1", "tactic2"],
+      "budget": 200
+    }
+  ]
+}
+
+Rules:
+- Extract actual values mentioned in the conversation
+- If budget is mentioned in AUD or another currency, convert to USD equivalent or note the currency
+- Include all channels mentioned (reddit, twitter, linkedin, email, content marketing, etc.)
+- Capture the sprint/phase structure if mentioned
+- For timeline, use the total campaign duration
+- Return ONLY the JSON, no other text`;
+
+  try {
+    let response: Response;
+
+    if (isAnthropic) {
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 2000,
+          messages: [{ role: 'user', content: extractionPrompt }],
+          temperature: 0.1,  // Low temperature for structured extraction
+        }),
+      });
+    } else {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: extractionPrompt }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 2000 },
+        }),
+      });
+    }
+
+    if (!response.ok) {
+      console.error('Extraction API error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    let extractedText: string;
+
+    if (isAnthropic) {
+      extractedText = data.content?.[0]?.text || '';
+    } else {
+      extractedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+
+    // Clean and parse JSON
+    extractedText = extractedText.trim();
+    if (extractedText.startsWith('```json')) {
+      extractedText = extractedText.slice(7);
+    }
+    if (extractedText.startsWith('```')) {
+      extractedText = extractedText.slice(3);
+    }
+    if (extractedText.endsWith('```')) {
+      extractedText = extractedText.slice(0, -3);
+    }
+    extractedText = extractedText.trim();
+
+    const extracted = JSON.parse(extractedText) as ExtractedCampaignData;
+
+    // Validate required fields
+    if (!extracted.product || extracted.product === 'The product or service being marketed') {
+      return null;
+    }
+
+    return extracted;
+  } catch (error) {
+    console.error('Error extracting campaign data:', error);
+    return null;
+  }
+}
+
+async function generateClarificationResponse(
+  apiKey: string,
+  conversationHistory: string,
+  currentQuery: string,
+  isAnthropic: boolean
+): Promise<string> {
+  const clarificationPrompt = `The user wants to create a campaign but I need more information. Based on this conversation, what key details are missing?
+
+CONVERSATION:
+${conversationHistory}
+
+USER REQUEST: ${currentQuery}
+
+Generate a friendly response that:
+1. Acknowledges their request to create/implement the campaign
+2. Lists what information you DO have from the conversation
+3. Asks for any critical missing details (product, audience, budget, or goals)
+4. Keeps it conversational and helpful
+
+If enough information exists to create a basic campaign, offer to proceed with reasonable defaults for missing items.`;
+
+  try {
+    let response: Response;
+
+    if (isAnthropic) {
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: clarificationPrompt }],
+          temperature: 0.7,
+        }),
+      });
+    } else {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: clarificationPrompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 1000 },
+        }),
+      });
+    }
+
+    if (!response.ok) {
+      return "I'd love to help create your campaign! Could you tell me more about what product or service you want to promote, who your target audience is, and your approximate budget?";
+    }
+
+    const data = await response.json();
+
+    if (isAnthropic) {
+      return data.content?.[0]?.text || "Let me help you create a campaign. What would you like to promote?";
+    } else {
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Let me help you create a campaign. What would you like to promote?";
+    }
+  } catch (error) {
+    console.error('Error generating clarification:', error);
+    return "I'd be happy to create your campaign! Could you share some details about what you're promoting and who you want to reach?";
+  }
+}
+
+async function createCampaignFromExtractedData(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  data: ExtractedCampaignData
+): Promise<Record<string, unknown> | null> {
+  try {
+    const budget = data.budget || 500;
+    const channels = data.channels && data.channels.length > 0
+      ? data.channels
+      : determineChannelsFromBudget(budget);
+
+    const campaignData = {
+      name: `${data.product} Campaign`,
+      description: data.strategy || `AI-generated campaign for ${data.product} targeting ${data.audience}`,
+      type: 'digital',
+      channel: channels[0] || 'social',
+      status: 'active',
+      target_audience: data.audience || 'General audience',
+      primary_objective: data.goals || 'Increase brand awareness and generate leads',
+      total_budget: budget,
+      budget_allocated: budget,
+      budget_spent: 0,
+      start_date: new Date().toISOString(),
+      end_date: calculateEndDate(data.timeline),
+      channels,
+      demographics: {
+        ageRange: '25-54',
+        location: 'Global',
+        interests: data.product
+      },
+      content: {
+        valueProposition: data.keyMessages?.[0] || `High-quality ${data.product}`,
+        keyMessages: data.keyMessages || [`${data.product} for ${data.audience}`],
+        contentStrategy: data.strategy || 'Multi-channel marketing approach'
+      },
+      settings: {
+        audienceSegments: [data.audience],
+        channelStrategy: `Multi-channel approach using ${channels.join(', ')}`,
+        contentTypes: determineContentTypes(channels),
+        sprints: data.sprints || null
+      },
+      metrics: {
+        reach: 0,
+        conversion_rate: 0,
+        impressions: 0,
+        clicks: 0,
+        engagement_rate: 0,
+        cost_per_click: 0,
+        cost_per_acquisition: 0,
+        revenue_generated: 0
+      },
+      created_by: userId
+    };
+
+    const { data: campaign, error } = await supabase
+      .from('campaigns')
+      .insert([campaignData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating campaign:', error);
+      return null;
+    }
+
+    console.log('Campaign created from extracted data:', campaign.id);
+    return campaign;
+  } catch (error) {
+    console.error('Error in createCampaignFromExtractedData:', error);
+    return null;
+  }
+}
+
+function generateCampaignCreatedResponse(data: ExtractedCampaignData, campaign: Record<string, unknown>): string {
+  const sprintSummary = data.sprints && data.sprints.length > 0
+    ? `\n\n**Campaign Structure:**\n${data.sprints.map(s => `- **${s.name}** (${s.duration}): ${s.goals}`).join('\n')}`
+    : '';
+
+  return `I've created and launched your campaign! Here's what I set up:
+
+**Campaign: ${data.product} Campaign**
+
+**Target Audience:** ${data.audience}
+
+**Budget:** $${data.budget} (${data.timeline || '30 days'})
+
+**Primary Goal:** ${data.goals}
+
+**Channels:** ${data.channels?.join(', ') || 'Social Media, Content Marketing'}
+
+**Key Message:** ${data.keyMessages?.[0] || `Quality ${data.product} for ${data.audience}`}
+${sprintSummary}
+
+Your campaign is now **active** and ready to go! You can:
+- View it in your Campaigns dashboard
+- Monitor performance in real-time
+- Let Marketing Autopilot optimize it automatically
+
+Would you like me to help you create content for the first sprint, or set up any specific automations?`;
+}
+
+function determineChannelsFromBudget(budget: number): string[] {
+  if (budget < 300) return ['social'];
+  if (budget < 1000) return ['social', 'email', 'content'];
+  return ['social', 'email', 'content', 'paid_ads'];
+}
+
+function determineContentTypes(channels: string[]): string[] {
+  const contentTypes: string[] = [];
+
+  if (channels.some(c => c.toLowerCase().includes('social') || c.toLowerCase().includes('reddit') || c.toLowerCase().includes('twitter'))) {
+    contentTypes.push('social posts', 'community engagement');
+  }
+  if (channels.some(c => c.toLowerCase().includes('email'))) {
+    contentTypes.push('email campaigns', 'newsletters');
+  }
+  if (channels.some(c => c.toLowerCase().includes('content'))) {
+    contentTypes.push('blog posts', 'articles');
+  }
+  if (channels.some(c => c.toLowerCase().includes('video') || c.toLowerCase().includes('youtube'))) {
+    contentTypes.push('video content');
+  }
+
+  return contentTypes.length > 0 ? contentTypes : ['social posts', 'email campaigns'];
+}
+
+function calculateEndDate(timeline?: string): string {
+  const now = new Date();
+  let daysToAdd = 30;
+
+  if (timeline) {
+    const lowerTimeline = timeline.toLowerCase();
+    if (lowerTimeline.includes('week') || lowerTimeline.includes('7')) {
+      daysToAdd = 7;
+    } else if (lowerTimeline.includes('90') || lowerTimeline.includes('quarter') || lowerTimeline.includes('3 month')) {
+      daysToAdd = 90;
+    } else if (lowerTimeline.includes('60') || lowerTimeline.includes('2 month')) {
+      daysToAdd = 60;
+    } else if (lowerTimeline.includes('month') || lowerTimeline.includes('30')) {
+      daysToAdd = 30;
+    } else {
+      // Try to extract number
+      const match = timeline.match(/(\d+)\s*day/i);
+      if (match) {
+        daysToAdd = parseInt(match[1]);
+      }
+    }
+  }
+
+  const endDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+  return endDate.toISOString();
+}
+
 async function getConversationCampaign(
-  supabase: Record<string, unknown>,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   conversationId: string
 ): Promise<ConversationCampaign | null> {
-  const { data, error } = await supabase
-    .from('conversation_campaigns')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('conversation_id', conversationId)
-    .eq('status', 'collecting_info')
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from('conversation_campaigns')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('conversation_id', conversationId)
+      .in('status', ['collecting_info', 'planning'])
+      .maybeSingle();
 
-  if (error || !data) return null;
+    if (error || !data) return null;
 
-  return {
-    id: data.id,
-    status: data.status,
-    current_step: data.current_step,
-    collected_data: data.collected_data || {}
-  };
+    return {
+      id: data.id,
+      status: data.status,
+      current_step: data.current_step,
+      collected_data: data.collected_data || {}
+    };
+  } catch (error) {
+    console.error('Error getting conversation campaign:', error);
+    return null;
+  }
 }
 
 async function createConversationCampaign(
-  supabase: Record<string, unknown>,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   conversationId: string
 ): Promise<ConversationCampaign> {
@@ -305,8 +844,8 @@ async function createConversationCampaign(
     .insert({
       user_id: userId,
       conversation_id: conversationId,
-      status: 'collecting_info',
-      current_step: 'product',
+      status: 'planning',
+      current_step: 'strategic_discussion',
       collected_data: {}
     })
     .select()
@@ -322,180 +861,37 @@ async function createConversationCampaign(
   };
 }
 
-async function updateConversationWithResponse(
-  supabase: Record<string, unknown>,
-  conversation: Record<string, unknown>,
-  userResponse: string
-): Promise<ConversationCampaign> {
-  const currentStep = conversation.current_step;
-  const collectedData = { ...conversation.collected_data };
-
-  // Extract information based on current step
-  switch (currentStep) {
-    case 'product':
-      collectedData.product = userResponse.trim();
-      break;
-    case 'audience':
-      collectedData.audience = userResponse.trim();
-      break;
-    case 'budget': {
-      const budgetMatch = userResponse.match(/(\d+)/);
-      collectedData.budget = budgetMatch ? parseInt(budgetMatch[1]) : 500;
-      break;
-    }
-    case 'goals':
-      collectedData.goals = userResponse.trim();
-      break;
-    case 'timeline':
-      collectedData.timeline = userResponse.trim();
-      break;
-  }
-
-  // Determine next step
-  const currentIndex = CAMPAIGN_CREATION_STEPS.indexOf(currentStep as CampaignStep);
-  const nextStep = CAMPAIGN_CREATION_STEPS[currentIndex + 1] || 'review';
-
-  // Update database
-  const { data, error } = await supabase
-    .from('conversation_campaigns')
-    .update({
-      current_step: nextStep,
-      collected_data: collectedData
-    })
-    .eq('id', conversation.id)
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  return {
-    id: data.id,
-    status: data.status,
-    current_step: data.current_step,
-    collected_data: data.collected_data || {}
-  };
-}
-
-function isConfirmation(query: string): boolean {
-  const lowerQuery = query.toLowerCase().trim();
-  const confirmations = [
-    'yes',
-    'yeah',
-    'yep',
-    'sure',
-    'ok',
-    'okay',
-    'confirm',
-    'looks good',
-    'perfect',
-    'go ahead',
-    'do it',
-    'create it',
-    'launch it'
-  ];
-
-  return confirmations.some(confirmation => lowerQuery.includes(confirmation));
-}
-
-async function createAndLaunchCampaign(
-  supabase: Record<string, unknown>,
+async function saveConversationCampaign(
+  supabase: ReturnType<typeof createClient>,
   userId: string,
-  conversation: Record<string, unknown>
-): Promise<Record<string, unknown>> {
-  const data = conversation.collected_data;
-
-  // Determine campaign type and channels based on goals and budget
-  const budget = data.budget || 500;
-  let channels: string[] = [];
-  const type = 'digital';
-
-  if (budget < 300) {
-    channels = ['social'];
-  } else if (budget < 1000) {
-    channels = ['social', 'email'];
-  } else {
-    channels = ['social', 'email', 'content'];
+  conversationId: string,
+  extractedData: ExtractedCampaignData,
+  campaignId: string
+): Promise<void> {
+  try {
+    await supabase
+      .from('conversation_campaigns')
+      .upsert({
+        user_id: userId,
+        conversation_id: conversationId,
+        status: 'completed',
+        current_step: 'created',
+        collected_data: extractedData,
+        campaign_id: campaignId,
+        completed_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,conversation_id'
+      });
+  } catch (error) {
+    console.error('Error saving conversation campaign:', error);
   }
-
-  // Create campaign object
-  const campaignData = {
-    name: `${data.product} Campaign`,
-    description: `AI-generated campaign for ${data.product} targeting ${data.audience}`,
-    type,
-    channel: channels[0],
-    status: 'active',
-    target_audience: data.audience || 'General audience',
-    primary_objective: data.goals || 'Increase brand awareness and generate leads',
-    total_budget: budget,
-    budget_allocated: budget,
-    budget_spent: 0,
-    start_date: new Date().toISOString(),
-    end_date: getEndDate(data.timeline),
-    channels,
-    demographics: {
-      ageRange: '25-54',
-      location: 'United States',
-      interests: data.product || ''
-    },
-    content: {
-      valueProposition: `High-quality ${data.product}`,
-      keyMessages: [`${data.product} for ${data.audience}`],
-      contentStrategy: 'Educational and engaging content'
-    },
-    settings: {
-      audienceSegments: [data.audience || 'General'],
-      channelStrategy: `Multi-channel approach using ${channels.join(', ')}`,
-      contentTypes: ['social posts', 'email campaigns']
-    },
-    metrics: {
-      reach: 0,
-      conversion_rate: 0,
-      impressions: 0,
-      clicks: 0,
-      engagement_rate: 0,
-      cost_per_click: 0,
-      cost_per_acquisition: 0,
-      revenue_generated: 0
-    },
-    created_by: userId
-  };
-
-  const { data: campaign, error } = await supabase
-    .from('campaigns')
-    .insert([campaignData])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating campaign:', error);
-    throw error;
-  }
-
-  console.log('Campaign created and launched:', campaign.id);
-
-  return campaign;
 }
 
-function getEndDate(timeline?: string): string {
-  const now = new Date();
-  let daysToAdd = 30;
-
-  if (timeline) {
-    const lowerTimeline = timeline.toLowerCase();
-    if (lowerTimeline.includes('week')) {
-      daysToAdd = 7;
-    } else if (lowerTimeline.includes('month') || lowerTimeline.includes('30')) {
-      daysToAdd = 30;
-    } else if (lowerTimeline.includes('quarter') || lowerTimeline.includes('90')) {
-      daysToAdd = 90;
-    }
-  }
-
-  const endDate = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-  return endDate.toISOString();
-}
-
-async function enrichContext(supabase: Record<string, unknown>, userId: string, providedContext?: Record<string, unknown>): Promise<ChatContext> {
+async function enrichContext(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  providedContext?: Record<string, unknown>
+): Promise<ChatContext> {
   const context: ChatContext = {};
 
   try {
@@ -524,97 +920,92 @@ async function enrichContext(supabase: Record<string, unknown>, userId: string, 
       .limit(5);
 
     context.recentActivity = recentActivity || [];
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error enriching context:', error);
   }
 
   return context;
 }
 
-function buildSystemPrompt(context: ChatContext): string {
+function buildStrategicSystemPrompt(context: ChatContext): string {
   const activeCampaigns = context.campaigns?.length || 0;
   const autopilotEnabled = context.autopilotConfig?.is_active || false;
   const businessDesc = context.autopilotConfig?.business_description || 'your business';
-  const conversationCampaign = context.conversationCampaign;
 
-  // If in campaign creation mode, provide guided prompts
-  if (conversationCampaign && conversationCampaign.status === 'collecting_info') {
-    const step = conversationCampaign.current_step;
-    const collectedData = conversationCampaign.collected_data;
+  return `You are an expert Marketing Strategist AI for Action Insight Marketing Platform.
 
-    let stepInstruction = '';
+PLATFORM CONTEXT:
+- User is managing ${activeCampaigns} active campaign(s)
+- Marketing Autopilot: ${autopilotEnabled ? 'ENABLED' : 'DISABLED'}
+- Business: ${businessDesc}
 
-    switch (step) {
-      case 'product':
-        stepInstruction = `Ask the user: "What product or service do you want to promote?" Be friendly and conversational.`;
-        break;
-      case 'audience':
-        stepInstruction = `The user is promoting: ${collectedData.product}. Now ask: "Who is your ideal customer or target audience?" Be specific and helpful.`;
-        break;
-      case 'budget':
-        stepInstruction = `Product: ${collectedData.product}, Audience: ${collectedData.audience}. Now ask: "What's your monthly marketing budget?" Suggest a range like $300-$1000 if they're unsure.`;
-        break;
-      case 'goals':
-        stepInstruction = `Ask: "What's your main goal for this campaign?" Provide examples like: generate leads, increase sales, build brand awareness, drive website traffic.`;
-        break;
-      case 'timeline':
-        stepInstruction = `Ask: "How long would you like to run this campaign?" Suggest options: 1 week, 1 month, or 3 months.`;
-        break;
-      case 'review':
-        stepInstruction = `Present a friendly summary of the campaign you'll create:
-- Product/Service: ${collectedData.product}
-- Target Audience: ${collectedData.audience}
-- Budget: $${collectedData.budget}/month
-- Goal: ${collectedData.goals}
-- Duration: ${collectedData.timeline}
-- Channels: ${getBudgetChannels(collectedData.budget || 500)}
+YOUR ROLE:
+You are helping the user develop a comprehensive marketing campaign strategy. Have a natural, strategic conversation to understand their:
+1. Product/service they want to promote
+2. Target audience (be specific - demographics, psychographics, where they hang out)
+3. Budget and resource constraints
+4. Goals and success metrics
+5. Timeline and urgency
+6. Preferred channels and tactics
 
-Then ask: "Does this look good? I'll create and launch this campaign right away!" Be enthusiastic and supportive.`;
-        break;
+CONVERSATION STYLE:
+- Be a strategic partner, not just a form-filler
+- Ask insightful follow-up questions
+- Provide expert recommendations based on their answers
+- Help them think through their strategy
+- Suggest creative tactics they might not have considered
+- Reference proven marketing frameworks when relevant
+
+IMPORTANT:
+- Have a real strategic conversation
+- Don't just collect data - provide value with each response
+- Help them develop a complete, actionable marketing plan
+- When they've shared enough information and want to proceed, they can say "create the campaign" or "implement this"
+
+When they're ready to create the campaign, remind them they can say "create the campaign" or "implement this" and you'll set everything up based on your conversation.`;
+}
+
+function buildSystemPrompt(context: ChatContext, completeness?: CompletenessCheck): string {
+  const activeCampaigns = context.campaigns?.length || 0;
+  const autopilotEnabled = context.autopilotConfig?.is_active || false;
+  const businessDesc = context.autopilotConfig?.business_description || 'your business';
+  const hasHistory = context.conversationHistory && context.conversationHistory.length > 100;
+
+  // Add completeness awareness
+  let completenessNote = '';
+  if (completeness && completeness.score > 0) {
+    if (completeness.isComplete) {
+      completenessNote = `\n\nIMPORTANT: You have gathered enough information from this conversation to create a campaign. The user has provided: ${completeness.presentFields.join(', ')}. When appropriate, proactively offer to create the campaign by saying something like "I have all the information I need. Would you like me to create this campaign now?"`;
+    } else if (completeness.score >= 50) {
+      completenessNote = `\n\nNote: You have gathered some campaign details (${completeness.presentFields.join(', ')}). You still need: ${completeness.missingFields.join(', ')}. Continue the strategic conversation to gather the remaining details.`;
     }
-
-    return `You are a friendly AI Marketing Assistant helping a non-marketer create their first campaign.
-
-CURRENT TASK: Guiding user through campaign creation
-CURRENT STEP: ${step}
-
-INSTRUCTIONS:
-${stepInstruction}
-
-TONE:
-- Warm, friendly, and encouraging
-- Simple language (user knows nothing about marketing)
-- One question at a time
-- Acknowledge their answer before asking next question
-- Be enthusiastic about helping them succeed
-
-Remember: This user is new to marketing. Make them feel confident and supported.`;
   }
 
-  // Normal conversation mode (not creating campaign)
   return `You are the AI Marketing Assistant for Action Insight Marketing Platform.
 
 PLATFORM CONTEXT:
 - User is managing ${activeCampaigns} active campaign(s)
 - Marketing Autopilot: ${autopilotEnabled ? 'ENABLED' : 'DISABLED'}
 - Business: ${businessDesc}
-${context.autopilotConfig?.target_audience ? `- Target Audience: ${context.autopilotConfig.target_audience}` : ''}
+${hasHistory ? '- You have been having a conversation with this user (see history below)' : ''}
+
+${context.conversationHistory ? `\nPREVIOUS CONVERSATION:\n${context.conversationHistory.slice(-3000)}\n` : ''}
 
 YOUR CAPABILITIES:
 - Analyze campaign performance and provide insights
-- Recommend optimizations for budget, targeting, and content
-- Help create new campaigns through guided conversation
+- Develop comprehensive marketing strategies
+- Help create new campaigns through strategic conversation
 - Answer questions about marketing automation
-- Provide strategic marketing advice
+- Provide actionable marketing advice
 
 GUIDELINES:
-- Be conversational and helpful, not generic or robotic
-- When user wants to create a campaign, guide them through simple questions
-- Reference specific campaigns when relevant
+- Be conversational, strategic, and helpful
+- Reference the conversation history when relevant
+- When user wants to create a campaign, have a strategic discussion first
+- When they're ready to implement, they can say "create the campaign" or "implement this"
 - Focus on actionable advice that drives business results
-- If you don't have specific data, acknowledge it honestly
 
-CURRENT DATA AVAILABLE:
+CURRENT DATA:
 ${context.campaigns && context.campaigns.length > 0 ? `
 Active Campaigns:
 ${context.campaigns.map(c => `- ${c.name} (${c.type}): $${c.budget_spent || 0}/$${c.budget_allocated || 0} spent`).join('\n')}
@@ -625,16 +1016,10 @@ Recent Activity:
 ${context.recentActivity.map(a => `- ${a.activity_type}: ${a.activity_description}`).join('\n')}
 ` : ''}
 
-Remember: You're part of an intelligent marketing automation platform. Help users succeed with their marketing goals.`;
+Remember: Help users succeed with strategic, actionable marketing guidance.${completenessNote}`;
 }
 
-function getBudgetChannels(budget: number): string {
-  if (budget < 300) return 'Social Media';
-  if (budget < 1000) return 'Social Media + Email';
-  return 'Social Media + Email + Content Marketing';
-}
-
-function buildUserPrompt(query: string, context: ChatContext): string {
+function buildUserPrompt(query: string, _context: ChatContext): string {
   return query;
 }
 
@@ -696,12 +1081,22 @@ async function callGemini(apiKey: string, systemPrompt: string, userPrompt: stri
   return data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
 }
 
-function detectActions(query: string, response: string): string[] {
+function detectActions(query: string, response: string, campaignCreated: boolean): string[] {
   const suggestions: string[] = [];
-  const queryLower = query.toLowerCase();
 
-  if (queryLower.includes('create') || queryLower.includes('new campaign')) {
-    suggestions.push('Create a new campaign');
+  if (campaignCreated) {
+    suggestions.push('View campaign dashboard');
+    suggestions.push('Create content for campaign');
+    suggestions.push('Set up automations');
+    return suggestions;
+  }
+
+  const queryLower = query.toLowerCase();
+  const responseLower = response.toLowerCase();
+
+  // If we've been discussing campaign strategy, suggest implementation
+  if (responseLower.includes('campaign') && (responseLower.includes('strategy') || responseLower.includes('plan'))) {
+    suggestions.push('Create the campaign');
   }
 
   if (queryLower.includes('content') || queryLower.includes('generate')) {
@@ -717,9 +1112,9 @@ function detectActions(query: string, response: string): string[] {
   }
 
   if (suggestions.length === 0) {
-    suggestions.push('Tell me more about my campaigns');
-    suggestions.push('Help me create new content');
-    suggestions.push('Show me performance insights');
+    suggestions.push('Help me create a campaign');
+    suggestions.push('Show campaign performance');
+    suggestions.push('Generate content ideas');
   }
 
   return suggestions.slice(0, 3);
