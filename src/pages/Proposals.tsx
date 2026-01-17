@@ -1,14 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProposalFormData } from '@/types/proposals';
 import { useProposals } from '@/hooks/useProposals';
 import ProposalForm from '@/components/proposals/ProposalForm';
-import ProposalPreview from '@/components/proposals/ProposalPreview';
 import ProposalsList from '@/components/proposals/ProposalsList';
 import LiveContentSuggestions from '@/components/content/LiveContentSuggestions';
 import { PageHelpModal } from '@/components/common/PageHelpModal';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load ProposalPreview to defer PDF libraries until needed
+const ProposalPreview = lazy(() => import('@/components/proposals/ProposalPreview'));
 
 const Proposals: React.FC = () => {
   const [activeTab, setActiveTab] = useState('create');
@@ -145,10 +148,16 @@ const Proposals: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="preview">
-          <ProposalPreview
-            proposal={generatedProposal}
-            onExport={exportProposal}
-          />
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          }>
+            <ProposalPreview
+              proposal={generatedProposal}
+              onExport={exportProposal}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="manage">
