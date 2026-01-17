@@ -7,6 +7,48 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Decryption utilities for API keys
+async function generateKey(): Promise<CryptoKey> {
+  const masterKeyString = Deno.env.get('SECRET_MASTER_KEY');
+  if (!masterKeyString || masterKeyString.length !== 64) {
+    throw new Error('Master key must be 64 hex characters (32 bytes)');
+  }
+
+  const keyBytes = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) {
+    keyBytes[i] = parseInt(masterKeyString.substr(i * 2, 2), 16);
+  }
+
+  return await crypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'AES-GCM' },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function decryptSecret(encryptedValue: string, iv: string): Promise<string> {
+  const key = await generateKey();
+  const encryptedData = Uint8Array.from(atob(encryptedValue), c => c.charCodeAt(0));
+  const ivData = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: ivData },
+    key,
+    encryptedData
+  );
+
+  return new TextDecoder().decode(decrypted);
+}
+
+interface ConversationCampaign {
+  id: string;
+  status: string;
+  current_step: string;
+  collected_data: Record<string, any>;
+}
+
 interface ChatContext {
   campaigns?: Record<string, unknown>[];
   autopilotConfig?: Record<string, unknown>;
@@ -96,8 +138,9 @@ serve(async (req) => {
     // Query for API keys - prefer Anthropic, fallback to Gemini
     const { data: apiKeys, error: keyError } = await supabase
       .from('user_secrets')
-      .select('encrypted_value, service_name')
+      .select('encrypted_value, initialization_vector, service_name')
       .eq('user_id', user.id)
+      .eq('is_active', true)
       .in('service_name', ['anthropic_api_key', 'gemini_api_key_encrypted']);
 
     if (keyError || !apiKeys || apiKeys.length === 0) {
@@ -127,15 +170,30 @@ serve(async (req) => {
 
     console.log('Using AI service:', apiKeyData.service_name);
 
+    // Decrypt the API key
+    let decryptedApiKey: string;
+    try {
+      decryptedApiKey = await decryptSecret(apiKeyData.encrypted_value, apiKeyData.initialization_vector);
+    } catch (decryptError) {
+      console.error('Failed to decrypt API key:', decryptError);
+      return new Response(
+        JSON.stringify({
+          error: 'API key decryption failed',
+          message: 'There was an issue with your API key. Please re-enter it in Settings > Integrations.'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-type': 'application/json' } }
+      );
+    }
+
     const systemPrompt = buildSystemPrompt(enrichedContext);
     const userPrompt = buildUserPrompt(query, enrichedContext);
 
     let aiResponse: string;
 
     if (apiKeyData.service_name === 'anthropic_api_key') {
-      aiResponse = await callClaude(apiKeyData.encrypted_value, systemPrompt, userPrompt);
+      aiResponse = await callClaude(decryptedApiKey, systemPrompt, userPrompt);
     } else {
-      aiResponse = await callGemini(apiKeyData.encrypted_value, systemPrompt, userPrompt);
+      aiResponse = await callGemini(decryptedApiKey, systemPrompt, userPrompt);
     }
 
     const actionSuggestions = detectActions(query, aiResponse);
@@ -589,7 +647,7 @@ async function callClaude(apiKey: string, systemPrompt: string, userPrompt: stri
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-opus-4.5',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 4000,
       system: systemPrompt,
       messages: [
@@ -610,7 +668,7 @@ async function callClaude(apiKey: string, systemPrompt: string, userPrompt: stri
 }
 
 async function callGemini(apiKey: string, systemPrompt: string, userPrompt: string): Promise<string> {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key=${apiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
