@@ -12,7 +12,8 @@ const RequestSchema = z.object({
   userId: z.string().uuid(),
   platform: z.enum(['linkedin', 'twitter', 'instagram', 'youtube', 'tiktok', 'blog', 'newsletter', 'reddit', 'facebook']),
   messageTag: z.string().optional(),
-  topic: z.string().min(5),
+  topic: z.string().min(5).optional(),
+  autoGenerate: z.boolean().optional(),
   positioning: z.object({
     positioningStatement: z.string().optional(),
     villain: z.string().optional(),
@@ -72,7 +73,102 @@ serve(async (req) => {
     const input = validation.data;
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 
+    // Validate: either topic or autoGenerate must be provided
+    if (!input.topic && !input.autoGenerate) {
+      return jsonResponse({
+        success: false,
+        error: 'Either topic or autoGenerate must be provided'
+      }, 400);
+    }
+
     console.log('Generating Seven Ideas aligned content...');
+
+    // Fetch context for auto-generation mode
+    let positioningData = input.positioning;
+    let audienceData = input.audienceData;
+    let personalityData = input.personalityElements;
+    let knowledgeContext = '';
+    let knowledgeDocsUsed = 0;
+
+    if (input.autoGenerate) {
+      console.log('Auto-generate mode: fetching user context...');
+
+      // Fetch positioning if not provided
+      if (!positioningData) {
+        const { data: posData } = await supabase
+          .from('positioning_definitions')
+          .select('positioning_statement, villain, core_messages')
+          .eq('user_id', input.userId)
+          .eq('is_active', true)
+          .single();
+
+        if (posData) {
+          positioningData = {
+            positioningStatement: posData.positioning_statement,
+            villain: posData.villain,
+            coreMessages: posData.core_messages
+          };
+        }
+      }
+
+      // Fetch audience data if not provided
+      if (!audienceData) {
+        const { data: audData } = await supabase
+          .from('audience_research')
+          .select('problem_language, raw_quotes')
+          .eq('user_id', input.userId)
+          .single();
+
+        if (audData) {
+          audienceData = {
+            problemLanguage: audData.problem_language,
+            rawQuotes: audData.raw_quotes
+          };
+        }
+      }
+
+      // Fetch personality elements if not provided
+      if (!personalityData) {
+        const { data: configData } = await supabase
+          .from('organic_marketing_config')
+          .select('founder_story, personality_traits, brand_voice, business_description')
+          .eq('user_id', input.userId)
+          .single();
+
+        if (configData) {
+          personalityData = {
+            founderStory: configData.founder_story,
+            personalityTraits: configData.personality_traits,
+            brandVoice: configData.brand_voice
+          };
+        }
+      }
+
+      // Fetch knowledge documents for additional context
+      const { data: buckets } = await supabase
+        .from('knowledge_buckets')
+        .select('id')
+        .eq('created_by', input.userId)
+        .eq('bucket_type', 'general');
+
+      if (buckets && buckets.length > 0) {
+        const bucketIds = buckets.map(b => b.id);
+        const { data: docs } = await supabase
+          .from('knowledge_documents')
+          .select('title, summary, content')
+          .in('bucket_id', bucketIds)
+          .eq('status', 'ready')
+          .limit(5);
+
+        if (docs && docs.length > 0) {
+          knowledgeDocsUsed = docs.length;
+          knowledgeContext = docs.map(d => {
+            const docContent = d.summary || (d.content?.slice(0, 500) + '...');
+            return `- ${d.title}: ${docContent}`;
+          }).join('\n');
+        }
+      }
+    }
 
     const platformGuidelines: Record<string, string> = {
       linkedin: 'Professional tone, storytelling hooks, 1300 char optimal, use line breaks for readability',
@@ -85,6 +181,12 @@ serve(async (req) => {
       reddit: 'Value-first, no self-promotion feel, engage with community norms',
       facebook: 'Conversational, question-based engagement, shareable format',
     };
+
+    // Build knowledge context prompt section
+    const knowledgePrompt = knowledgeContext ? `
+
+PRODUCT/SERVICE KNOWLEDGE (use this for specific, accurate content):
+${knowledgeContext}` : '';
 
     const systemPrompt = `You are an expert content creator using the Seven Ideas methodology for organic marketing. Your content must:
 
@@ -99,30 +201,36 @@ serve(async (req) => {
 5. **Message Clarity**: Each piece should deliver ONE core message clearly.
 
 Platform: ${input.platform}
-Guidelines: ${platformGuidelines[input.platform]}`;
+Guidelines: ${platformGuidelines[input.platform]}${knowledgePrompt}`;
 
-    const positioningContext = input.positioning ? `
+    const positioningContext = positioningData ? `
 Positioning:
-- Statement: ${input.positioning.positioningStatement || 'Not defined'}
-- Villain: ${input.positioning.villain || 'Not defined'}
+- Statement: ${positioningData.positioningStatement || 'Not defined'}
+- Villain: ${positioningData.villain || 'Not defined'}
+- Core Messages: ${JSON.stringify(positioningData.coreMessages?.slice(0, 3) || [])}
 ` : '';
 
-    const audienceContext = input.audienceData ? `
+    const audienceContext = audienceData ? `
 Audience Language:
-- Problem phrases: ${JSON.stringify(input.audienceData.problemLanguage?.slice(0, 5) || [])}
-- Raw quotes: ${input.audienceData.rawQuotes?.slice(0, 3).join('; ') || 'None captured'}
+- Problem phrases: ${JSON.stringify(audienceData.problemLanguage?.slice(0, 5) || [])}
+- Raw quotes: ${audienceData.rawQuotes?.slice(0, 3).join('; ') || 'None captured'}
 ` : '';
 
-    const personalityContext = input.personalityElements ? `
+    const personalityContext = personalityData ? `
 Personality Elements:
-- Founder story: ${input.personalityElements.founderStory || 'Not provided'}
-- Traits: ${input.personalityElements.personalityTraits?.join(', ') || 'Not defined'}
-- Brand voice: ${input.personalityElements.brandVoice || 'Not defined'}
+- Founder story: ${personalityData.founderStory || 'Not provided'}
+- Traits: ${personalityData.personalityTraits?.join(', ') || 'Not defined'}
+- Brand voice: ${personalityData.brandVoice || 'Not defined'}
 ` : '';
+
+    // Build topic section - auto-generate or use provided
+    const topicSection = input.topic
+      ? `Topic: ${input.topic}`
+      : `IMPORTANT: Auto-generate a compelling topic based on the positioning, audience pain points, and core messages provided. Pick ONE core message or audience pain point to focus on. Make it timely and relevant.`;
 
     const userPrompt = `Create ${input.contentType || 'post'} content for ${input.platform}:
 
-Topic: ${input.topic}
+${topicSection}
 ${input.messageTag ? `Message Pillar: ${input.messageTag}` : ''}
 ${positioningContext}
 ${audienceContext}
@@ -211,6 +319,7 @@ Return as JSON:
       success: true,
       content: contentResults,
       contentId: savedContent?.id,
+      knowledgeDocsUsed,
       message: 'Content generated successfully'
     });
 

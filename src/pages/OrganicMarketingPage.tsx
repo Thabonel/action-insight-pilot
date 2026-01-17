@@ -12,7 +12,8 @@ import OrganicSetupWizard from '@/components/organic/OrganicSetupWizard';
 import ContentCreator from '@/components/organic/ContentCreator';
 import QualityGateDashboard from '@/components/organic/QualityGateDashboard';
 import GoldenHourView from '@/components/organic/GoldenHourView';
-import { Settings, PenTool, CheckSquare, Clock, Sparkles, Target, Users } from 'lucide-react';
+import QuickPost from '@/components/organic/QuickPost';
+import { Settings, PenTool, CheckSquare, Clock, Sparkles, Target, Users, Zap } from 'lucide-react';
 
 interface OrganicConfig {
   setup_completed: boolean;
@@ -198,8 +199,13 @@ const OrganicMarketingPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="create" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="quick" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="quick" className="flex items-center gap-2">
+            <Zap className="h-4 w-4" />
+            <span className="hidden sm:inline">Quick Post</span>
+            <span className="sm:hidden">Quick</span>
+          </TabsTrigger>
           <TabsTrigger value="create" className="flex items-center gap-2">
             <PenTool className="h-4 w-4" />
             <span className="hidden sm:inline">Create Content</span>
@@ -216,6 +222,10 @@ const OrganicMarketingPage: React.FC = () => {
             <span className="sm:hidden">Times</span>
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="quick">
+          <QuickPost onContentCreated={() => loadConfig()} />
+        </TabsContent>
 
         <TabsContent value="create">
           <ContentCreator onContentCreated={() => loadConfig()} />
