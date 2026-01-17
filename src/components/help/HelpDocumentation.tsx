@@ -18,6 +18,15 @@ interface HelpArticle {
 
 const helpArticles: HelpArticle[] = [
   {
+    id: 'organic-marketing-intro',
+    title: 'Getting Started with Organic Marketing',
+    description: 'Learn how AI creates authentic content that resonates with your audience',
+    category: 'Getting Started',
+    difficulty: 'Beginner',
+    readTime: '5 min',
+    tags: ['organic', 'content', 'setup', 'ai']
+  },
+  {
     id: 'campaign-basics',
     title: 'Creating Your First Campaign',
     description: 'Step-by-step guide to setting up effective marketing campaigns',
@@ -46,21 +55,21 @@ const helpArticles: HelpArticle[] = [
   },
   {
     id: 'ai-video-studio',
-    title: 'AI Video Generation with Gemini 3',
+    title: 'AI Video Generation',
     description: 'Create professional marketing videos using AI - no editing skills required',
     category: 'AI Features',
     difficulty: 'Intermediate',
     readTime: '10 min',
-    tags: ['video', 'ai', 'gemini', 'veo-3']
+    tags: ['video', 'ai', 'generation']
   },
   {
     id: 'conversational-dashboard',
     title: 'Using the AI Chat Dashboard',
-    description: 'Get instant marketing insights and recommendations using Claude Opus 4.5',
+    description: 'Get instant marketing insights and recommendations using AI',
     category: 'AI Features',
     difficulty: 'Beginner',
     readTime: '5 min',
-    tags: ['ai', 'chat', 'claude', 'dashboard']
+    tags: ['ai', 'chat', 'dashboard']
   },
   {
     id: 'lead-management',
@@ -118,27 +127,63 @@ const helpArticles: HelpArticle[] = [
   },
   {
     id: 'ai-content-generation',
-    title: 'AI Content Generation with Claude',
-    description: 'Generate social media posts, emails, and marketing copy using Claude Opus 4.5',
+    title: 'AI Content Generation',
+    description: 'Generate social media posts, emails, and marketing copy using AI',
     category: 'AI Features',
     difficulty: 'Beginner',
     readTime: '6 min',
-    tags: ['ai', 'content', 'claude', 'copywriting']
+    tags: ['ai', 'content', 'copywriting']
+  },
+  {
+    id: 'organic-audience-research',
+    title: 'Understanding Audience Research',
+    description: 'How AI discovers where your audience hangs out and captures their exact language',
+    category: 'Organic Marketing',
+    difficulty: 'Beginner',
+    readTime: '4 min',
+    tags: ['organic', 'audience', 'research', 'language']
+  },
+  {
+    id: 'organic-quality-gate',
+    title: 'Using the Quality Gate',
+    description: 'How content scoring works and what the quality threshold means',
+    category: 'Organic Marketing',
+    difficulty: 'Beginner',
+    readTime: '3 min',
+    tags: ['organic', 'quality', 'scoring', 'content']
+  },
+  {
+    id: 'organic-golden-hour',
+    title: 'Golden Hour Engagement',
+    description: 'Why the first 60 minutes after posting matter and how to maximize engagement',
+    category: 'Organic Marketing',
+    difficulty: 'Intermediate',
+    readTime: '5 min',
+    tags: ['organic', 'engagement', 'timing', 'golden-hour']
+  },
+  {
+    id: 'organic-positioning',
+    title: 'Creating Your Positioning Statement',
+    description: 'How AI helps you define what you do, who you help, and what you stand against',
+    category: 'Organic Marketing',
+    difficulty: 'Intermediate',
+    readTime: '6 min',
+    tags: ['organic', 'positioning', 'branding', 'strategy']
   }
 ];
 
 const quickTips = [
   {
-    title: 'Use descriptive campaign names',
-    description: 'Include date, channel, and goal for easy identification'
+    title: 'Start with Organic Marketing',
+    description: 'Set up your content system to create posts that sound like you'
   },
   {
-    title: 'Review lead scores weekly',
-    description: 'High-scoring leads need immediate attention'
+    title: 'Check your Golden Hour schedule',
+    description: 'Post when your audience is most active for better engagement'
   },
   {
-    title: 'Set realistic budgets',
-    description: 'Start small and scale successful campaigns'
+    title: 'Use your quality threshold',
+    description: 'Only publish content that meets your standards - quality over quantity'
   }
 ];
 

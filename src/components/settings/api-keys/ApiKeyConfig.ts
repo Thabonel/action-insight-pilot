@@ -13,7 +13,7 @@ export const aiServices: ApiKeyConfig[] = [
   {
     id: 'anthropic_api_key',
     name: 'Anthropic Claude API Key',
-    description: 'Required for AI content generation, analytics, and advanced reasoning. Primary AI provider using Claude Opus 4.5.',
+    description: 'Required for AI content generation, analytics, and advanced reasoning. Primary AI provider.',
     placeholder: 'sk-ant-...',
     icon: '🤖',
     required: true,
@@ -22,7 +22,7 @@ export const aiServices: ApiKeyConfig[] = [
   {
     id: 'gemini_api_key_encrypted',
     name: 'Google Gemini API Key',
-    description: 'Required for visual AI tasks with Gemini 3 Pro/Flash, AI video generation with Veo 3, and image generation. Get your key from https://aistudio.google.com/apikey',
+    description: 'Required for visual AI tasks, AI video generation, and image generation. Get your key from https://aistudio.google.com/apikey',
     placeholder: 'AIza...',
     icon: '🎬',
     required: true,

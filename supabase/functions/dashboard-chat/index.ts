@@ -241,11 +241,15 @@ serve(async (req) => {
       );
 
       if (extractedData && extractedData.product) {
-        // Create the campaign with extracted data
-        createdCampaign = await createCampaignFromExtractedData(
+        // If campaignId was provided (from Quick Start), update that campaign
+        // Otherwise create a new one
+        const existingCampaignId = campaignId || enrichedContext.activeCampaign?.id;
+
+        createdCampaign = await createOrUpdateCampaignFromExtractedData(
           supabase,
           user.id,
-          extractedData
+          extractedData,
+          existingCampaignId
         );
 
         if (createdCampaign) {
@@ -258,8 +262,9 @@ serve(async (req) => {
             createdCampaign.id as string
           );
 
-          // Generate success response
-          aiResponse = generateCampaignCreatedResponse(extractedData, createdCampaign);
+          // Generate success response - note if this was an update vs create
+          const wasUpdated = !!existingCampaignId;
+          aiResponse = generateCampaignCreatedResponse(extractedData, createdCampaign, wasUpdated);
         } else {
           aiResponse = "I encountered an issue creating the campaign. Let me know if you'd like to try again or adjust any details.";
         }
@@ -750,10 +755,11 @@ If enough information exists to create a basic campaign, offer to proceed with r
   }
 }
 
-async function createCampaignFromExtractedData(
+async function createOrUpdateCampaignFromExtractedData(
   supabase: ReturnType<typeof createClient>,
   userId: string,
-  data: ExtractedCampaignData
+  data: ExtractedCampaignData,
+  existingCampaignId?: string
 ): Promise<Record<string, unknown> | null> {
   try {
     const budget = data.budget || 500;
@@ -761,9 +767,15 @@ async function createCampaignFromExtractedData(
       ? data.channels
       : determineChannelsFromBudget(budget);
 
+    // Generate a cleaner campaign name - just use product name, not full description
+    const productName = data.product.split(' - ')[0].split(':')[0].trim();
+    const campaignName = productName.length > 50
+      ? `${productName.slice(0, 47)}...`
+      : `${productName} Campaign`;
+
     const campaignData = {
-      name: `${data.product} Campaign`,
-      description: data.strategy || `AI-generated campaign for ${data.product} targeting ${data.audience}`,
+      name: campaignName,
+      description: data.strategy || `AI-generated campaign for ${productName} targeting ${data.audience}`,
       type: 'digital',
       channel: channels[0] || 'social',
       status: 'active',
@@ -778,11 +790,11 @@ async function createCampaignFromExtractedData(
       demographics: {
         ageRange: '25-54',
         location: 'Global',
-        interests: data.product
+        interests: productName
       },
       content: {
-        valueProposition: data.keyMessages?.[0] || `High-quality ${data.product}`,
-        keyMessages: data.keyMessages || [`${data.product} for ${data.audience}`],
+        valueProposition: data.keyMessages?.[0] || `High-quality ${productName}`,
+        keyMessages: data.keyMessages || [`${productName} for ${data.audience}`],
         contentStrategy: data.strategy || 'Multi-channel marketing approach'
       },
       settings: {
@@ -800,37 +812,72 @@ async function createCampaignFromExtractedData(
         cost_per_click: 0,
         cost_per_acquisition: 0,
         revenue_generated: 0
-      },
-      created_by: userId
+      }
     };
 
-    const { data: campaign, error } = await supabase
-      .from('campaigns')
-      .insert([campaignData])
-      .select()
-      .single();
+    let campaign;
+    let error;
+
+    if (existingCampaignId) {
+      // UPDATE existing campaign instead of creating a new one
+      console.log('Updating existing campaign:', existingCampaignId);
+
+      const result = await supabase
+        .from('campaigns')
+        .update(campaignData)
+        .eq('id', existingCampaignId)
+        .eq('created_by', userId)
+        .select()
+        .single();
+
+      campaign = result.data;
+      error = result.error;
+
+      if (!error && campaign) {
+        console.log('Campaign updated from extracted data:', campaign.id);
+      }
+    } else {
+      // CREATE new campaign
+      const result = await supabase
+        .from('campaigns')
+        .insert([{ ...campaignData, created_by: userId }])
+        .select()
+        .single();
+
+      campaign = result.data;
+      error = result.error;
+
+      if (!error && campaign) {
+        console.log('Campaign created from extracted data:', campaign.id);
+      }
+    }
 
     if (error) {
-      console.error('Error creating campaign:', error);
+      console.error('Error creating/updating campaign:', error);
       return null;
     }
 
-    console.log('Campaign created from extracted data:', campaign.id);
     return campaign;
   } catch (error) {
-    console.error('Error in createCampaignFromExtractedData:', error);
+    console.error('Error in createOrUpdateCampaignFromExtractedData:', error);
     return null;
   }
 }
 
-function generateCampaignCreatedResponse(data: ExtractedCampaignData, campaign: Record<string, unknown>): string {
+function generateCampaignCreatedResponse(data: ExtractedCampaignData, campaign: Record<string, unknown>, wasUpdated?: boolean): string {
   const sprintSummary = data.sprints && data.sprints.length > 0
     ? `\n\n**Campaign Structure:**\n${data.sprints.map(s => `- **${s.name}** (${s.duration}): ${s.goals}`).join('\n')}`
     : '';
 
-  return `I've created and launched your campaign! Here's what I set up:
+  const actionVerb = wasUpdated ? 'updated and activated' : 'created and launched';
 
-**Campaign: ${data.product} Campaign**
+  // Generate a cleaner product name for display
+  const productName = data.product.split(' - ')[0].split(':')[0].trim();
+  const displayName = productName.length > 50 ? `${productName.slice(0, 47)}...` : productName;
+
+  return `I've ${actionVerb} your campaign! Here's what I set up:
+
+**Campaign: ${displayName} Campaign**
 
 **Target Audience:** ${data.audience}
 

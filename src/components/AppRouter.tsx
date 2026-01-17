@@ -24,6 +24,7 @@ import { KeywordResearch } from '@/pages/KeywordResearch'
 import KnowledgeManagement from '@/components/knowledge/KnowledgeManagement'
 import SimpleDashboard from '@/pages/SimpleDashboard'
 import AutopilotSetup from '@/pages/AutopilotSetup'
+import OrganicMarketingPage from '@/pages/OrganicMarketingPage'
 
 const AppRouter: React.FC = () => {
   return (
@@ -47,6 +48,7 @@ const AppRouter: React.FC = () => {
         <Route path="leads" element={<Leads />} />
         <Route path="lead-capture-forms" element={<LeadCaptureForms />} />
         <Route path="content" element={<Content />} />
+        <Route path="organic" element={<OrganicMarketingPage />} />
         <Route path="social" element={<Social />} />
         <Route path="email" element={<Email />} />
         <Route path="analytics" element={<Analytics />} />
