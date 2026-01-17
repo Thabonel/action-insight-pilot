@@ -141,7 +141,7 @@ serve(async (req) => {
       .select('encrypted_value, initialization_vector, service_name')
       .eq('user_id', user.id)
       .eq('is_active', true)
-      .in('service_name', ['Anthropic', 'Gemini']);
+      .in('service_name', ['anthropic_api_key', 'gemini_api_key_encrypted']);
 
     if (keyError || !apiKeys || apiKeys.length === 0) {
       console.error('API key query error:', keyError);
@@ -155,8 +155,8 @@ serve(async (req) => {
     }
 
     // Prefer Anthropic Claude, fallback to Gemini
-    const apiKeyData = apiKeys.find(k => k.service_name === 'Anthropic')
-      || apiKeys.find(k => k.service_name === 'Gemini');
+    const apiKeyData = apiKeys.find(k => k.service_name === 'anthropic_api_key')
+      || apiKeys.find(k => k.service_name === 'gemini_api_key_encrypted');
 
     if (!apiKeyData) {
       return new Response(
@@ -190,7 +190,7 @@ serve(async (req) => {
 
     let aiResponse: string;
 
-    if (apiKeyData.service_name === 'Anthropic') {
+    if (apiKeyData.service_name === 'anthropic_api_key') {
       aiResponse = await callClaude(decryptedApiKey, systemPrompt, userPrompt);
     } else {
       aiResponse = await callGemini(decryptedApiKey, systemPrompt, userPrompt);
