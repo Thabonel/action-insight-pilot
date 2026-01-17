@@ -50,12 +50,30 @@ interface ConversationCampaign {
   conversation_history?: string;
 }
 
+interface KnowledgeDocument {
+  id: string;
+  title: string;
+  content: string;
+  summary?: string;
+  bucket_name: string;
+  bucket_type: 'campaign' | 'general';
+}
+
+interface KnowledgeContext {
+  hasKnowledge: boolean;
+  documentCount: number;
+  bucketCount: number;
+  documents: KnowledgeDocument[];
+  summaries: string[];
+}
+
 interface ChatContext {
   campaigns?: Record<string, unknown>[];
   autopilotConfig?: Record<string, unknown>;
   recentActivity?: Record<string, unknown>[];
   conversationCampaign?: ConversationCampaign;
   conversationHistory?: string;
+  knowledge?: KnowledgeContext;
 }
 
 interface ExtractedCampaignData {
@@ -277,7 +295,7 @@ serve(async (req) => {
     // Save this exchange to conversation history
     await saveConversationMessage(supabase, sessionId, user.id, query, aiResponse);
 
-    const actionSuggestions = detectActions(query, aiResponse, createdCampaign !== null);
+    const actionSuggestions = detectActions(query, aiResponse, createdCampaign !== null, enrichedContext.knowledge?.hasKnowledge);
 
     console.log('Successfully processed dashboard chat query');
 
@@ -288,7 +306,12 @@ serve(async (req) => {
         success: true,
         conversationId: sessionId,
         campaignCreated: createdCampaign ? true : false,
-        campaignId: createdCampaign?.id || null
+        campaignId: createdCampaign?.id || null,
+        knowledge: {
+          hasDocuments: enrichedContext.knowledge?.hasKnowledge || false,
+          documentCount: enrichedContext.knowledge?.documentCount || 0,
+          bucketCount: enrichedContext.knowledge?.bucketCount || 0
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -429,9 +452,9 @@ async function getConversationHistory(
   try {
     const { data, error } = await supabase
       .from('chat_messages')
-      .select('user_message, ai_response, created_at')
+      .select('user_message, ai_response, timestamp')
       .eq('session_id', conversationId)
-      .order('created_at', { ascending: true })
+      .order('timestamp', { ascending: true })
       .limit(20);
 
     if (error || !data || data.length === 0) {
@@ -478,10 +501,27 @@ async function extractCampaignDataFromConversation(
   currentQuery: string,
   isAnthropic: boolean
 ): Promise<ExtractedCampaignData | null> {
+  // Handle very long conversations by intelligent truncation
+  // Claude Sonnet 4.5 has 200k context, but we want to stay well under for extraction
+  const MAX_CONVERSATION_LENGTH = 25000;
+  let processedHistory = conversationHistory;
+
+  if (conversationHistory.length > MAX_CONVERSATION_LENGTH) {
+    console.log(`Conversation history too long (${conversationHistory.length} chars), truncating for extraction`);
+
+    // Keep the most recent part of the conversation which has the most relevant details
+    // Also try to include the beginning which often has initial context
+    const startSection = conversationHistory.slice(0, 5000);
+    const endSection = conversationHistory.slice(-(MAX_CONVERSATION_LENGTH - 6000));
+
+    processedHistory = `${startSection}\n\n[... earlier conversation omitted for brevity ...]\n\n${endSection}`;
+    console.log(`Truncated to ${processedHistory.length} chars (start: 5000, end: ${MAX_CONVERSATION_LENGTH - 6000})`);
+  }
+
   const extractionPrompt = `You are a data extraction assistant. Analyze this marketing conversation and extract structured campaign data.
 
 CONVERSATION HISTORY:
-${conversationHistory}
+${processedHistory}
 
 CURRENT USER REQUEST: ${currentQuery}
 
@@ -546,7 +586,14 @@ Rules:
     }
 
     if (!response.ok) {
-      console.error('Extraction API error:', response.status);
+      const errorBody = await response.text();
+      console.error('Extraction API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody.slice(0, 500),
+        conversationLength: processedHistory.length,
+        isAnthropic
+      });
       return null;
     }
 
@@ -557,6 +604,17 @@ Rules:
       extractedText = data.content?.[0]?.text || '';
     } else {
       extractedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+
+    console.log('Extraction response length:', extractedText.length);
+
+    if (!extractedText) {
+      console.error('Empty extraction response from AI', {
+        isAnthropic,
+        responseKeys: Object.keys(data),
+        conversationLength: processedHistory.length
+      });
+      return null;
     }
 
     // Clean and parse JSON
@@ -572,16 +630,44 @@ Rules:
     }
     extractedText = extractedText.trim();
 
-    const extracted = JSON.parse(extractedText) as ExtractedCampaignData;
-
-    // Validate required fields
-    if (!extracted.product || extracted.product === 'The product or service being marketed') {
+    let extracted: ExtractedCampaignData;
+    try {
+      extracted = JSON.parse(extractedText) as ExtractedCampaignData;
+    } catch (parseError) {
+      console.error('Failed to parse extracted JSON:', {
+        error: parseError,
+        rawText: extractedText.slice(0, 500),
+        conversationLength: processedHistory.length
+      });
       return null;
     }
 
+    // Validate required fields
+    if (!extracted.product || extracted.product === 'The product or service being marketed') {
+      console.error('Extraction failed - missing or placeholder product field:', {
+        product: extracted.product,
+        hasAudience: !!extracted.audience,
+        hasBudget: !!extracted.budget,
+        conversationLength: processedHistory.length
+      });
+      return null;
+    }
+
+    console.log('Successfully extracted campaign data:', {
+      product: extracted.product,
+      audience: extracted.audience?.slice(0, 50),
+      budget: extracted.budget,
+      channelCount: extracted.channels?.length || 0,
+      hasSprints: !!extracted.sprints
+    });
+
     return extracted;
   } catch (error) {
-    console.error('Error extracting campaign data:', error);
+    console.error('Error extracting campaign data:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      conversationLength: conversationHistory.length
+    });
     return null;
   }
 }
@@ -920,6 +1006,9 @@ async function enrichContext(
       .limit(5);
 
     context.recentActivity = recentActivity || [];
+
+    // Fetch knowledge documents for context
+    context.knowledge = await fetchKnowledgeContext(supabase, userId);
   } catch (error) {
     console.error('Error enriching context:', error);
   }
@@ -927,10 +1016,107 @@ async function enrichContext(
   return context;
 }
 
+async function fetchKnowledgeContext(
+  supabase: ReturnType<typeof createClient>,
+  userId: string
+): Promise<KnowledgeContext> {
+  const knowledgeContext: KnowledgeContext = {
+    hasKnowledge: false,
+    documentCount: 0,
+    bucketCount: 0,
+    documents: [],
+    summaries: []
+  };
+
+  try {
+    // Fetch buckets with their documents
+    const { data: buckets, error: bucketsError } = await supabase
+      .from('knowledge_buckets')
+      .select(`
+        id,
+        name,
+        bucket_type,
+        knowledge_documents (
+          id,
+          title,
+          content,
+          summary,
+          status
+        )
+      `)
+      .eq('created_by', userId);
+
+    if (bucketsError) {
+      console.error('Error fetching knowledge buckets:', bucketsError);
+      return knowledgeContext;
+    }
+
+    if (!buckets || buckets.length === 0) {
+      return knowledgeContext;
+    }
+
+    knowledgeContext.bucketCount = buckets.length;
+
+    // Process documents from all buckets
+    for (const bucket of buckets) {
+      const docs = bucket.knowledge_documents || [];
+      const readyDocs = docs.filter((d: { status: string }) => d.status === 'ready');
+
+      for (const doc of readyDocs) {
+        knowledgeContext.documents.push({
+          id: doc.id,
+          title: doc.title,
+          content: doc.content?.slice(0, 2000) || '', // Limit content size
+          summary: doc.summary,
+          bucket_name: bucket.name,
+          bucket_type: bucket.bucket_type
+        });
+
+        if (doc.summary) {
+          knowledgeContext.summaries.push(`[${bucket.name}] ${doc.title}: ${doc.summary}`);
+        }
+      }
+    }
+
+    knowledgeContext.documentCount = knowledgeContext.documents.length;
+    knowledgeContext.hasKnowledge = knowledgeContext.documentCount > 0;
+
+    console.log(`Loaded knowledge context: ${knowledgeContext.bucketCount} buckets, ${knowledgeContext.documentCount} documents`);
+
+  } catch (error) {
+    console.error('Error fetching knowledge context:', error);
+  }
+
+  return knowledgeContext;
+}
+
 function buildStrategicSystemPrompt(context: ChatContext): string {
   const activeCampaigns = context.campaigns?.length || 0;
   const autopilotEnabled = context.autopilotConfig?.is_active || false;
   const businessDesc = context.autopilotConfig?.business_description || 'your business';
+  const knowledge = context.knowledge;
+
+  // Build knowledge section
+  let knowledgeSection = '';
+  if (knowledge?.hasKnowledge) {
+    knowledgeSection = `
+PRODUCT KNOWLEDGE BASE:
+You have access to ${knowledge.documentCount} document(s) the user has uploaded about their product/business:
+${knowledge.summaries.slice(0, 5).map(s => `- ${s}`).join('\n')}
+
+${knowledge.documents.slice(0, 3).map(doc => `
+--- ${doc.title} (${doc.bucket_name}) ---
+${doc.content.slice(0, 1500)}
+`).join('\n')}
+
+USE THIS KNOWLEDGE to provide more specific, informed recommendations. Reference these documents when relevant.
+`;
+  } else {
+    knowledgeSection = `
+KNOWLEDGE BASE:
+The user has not uploaded any product documents yet. Early in the conversation, suggest they upload documents about their product/service to the Knowledge Management section (Settings > Knowledge) for better AI assistance. This helps you provide more specific, informed campaign recommendations.
+`;
+  }
 
   return `You are an expert Marketing Strategist AI for Action Insight Marketing Platform.
 
@@ -938,7 +1124,7 @@ PLATFORM CONTEXT:
 - User is managing ${activeCampaigns} active campaign(s)
 - Marketing Autopilot: ${autopilotEnabled ? 'ENABLED' : 'DISABLED'}
 - Business: ${businessDesc}
-
+${knowledgeSection}
 YOUR ROLE:
 You are helping the user develop a comprehensive marketing campaign strategy. Have a natural, strategic conversation to understand their:
 1. Product/service they want to promote
@@ -955,12 +1141,14 @@ CONVERSATION STYLE:
 - Help them think through their strategy
 - Suggest creative tactics they might not have considered
 - Reference proven marketing frameworks when relevant
+- If user has uploaded knowledge documents, USE that information to give specific advice
 
 IMPORTANT:
 - Have a real strategic conversation
 - Don't just collect data - provide value with each response
 - Help them develop a complete, actionable marketing plan
 - When they've shared enough information and want to proceed, they can say "create the campaign" or "implement this"
+- If the user hasn't uploaded product documents, gently suggest they can upload product info, competitor analysis, or brand guidelines to Knowledge Management for better recommendations
 
 When they're ready to create the campaign, remind them they can say "create the campaign" or "implement this" and you'll set everything up based on your conversation.`;
 }
@@ -970,6 +1158,29 @@ function buildSystemPrompt(context: ChatContext, completeness?: CompletenessChec
   const autopilotEnabled = context.autopilotConfig?.is_active || false;
   const businessDesc = context.autopilotConfig?.business_description || 'your business';
   const hasHistory = context.conversationHistory && context.conversationHistory.length > 100;
+  const knowledge = context.knowledge;
+
+  // Build knowledge section
+  let knowledgeSection = '';
+  if (knowledge?.hasKnowledge) {
+    knowledgeSection = `
+PRODUCT KNOWLEDGE BASE:
+You have access to ${knowledge.documentCount} document(s) the user has uploaded:
+${knowledge.summaries.slice(0, 5).map(s => `- ${s}`).join('\n')}
+
+${knowledge.documents.slice(0, 3).map(doc => `
+--- ${doc.title} (${doc.bucket_name}) ---
+${doc.content.slice(0, 1500)}
+`).join('\n')}
+
+USE THIS KNOWLEDGE to provide more specific, informed recommendations.
+`;
+  } else {
+    knowledgeSection = `
+KNOWLEDGE BASE: No documents uploaded yet.
+TIP: Suggest the user can upload product documentation, brand guidelines, or competitor analysis to Knowledge Management for better campaign recommendations.
+`;
+  }
 
   // Add completeness awareness
   let completenessNote = '';
@@ -988,8 +1199,8 @@ PLATFORM CONTEXT:
 - Marketing Autopilot: ${autopilotEnabled ? 'ENABLED' : 'DISABLED'}
 - Business: ${businessDesc}
 ${hasHistory ? '- You have been having a conversation with this user (see history below)' : ''}
-
-${context.conversationHistory ? `\nPREVIOUS CONVERSATION:\n${context.conversationHistory.slice(-3000)}\n` : ''}
+${knowledgeSection}
+${context.conversationHistory ? `\nPREVIOUS CONVERSATION:\n${context.conversationHistory.slice(-12000)}\n` : ''}
 
 YOUR CAPABILITIES:
 - Analyze campaign performance and provide insights
@@ -997,6 +1208,7 @@ YOUR CAPABILITIES:
 - Help create new campaigns through strategic conversation
 - Answer questions about marketing automation
 - Provide actionable marketing advice
+- Use uploaded knowledge documents to give informed, specific advice
 
 GUIDELINES:
 - Be conversational, strategic, and helpful
@@ -1004,6 +1216,8 @@ GUIDELINES:
 - When user wants to create a campaign, have a strategic discussion first
 - When they're ready to implement, they can say "create the campaign" or "implement this"
 - Focus on actionable advice that drives business results
+- If user has knowledge documents, USE them to give specific recommendations
+- If no documents are uploaded, mention that uploading product info to Knowledge Management can help you give better advice
 
 CURRENT DATA:
 ${context.campaigns && context.campaigns.length > 0 ? `
@@ -1081,7 +1295,7 @@ async function callGemini(apiKey: string, systemPrompt: string, userPrompt: stri
   return data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, but I could not generate a response. Please try again.';
 }
 
-function detectActions(query: string, response: string, campaignCreated: boolean): string[] {
+function detectActions(query: string, response: string, campaignCreated: boolean, hasKnowledge?: boolean): string[] {
   const suggestions: string[] = [];
 
   if (campaignCreated) {
@@ -1111,10 +1325,17 @@ function detectActions(query: string, response: string, campaignCreated: boolean
     suggestions.push('Get optimization recommendations');
   }
 
+  // Suggest uploading knowledge if user has none
+  if (!hasKnowledge && (queryLower.includes('product') || queryLower.includes('campaign') || queryLower.includes('help'))) {
+    suggestions.push('Upload product documents');
+  }
+
   if (suggestions.length === 0) {
     suggestions.push('Help me create a campaign');
+    if (!hasKnowledge) {
+      suggestions.push('Upload product documents');
+    }
     suggestions.push('Show campaign performance');
-    suggestions.push('Generate content ideas');
   }
 
   return suggestions.slice(0, 3);
