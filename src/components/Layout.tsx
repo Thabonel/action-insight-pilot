@@ -47,7 +47,7 @@ const Layout: React.FC = () => {
     customIcon?: 'logo';
   };
 
-  // Simple mode navigation items (3 items)
+  // Simple mode navigation items (4 items)
   const simpleNavItems: NavItem[] = [
     {
       name: 'Autopilot Dashboard',
@@ -60,6 +60,12 @@ const Layout: React.FC = () => {
       href: '/app/conversational-dashboard',
       iconName: 'dashboard',
       description: 'Ask me anything'
+    },
+    {
+      name: 'Knowledge',
+      href: '/app/knowledge',
+      description: 'Upload product docs for AI',
+      customIcon: 'logo'
     },
     {
       name: 'Settings',
@@ -76,6 +82,12 @@ const Layout: React.FC = () => {
       href: '/app/conversational-dashboard',
       iconName: 'dashboard',
       description: 'AI-powered insights'
+    },
+    {
+      name: 'Knowledge',
+      href: '/app/knowledge',
+      description: 'Upload product docs for AI',
+      customIcon: 'logo'
     },
     {
       name: 'Campaigns',
@@ -130,12 +142,6 @@ const Layout: React.FC = () => {
       href: '/app/proposals',
       iconName: 'proposals',
       description: 'Proposal generation'
-    },
-    {
-      name: 'Knowledge',
-      href: '/app/knowledge',
-      description: 'AI knowledge base',
-      customIcon: 'logo'
     },
     {
       name: 'Settings',
