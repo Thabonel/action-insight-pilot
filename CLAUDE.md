@@ -374,6 +374,61 @@ npm run knip
   src/components/OldModal.tsx
 ```
 
+### Code Simplifier - Automated Code Refinement
+
+**What it does**:
+- Simplifies and refines code for clarity, consistency, and maintainability
+- Preserves all existing functionality while improving readability
+- Focuses on recently modified code by default
+- Identifies overly complex patterns and suggests cleaner alternatives
+- Ensures consistent naming conventions and code style
+
+**When to run** (Regular Schedule):
+- After completing a feature or significant code changes
+- Before creating pull requests
+- Weekly maintenance pass on active development areas
+- After refactoring sessions to ensure simplicity wasn't lost
+- When code review feedback mentions complexity concerns
+
+**How to invoke**:
+```
+# Run on recently modified files (default behavior)
+Use the code-simplifier agent
+
+# Run on specific files or directories
+Use the code-simplifier agent on src/components/Dashboard.tsx
+
+# Run after major feature completion
+Use the code-simplifier agent to review the [feature-name] implementation
+```
+
+**What it focuses on**:
+- Removing unnecessary complexity and over-engineering
+- Consolidating duplicated logic
+- Simplifying conditional chains and nested structures
+- Improving variable and function naming
+- Reducing cognitive load for future maintainers
+- Ensuring code follows project conventions (Anti-AI-Slop Rules)
+
+**Important**:
+- Always review suggested changes before accepting
+- Run tests after applying simplifications
+- Pairs well with Knip for comprehensive cleanup
+- Does NOT change functionality - only improves clarity
+
+**Recommended workflow**:
+```bash
+# 1. Run code simplifier on recent changes
+# 2. Review and apply suggestions
+# 3. Run tests to verify functionality
+npm run test
+
+# 4. Run Knip to find any newly unused code
+npm run knip
+
+# 5. Commit the cleaned code
+```
+
 ---
 
 ## 🤖 AI Models & Services
@@ -887,6 +942,7 @@ git push origin main --force --no-verify
 
 ### Code Quality
 - ✅ Run `npm run knip` before major refactors
+- ✅ Run code-simplifier agent after completing features or before PRs
 - ✅ Use TypeScript strict mode
 - ✅ Follow existing patterns in codebase
 - ✅ Keep components under 300 lines
@@ -1067,7 +1123,7 @@ SELECT * FROM conversation_campaigns WHERE user_id = 'user-uuid' ORDER BY create
 
 ---
 
-**Last Updated**: 2025-12-29
+**Last Updated**: 2026-01-17
 **Project Version**: 1.0.0
 **Status**: Active Development
 **AI Agent Personas**: 7 specialized agents integrated

@@ -124,10 +124,9 @@ const EnhancedSocialDashboard: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-2">
-                  <Badge variant="outline">GPT-4</Badge>
-                  <Badge variant="outline">Claude</Badge>
-                  <Badge variant="outline">Mistral</Badge>
+                <div className="flex gap-2">
+                  <Badge variant="outline">Multi-Model AI</Badge>
+                  <Badge variant="outline">Auto-Selection</Badge>
                 </div>
                 
                 <div className="space-y-3">
@@ -157,14 +156,14 @@ const EnhancedSocialDashboard: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { platform: 'Instagram', engagement: '+34%', model: 'GPT-4' },
-                  { platform: 'Twitter', engagement: '+12%', model: 'Claude' },
-                  { platform: 'LinkedIn', engagement: '+28%', model: 'Mistral' }
+                  { platform: 'Instagram', engagement: '+34%' },
+                  { platform: 'Twitter', engagement: '+12%' },
+                  { platform: 'LinkedIn', engagement: '+28%' }
                 ].map((item, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium">{item.platform}</p>
-                      <p className="text-sm text-gray-600">Generated with {item.model}</p>
+                      <p className="text-sm text-gray-600">AI Generated</p>
                     </div>
                     <Badge variant="outline" className="text-green-600">
                       {item.engagement}

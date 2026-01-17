@@ -90,6 +90,12 @@ const Layout: React.FC = () => {
       customIcon: 'logo'
     },
     {
+      name: 'Organic Marketing',
+      href: '/app/organic',
+      iconName: 'content',
+      description: 'Seven Ideas content system'
+    },
+    {
       name: 'Campaigns',
       href: '/app/campaigns',
       iconName: 'campaigns',
