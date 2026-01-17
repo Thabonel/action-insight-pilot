@@ -20,35 +20,54 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Disable modulepreload completely - chunks will load on demand
+    modulePreload: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core vendor chunks
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-label',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-switch',
-            '@radix-ui/react-toggle',
-          ],
-          // Heavy libraries - loaded separately
-          'vendor-charts': ['recharts'],
-          'vendor-pdf': ['jspdf', 'html2canvas', 'canvg'],
-          'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
+        manualChunks(id) {
+          // Core vendor chunks - always needed
+          if (id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/react-router')) {
+            return 'vendor-react';
+          }
+
+          // Supabase - needed for auth
+          if (id.includes('node_modules/@supabase/')) {
+            return 'vendor-supabase';
+          }
+
+          // UI components - commonly used
+          if (id.includes('node_modules/@radix-ui/')) {
+            return 'vendor-ui';
+          }
+
+          // PDF libraries - only load when exporting PDFs (do NOT include in common chunks)
+          if (id.includes('node_modules/jspdf') ||
+              id.includes('node_modules/html2canvas') ||
+              id.includes('node_modules/canvg')) {
+            return 'vendor-pdf';
+          }
+
+          // Charts - only needed on analytics pages
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) {
+            return 'vendor-charts';
+          }
+
+          // Forms - loaded when forms are used
+          if (id.includes('node_modules/react-hook-form') ||
+              id.includes('node_modules/@hookform/') ||
+              id.includes('node_modules/zod')) {
+            return 'vendor-forms';
+          }
+
+          // Utils - commonly used small libs
+          if (id.includes('node_modules/date-fns') ||
+              id.includes('node_modules/clsx') ||
+              id.includes('node_modules/tailwind-merge') ||
+              id.includes('node_modules/class-variance-authority')) {
+            return 'vendor-utils';
+          }
         },
       },
     },
