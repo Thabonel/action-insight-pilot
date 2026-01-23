@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Outlet, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserMode } from '@/hooks/useUserMode';
@@ -142,6 +142,18 @@ const Layout: React.FC = () => {
       href: '/app/viral-video-marketing',
       iconName: 'viral-video',
       description: 'Video content automation'
+    },
+    {
+      name: 'Video Studio',
+      href: '/app/video-studio',
+      iconName: 'viral-video',
+      description: 'Create animated marketing videos'
+    },
+    {
+      name: 'AI Video Studio',
+      href: '/app/ai-video-studio',
+      iconName: 'viral-video',
+      description: 'Generate videos with AI (Veo 3)'
     },
     {
       name: 'Proposals',
