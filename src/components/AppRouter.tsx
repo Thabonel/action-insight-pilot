@@ -29,6 +29,8 @@ const KnowledgeManagement = lazy(() => import('@/components/knowledge/KnowledgeM
 const SimpleDashboard = lazy(() => import('@/pages/SimpleDashboard'))
 const AutopilotSetup = lazy(() => import('@/pages/AutopilotSetup'))
 const OrganicMarketingPage = lazy(() => import('@/pages/OrganicMarketingPage'))
+const RemotionStudio = lazy(() => import('@/pages/RemotionStudio'))
+const AIVideoStudio = lazy(() => import('@/pages/AIVideoStudio'))
 
 const AppRouter: React.FC = () => {
   return (
@@ -127,6 +129,16 @@ const AppRouter: React.FC = () => {
         <Route path="viral-video-marketing" element={
           <Suspense fallback={<PageLoader />}>
             <ViralVideoMarketing />
+          </Suspense>
+        } />
+        <Route path="video-studio" element={
+          <Suspense fallback={<PageLoader />}>
+            <RemotionStudio />
+          </Suspense>
+        } />
+        <Route path="ai-video-studio" element={
+          <Suspense fallback={<PageLoader />}>
+            <AIVideoStudio />
           </Suspense>
         } />
         <Route path="proposals" element={
