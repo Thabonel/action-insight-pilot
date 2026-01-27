@@ -926,3 +926,240 @@ This is what modern SaaS should be: **Simple by default, powerful when needed.**
 *Final Status: Marketing Autopilot - FULLY FUNCTIONAL*
 *Code Status: Deployed to production*
 *Documentation Status: Complete*
+
+---
+
+## Session: Remotion Video Studio Integration
+
+**Date**: 2026-01-27
+**Objective**: Integrate Remotion for programmatic video creation and improve UX for marketing novices
+
+---
+
+### Problem Statement
+
+The platform needed a way to create animated marketing videos without relying solely on expensive AI video generation APIs (Google Veo 3). Users should have the option to:
+
+1. **Create animated videos client-side** - No API costs, instant preview
+2. **Use AI-generated videos** - For realistic content via Veo 3 (existing feature)
+
+Additionally, a UX evaluation revealed that marketing novices would struggle with:
+- API key requirements not mentioned upfront in onboarding
+- Marketing jargon without explanations
+- Unclear prerequisites for Quick Post feature
+
+---
+
+### Solution: Remotion Video Studio
+
+#### What is Remotion?
+
+Remotion is a React-based framework for creating videos programmatically. It allows:
+- Writing videos in React components
+- Using familiar web technologies (CSS, SVG, etc.)
+- Real-time preview with Remotion Player
+- Server-side rendering for export
+
+#### Implementation
+
+**Packages Installed:**
+```json
+{
+  "remotion": "^4.x",
+  "@remotion/cli": "^4.x",
+  "@remotion/player": "^4.x",
+  "@remotion/renderer": "^4.x"
+}
+```
+
+**Video Templates Created:**
+
+1. **MarketingPromo** (`src/remotion/compositions/MarketingPromo.tsx`)
+   - Format: Vertical 1080x1920 (Stories/Reels)
+   - Duration: 5 seconds at 30fps
+   - Features: Spring animations, gradient backgrounds, animated CTA
+
+2. **SocialMediaAd** (`src/remotion/compositions/SocialMediaAd.tsx`)
+   - Format: Square 1080x1080 (Instagram/Facebook)
+   - Duration: 6 seconds at 30fps
+   - Features: Product showcase, feature list reveal, price animation
+
+3. **ProductShowcase** (`src/remotion/compositions/ProductShowcase.tsx`)
+   - Format: Landscape 1920x1080 (YouTube/Websites)
+   - Duration: 8 seconds at 30fps
+   - Features: Split-screen layout, feature cycling, progress indicators
+
+4. **TextReveal** (`src/remotion/compositions/TextReveal.tsx`)
+   - Format: Square 1080x1080
+   - Duration: 3 seconds at 30fps
+   - Animation Types: typewriter, fade, slide, scale, word-by-word
+
+**Video Studio Page** (`src/pages/RemotionStudio.tsx`):
+- Template selection with visual cards
+- Live Remotion Player preview
+- Property editors for each template type
+- Color pickers for brand customization
+- Export functionality (requires render server setup)
+
+---
+
+### File Structure
+
+```
+src/
+├── remotion/
+│   ├── Root.tsx                           # Composition registration
+│   └── compositions/
+│       ├── index.ts                       # Barrel exports
+│       ├── MarketingPromo.tsx             # Vertical promo template
+│       ├── SocialMediaAd.tsx              # Square ad template
+│       ├── ProductShowcase.tsx            # Landscape showcase template
+│       └── TextReveal.tsx                 # Text animation template
+├── pages/
+│   └── RemotionStudio.tsx                 # Video Studio page
+└── components/
+    ├── AppRouter.tsx                      # Added routes
+    └── Layout.tsx                         # Added navigation
+
+.claude/skills/remotion/                    # Remotion Agent Skills
+├── SKILL.md
+└── rules/
+    ├── animations.md
+    ├── compositions.md
+    ├── timing.md
+    └── ... (29 rule files)
+```
+
+---
+
+### Routes Added
+
+| Route | Page | Description |
+|-------|------|-------------|
+| `/app/video-studio` | RemotionStudio | Animated marketing videos (Remotion) |
+| `/app/ai-video-studio` | AIVideoStudio | AI-generated videos (Veo 3) |
+
+---
+
+### Navigation Updates
+
+Added to Advanced Mode sidebar:
+- **Video Studio** - Create animated marketing videos
+- **AI Video Studio** - Generate videos with AI (Veo 3)
+
+---
+
+### UX Improvements
+
+**WelcomeFlow.tsx Changes:**
+
+1. Added API key requirement to "What you'll need" section:
+```tsx
+<li className="flex items-start gap-2">
+  <Key className="h-4 w-4 text-blue-500 mt-0.5" />
+  <div>
+    <span>AI service keys (free to create)</span>
+    <p className="text-xs text-gray-500">
+      You'll need accounts with Claude and Google Gemini.
+      We'll guide you through getting these - takes about 5 minutes.
+    </p>
+  </div>
+</li>
+```
+
+2. Changed "5 min setup" to "Quick setup" for honest expectations
+
+**UX Evaluation Report:**
+Created comprehensive evaluation at `docs/UX-EVALUATION-SARAH-CHEN.md` documenting:
+- Jargon audit with plain-English alternatives
+- Blocker analysis for marketing novices
+- Prioritized recommendations
+
+---
+
+### Remotion Agent Skills
+
+Installed Remotion's official AI skills to `.claude/skills/remotion/`:
+
+These provide AI assistants with:
+- Best practices for Remotion animations
+- Correct API usage patterns
+- Common pitfalls to avoid
+- Code examples for various scenarios
+
+Skills include rules for:
+- Animations and timing
+- Audio and video handling
+- Text animations
+- Transitions and effects
+- 3D rendering
+- Charts and data visualization
+
+---
+
+### Technical Notes
+
+**Animation Approach:**
+- Remotion uses frame-based animation, not CSS transitions
+- All animations use `interpolate()` and `spring()` from Remotion
+- CSS transitions/animations are forbidden in Remotion
+
+**Rendering:**
+- Preview: Remotion Player (client-side, instant)
+- Export: Requires @remotion/renderer with server or Lambda
+- For production export, set up Remotion Lambda on AWS
+
+**Performance:**
+- Templates use `useMemo()` for expensive calculations
+- Player supports `controls` prop for playback UI
+- Lazy loading for composition imports
+
+---
+
+### Comparison: Video Studio vs AI Video Studio
+
+| Feature | Video Studio (Remotion) | AI Video Studio (Veo 3) |
+|---------|------------------------|------------------------|
+| Cost | Free (client-side) | $0.40-0.75/second |
+| Speed | Instant preview | 2-6 minutes generation |
+| Style | Animated graphics | Realistic AI video |
+| Customization | Full control | Prompt-based |
+| Best for | Branded content, ads | Product demos, storytelling |
+
+---
+
+### Git Commit
+
+```
+commit 81462a5
+feat(video): add Remotion video studio for animated marketing videos
+
+- Add Remotion packages (@remotion/cli, @remotion/player, @remotion/renderer)
+- Create 4 marketing video templates
+- Add RemotionStudio page with live preview and property editors
+- Add routes for /app/video-studio and /app/ai-video-studio
+- Add navigation items in advanced mode sidebar
+- Include Remotion Agent Skills for AI-assisted video creation
+- Fix API key discovery gap in WelcomeFlow onboarding
+- Add UX evaluation report for marketing novice persona
+```
+
+---
+
+### Next Steps
+
+1. **Set up Remotion Lambda** for server-side video export
+2. **Add more templates** based on user feedback
+3. **Connect to campaign system** - auto-generate videos for campaigns
+4. **Add audio support** - background music, voiceovers
+5. **Implement the UX fixes** from the evaluation report
+
+---
+
+**Session Complete** ✅
+
+*Files Created: 12*
+*Files Modified: 5*
+*Packages Added: 4*
+*Commit: 81462a5*
+*Status: Deployed to production*
