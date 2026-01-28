@@ -49,9 +49,10 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-pdf';
           }
 
-          // Charts - only needed on analytics pages
-          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) {
-            return 'vendor-charts';
+          // Charts - DO NOT manually chunk recharts due to circular dependency issues
+          // Let Vite handle recharts automatically to avoid initialization errors
+          if (id.includes('node_modules/d3-') && !id.includes('node_modules/recharts')) {
+            return 'vendor-d3';
           }
 
           // Forms - loaded when forms are used
