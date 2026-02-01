@@ -19,4 +19,19 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        format: 'es',
+        manualChunks: undefined,
+      },
+      preserveEntrySignatures: 'strict',
+    },
+    modulePreload: true,
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+  },
 }));
