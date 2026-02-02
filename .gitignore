@@ -15,6 +15,16 @@ dist-ssr
 # Knip cache (staging only - never in production)
 .knip/
 
+# OpenClaw (cloned separately)
+openclaw-core/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+backend/**/__pycache__/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

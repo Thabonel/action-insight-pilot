@@ -4,14 +4,19 @@ import uuid
 from datetime import datetime, date
 import logging
 
-from models import APIResponse
-from auth import verify_token
-from config import agent_manager
-from database import get_supabase
+from backend.models import APIResponse
+from backend.auth import verify_token
+from backend.config import agent_manager
+from backend.database import get_supabase
+from backend.services.hybrid_agent_service import get_hybrid_agent_service
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
+
+# Initialize hybrid agent service
+hybrid_service = get_hybrid_agent_service()
+hybrid_service.set_legacy_agent_manager(agent_manager)
 
 @router.post("/daily-focus", response_model=APIResponse)
 async def get_daily_focus(request_data: Dict[str, Any], token: str = Depends(verify_token)):
@@ -21,35 +26,32 @@ async def get_daily_focus(request_data: Dict[str, Any], token: str = Depends(ver
         campaigns = request_data.get("campaigns", [])
         context = request_data.get("context", [])
         today = request_data.get("date", str(date.today()))
-        
+        user_id = getattr(token, 'user_id', None)
+
         logger.info(f"🎯 Processing daily focus request for {today}")
-        
-        # Try AI agent first
-        if agent_manager.agents_available:
-            try:
-                if hasattr(agent_manager.campaign_agent, 'execute_task'):
-                    result = await agent_manager.campaign_agent.execute_task(
-                        "general_query", 
-                        {
-                            "query": query,
-                            "campaigns": campaigns,
-                            "context": context,
-                            "focus_date": today
-                        }
-                    )
-                    
-                    if result.get("success", True):
-                        logger.info("✅ Generated daily focus via AI agent")
-                        return APIResponse(success=True, data=result)
-                        
-            except Exception as agent_error:
-                logger.error(f"❌ AI agent focus failed: {agent_error}")
-        
-        # Fallback to smart analysis based on campaign data
-        focus_response = analyze_daily_focus_fallback(campaigns, query, today)
-        logger.info("📢 Generated daily focus via fallback analysis")
-        return APIResponse(success=True, data=focus_response)
-        
+
+        # Use hybrid service for daily focus analysis
+        result = await hybrid_service.execute_task(
+            task_type="campaign_agent",
+            input_data={
+                "task_type": "general_query",
+                "query": f"Daily focus analysis: {query}",
+                "campaigns": campaigns,
+                "context": context,
+                "focus_date": today
+            },
+            user_id=user_id
+        )
+
+        if result.get("success"):
+            logger.info(f"✅ Generated daily focus via {result.get('execution_path', 'unknown')}")
+            return APIResponse(success=True, data=result)
+        else:
+            # Additional fallback to local analysis
+            focus_response = analyze_daily_focus_fallback(campaigns, query, today)
+            logger.info("📢 Generated daily focus via local fallback")
+            return APIResponse(success=True, data=focus_response)
+
     except Exception as e:
         logger.error(f"❌ Error generating daily focus: {e}")
         return APIResponse(success=False, error=str(e))
@@ -60,38 +62,106 @@ async def handle_campaign_agent_task(request_data: Dict[str, Any], token: str = 
     try:
         task_type = request_data.get("task_type", "general_query")
         input_data = request_data.get("input_data", {})
-        
+        user_id = getattr(token, 'user_id', None)  # Extract user ID from token if available
+
         logger.info(f"🎯 Processing campaign agent task: {task_type}")
-        
-        # Try AI agent
-        if agent_manager.agents_available:
-            try:
-                if hasattr(agent_manager.campaign_agent, 'execute_task'):
-                    result = await agent_manager.campaign_agent.execute_task(task_type, input_data)
-                    
-                    if result.get("success", True):
-                        logger.info(f"✅ Campaign agent task '{task_type}' completed")
-                        return APIResponse(success=True, data=result)
-                        
-            except Exception as agent_error:
-                logger.error(f"❌ Campaign agent task failed: {agent_error}")
-        
-        # Fallback based on task type
-        if task_type == "analyze_performance":
-            result = analyze_performance_fallback(input_data)
-        elif task_type == "general_query":
-            result = handle_general_query_fallback(input_data)
+
+        # Use hybrid service to route between OpenClaw and legacy agents
+        result = await hybrid_service.execute_task(
+            task_type="campaign_agent",
+            input_data={
+                "task_type": task_type,
+                **input_data
+            },
+            user_id=user_id
+        )
+
+        if result.get("success"):
+            logger.info(f"✅ Campaign task '{task_type}' completed via {result.get('execution_path', 'unknown')}")
+            return APIResponse(success=True, data=result)
         else:
-            result = {
-                "success": False,
-                "message": f"Task type '{task_type}' not supported in fallback mode"
-            }
-        
-        logger.info(f"📢 Campaign task '{task_type}' handled via fallback")
-        return APIResponse(success=True, data=result)
-        
+            logger.error(f"❌ Campaign task '{task_type}' failed: {result.get('error')}")
+            return APIResponse(success=False, error=result.get('error', 'Unknown error'))
+
     except Exception as e:
         logger.error(f"❌ Error handling campaign agent task: {e}")
+        return APIResponse(success=False, error=str(e))
+
+@router.post("/openclaw/status", response_model=APIResponse)
+async def get_openclaw_status(token: str = Depends(verify_token)):
+    """Get OpenClaw integration status and system health"""
+    try:
+        status = await hybrid_service.get_system_status()
+        return APIResponse(success=True, data=status)
+    except Exception as e:
+        logger.error(f"Error getting OpenClaw status: {e}")
+        return APIResponse(success=False, error=str(e))
+
+@router.post("/openclaw/configure", response_model=APIResponse)
+async def configure_openclaw_routing(request_data: Dict[str, Any], token: str = Depends(verify_token)):
+    """Configure OpenClaw routing percentage for A/B testing"""
+    try:
+        percentage = request_data.get("percentage", 0)
+        hybrid_service.set_openclaw_percentage(percentage)
+
+        return APIResponse(
+            success=True,
+            data={
+                "message": f"OpenClaw routing set to {percentage}%",
+                "openclaw_percentage": percentage
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error configuring OpenClaw routing: {e}")
+        return APIResponse(success=False, error=str(e))
+
+@router.post("/openclaw/compare", response_model=APIResponse)
+async def compare_agent_implementations(request_data: Dict[str, Any], token: str = Depends(verify_token)):
+    """Compare OpenClaw and legacy agent implementations for the same task"""
+    try:
+        task_type = request_data.get("task_type", "general_query")
+        input_data = request_data.get("input_data", {})
+        user_id = getattr(token, 'user_id', None)
+
+        logger.info(f"🔄 Comparing implementations for task: {task_type}")
+
+        comparison = await hybrid_service.compare_implementations(
+            task_type="campaign_agent",
+            input_data={
+                "task_type": task_type,
+                **input_data
+            },
+            user_id=user_id
+        )
+
+        return APIResponse(success=True, data=comparison)
+    except Exception as e:
+        logger.error(f"Error comparing agent implementations: {e}")
+        return APIResponse(success=False, error=str(e))
+
+@router.post("/openclaw/skill", response_model=APIResponse)
+async def execute_openclaw_skill_directly(request_data: Dict[str, Any], token: str = Depends(verify_token)):
+    """Execute an OpenClaw skill directly (for testing)"""
+    try:
+        task_type = request_data.get("task_type", "general_query")
+        input_data = request_data.get("input_data", {})
+        user_id = getattr(token, 'user_id', None)
+
+        logger.info(f"🤖 Direct OpenClaw skill execution: {task_type}")
+
+        result = await hybrid_service.execute_task(
+            task_type="campaign_agent",
+            input_data={
+                "task_type": task_type,
+                **input_data
+            },
+            user_id=user_id,
+            force_openclaw=True  # Force OpenClaw execution
+        )
+
+        return APIResponse(success=True, data=result)
+    except Exception as e:
+        logger.error(f"Error executing OpenClaw skill directly: {e}")
         return APIResponse(success=False, error=str(e))
 
 # Fallback analysis functions
