@@ -61,6 +61,7 @@ for module_path, router_name in essential_routers:
 # Try to load other routers with better error handling
 optional_routers = [
     ("backend.routes.unified_agents", "router"),
+    ("backend.routes.agents", "router"),  # OpenClaw integration
     ("backend.routes.campaigns", "router"),
     ("backend.routes.leads", "router"),
     ("backend.routes.lead_capture", "router"),
