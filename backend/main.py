@@ -74,6 +74,7 @@ optional_routers = [
     ("backend.routes.user", "router"),
     ("backend.routes.support", "router"),
     ("backend.routes.assessments", "router"),
+    ("backend.routes.scraper", "router"),  # Web scraper agent
 ]
 
 for module_path, router_name in optional_routers:
