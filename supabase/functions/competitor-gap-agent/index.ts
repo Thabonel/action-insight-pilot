@@ -48,117 +48,215 @@ serve(async (req) => {
 
     console.log('Analyzing competitive gaps and opportunities...');
 
-    const systemPrompt = `You are an expert competitive analyst and strategist. Identify market gaps and opportunities through competitive analysis.
+    const systemPrompt = `You are an expert competitive strategist specializing in honesty-first competitor analysis and ownable differentiation discovery.
 
-Your analysis should be:
-- Objective and data-driven
-- Identify genuine opportunities (not just differences)
-- Consider feasibility and resources
-- Find ownable differentiators
-- Provide actionable recommendations
+## ADVANCED COMPETITOR INTELLIGENCE FRAMEWORK:
 
-Focus on what the brand can realistically own and dominate.`;
+**Honesty-First Analysis Methodology:**
+- Acknowledge competitor strengths openly and objectively
+- Identify genuine competitive advantages (not manufactured differences)
+- Analyze sustainable vs. temporary competitive moats
+- Assess realistic opportunities based on resources and market position
+- Avoid wishful thinking or underestimating competition
 
-    const userPrompt = `Compare this brand against its top three competitors. Find missed opportunities.
+**Content & Messaging Intelligence:**
+- Hook formula analysis: Problem/Outcome/Method/Social proof angle usage
+- Content pillar breakdown: Educational/Inspirational/Entertaining/Promotional ratios
+- Platform-specific messaging adaptation and performance
+- Voice and tone differentiation opportunities
+- Untapped messaging territories and positioning white space
 
-Our Brand:
+**Copywriting Excellence Comparison:**
+- Headline formula effectiveness: Specificity, social proof, outcome focus
+- CTA psychology: Urgency, clarity, friction reduction analysis
+- Email subject line strategies and open rate optimization
+- Value proposition clarity and differentiation strength
+- Story framework usage and emotional connection depth
+
+**Social Media Platform Analysis:**
+- Content type performance across platforms (video/image/text ratios)
+- Platform-specific optimization and algorithm understanding
+- Community engagement quality vs. quantity metrics
+- Influencer and partnership strategy assessment
+- User-generated content cultivation and amplification
+
+**Market Positioning Intelligence:**
+- Customer segment prioritization and focus areas
+- Price positioning and value justification strategies
+- Distribution channel strength and expansion opportunities
+- Brand personality and emotional positioning gaps
+- Innovation pipeline and future market direction
+
+Your analysis must be:
+- Brutally honest about competitor strengths
+- Specific about actionable opportunities
+- Grounded in realistic resource assessment
+- Focused on sustainable competitive advantage
+- Rich in tactical implementation details
+
+Recommend only ownable differentiators that can be defended and scaled.`;
+
+    const userPrompt = `Conduct comprehensive competitive intelligence analysis using honesty-first methodology and advanced messaging/content frameworks.
+
+## OUR BRAND CONTEXT:
+
 Name: ${data.ourBrand}
 Offering: ${data.ourOffering}
 Strengths: ${data.ourStrengths || 'To be determined'}
 
-Top 3 Competitors:
+## COMPETITORS TO ANALYZE:
+
 1. ${data.competitor1}
 2. ${data.competitor2}
 3. ${data.competitor3}
 
-Analyze gaps in these areas:
+## ANALYSIS REQUIREMENTS:
 
-1. **Messaging Gaps**
-   - What are competitors saying that we're not?
-   - What message positioning are they missing?
-   - What story could we tell better?
+**Honesty-First Assessment:**
+Acknowledge competitor strengths objectively. Identify genuine (not manufactured) opportunities. Focus on sustainable competitive advantages.
 
-2. **Channel Gaps**
-   - Where are they present that we're not?
-   - Where are they weak or absent?
-   - What emerging channels are being ignored?
+**Messaging & Copywriting Intelligence:**
+- Hook formula analysis: Problem/Outcome/Method/Social proof angle usage
+- Headline effectiveness: Specificity, social proof, outcome focus
+- CTA psychology: Urgency, clarity, friction reduction
+- Email subject line strategies and performance
+- Value proposition differentiation and story framework usage
 
-3. **Audience Gaps**
-   - Who are they targeting that we could own?
-   - What underserved segments exist?
-   - Who are they ignoring?
+**Content & Social Media Analysis:**
+- Content pillar ratios: Educational/Inspirational/Entertaining/Promotional
+- Platform-specific optimization and algorithm performance
+- Content format distribution: Video/image/text effectiveness
+- Community engagement quality vs. quantity
+- User-generated content cultivation strategies
 
-4. **Content Gaps**
-   - What content types are they dominating?
-   - What topics are they neglecting?
-   - What format/medium opportunities exist?
+**Market Positioning Intelligence:**
+- Customer segment focus and prioritization
+- Price positioning and value justification
+- Distribution channel strength and gaps
+- Brand personality and emotional positioning
+- Innovation pipeline and future direction
 
-5. **Experience Gaps**
-   - What customer experience elements could we own?
-   - What pain points are they not addressing?
-   - What delighters could we add?
+## OUTPUT FORMAT:
 
-Then suggest:
-- One unique differentiator that this brand can own and dominate
-- Why this differentiator is defensible
-- How to activate this differentiator
-
-Format as JSON:
 {
-  "competitiveOverview": {
-    "marketDynamics": "Brief market state",
-    "competitorStrengths": ["Common strengths across competitors"],
-    "competitorWeaknesses": ["Common gaps in competition"]
+  "honestyFirstAssessment": {
+    "competitorStrengths": [
+      {
+        "competitor": "Competitor name",
+        "genuineStrengths": ["What they truly do well"],
+        "competitiveAdvantages": ["Sustainable advantages they hold"],
+        "marketPosition": "Their defendable market position"
+      }
+    ],
+    "realOpportunities": ["Genuine gaps we can exploit"],
+    "competitiveRealities": ["Hard truths about our position"]
   },
-  "gapAnalysis": {
-    "messaging": {
-      "competitorApproach": "What they're doing",
-      "missedOpportunities": ["Opportunity 1", "Opportunity 2"],
-      "recommendation": "What we should do differently"
+  "messagingIntelligence": {
+    "hookFormulas": {
+      "competitorUsage": {
+        "problemFocused": "How they use pain-point messaging",
+        "outcomeFocused": "How they promise benefits",
+        "methodFocused": "How they highlight their process",
+        "socialProof": "How they use testimonials/numbers"
+      },
+      "missedAngles": ["Hook formulas they're not using"],
+      "ownershipOpportunity": "Which angle we can dominate"
     },
-    "channels": {
-      "competitorPresence": ["Where they are strong"],
-      "underutilizedChannels": ["Channel opportunities"],
-      "recommendation": "Channel strategy"
+    "copywritingGaps": {
+      "headlines": "Headline formula opportunities they're missing",
+      "ctas": "Call-to-action psychology gaps",
+      "emailSubjects": "Subject line opportunities",
+      "valueProps": "Value proposition weaknesses"
+    }
+  },
+  "contentAnalysis": {
+    "contentPillars": {
+      "competitorRatio": "Their Educational/Inspirational/Entertaining/Promotional %",
+      "gapOpportunity": "Pillar they're under-investing in",
+      "recommendedRatio": "Our optimal content mix"
     },
-    "audience": {
-      "competitorFocus": "Who they target",
-      "underservedSegments": ["Segment 1", "Segment 2"],
-      "recommendation": "Who we should own"
+    "platformStrategy": {
+      "strongPlatforms": ["Where they dominate"],
+      "weakPlatforms": ["Where they underperform"],
+      "untappedPlatforms": ["Platforms they're ignoring"],
+      "formatGaps": ["Content types they're missing"]
     },
-    "content": {
-      "competitorContentTypes": ["What they create"],
-      "contentGaps": ["Type 1", "Type 2"],
-      "recommendation": "Content strategy"
+    "engagementQuality": {
+      "theirApproach": "How they engage community",
+      "qualityVsQuantity": "Their engagement philosophy",
+      "communityGaps": "Engagement opportunities they miss"
+    }
+  },
+  "socialMediaIntelligence": {
+    "platformPresence": [
+      {
+        "platform": "Platform name",
+        "competitorPerformance": "How they perform",
+        "contentStrategy": "Their content approach",
+        "engagementRate": "Estimated engagement quality",
+        "opportunityGap": "What they're missing"
+      }
+    ],
+    "algorithmOptimization": {
+      "theirMastery": "Platforms where they excel",
+      "algorithmGaps": "Where they struggle with algorithms",
+      "optimizationOpportunity": "Our algorithmic advantage potential"
+    }
+  },
+  "positioningAnalysis": {
+    "customerSegments": {
+      "theirFocus": "Primary customer segments they target",
+      "underservedSegments": ["Segments they ignore or serve poorly"],
+      "segmentOpportunity": "Customer segment we can own"
     },
-    "experience": {
-      "competitorExperience": "What they offer",
-      "experienceGaps": ["Gap 1", "Gap 2"],
-      "recommendation": "Experience differentiator"
+    "pricePositioning": {
+      "theirStrategy": "How they position on price/value",
+      "valueGaps": "Value justification weaknesses",
+      "pricingOpportunity": "Our pricing/value positioning"
+    },
+    "brandPersonality": {
+      "theirPersonality": "Their brand voice and personality",
+      "emotionalGaps": "Emotional territories they don't own",
+      "personalityOpportunity": "Personality space we can claim"
     }
   },
   "ownableDifferentiator": {
-    "title": "The one thing we can own",
-    "description": "Detailed explanation of the differentiator",
-    "whyDefensible": "Why competitors can't easily copy this",
+    "title": "The defensible position we can own",
+    "description": "Detailed explanation of our unique opportunity",
+    "whyDefensible": "Why this can't be easily copied",
+    "competitorWeakness": "Specific competitor vulnerability this exploits",
     "activationStrategy": [
-      "Step 1: How to start owning this",
-      "Step 2: How to reinforce it",
-      "Step 3: How to dominate it"
+      "Phase 1: Establish foundation (Week 1-4)",
+      "Phase 2: Build momentum (Month 2-3)",
+      "Phase 3: Dominate space (Month 4-12)"
     ],
-    "expectedImpact": "What success looks like",
-    "timeline": "How long to establish dominance",
-    "resources": ["What you need to execute"]
+    "messagingFramework": {
+      "coreMessage": "Primary positioning statement",
+      "hookFormula": "Best hook angle for this differentiator",
+      "proofPoints": ["Evidence that supports our claim"],
+      "competitorComparison": "How we'll honestly compare vs competition"
+    },
+    "contentStrategy": "Content approach to reinforce this position",
+    "expectedImpact": "Realistic market position outcome",
+    "resourceRequirements": ["Capabilities needed to execute"],
+    "timeline": "Realistic timeframe to establish dominance"
   },
-  "quickWins": [
-    "Immediate action 1",
-    "Immediate action 2",
-    "Immediate action 3"
-  ],
-  "avoidTraps": [
-    "Don't do X because...",
-    "Avoid Y trap because..."
-  ]
+  "implementationPlan": {
+    "immediateActions": [
+      "Week 1 tactical move",
+      "Week 2 tactical move",
+      "Week 3 tactical move"
+    ],
+    "messagingRollout": "How to launch new messaging",
+    "contentCalendar": "Content strategy to support positioning",
+    "competitorResponse": "How competitors might react and counter-moves"
+  },
+  "realityChecks": {
+    "competitorAdvantages": ["Advantages we need to acknowledge"],
+    "resourceConstraints": ["Limitations we must work within"],
+    "marketRealities": ["Industry dynamics we cannot ignore"],
+    "avoidanceTraps": ["Competitive mistakes to avoid"]
+  }
 }`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

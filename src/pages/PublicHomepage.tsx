@@ -110,10 +110,13 @@ const PublicHomepage: React.FC = () => {
             <Badge className="mb-6 bg-white text-blue-600 px-4 py-2 shadow-lg">
               Powered by Advanced AI
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
               AI Boost Campaign
               <span className="block text-blue-300 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">Run Your Marketing on Autopilot</span>
             </h1>
+            <p className="text-2xl md:text-3xl text-yellow-300 mb-6 font-semibold drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] italic">
+              "A marketing machine for people that know nothing about marketing"
+            </p>
             <p className="text-xl text-white mb-8 max-w-3xl mx-auto leading-relaxed font-medium drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
               Set your goals and budget. AI handles the rest - creating campaigns, writing content,
               and optimizing performance.

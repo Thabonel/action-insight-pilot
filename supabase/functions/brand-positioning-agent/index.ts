@@ -51,69 +51,144 @@ serve(async (req) => {
 
     console.log('Generating brand positioning analysis using 3Cs framework...');
 
-    const systemPrompt = `You are an expert brand strategist specializing in positioning analysis. Use the 3Cs framework (Company, Customer, Competition) to analyze brand positioning.
+    const systemPrompt = `You are an expert brand strategist specializing in psychology-driven positioning analysis. Use the 3Cs framework enhanced with behavioral psychology and competitor intelligence.
 
-Your analysis should be:
-- Data-driven and objective
-- Clear and actionable
-- Based on real competitive advantages
-- Customer-centric
+## PSYCHOLOGY-DRIVEN POSITIONING FRAMEWORK:
 
-Always provide specific, implementable recommendations.`;
+**BJ Fogg Behavior Model Integration:**
+- MOTIVATION: Identify core emotional triggers (pleasure/pain, hope/fear, acceptance/rejection)
+- ABILITY: Assess customer's capability to engage (time, money, physical effort, brain cycles, social deviance, non-routine)
+- PROMPT: Design positioning that serves as behavioral trigger at the right moment
 
-    const userPrompt = `Analyze the company's mission, audience, and offer. Summarize the brand's unique position using the 3Cs (Company, Customer, Competition).
+**EAST Framework Application:**
+- EASY: Position as the simplest path to desired outcome
+- ATTRACTIVE: Use loss aversion, social proof, and scarcity where genuine
+- SOCIAL: Leverage network effects and community belonging
+- TIMELY: Address immediate needs and decision-making moments
 
-Company Information:
+**Competitor Analysis Excellence:**
+- Honesty-first comparisons: Acknowledge competitor strengths, highlight our unique advantages
+- Gap identification: Where competitors under-serve or over-complicate
+- Content format opportunities: What they're not doing in content/messaging
+- Positioning white space: Unexplored market positions
+
+Your analysis must be:
+- Psychology-informed and behavior-change focused
+- Honest about competitive landscape
+- Specific about emotional triggers and rational benefits
+- Actionable for immediate implementation
+
+Focus on genuine differentiation, not manufactured uniqueness.`;
+
+    const userPrompt = `Conduct a psychology-driven brand positioning analysis using enhanced 3Cs framework with behavioral triggers and competitor intelligence.
+
+## INPUT DATA:
+
+**Company Information:**
 Mission: ${data.companyMission}
 Product/Offer: ${data.productOffer}
 Core Capabilities: ${data.coreCapabilities || 'Not specified'}
 
-Customer Information:
+**Customer Information:**
 Target Audience: ${data.targetAudience}
 Customer Needs: ${data.customerNeeds || 'To be determined'}
 Pain Points: ${data.customerPainPoints || 'To be determined'}
 
-Competition Information:
+**Competition Information:**
 Competitors: ${data.competitors}
 Market Position: ${data.marketPosition || 'To be determined'}
 Competitive Advantages: ${data.competitiveAdvantages || 'To be determined'}
 
-Output a comprehensive positioning analysis with:
-1. One-sentence positioning statement
-2. Three key differentiators (what makes you unique)
-3. Brand tone description (personality, voice, style)
-4. Strategic positioning recommendations
+## ANALYSIS REQUIREMENTS:
 
-Format as JSON:
+Apply BJ Fogg Behavior Model to understand customer psychology:
+- MOTIVATION triggers (what drives them emotionally)
+- ABILITY barriers (what might stop them)
+- PROMPT opportunities (when they're ready to act)
+
+Use EAST Framework for positioning:
+- How we make success EASY for customers
+- What makes us ATTRACTIVE (loss aversion, social proof)
+- SOCIAL elements we can leverage
+- TIMELY moments we should target
+
+Conduct honest competitor analysis:
+- Their genuine strengths we must acknowledge
+- Gaps they leave that we can fill
+- Content/messaging opportunities they're missing
+- Market positions they haven't claimed
+
+## OUTPUT FORMAT:
+
 {
-  "positioningStatement": "We help [target customer] achieve [benefit] through [unique approach], unlike [competitors] who [their limitation]",
+  "positioningStatement": "We help [specific target] achieve [specific outcome] through [unique method], unlike [competitors] who [specific limitation]",
   "differentiators": [
     {
       "title": "Differentiator name",
-      "description": "Why this matters",
-      "evidence": "Proof points or metrics"
+      "description": "Why this matters to customers",
+      "evidence": "Specific proof points or advantages",
+      "psychologyTrigger": "Which psychological need this addresses"
     }
   ],
   "brandTone": {
     "personality": ["trait1", "trait2", "trait3"],
-    "voiceCharacteristics": "Description of how the brand communicates",
-    "styleGuidelines": "Specific do's and don'ts"
+    "voiceCharacteristics": "How we communicate emotionally and rationally",
+    "styleGuidelines": "Communication dos and don'ts",
+    "persuasionStyle": "Authority/Social proof/Scarcity approach"
   },
-  "recommendations": ["Strategic recommendation 1", "Strategic recommendation 2"],
+  "behaviorModel": {
+    "motivation": {
+      "pleasure": "What positive outcome we promise",
+      "pain": "What negative outcome we prevent",
+      "socialTrigger": "Belonging/status element"
+    },
+    "ability": {
+      "simplicityFactor": "How we reduce effort/complexity",
+      "barrierRemoval": "What obstacles we eliminate",
+      "timeInvestment": "Realistic time commitment"
+    },
+    "prompt": {
+      "triggerMoments": ["When customer feels X", "When situation Y occurs"],
+      "callToAction": "Primary action we want them to take"
+    }
+  },
+  "eastFramework": {
+    "easy": "How we're the simplest path to success",
+    "attractive": "Loss aversion and social proof elements",
+    "social": "Community/network effects we offer",
+    "timely": "When customers are most ready to engage"
+  },
+  "competitorIntelligence": {
+    "honestComparison": {
+      "theirStrengths": ["What they do well that we acknowledge"],
+      "ourAdvantages": ["What we do better and how"],
+      "marketGaps": ["Opportunities they're leaving on table"]
+    },
+    "contentOpportunities": ["Messaging angles they haven't used"],
+    "positioningWhiteSpace": "Unexplored market position we can claim"
+  },
+  "recommendations": [
+    "Immediate positioning action 1",
+    "Behavioral trigger implementation 2",
+    "Competitive differentiation strategy 3"
+  ],
   "threeCs": {
     "company": {
-      "strengths": ["strength1", "strength2"],
-      "uniqueCapabilities": "What we can do that others can't"
+      "strengths": ["Our key capabilities"],
+      "uniqueCapabilities": "What only we can do",
+      "psychologyAlignment": "How our strengths match customer psychology"
     },
     "customer": {
-      "primaryNeed": "Most important customer need we address",
-      "emotionalDrivers": ["driver1", "driver2"],
-      "decisionCriteria": "What influences their choice"
+      "primaryNeed": "Core functional need",
+      "emotionalDrivers": ["Emotional motivations"],
+      "decisionCriteria": "What influences their choice",
+      "behaviorBarriers": "What stops them from acting"
     },
     "competition": {
-      "mainCompetitors": ["competitor1", "competitor2"],
-      "theirWeaknesses": ["weakness1", "weakness2"],
-      "ourAdvantage": "How we win"
+      "mainCompetitors": ["Key competitors to watch"],
+      "theirWeaknesses": ["Honest assessment of their gaps"],
+      "ourAdvantage": "Our sustainable competitive edge",
+      "positioningGaps": "Market positions not claimed"
     }
   }
 }`;
