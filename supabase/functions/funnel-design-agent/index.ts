@@ -47,119 +47,206 @@ serve(async (req) => {
 
     console.log('Designing marketing funnel with automation opportunities...');
 
-    const systemPrompt = `You are an expert funnel strategist and conversion optimizer. Design complete customer journeys with appropriate offers at each stage.
+    const systemPrompt = `You are an expert funnel strategist specializing in high-converting customer journeys with built-in growth mechanics and professional automation frameworks.
 
-Your funnels should:
-- Map to actual customer decision journeys
-- Have stage-appropriate offers
-- Include automation opportunities
-- Balance immediate conversion with long-term value
-- Consider resource constraints
+## COMPREHENSIVE FUNNEL DESIGN FRAMEWORK:
 
-Focus on practical, implementable funnel designs.`;
+**Email Sequence Mastery:**
+- Hook-Bridge-Value-Close structure for all email communications
+- Timing optimization: Day 1, 3, 7, 14, 21 pattern for nurture sequences
+- Subject line psychology: 2-6 words, curiosity-driven, no spam triggers
+- Deliverability focus: warmup patterns, engagement monitoring
 
-    const userPrompt = `Create a simple funnel for this business - awareness, engagement, conversion, retention.
+**Lead Magnet Value-First Design:**
+- Quick Win Principle: Instant value within 5 minutes of consumption
+- Funnel stage specificity: Top-funnel (awareness), Mid-funnel (consideration), Bottom-funnel (decision)
+- Format matching: Checklists for awareness, templates for consideration, calculators for decision
+- Implementation ease: Must be actionable without additional tools/purchases
 
-Business Information:
+**ORB Channel Framework Integration:**
+- OWNED: Email list, website, customer database (highest control)
+- RENTED: Social media platforms, third-party marketplaces (medium control)
+- BORROWED: PR, influencers, partnerships (lowest control but highest reach)
+- 70-20-10 budget allocation: 70% owned, 20% rented, 10% borrowed
+
+**Growth & Viral Mechanics:**
+- Built-in referral loops at each stage with psychological motivations
+- Shared incentives: Both referrer and referee benefit
+- Social sharing friction reduction: One-click sharing with pre-written copy
+- Network effects: Community features that increase value with more users
+
+**Ad Creative Angle Development:**
+- Problem-focused angles: "Tired of X?"
+- Outcome-focused angles: "Get Y without Z"
+- Method-focused angles: "The Z way to achieve Y"
+- Social proof angles: "Join N+ people who..."
+- Iteration protocol: 3 angles per stage, test weekly, scale winners
+
+Your funnels must be:
+- Growth-engineered with viral loops
+- Email-centric with professional automation
+- Lead magnet optimized for instant value
+- Channel-diversified using ORB framework
+- Creative-ready with multiple testing angles
+
+Design for exponential growth, not just linear conversion.`;
+
+    const userPrompt = `Design a growth-engineered funnel with professional automation, viral mechanics, and multi-channel acquisition using proven frameworks.
+
+## BUSINESS CONTEXT:
+
 Business Type: ${data.businessType}
 Product/Offer: ${data.productOffer}
 Average Order Value: $${data.averageOrderValue || 'Not specified'}
 Customer Lifetime Value: $${data.customerLifetimeValue || 'Not specified'}
 Current Marketing Capabilities: ${data.currentMarketingCapabilities || 'Starting from scratch'}
 
-For each funnel stage, suggest:
-1. Best-fit offer at that stage
-2. One automation or AI task that could run that stage
-3. Key metrics to track
-4. Transition triggers to next stage
-5. Content/touchpoint recommendations
+## DESIGN REQUIREMENTS:
 
-Design these four stages:
+**Email Sequence Integration:**
+For each stage, design Hook-Bridge-Value-Close email sequences with:
+- Day 1, 3, 7, 14, 21 timing optimization
+- 2-6 word subject lines with curiosity psychology
+- Deliverability-safe content and sender reputation management
 
-**Awareness Stage:**
-- How prospects discover you
-- Top-of-funnel offers (lead magnets, free content)
-- Discovery channels
-- First impression tactics
+**Lead Magnet Quick Win Design:**
+Create instant-value lead magnets for each stage:
+- 5-minute consumption time maximum
+- Actionable without additional purchases
+- Format matched to buyer stage (checklist/template/calculator)
 
-**Engagement Stage:**
-- How you nurture interest
-- Middle-funnel offers (webinars, demos, trials)
-- Education and trust-building
-- Objection handling
+**ORB Channel Strategy:**
+Allocate touchpoints across:
+- OWNED (70%): Email, website, customer database
+- RENTED (20%): Social platforms, marketplaces
+- BORROWED (10%): PR, influencers, partnerships
 
-**Conversion Stage:**
-- How you drive the first purchase
-- Bottom-funnel offers (discounts, guarantees, bonuses)
-- Conversion optimization tactics
-- Purchase friction reduction
+**Viral Growth Mechanics:**
+Build referral loops with:
+- Dual incentives (referrer + referee benefits)
+- Friction-reduced sharing (one-click + pre-written copy)
+- Network effects that increase value with scale
 
-**Retention Stage:**
-- How you build loyalty and repeat business
-- Post-purchase offers (upsells, cross-sells, referrals)
-- Customer success tactics
-- Advocacy programs
+**Ad Creative Angles:**
+Develop 3 testing angles per stage:
+- Problem-focused, Outcome-focused, Method-focused, Social proof
+- Weekly testing rotation with performance scaling
 
-Format as JSON with complete funnel structure:
+## OUTPUT FORMAT:
+
 {
   "funnelOverview": {
     "totalEstimatedConversionRate": "X%",
     "averageTimeToConvert": "X days",
-    "recommendedBudgetSplit": {
-      "awareness": 30,
-      "engagement": 25,
-      "conversion": 30,
-      "retention": 15
-    }
+    "viralCoefficient": "Expected K-factor",
+    "orbChannelAllocation": {
+      "owned": 70,
+      "rented": 20,
+      "borrowed": 10
+    },
+    "growthProjection": "Month 1-12 growth estimate"
   },
   "stages": {
     "awareness": {
-      "goal": "Drive qualified traffic and brand discovery",
-      "offers": [
+      "goal": "Drive qualified discovery with viral amplification",
+      "leadMagnet": {
+        "name": "Specific lead magnet name",
+        "format": "Checklist/Template/Calculator/Guide",
+        "quickWinPromise": "Outcome achievable in 5 minutes",
+        "deliveryMethod": "How it's delivered instantly",
+        "viralHook": "Why people would share this"
+      },
+      "emailSequence": {
+        "sequenceName": "Awareness nurture sequence",
+        "emailCount": 5,
+        "timeline": "Day 1, 3, 7, 14, 21",
+        "emails": [
+          {
+            "day": 1,
+            "subject": "2-6 word curiosity subject",
+            "structure": "Hook-Bridge-Value-Close outline",
+            "cta": "Primary action"
+          }
+        ]
+      },
+      "adCreativeAngles": [
         {
-          "type": "lead_magnet",
-          "name": "Offer name",
-          "description": "What it includes",
-          "deliveryMethod": "How it's delivered"
+          "type": "problem_focused",
+          "hook": "Tired of [pain point]?",
+          "promise": "What they'll get",
+          "social_proof": "Join X+ people who..."
         }
       ],
+      "orbChannels": {
+        "owned": ["Email capture", "Website blog"],
+        "rented": ["Social media", "Content platforms"],
+        "borrowed": ["PR mentions", "Influencer features"]
+      },
+      "viralMechanics": {
+        "shareIncentive": "What motivates sharing",
+        "referralReward": "Reward for successful referral",
+        "sharingFriction": "How to reduce sharing effort",
+        "networkEffect": "Value increase with network size"
+      },
       "automation": {
         "task": "AI/automation opportunity",
-        "implementation": "How to set it up",
-        "tools": ["Tool suggestions"]
+        "implementation": "Setup instructions",
+        "tools": ["Tool suggestions"],
+        "triggers": "When automation activates"
       },
-      "metrics": ["metric1", "metric2"],
-      "transitionTriggers": ["When visitor does X", "When engagement reaches Y"],
-      "touchpoints": ["Blog", "Social media", "Paid ads"]
+      "metrics": ["Traffic", "Conversion rate", "Viral shares"],
+      "transitionTriggers": ["Email opens", "Content engagement", "Time threshold"]
     },
     "engagement": {
-      "goal": "Nurture interest and build trust",
-      "offers": [...],
+      "goal": "Build trust and demonstrate expertise",
+      "leadMagnet": {...},
+      "emailSequence": {...},
+      "adCreativeAngles": [...],
+      "orbChannels": {...},
+      "viralMechanics": {...},
       "automation": {...},
       "metrics": [...],
-      "transitionTriggers": [...],
-      "touchpoints": [...]
+      "transitionTriggers": [...]
     },
     "conversion": {
-      "goal": "Drive first purchase decision",
-      "offers": [...],
+      "goal": "Drive first purchase with urgency",
+      "leadMagnet": {...},
+      "emailSequence": {...},
+      "adCreativeAngles": [...],
+      "orbChannels": {...},
+      "viralMechanics": {...},
       "automation": {...},
       "metrics": [...],
-      "transitionTriggers": [...],
-      "touchpoints": [...]
+      "transitionTriggers": [...]
     },
     "retention": {
-      "goal": "Maximize customer lifetime value",
-      "offers": [...],
+      "goal": "Maximize LTV and create advocates",
+      "leadMagnet": {...},
+      "emailSequence": {...},
+      "adCreativeAngles": [...],
+      "orbChannels": {...},
+      "viralMechanics": {...},
       "automation": {...},
       "metrics": [...],
-      "transitionTriggers": ["Repurchase", "Referral", "Upgrade"],
-      "touchpoints": [...]
+      "transitionTriggers": ["Repurchase", "Referral", "Upgrade"]
     }
   },
-  "integrationStrategy": "How the stages work together",
-  "quickWins": ["3 things to implement first"],
-  "longTermOptimizations": ["Strategic improvements over time"]
+  "growthStrategy": {
+    "viralLoops": "How viral mechanics connect across stages",
+    "compoundGrowth": "How each stage amplifies others",
+    "retentionEngine": "How we keep growth sustainable"
+  },
+  "implementationPlan": {
+    "week1": ["Immediate setup tasks"],
+    "week2-4": ["Email sequences and automation"],
+    "month2-3": ["Viral mechanics and ORB expansion"],
+    "longTerm": ["Scale and optimization strategy"]
+  },
+  "expectedResults": {
+    "month1": "Growth metrics projection",
+    "month3": "Viral coefficient and LTV targets",
+    "month12": "Scale and sustainability outcomes"
+  }
 }`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
