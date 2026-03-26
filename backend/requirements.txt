@@ -19,7 +19,7 @@ pytz==2024.1
 
 # Additional utilities
 python-multipart==0.0.12
-requests==2.32.3
+requests==2.33.0
 
 # Pydantic for data validation - current version
 pydantic==2.10.1
