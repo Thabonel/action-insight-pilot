@@ -46,12 +46,12 @@ serve(async (req) => {
 
     const { businessType, targetAudience, productOffer, assessmentGoal } = validationResult.data;
 
-    // Check API key
+    // Check credential
     if (!anthropicApiKey) {
       console.error('ANTHROPIC_API_KEY environment variable not set');
       return new Response(JSON.stringify({
         success: false,
-        error: 'Anthropic Claude API key not configured'
+        error: 'Anthropic Claude credential not configured'
       }), {
         status: 503,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -256,7 +256,7 @@ Return JSON in this exact format:
     }
 
     const errorMessage = error instanceof Error ? error instanceof Error ? error.message : String(error) : 'An error occurred generating assessment';
-    const isConfigError = errorMessage.includes('API key') || errorMessage.includes('configured');
+    const isConfigError = errorMessage.includes('credential') || errorMessage.includes('configured');
 
     return new Response(JSON.stringify({
       success: false,

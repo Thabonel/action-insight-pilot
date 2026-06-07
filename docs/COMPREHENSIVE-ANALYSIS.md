@@ -15,10 +15,10 @@
 - **Marketing Autopilot**: Autonomous campaign optimization with daily budget adjustments, automated video ad generation, and lead management
 - **Strategic Marketing Framework**: 10 foundational strategy prompts covering positioning, personas, messaging, funnels, content, campaigns, SEO, competitive analysis, and performance tracking
 - **AI-First Architecture**: Multi-provider AI support (OpenAI, Anthropic, Google Gemini, Mistral) with automatic fallback
-- **User-Provided API Keys**: Zero markup on AI costs - users bring their own API keys for complete cost transparency
+- **User-Provided Credentials**: Zero markup on AI costs - users bring their own credentials for complete cost transparency
 
 ### Business Model
-- **SaaS subscription** with user-provided AI API keys
+- **SaaS subscription** with user-provided AI credentials
 - No markup on AI usage costs
 - Platform focuses on orchestration, automation, and intelligence layer
 - Transparent cost structure where users see exactly what they pay to AI providers
@@ -83,7 +83,7 @@
 - Automatic provider switching on failures
 
 **Security**:
-- Encrypted user API key storage (AES-GCM)
+- Encrypted user credential storage (AES-GCM)
 - Row-level security policies
 - OAuth integration for social platforms
 - Comprehensive audit logging
@@ -97,7 +97,7 @@
 - **Ideal Customer**: Non-marketers who need professional marketing automation
 
 #### Competitive Advantages
-1. **Transparency**: User-provided API keys with zero markup
+1. **Transparency**: User-provided credentials with zero markup
 2. **Autonomy**: True autopilot mode with daily optimizations
 3. **Strategic Intelligence**: 10 strategic marketing frameworks built-in
 4. **Multi-Provider AI**: Not locked into single AI provider
@@ -283,19 +283,19 @@ Located at `backend/agents/social/multi_model_service.py` (379 lines)
 
 **OAuth/Integration Tables** (2):
 1. `oauth_connections` - Social platform connections with encrypted tokens
-2. `secret_audit_logs` - API key operations audit trail
+2. `secret_audit_logs` - credential operations audit trail
 
 **Core Platform Tables**:
 - `campaigns` - Marketing campaigns
 - `leads` - Lead database
 - `user_preferences` - User settings including interface_mode
-- `user_secrets` - Encrypted API keys
+- `user_secrets` - Encrypted credentials
 - `knowledge_buckets`, `knowledge_documents`, `knowledge_chunks` - Knowledge base
 
 **Data Patterns**:
 - Snake_case in DB, camelCase in TypeScript (transformation layer)
 - JSONB for AI responses (flexible schema)
-- Encrypted storage for sensitive data (user API keys, OAuth tokens)
+- Encrypted storage for sensitive data (user credentials, OAuth tokens)
 - Comprehensive timestamping (created_at, updated_at, completed_at)
 
 **Areas for Improvement**:
@@ -333,7 +333,7 @@ All use GPT-5-mini with JSON output format enforcement.
 - `dashboard-chat` - Quick AI Q&A
 
 **Infrastructure** (5 functions):
-- `manage-user-secrets` - Encrypt/decrypt user API keys
+- `manage-user-secrets` - Encrypt/decrypt user credentials
 - `social-oauth-initiate` - Start OAuth flow
 - `social-oauth-callback` - Handle OAuth callback
 - `social-connections` - List user's social connections
@@ -401,7 +401,7 @@ Each prompt includes:
 - Expected output format (usually JSON)
 
 **AI Cost Transparency**:
-- Users provide own API keys
+- Users provide own credentials
 - Zero platform markup
 - Cost tracking in database (ai_video_projects.cost_usd)
 - Direct billing to user's AI provider accounts
@@ -412,7 +412,7 @@ Each prompt includes:
 
 **Implemented**:
 - ✅ Row-level security (RLS) on all user tables
-- ✅ AES-GCM encryption for user API keys
+- ✅ AES-GCM encryption for user credentials
 - ✅ JWT authentication via Supabase
 - ✅ OAuth token encryption
 - ✅ Audit logging for sensitive operations
@@ -422,7 +422,7 @@ Each prompt includes:
 
 **Best Practices**:
 - User-scoped queries: `WHERE user_id = auth.uid()`
-- Encrypted at rest: OAuth tokens, user API keys
+- Encrypted at rest: OAuth tokens, user credentials
 - Encrypted in transit: HTTPS everywhere
 - No sensitive data in localStorage (except onboarding flags)
 - Service role key separate from anon key
@@ -652,14 +652,14 @@ The CLAUDE.md file enforces 12 strict rules:
 - ⚠️ **Market competition**: HubSpot could copy autopilot feature
 
 **Medium Priority**:
-- ⚠️ **User API key management**: Users may not want to manage keys
+- ⚠️ **User credential management**: Users may not want to manage keys
 - ⚠️ **Feature complexity**: Too many features for target market (SMBs)
 
 **Mitigation Strategies**:
 1. **Revenue diversification**: Charge for orchestration, storage, premium features
 2. **Prove ROI early**: 30-day onboarding with measurable wins
 3. **Unique IP**: Patent autopilot orchestration logic
-4. **Simplified onboarding**: Option to use platform API keys at markup
+4. **Simplified onboarding**: Option to use platform credentials at markup
 5. **Feature tiering**: Simple vs. Advanced modes addresses this
 
 ### 4.3 Operational Risks
@@ -691,7 +691,7 @@ The CLAUDE.md file enforces 12 strict rules:
    - No competitor offers this level of autonomy
 
 2. **Cost Transparency**
-   - User-provided API keys with zero markup
+   - User-provided credentials with zero markup
    - Real-time cost tracking
    - HubSpot/Marketo mark up AI 200-500%
 
@@ -1138,7 +1138,7 @@ SECRET_MASTER_KEY=<SECRET_MASTER_KEY>
 4. ✅ **Strategic Value**: 10 marketing frameworks beyond just execution
 5. ✅ **Security**: RLS, encryption, audit logs properly implemented
 6. ✅ **Documentation**: Excellent CLAUDE.md and docs/ structure
-7. ✅ **Cost Transparency**: User-provided API keys = zero markup differentiation
+7. ✅ **Cost Transparency**: User-provided credentials = zero markup differentiation
 
 **Areas for Improvement**:
 1. ⚠️ **Production Monitoring**: Limited observability infrastructure
@@ -1215,7 +1215,7 @@ If seeking funding:
 - `supabase/functions/funnel-design-agent/index.ts` - Funnel creation
 - `supabase/functions/competitor-gap-agent/index.ts` - Gap analysis
 - `supabase/functions/performance-tracker-agent/index.ts` - KPI tracking
-- `supabase/functions/manage-user-secrets/index.ts` - API key encryption
+- `supabase/functions/manage-user-secrets/index.ts` - credential encryption
 
 ### Database
 - `supabase/migrations/` - 46+ migration files (5,350+ lines total)

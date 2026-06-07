@@ -2,14 +2,14 @@
 
 **Last Updated**: October 28, 2025  
 **Status**: Production-Ready  
-**Scope**: Complete Authentication, Authorization, API Key Management, and Integration Details
+**Scope**: Complete Authentication, Authorization, Credential Management, and Integration Details
 
 ---
 
 ## Table of Contents
 
 1. [Authentication & Authorization](#authentication--authorization)
-2. [API Key Management](#api-key-management)
+2. [Credential Management](#api-key-management)
 3. [Security Measures](#security-measures)
 4. [Third-Party Integrations](#third-party-integrations)
 5. [Environment Variables](#environment-variables)
@@ -266,7 +266,7 @@ interface OAuthProvider {
 
 ---
 
-## API Key Management
+## Credential Management
 
 ### User Secrets Storage System
 
@@ -293,10 +293,10 @@ CREATE TABLE public.user_secrets (
 
 **Supported Service Names**:
 ```
-gemini_api_key_encrypted
-openai_api_key_encrypted
-anthropic_api_key_encrypted
-mistral_api_key_encrypted
+gemini_credential_name_encrypted
+openai_credential_name_encrypted
+anthropic_credential_name_encrypted
+mistral_credential_name_encrypted
 buffer_oauth_token
 hootsuite_oauth_token
 later_oauth_token
@@ -386,7 +386,7 @@ interface SecretMetadata {
 // Save
 POST ?action=save
 {
-  "serviceName": "gemini_api_key_encrypted",
+  "serviceName": "gemini_credential_name_encrypted",
   "value": "actual-api-key-value"
 }
 
@@ -394,12 +394,12 @@ POST ?action=save
 GET ?action=list
 
 // Get
-GET ?action=get&serviceName=gemini_api_key_encrypted
+GET ?action=get&serviceName=gemini_credential_name_encrypted
 
 // Delete
 POST ?action=delete
 {
-  "serviceName": "gemini_api_key_encrypted"
+  "serviceName": "gemini_credential_name_encrypted"
 }
 ```
 
@@ -778,19 +778,19 @@ except httpx.HTTPError as e:
 import google.generativeai as genai
 
 async def get_user_gemini_key(user_id: str) -> Optional[str]:
-    """Retrieve user's Gemini API key from user_secrets"""
+    """Retrieve user's Gemini credential from user_secrets"""
     result = supabase.table('user_secrets')\
         .select('encrypted_value')\
         .eq('user_id', user_id)\
-        .eq('service_name', 'gemini_api_key_encrypted')\
+        .eq('service_name', 'gemini_credential_name_encrypted')\
         .single()\
         .execute()
     
     return result.data['encrypted_value'] if result.data else None
 
-async def validate_gemini_key(api_key: str) -> bool:
+async def validate_gemini_key(credential_name: str) -> bool:
     """Validate key with test request"""
-    genai.configure(api_key=api_key)
+    genai.configure(credential_name=credential_name)
     model = genai.GenerativeModel('gemini-2.0-flash-exp')
     response = model.generate_content("Hello")
     return True
@@ -841,7 +841,7 @@ All social connectors inherit from `BaseSocialConnector` and implement:
 
 **API Endpoints**:
 - Base URL: `https://api.bufferapp.com/1`
-- Get Profiles: `GET /profiles.json?access_token={token}`
+- Get Profiles: `GET /profiles.json?accessToken={token}`
 - Create Post: `POST /updates/create.json`
 - Get Analytics: `GET /updates/{post_id}.json`
 - Validate Token: `GET /user.json`
@@ -849,7 +849,7 @@ All social connectors inherit from `BaseSocialConnector` and implement:
 **Post Request Format**:
 ```python
 {
-  "access_token": "omitted",
+  "accessToken": "omitted",
   "text": "Post content",
   "profile_ids[]": "profile_id",
   "media": {"link": "image_url"},  # Optional
@@ -899,7 +899,7 @@ All social connectors inherit from `BaseSocialConnector` and implement:
 }
 ```
 
-**Authentication Header**: `Authorization: Bearer {access_token}`
+**Authentication Header**: `Authorization: Bearer {accessToken}`
 
 #### Later
 
@@ -964,16 +964,16 @@ class BaseSocialConnector:
     async def exchange_code_for_token(self, authorization_code: str) -> Dict[str, Any]:
         """OAuth code -> access token exchange"""
         
-    async def get_user_profiles(self, access_token: str) -> List[PlatformProfile]:
+    async def get_user_profiles(self, accessToken: str) -> List[PlatformProfile]:
         """Get user's social profiles"""
         
-    async def create_post(self, access_token: str, post: SocialPost) -> Dict[str, Any]:
+    async def create_post(self, accessToken: str, post: SocialPost) -> Dict[str, Any]:
         """Create/schedule a post"""
         
-    async def get_post_analytics(self, access_token: str, post_id: str) -> Dict[str, Any]:
+    async def get_post_analytics(self, accessToken: str, post_id: str) -> Dict[str, Any]:
         """Get post performance metrics"""
         
-    async def validate_token(self, access_token: str) -> bool:
+    async def validate_token(self, accessToken: str) -> bool:
         """Verify token is still valid"""
 ```
 
@@ -1107,7 +1107,7 @@ Deno.env.get('FACEBOOK_CLIENT_SECRET')
 |----------|-------|----------|-------|
 | `SUPABASE_JWT_SECRET` | Backend JWT verification | Yes | Backend |
 | `SUPABASE_SERVICE_ROLE_KEY` | Backend database access | Yes | Backend |
-| `SECRET_MASTER_KEY` | API key encryption (64 hex chars) | Yes | Backend + Edge Functions |
+| `SECRET_MASTER_KEY` | credential encryption (64 hex chars) | Yes | Backend + Edge Functions |
 | `OPENAI_API_KEY` | Primary AI model | Yes (unless user-provided) | Backend |
 | `GEMINI_API_KEY` | Video generation | No (user-provided) | Backend |
 | `ANTHROPIC_API_KEY` | Fallback AI model | No | Backend |
@@ -1195,10 +1195,10 @@ except jwt.ExpiredSignatureError:
     raise ValueError("Token has expired")
 ```
 
-### API Key Rotation
+### Credential Rotation
 
 **Process**:
-1. Generate new API key from service provider
+1. Generate new credential from service provider
 2. Add new key via Settings → Integrations
 3. Test with new key
 4. Remove old key (soft delete: set is_active = false)
@@ -1257,8 +1257,8 @@ supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANO
    ```
 2. **Update `SECRET_MASTER_KEY` environment variable**
 3. **Re-encrypt all user secrets** (requires data migration)
-4. **Notify all users to update API keys**
-5. **Rotate all external API keys** (OpenAI, Gemini, etc.)
+4. **Notify all users to update credentials**
+5. **Rotate all external credentials** (OpenAI, Gemini, etc.)
 
 ### If JWT Secret is Compromised
 
@@ -1267,7 +1267,7 @@ supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_ANO
 3. **All existing tokens become invalid** (users must re-login)
 4. **Invalidate existing sessions** via Supabase dashboard
 
-### If User API Key is Exposed
+### If User Credential is Exposed
 
 1. **Delete key from user_secrets** (is_active = false)
 2. **User must generate new key** from service provider
@@ -1290,7 +1290,7 @@ Before deploying to production:
 - [ ] Error messages are generic to clients
 - [ ] Detailed errors logged server-side
 - [ ] Rate limiting configured (via reverse proxy)
-- [ ] API keys stored only in user_secrets or environment
+- [ ] credentials stored only in user_secrets or environment
 - [ ] Audit logging enabled for security operations
 - [ ] HTTPS enforced on all endpoints
 - [ ] Session timeout configured (1 hour default)

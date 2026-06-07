@@ -93,7 +93,7 @@ Create detailed buyer personas. Return them as a JSON array of objects with the 
 
     if (!anthropicApiKey) {
       console.error('ANTHROPIC_API_KEY environment variable not set');
-      throw new Error('Anthropic Claude API key not configured');
+      throw new Error('Anthropic Claude credential not configured');
     }
 
     console.log('Calling Anthropic Claude API with model: claude-opus-4.5');
@@ -159,7 +159,7 @@ Create detailed buyer personas. Return them as a JSON array of objects with the 
     console.error('Error stack:', error.stack);
 
     const errorMessage = error instanceof Error ? error.message : String(error) || 'An error occurred generating campaign content';
-    const isConfigError = errorMessage.includes('API key') || errorMessage.includes('configured');
+    const isConfigError = errorMessage.includes('credential') || errorMessage.includes('configured');
 
     return new Response(JSON.stringify({
       success: false,
