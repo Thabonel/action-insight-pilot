@@ -1095,7 +1095,7 @@ VITE_SUPABASE_ANON_KEY=<SUPABASE_ANON_KEY>
 ```bash
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<SUPABASE_SERVICE_ROLE_KEY>
-SECRET_MASTER_KEY=<SECRET_MASTER_KEY>
+SECRET_MASTER_KEY is configured in the deployment environment
 OPENAI_API_KEY=<OPENAI_API_KEY>
 ANTHROPIC_API_KEY=<ANTHROPIC_API_KEY>
 GOOGLE_API_KEY=AIza...
@@ -1106,7 +1106,7 @@ ENVIRONMENT=production
 **Supabase Edge Functions** (Supabase Secrets):
 ```bash
 OPENAI_API_KEY=<OPENAI_API_KEY>
-SECRET_MASTER_KEY=<SECRET_MASTER_KEY>
+SECRET_MASTER_KEY is configured in the deployment environment
 ```
 
 ### 8.3 Monitoring & Logging

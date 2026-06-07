@@ -1029,7 +1029,7 @@ const errorMessages: Record<string, string> = {
 
 ```bash
 VITE_SUPABASE_PROJECT_ID="kciuuxoqxfsogjuqflou"
-VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+VITE_SUPABASE_PUBLISHABLE_KEY is configured in the deployment environment
 VITE_SUPABASE_URL="https://kciuuxoqxfsogjuqflou.supabase.co"
 VITE_BACKEND_URL="https://wheels-wins-orchestrator.onrender.com"
 ```
@@ -1079,7 +1079,7 @@ SPROUT_CLIENT_ID=...
 SPROUT_CLIENT_SECRET=...
 
 # Encryption
-SECRET_MASTER_KEY=<SECRET_MASTER_KEY>  # CRITICAL
+SECRET_MASTER_KEY is configured in the deployment environment  # CRITICAL
 
 # Server Configuration
 ENVIRONMENT=production|development

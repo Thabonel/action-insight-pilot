@@ -162,7 +162,7 @@ Return JSON in this exact format:
   ]
 }`;
 
-    console.log('Calling Anthropic Claude API with model: claude-opus-4.5');
+    console.log('Calling Anthropic Claude model call: claude-opus-4.5');
 
     // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {

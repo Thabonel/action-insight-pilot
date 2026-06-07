@@ -96,7 +96,7 @@ Create detailed buyer personas. Return them as a JSON array of objects with the 
       throw new Error('Anthropic Claude credential not configured');
     }
 
-    console.log('Calling Anthropic Claude API with model: claude-opus-4.5');
+    console.log('Calling Anthropic Claude model call: claude-opus-4.5');
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
