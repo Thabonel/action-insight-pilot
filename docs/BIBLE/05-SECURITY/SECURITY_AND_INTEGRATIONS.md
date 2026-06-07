@@ -1054,7 +1054,7 @@ SUPABASE_JWT_SECRET=your_jwt_secret_here
 # AI Model Keys
 OPENAI_API_KEY=<OPENAI_API_KEY>
 ANTHROPIC_API_KEY=<ANTHROPIC_API_KEY>  # Optional fallback
-GEMINI_API_KEY=your_gemini_api_key_here  # Optional for video
+GEMINI_API_KEY=${API_KEY}  # Optional for video
 
 # Social Connectors (OAuth Credentials)
 FACEBOOK_CLIENT_ID=...

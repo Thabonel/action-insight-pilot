@@ -553,7 +553,7 @@ supabase functions serve
 
 # Test function
 curl -X POST 'http://localhost:54321/functions/v1/chat-ai' \
-  -H 'Authorization: Bearer YOUR_ANON_KEY' \
+  -H 'Authorization: Bearer ${ACCESS_TOKEN}' \
   -H 'Content-Type: application/json' \
   -d '{"message": "Hello", "context": {}}'
 ```

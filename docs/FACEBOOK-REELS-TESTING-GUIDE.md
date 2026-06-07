@@ -502,7 +502,7 @@ LIMIT 10;
 ```bash
 # Test publishing (requires valid auth token)
 curl -X POST "https://your-function-url/facebook-publish" \
-  -H "Authorization: Bearer YOUR_USER_TOKEN" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user-uuid",

@@ -246,5 +246,5 @@ const newCampaign = await apiClient.createCampaign({
 ```bash
 curl -X GET \
   https://wheels-wins-orchestrator.onrender.com/api/campaigns \
-  -H 'Authorization: Bearer YOUR_TOKEN'
+  -H 'Authorization: Bearer ${ACCESS_TOKEN}'
 ```

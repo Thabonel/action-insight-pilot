@@ -134,7 +134,7 @@ supabase functions list
 ```bash
 # Trigger discovery manually to populate database
 curl -X POST https://your-project.supabase.co/functions/v1/ai-model-updater \
-  -H "Authorization: Bearer YOUR_ANON_KEY"
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 Or use the Admin UI:
@@ -156,7 +156,7 @@ In Supabase Dashboard:
 ```bash
 # Get current OpenAI flagship model
 curl "https://your-project.supabase.co/functions/v1/ai-model-config?provider=openai&type=flagship" \
-  -H "Authorization: Bearer YOUR_ANON_KEY"
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
 
 # Should return: { "success": true, "model_name": "gpt-5", ... }
 ```

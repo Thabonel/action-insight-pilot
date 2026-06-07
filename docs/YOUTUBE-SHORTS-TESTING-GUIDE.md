@@ -538,7 +538,7 @@ curl -X GET "https://your-function-url/youtube-oauth-callback?code=AUTH_CODE&sta
 
 # Test publishing (requires valid auth token)
 curl -X POST "https://your-function-url/youtube-publish" \
-  -H "Authorization: Bearer YOUR_USER_TOKEN" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user-uuid",

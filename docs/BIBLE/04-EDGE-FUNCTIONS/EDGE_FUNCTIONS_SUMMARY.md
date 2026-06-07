@@ -199,7 +199,7 @@ All functions are accessible via standard HTTP:
 ```bash
 # Example: Brand positioning
 curl -X POST https://your-supabase.functions.supabase.co/brand-positioning-agent \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "companyMission": "...",

@@ -417,7 +417,7 @@ curl -X GET "https://your-function-url/instagram-oauth-callback?code=ABC123&stat
 
 # Test publishing (requires valid auth token)
 curl -X POST "https://your-function-url/instagram-publish" \
-  -H "Authorization: Bearer YOUR_USER_TOKEN" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "uuid",

@@ -35,7 +35,7 @@ PAM (Personal Assistant for Marketing) is a comprehensive AI-powered marketing a
 // Retrieve or store chat memory
 ```bash
 curl -X POST \
-  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"conversationId":"your-id","role":"user","content":"Hello"}' \
   https://YOUR_PROJECT.supabase.co/functions/v1/chat-memory

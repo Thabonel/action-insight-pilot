@@ -364,11 +364,11 @@ supabase functions list
 ```bash
 # Trigger discovery manually
 curl -X POST https://your-project.supabase.co/functions/v1/ai-model-updater \
-  -H "Authorization: Bearer YOUR_ANON_KEY"
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
 
 # Check results
 curl https://your-project.supabase.co/functions/v1/ai-model-config/all \
-  -H "Authorization: Bearer YOUR_ANON_KEY"
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 ### 4. Verify Cron Schedule

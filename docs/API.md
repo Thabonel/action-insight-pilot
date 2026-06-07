@@ -157,7 +157,7 @@ POST /api/agents/{agent_type}/{task_type}
 #### Example: Generate Blog Content
 ```bash
 curl -X POST https://your-backend.onrender.com/api/agents/content/create_blog_content \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
     "topic": "Marketing Automation Best Practices",
@@ -409,7 +409,7 @@ npm install @aimarketinghub/sdk
 import { AIMarketingHub } from '@aimarketinghub/sdk';
 
 const client = new AIMarketingHub({
-  apiKey: 'your-api-key',
+  apiKey: '${API_KEY}',
   baseUrl: 'https://your-project.supabase.co/functions/v1'
 });
 
